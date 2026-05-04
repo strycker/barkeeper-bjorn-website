@@ -187,29 +187,35 @@ A top-level `barkeeper-instructions.md` would `include` or concatenate these —
 
 These require building something beyond markdown files. Each is a project in its own right.
 
-### 3.1 — Interactive web UI
+### 3.1 — Interactive web UI ⟳ In Progress
 
 **Vision:** A single-page web app that replaces the raw-markdown onboarding flow with a proper interactive experience.
 
-**Components:**
-- **Onboarding wizard:** Step-by-step screens, one question per screen, with:
-  - Radio button groups (flavor axis A/B choices)
-  - Slider inputs (sweetness level 1–10, strength level 1–10)
-  - Multi-select checkboxes (inventory categories)
-  - Free-text fields (name, location, notes)
-  - Progress indicator
-- **Inventory manager:** Visual pantry view. Toggle bottles in/out, add new ones, search by category.
-- **Recipe browser:** Card view of all originals + favorites. Click to expand full recipe. Inline images.
-- **Cocktail recommender:** "What can I make right now?" — dynamic, filtered by current inventory and flavor profile.
-- **Shopping list:** Prioritized purchase list with ROI explanation per item. Checkboxes.
-- **Profile dashboard:** Radar chart of the 6 flavor axes. Evolution log timeline.
+**Approach chosen:** Hybrid static site — vanilla HTML/CSS/JS in `app/`, reads/writes JSON data files in the repo via GitHub Contents API. Auth via GitHub Personal Access Token (stored in localStorage). No backend, no build step, deployable to GitHub Pages.
 
-**Tech candidates:**
-- Static site (no backend): Next.js or SvelteKit, deployed to Vercel/Netlify. Files stored in browser localStorage or synced to a GitHub branch via the API.
-- API-backed: FastAPI or Express backend, PostgreSQL or SQLite, React frontend.
-- Hybrid (most realistic near-term): Static site that reads/writes the user's GitHub branch via the GitHub API. No backend needed; auth via GitHub OAuth.
+**Components implemented (v0.1):**
+- **Setup view:** GitHub PAT + repo config. Validates connection. Stores config in localStorage.
+- **Dashboard:** Session-start menu with stat bar (bottle count, originals, favorites, shopping items). Returning-user greeting. New-user call-to-action. Recent originals quick-view.
+- **Onboarding wizard:** Full step-by-step flow — persona, track, name, location, background, equipment, all 6 flavor axes (A/B choice cards), supplemental (smoke/funk/savory), saves to GitHub on completion.
+- **Inventory manager:** Tabbed view (Spirits & Bottles / Pantry & Perishables / Vetoes). Bottle chips with tier color-coding. Add/remove bottles and string items. Inline save-to-GitHub. Vetoes and temporary substitutes editor.
+- **Recipe browser:** Card grid of originals + favorites + wishlist tabs. Click to drill into full recipe detail (ingredients table, method, garnish, profile, why-it-works, variations, ratings, inline images from GitHub raw URLs).
+- **Profile dashboard:** Interactive SVG hexagonal radar chart of the 6 flavor axes. Drag sliders to adjust axes — radar updates live. Supplemental preferences (smoke/funk/savory). Identity fields. Evolution log. Save-to-GitHub.
+- **Shopping list:** Priority-ranked buy list. Add items manually. Mark as "Got It" (moves to inventory). ROI context and cocktail unlocks shown per item.
 
-**Files:** New `app/` directory (or separate repo)
+**GitHub API integration:**
+- `GET /repos/{owner}/{repo}/contents/{path}?ref={branch}` — read JSON
+- `PUT /repos/{owner}/{repo}/contents/{path}` — write JSON (base64 encoded, with SHA for conflict detection)
+- All operations use PAT in `Authorization: Bearer` header
+
+**Files:** `app/index.html`, `app/css/app.css`, `app/js/{github-api,state,utils,app}.js`, `app/js/views/{setup,dashboard,onboarding,inventory,recipes,profile,shopping}.js`
+
+**Next steps for 3.1:**
+- GitHub Pages deployment config (or Netlify)
+- Cocktail recommender view ("What can I make right now?" — filter by current inventory)
+- Inventory search and filter by category
+- Recipe add/edit form (full inline editor for originals)
+- "Got It" flow: proper category selection when moving from shopping list to inventory
+- Image upload workflow (upload to `images/` via GitHub API)
 
 ---
 
@@ -287,3 +293,4 @@ Things worth capturing but not yet scoped.
 | 0.1 | 2026-05-03 | Initial roadmap. Captures quick fixes (Tier 1), structural improvements (Tier 2), and product/platform ambitions (Tiers 3–4) based on first real-world install feedback from ChatGPT. |
 | 0.2 | 2026-05-03 | Added 1.5 (session-start menu with smart recipe list display). Revised 2.1 to clarify JSON↔MD architecture: JSON is system-of-record, MD files are derived and human-editable, bidirectional sync handled by agent at session start. |
 | 0.3 | 2026-05-03 | Tier 2 complete: 2.1 (JSON schemas in schema/, data/ placeholders, bidirectional sync instruction); 2.2 (instructions/ module split — 7 modules); 2.3 (session-state.md template, re-evaluation module updated); 2.4 (analytics.md module, analytics mode in main instructions, Option 7 in session-start menu). barkeeper-instructions.md bumped to v2.0. README file structure updated. |
+| 0.4 | 2026-05-04 | Tier 3.1 v0.1: Hybrid static web UI in app/ — vanilla JS SPA, GitHub API read/write, PAT auth. Implements setup, dashboard, onboarding wizard (all 6 flavor axes), inventory manager, recipe browser + detail, profile dashboard with SVG radar chart, shopping list. No backend, no build step, deployable to GitHub Pages. |
