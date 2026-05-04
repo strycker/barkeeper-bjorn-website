@@ -20,7 +20,7 @@
         "last_evaluated": "2026-05-04"
       },
       "acid": {
-        "position": "Strong A",
+        "position": "Middle",
         "confidence": "Tentative",
         "last_evaluated": "2026-05-04"
       },
@@ -50,11 +50,11 @@
         "position": "neutral"
       },
       "funk": {
-        "position": null,
+        "position": "into it",
         "notes": null
       },
       "savory_saline": {
-        "position": null,
+        "position": "interesting",
         "notes": null
       }
     }
