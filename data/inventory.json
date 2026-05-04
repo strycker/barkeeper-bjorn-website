@@ -98,10 +98,26 @@
   },
   "syrups": [],
   "non_alcoholic_spirits": [],
-  "mixers": [],
-  "refrigerator_perishables": [],
-  "pantry_spice_rack": [],
-  "fresh_produce": [],
+  "mixers": [
+    "plain sparkling water",
+    "orange juice"
+  ],
+  "refrigerator_perishables": [
+    "cream"
+  ],
+  "pantry_spice_rack": [
+    "salt",
+    "sugar",
+    "cinnamon",
+    "nutmeg",
+    "allspice"
+  ],
+  "fresh_produce": [
+    "lemon",
+    "limes",
+    "mint",
+    "basil"
+  ],
   "specialty_ingredients": [],
   "garnish_and_service": [],
   "past_inventory": [],
