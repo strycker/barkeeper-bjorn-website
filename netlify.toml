@@ -1,0 +1,11 @@
+# Netlify deploy config — alternative to GitHub Pages.
+# To use: connect repo at app.netlify.com, settings are picked up automatically.
+
+[build]
+  publish = "app"
+  # No build command — static files only.
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
