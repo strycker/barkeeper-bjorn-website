@@ -1,0 +1,164 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "inventory.schema.json",
+  "title": "Bar Inventory",
+  "description": "The bar owner's current stock, vetoes, and shopping list.",
+  "type": "object",
+  "properties": {
+    "last_updated": { "type": "string", "format": "date" },
+    "base_spirits": {
+      "type": "object",
+      "properties": {
+        "whiskey": { "$ref": "#/definitions/spiritCategory", "description": "Bourbon, rye, Scotch, Irish, Japanese, etc." },
+        "brandy": { "$ref": "#/definitions/spiritCategory", "description": "Cognac, Armagnac, Calvados, pisco, etc." },
+        "rum": { "$ref": "#/definitions/spiritCategory", "description": "White, dark, aged, agricole, cachaça, etc." },
+        "agave": { "$ref": "#/definitions/spiritCategory", "description": "Tequila (blanco/reposado/añejo), mezcal, etc." },
+        "white_spirits": { "$ref": "#/definitions/spiritCategory", "description": "Gin (style noted), vodka, etc." },
+        "other": { "$ref": "#/definitions/spiritCategory", "description": "Aquavit, baijiu, sotol, soju, pisco (if not under brandy), etc." }
+      }
+    },
+    "fortified_wines_and_aperitif_wines": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/bottleEntry" },
+      "description": "Vermouths, sherries, Cocchi Americano, Lillet, etc."
+    },
+    "liqueurs_and_cordials": {
+      "type": "object",
+      "properties": {
+        "fruit_forward": { "type": "array", "items": { "$ref": "#/definitions/bottleEntry" } },
+        "nut_coffee": { "type": "array", "items": { "$ref": "#/definitions/bottleEntry" } },
+        "herbal": { "type": "array", "items": { "$ref": "#/definitions/bottleEntry" } },
+        "specialty_regional": { "type": "array", "items": { "$ref": "#/definitions/bottleEntry" } }
+      }
+    },
+    "bitters": {
+      "type": "object",
+      "properties": {
+        "anchors": { "type": "array", "items": { "$ref": "#/definitions/bottleEntry" } },
+        "aromatic_smoke": { "type": "array", "items": { "$ref": "#/definitions/bottleEntry" } },
+        "nut_earth": { "type": "array", "items": { "$ref": "#/definitions/bottleEntry" } },
+        "fruit_botanical": { "type": "array", "items": { "$ref": "#/definitions/bottleEntry" } },
+        "other": { "type": "array", "items": { "$ref": "#/definitions/bottleEntry" } }
+      }
+    },
+    "syrups": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/bottleEntry" },
+      "description": "Simple syrup, orgeat, honey syrup, ginger syrup, falernum, etc."
+    },
+    "non_alcoholic_spirits": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/bottleEntry" },
+      "description": "Seedlip, Lyre's, Ritual, Wilderton, etc."
+    },
+    "mixers": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Sparkling water, tonic, soda, ginger beer, juices, etc."
+    },
+    "refrigerator_perishables": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Milk, cream, citrus, eggs, juices, etc."
+    },
+    "pantry_spice_rack": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "fresh_produce": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Herbs, fresh fruit beyond citrus, seasonal items, etc."
+    },
+    "specialty_ingredients": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Regional or unusual items specific to this household."
+    },
+    "garnish_and_service": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Cherries, picks, ice format, glassware notes, etc."
+    },
+    "past_inventory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item": { "type": "string" },
+          "notes": { "type": "string", "description": "Why liked, when last stocked, etc." }
+        }
+      },
+      "description": "Items previously stocked and enjoyed — flavor memory for recommendations."
+    },
+    "vetoes": {
+      "type": "object",
+      "properties": {
+        "disliked_ingredients": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Permanent vetoes. Never suggest these in drinks or as purchases."
+        },
+        "substitute_for_now": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["missing", "substitute"],
+            "properties": {
+              "missing": { "type": "string" },
+              "substitute": { "type": "string" },
+              "ratio": { "type": "string", "description": "e.g., '1:1', '¾ oz for 1 oz'" }
+            }
+          },
+          "description": "Temporary substitutions — ingredients intended for purchase."
+        }
+      }
+    },
+    "shopping_list": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["item"],
+        "properties": {
+          "item": { "type": "string" },
+          "priority": { "type": "integer", "minimum": 1, "description": "1 = highest priority" },
+          "estimated_price_usd": { "type": "number" },
+          "unlocks": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Cocktails this purchase makes buildable."
+          },
+          "rationale": { "type": "string" }
+        }
+      }
+    },
+    "agent_notes": {
+      "type": "string",
+      "description": "Freeform notes for the agent about this inventory (quirks, gaps, context)."
+    }
+  },
+  "definitions": {
+    "bottleEntry": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "description": "Brand and expression (e.g., 'Buffalo Trace Bourbon')" },
+        "category": { "type": "string" },
+        "tier": {
+          "type": "string",
+          "enum": ["industrial", "premium-accessible", "boutique", "rare/exceptional"],
+          "description": "Honest quality tier for recommendation calibration."
+        },
+        "notes": { "type": "string" },
+        "best_for": {
+          "type": "string",
+          "enum": ["sipping", "mixing", "both"]
+        }
+      }
+    },
+    "spiritCategory": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/bottleEntry" }
+    }
+  }
+}

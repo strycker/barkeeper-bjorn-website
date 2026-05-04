@@ -1,0 +1,44 @@
+{
+  "_comment": "Generated from bar-owner-profile.md. Edit bar-owner-profile.md directly — do not hand-edit this file.",
+  "_schema": "../schema/bar-owner-profile.schema.json",
+  "_sync": {
+    "source_md": "bar-owner-profile.md",
+    "last_synced": null,
+    "md_hash": null
+  },
+  "identity": {
+    "full_name": null,
+    "preferred_name": null,
+    "location": null,
+    "timezone": null
+  },
+  "flavor_profile": {
+    "axes": {
+      "sweetness": { "position": null, "confidence": "—", "last_evaluated": null },
+      "acid": { "position": null, "confidence": "—", "last_evaluated": null },
+      "strength": { "position": null, "confidence": "—", "last_evaluated": null },
+      "complexity": { "position": null, "confidence": "—", "last_evaluated": null },
+      "season": { "position": null, "confidence": "—", "last_evaluated": null },
+      "risk": { "position": null, "confidence": "—", "last_evaluated": null }
+    },
+    "supplemental": {
+      "smoke": { "position": null, "notes": null },
+      "funk": { "position": null, "notes": null },
+      "savory_saline": { "position": null, "notes": null }
+    }
+  },
+  "archetypes": [],
+  "vetoes": {
+    "disliked_ingredients": [],
+    "substitute_for_now": []
+  },
+  "documented_originals": [],
+  "review_counter": {
+    "cocktails_since_last_review": 0,
+    "last_review_date": null,
+    "next_review_threshold": 5
+  },
+  "evolution_log": [],
+  "guests": [],
+  "last_updated": null
+}

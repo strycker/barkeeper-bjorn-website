@@ -1,0 +1,209 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "bar-owner-profile.schema.json",
+  "title": "Bar Owner Profile",
+  "description": "The drinker's identity, preferences, equipment, constraints, and flavor profile.",
+  "type": "object",
+  "properties": {
+    "identity": {
+      "type": "object",
+      "properties": {
+        "full_name": { "type": "string" },
+        "preferred_name": { "type": "string" },
+        "location": { "type": "string" },
+        "timezone": { "type": "string", "description": "e.g., 'CST/CDT', 'PST/PDT', 'ET', 'GMT'" }
+      }
+    },
+    "background": {
+      "type": "object",
+      "properties": {
+        "profession": { "type": "string" },
+        "academic_background": { "type": "string" },
+        "vocabulary_preference": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Domains where technical language is welcome (physics, finance, medicine, etc.)"
+        },
+        "drinking_frequency": {
+          "type": "string",
+          "enum": ["occasional", "weekly", "regular", "most evenings", "other"]
+        },
+        "typical_context": { "type": "string", "description": "Solo evenings, dinner parties, hosting guests, etc." },
+        "household_context": { "type": "string" },
+        "serving_context": {
+          "type": "object",
+          "properties": {
+            "who": { "type": "string", "description": "Just self, partner, guests regularly, etc." },
+            "impressing_guests_means": { "type": "string", "description": "Taste quality, presentation, novelty, or combination" }
+          }
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "equipment": {
+      "type": "object",
+      "properties": {
+        "shaker": {
+          "type": "string",
+          "enum": ["Boston two-piece", "cobbler", "none", "other"]
+        },
+        "mixing_glass": { "type": "boolean" },
+        "jigger": { "type": "boolean" },
+        "bar_spoon": { "type": "boolean" },
+        "strainer": {
+          "type": "string",
+          "enum": ["Hawthorne", "Julep", "fine mesh", "none", "multiple"]
+        },
+        "citrus_press": { "type": "boolean" },
+        "ice_setup": {
+          "type": "string",
+          "enum": ["standard cubes", "large format", "crushed", "combination", "none"]
+        },
+        "other": { "type": "string", "description": "Muddler, channel knife, smoker, etc." },
+        "gaps_flagged": { "type": "string" }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "properties": {
+        "bar_budget": { "type": "string", "description": "e.g., 'selective, $50-75 per bottle max', 'open', 'tight'" },
+        "space": { "type": "string", "description": "e.g., 'dedicated bar cart', 'one cabinet shelf', 'full bar setup'" },
+        "cocktail_frequency": { "type": "string", "description": "e.g., 'a few times a year', 'weekly', 'most evenings'" }
+      }
+    },
+    "personal_context": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Free-form interests and lifestyle signals (cooking, travel, design, music, analytics, etc.)"
+    },
+    "flavor_profile": {
+      "type": "object",
+      "properties": {
+        "axes": {
+          "type": "object",
+          "properties": {
+            "sweetness": { "$ref": "#/definitions/flavorAxis" },
+            "acid": { "$ref": "#/definitions/flavorAxis" },
+            "strength": { "$ref": "#/definitions/flavorAxis" },
+            "complexity": { "$ref": "#/definitions/flavorAxis" },
+            "season": { "$ref": "#/definitions/flavorAxis" },
+            "risk": { "$ref": "#/definitions/flavorAxis" }
+          }
+        },
+        "supplemental": {
+          "type": "object",
+          "properties": {
+            "smoke": {
+              "type": "object",
+              "properties": {
+                "position": { "type": "string", "enum": ["into it", "neutral", "avoids"] },
+                "notes": { "type": "string" }
+              }
+            },
+            "funk": {
+              "type": "object",
+              "properties": {
+                "position": { "type": "string", "enum": ["into it", "neutral", "turnoff"] },
+                "notes": { "type": "string" }
+              }
+            },
+            "savory_saline": {
+              "type": "object",
+              "properties": {
+                "position": { "type": "string", "enum": ["interesting", "neutral", "hard no"] },
+                "notes": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "archetypes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "2-4 drinker-archetype descriptors assigned by the agent."
+    },
+    "vetoes": {
+      "type": "object",
+      "description": "Quick-reference summary. Canonical source is inventory.md.",
+      "properties": {
+        "disliked_ingredients": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "substitute_for_now": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "missing": { "type": "string" },
+              "substitute": { "type": "string" },
+              "ratio": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "documented_originals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "pattern": "^cocktail[0-9]+$" },
+          "name": { "type": "string" },
+          "creator": { "type": "string" },
+          "style": { "type": "string" }
+        }
+      }
+    },
+    "review_counter": {
+      "type": "object",
+      "properties": {
+        "cocktails_since_last_review": { "type": "integer", "minimum": 0 },
+        "last_review_date": { "type": ["string", "null"], "format": "date" },
+        "next_review_threshold": { "type": "integer", "default": 5 }
+      }
+    },
+    "evolution_log": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["date", "change"],
+        "properties": {
+          "date": { "type": "string", "format": "date" },
+          "change": { "type": "string" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "guests": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "relationship": { "type": "string" },
+          "preferences": { "type": "string" },
+          "vetoes": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "last_updated": { "type": "string", "format": "date" }
+  },
+  "definitions": {
+    "flavorAxis": {
+      "type": "object",
+      "properties": {
+        "position": {
+          "type": "string",
+          "description": "e.g., 'Strong A', 'Lean A', 'Middle', 'Lean B', 'Strong B', or nuanced description"
+        },
+        "confidence": { "type": "string", "enum": ["High", "Medium", "Tentative", "—"] },
+        "last_evaluated": { "type": ["string", "null"], "format": "date" }
+      }
+    }
+  }
+}

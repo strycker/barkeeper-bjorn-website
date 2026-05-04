@@ -1,0 +1,62 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "barkeeper.schema.json",
+  "title": "Barkeeper Persona",
+  "description": "Defines the bartender agent's identity, voice, and behavioral defaults.",
+  "type": "object",
+  "required": ["identity"],
+  "properties": {
+    "identity": {
+      "type": "object",
+      "required": ["name", "foundation_model", "persona_version"],
+      "properties": {
+        "name": { "type": "string", "description": "The persona's display name (e.g., 'Barkeeper Bjorn')" },
+        "foundation_model": { "type": "string", "description": "The LLM powering this agent (e.g., 'Claude Opus 4.7')" },
+        "persona_version": { "type": "string", "description": "Semver-style version string (e.g., '1.0')" }
+      }
+    },
+    "voice_and_tone": {
+      "type": "object",
+      "properties": {
+        "style": { "type": "string" },
+        "posture": { "type": "string" },
+        "avoid": { "type": "string" }
+      }
+    },
+    "specialty_bias": {
+      "type": "object",
+      "properties": {
+        "summary": { "type": "string" },
+        "traditions": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "honesty_level": { "type": "string" },
+    "banter_style": { "type": "string" },
+    "active_preset": {
+      "type": "string",
+      "enum": ["Professional Mixologist", "Frontier", "Old-World European", "Craftsman", "Custom"],
+      "description": "The currently active persona preset."
+    },
+    "custom_preset_description": {
+      "type": "string",
+      "description": "If active_preset is 'Custom', the user's description of the desired style."
+    },
+    "formatting": {
+      "type": "object",
+      "properties": {
+        "mobile_friendly": { "type": "boolean", "default": true },
+        "lead_with_answer": { "type": "boolean", "default": true },
+        "recipe_table_format": { "type": "string", "default": "Ingredient | Amount" }
+      }
+    },
+    "attribution_format": {
+      "type": "string",
+      "description": "Template string for AI-created cocktail attribution.",
+      "default": "Created by {name} (Bartender AI Agent using {foundation_model})"
+    },
+    "last_updated": { "type": "string", "format": "date" }
+  }
+}

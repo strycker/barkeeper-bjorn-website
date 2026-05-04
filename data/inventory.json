@@ -1,0 +1,46 @@
+{
+  "_comment": "Generated from inventory.md. Edit inventory.md directly — do not hand-edit this file.",
+  "_schema": "../schema/inventory.schema.json",
+  "_sync": {
+    "source_md": "inventory.md",
+    "last_synced": null,
+    "md_hash": null
+  },
+  "last_updated": null,
+  "base_spirits": {
+    "whiskey": [],
+    "brandy": [],
+    "rum": [],
+    "agave": [],
+    "white_spirits": [],
+    "other": []
+  },
+  "fortified_wines_and_aperitif_wines": [],
+  "liqueurs_and_cordials": {
+    "fruit_forward": [],
+    "nut_coffee": [],
+    "herbal": [],
+    "specialty_regional": []
+  },
+  "bitters": {
+    "anchors": [],
+    "aromatic_smoke": [],
+    "nut_earth": [],
+    "fruit_botanical": [],
+    "other": []
+  },
+  "syrups": [],
+  "non_alcoholic_spirits": [],
+  "mixers": [],
+  "refrigerator_perishables": [],
+  "pantry_spice_rack": [],
+  "fresh_produce": [],
+  "specialty_ingredients": [],
+  "garnish_and_service": [],
+  "past_inventory": [],
+  "vetoes": {
+    "disliked_ingredients": [],
+    "substitute_for_now": []
+  },
+  "shopping_list": []
+}
