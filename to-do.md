@@ -219,6 +219,154 @@ These require building something beyond markdown files. Each is a project in its
 
 ---
 
+### 3.1.x — Remaining web UI completions (before moving to backend)
+
+These complete the single-user static-site story before we introduce a backend layer. Each is self-contained and can be done in one session.
+
+**3.1.1 — Deployment to GitHub Pages (highest priority)**
+- Add `.github/workflows/pages.yml` to auto-deploy `app/` on push to main
+- OR add `_config.yml` for simple GitHub Pages (set source to `/app`)
+- Update README with "Deploy your own" section (fork → enable Pages → enter PAT → done)
+- Add `netlify.toml` as a Netlify alternative (zero-config, drag-and-drop deploy)
+- Decision: GitHub Pages is simplest; the HTML is already self-contained
+
+**3.1.2 — "What can I make right now?" recommender view**
+- New view `app/js/views/recommender.js`, linked from dashboard as primary menu item
+- Algorithm (client-side, pure JS):
+  - Normalize inventory: flatten all bottle names into a canonical string set
+  - Maintain a built-in table of ~50 classic cocktail recipes with ingredient lists
+  - Compute set intersection: classics where all required bottles are in inventory
+  - Score by flavor-profile alignment (weight each classic against user's axis positions)
+  - Output: ranked card list — "You can build these right now"
+  - Secondary: "One bottle away" section — 1-ingredient gap recipes, linked to shopping list
+- This is the single most compelling UI feature for a new visitor; prioritize it
+
+**3.1.3 — Recipe add/edit form**
+- Currently the recipe browser is read-only; users cannot add originals through the UI
+- Add an "Add Original" button → modal or dedicated route `#recipes/new`
+- Form fields: id (auto-incremented), name, tagline, creator (pre-filled from profile), date, ingredients (repeating rows: amount + name + notes), method type, glassware, garnish, profile, why-it-works, variations
+- On save: append to `recipes.originals`, update `profile_coverage_matrix`, write back to GitHub
+- Also add "Edit" button on recipe detail view (same form, pre-filled)
+
+**3.1.4 — Image upload via GitHub API**
+- Add "Upload Image" button on recipe detail view
+- File picker → FileReader → base64 → `PUT /repos/.../contents/images/{filename}`
+- Display confirmation with raw GitHub URL for use in AI agent sessions
+- This closes the loop for cocktail image workflow (to-do item 1.3)
+
+**3.1.5 — Inventory search and category filter**
+- Add search input that filters bottle chips across all categories in real-time
+- Category filter dropdown to jump-scroll to a section
+- "Total count" stat kept in sync as bottles are added/removed
+
+---
+
+### 3.5 — Backend / auth layer (prerequisite for multi-user) ⚠ Architecture decision point
+
+**The core problem:** The current GitHub-API approach is inherently single-user. A PAT authenticates one GitHub account. To support user logins, shared data, and social features, a backend layer is required.
+
+**Honest analysis of options:**
+
+| Option | Effort | Multi-user | Shared data | Forum | Notes |
+|---|---|---|---|---|---|
+| Stay GitHub-API only | Low | Fork-per-user (awkward) | Via PRs (very awkward) | No | Works fine for solo/power users. Breaks for casual users and social. |
+| **Supabase** (recommended) | Medium | Yes, built-in | Yes, Postgres | Yes (later) | Managed Postgres + Auth + Storage. Frontend stays static. Free tier generous. |
+| Cloudflare Workers + D1 | Medium | Yes (custom auth) | Yes | Yes (later) | Serverless edge, SQLite. More DIY. |
+| FastAPI + PostgreSQL | High | Yes (custom auth) | Yes | Yes | Most control, aligns with 3.2 plan, requires hosting. |
+
+**Recommendation: Supabase**
+- Auth: email/password + GitHub OAuth — no custom auth code
+- Database: Postgres — existing JSON schemas map directly to tables
+- Storage: built-in S3-compatible bucket for cocktail images
+- Realtime: future live-collaboration features available for free
+- Frontend: remains static (GitHub Pages / Netlify) — only the data layer changes
+- Free tier: 500MB DB, 1GB storage, 50k monthly active users — plenty to start
+- The existing `data/*.json` files become the migration source
+
+**Migration path from GitHub-API:**
+- App gets a "mode" flag: `solo` (current PAT-based) vs `hosted` (Supabase)
+- Solo mode stays fully functional — no breaking change for current users
+- Hosted mode replaces `GitHubAPI` reads/writes with `supabase-js` calls
+- Data model maps: `inventory.json` → `inventory` table, `recipes.json` → `recipes` table, etc.
+- Images: move from `images/` in repo to Supabase Storage bucket
+
+**Files:** `app/js/supabase-api.js`, `app/js/auth.js`, Supabase project setup, DB migration scripts
+
+---
+
+### 3.6 — Multi-user accounts and per-user data
+
+**Depends on:** 3.5 complete
+
+**Vision:** Any person can sign up at the hosted URL, go through onboarding, and have their own private bar profile — inventory, recipes, flavor axes — without touching GitHub or a text editor.
+
+**Feature spec:**
+- **Sign up / log in:** Email+password or "Continue with GitHub" — handled entirely by Supabase Auth
+- **Per-user isolation:** Each user's inventory, profile, and recipes are private by default (row-level security in Postgres)
+- **Session persistence:** Auth token in localStorage (or cookie) — no re-login on refresh
+- **Account settings view:** Change email, password, display name, delete account
+- **User identity in recipes:** Creator field auto-populated with display name from account (overrides onboarding answer)
+- **Multiple "bars":** Advanced — a single user could manage multiple bars (home bar, vacation house, a bar they consult for). Probably Tier 4 initially.
+
+**Data model additions:**
+- `users` table: id, email, display_name, created_at (managed by Supabase Auth)
+- All existing tables get a `user_id` foreign key
+- Row-level security: `user_id = auth.uid()` on all reads/writes
+
+**Files:** `app/js/views/auth.js` (login/signup modal), `app/js/views/account.js`, schema migrations
+
+---
+
+### 3.7 — Community recipe sharing and discovery
+
+**Depends on:** 3.6 complete
+
+**Vision:** Users can publish originals to a community feed. Other users can browse, save, and rate community recipes. This is the social layer that makes the platform more than a personal notebook.
+
+**Feature spec:**
+- **Per-recipe visibility toggle:** Private (default) / Public. One click in the recipe editor.
+- **Community feed:** `#community` view — paginated card grid of all public originals, sorted by date or rating
+- **Filtering:** By base spirit, method, flavor profile (nearest axis match)
+- **"Save to my collection":** One-click to copy a community recipe into your own `recipes.wishlist` or `confirmed_favorites`
+- **Recipe ratings:** Star or thumbs up/down. Aggregated average shown on community cards.
+- **Attribution preserved:** Creator name and model attribution always visible — core to the project's philosophy
+- **Flagging / moderation:** Report inappropriate content; admin review queue. Keep it simple initially.
+- **Search:** Full-text search over recipe names, ingredients, profiles. Postgres has built-in FTS.
+
+**Data model additions:**
+- `recipes` table: add `is_public boolean` field
+- `recipe_saves` table: user_id, recipe_id, saved_at (for "save to my collection")
+- `recipe_ratings` table: user_id, recipe_id, rating (1-5), created_at
+- Aggregated view: `recipe_public_with_stats` — join recipes + ratings + save counts
+
+**Files:** `app/js/views/community.js`, `app/js/views/recipe-detail-public.js`, DB migrations
+
+---
+
+### 3.8 — Discussion forum / threads
+
+**Depends on:** 3.6 (accounts) — 3.7 (community) is optional but synergistic
+
+**Vision:** A lightweight discussion space — not a full forum, more like a comment section on steroids. Threads can be attached to recipes (ingredient questions, variation ideas, "I tried this and…") or stand-alone (technique discussions, ingredient sourcing, seasonal menus).
+
+**Feature spec:**
+- **Recipe-attached comments:** Each public recipe gets a comment thread. Threaded replies (one level deep — not infinitely nested).
+- **Stand-alone topics:** A `#forum` view with topic categories: Techniques, Ingredients, Spirits, Recommendations, Off-Topic.
+- **Markdown support:** Basic formatting — bold, italic, code (for recipe snippets), links.
+- **Notifications:** Email digest of replies to your posts/comments (Supabase has SMTP/hooks).
+- **Moderation:** Soft delete, admin flag. Keep simple — no karma system initially.
+- **"Barkeeper Bjorn" bot posts:** The AI agent could be invoked in threads — someone asks "what's a good substitute for Velvet Falernum?" and Bjorn answers. Requires Claude API integration.
+
+**Data model:**
+- `forum_topics` table: id, user_id, category, title, body, created_at, is_pinned
+- `forum_replies` table: id, topic_id, user_id, parent_reply_id (nullable), body, created_at
+- `recipe_comments` table: id, recipe_id, user_id, parent_comment_id (nullable), body, created_at
+- `forum_votes` table: user_id, target_type (topic/reply/comment), target_id, vote (+1/-1)
+
+**Files:** `app/js/views/forum.js`, `app/js/views/topic.js`, `app/js/views/recipe-comments.js`, DB migrations
+
+---
+
 ### 3.2 — API-ready JSON output + recipe engine
 
 **Vision:** A structured API that exposes Barkeeper Bjorn's logic programmatically — for integration into a future app, a POS system, or third-party cocktail platforms.
@@ -279,10 +427,18 @@ Things worth capturing but not yet scoped.
 - **Seasonal menu generator:** Given current inventory + current month/location, produce a 4-drink seasonal menu with names, recipes, and suggested garnishes.
 - **Guest mode:** Simplified interface for a guest who doesn't have their own Barkeeper instance. Takes flavor preferences in 3 questions, returns 2 drink suggestions from the host's inventory.
 - **"What's depleted?" tracker:** The agent asks at session start whether anything ran out since last time, and updates inventory before recommending.
-- **Community cocktails file:** A `community-recipes.md` that aggregates AI-generated originals submitted by users across forks. Filterable by model attribution.
-- **Barkeeper persona gallery:** Multiple pre-built personas beyond Bjorn (a tiki-obsessed Hawaiian uncle, a no-nonsense Tokyo bartender, a theatrical Victorian apothecary). Users can swap personas without changing user files.
-- **Drink history log:** A `history.md` or log file appended each session — what was built, by whom, rating, notes. Feeds the analytics brain over time.
+- **Community cocktails file:** Superseded by 3.7 (community recipe sharing). The markdown version (community-recipes.md aggregated from forks via PRs) was always awkward — the Supabase-backed community feed in 3.7 is the right approach.
+- **Barkeeper persona gallery:** Multiple pre-built personas beyond Bjorn (a tiki-obsessed Hawaiian uncle, a no-nonsense Tokyo bartender, a theatrical Victorian apothecary). Users can swap personas without changing user files. In multi-user context (3.6+), persona is stored per-user account.
+- **Drink history log:** A session history table in the database (multi-user) or a `history.md` log (solo). Records what was built, by whom, rating, notes. Feeds the analytics brain over time.
 - **Halal / NA mode:** A full non-alcoholic track with the same structural depth as the alcoholic system. Seedlip, Lyre's, shrubs, switchels, drinking vinegars, NA beers and wines.
+- **Multiple bars per user:** One user account managing multiple distinct bars (home bar, vacation house, a bar they consult for). Each bar has its own inventory, recipes, and flavor profile. Probably requires 3.6 to be complete first.
+- **"Barkeeper Bjorn" bot in forum threads:** A user can invoke the AI agent in a forum discussion thread — e.g., "Bjorn, what's the best substitute for Velvet Falernum?" — and get a response. Requires Claude API integration and a small server-side function (can't call Claude from the browser directly).
+- **Guest mode:** Simplified interface for a guest who doesn't have their own account. Takes flavor preferences in 3 questions, returns drink suggestions from the host's inventory. Host shares a link; guest gets a read-only recommender view.
+- **Cocktail comparison mode:** Side-by-side two drinks by structure (base, modifier, acid, sweetener, bitters). Useful for teaching and for designing variations.
+- **Seasonal menu generator:** Given current inventory + current month/location, produce a 4-drink seasonal menu with names, recipes, and suggested garnishes.
+- **"What's depleted?" tracker:** The agent asks at session start whether anything ran out since last time, and updates inventory before recommending.
+- **Event mode:** Configure a temporary cocktail menu for a party or event. Track what gets made, how many servings, what runs low. Auto-generates a depletion report at the end.
+- **Public profile / bartender page:** A public-facing URL for your bar — shareable link that shows your public recipes, flavor profile radar, and "signature cocktails." Think portfolio page for cocktail enthusiasts.
 
 ---
 
@@ -294,3 +450,4 @@ Things worth capturing but not yet scoped.
 | 0.2 | 2026-05-03 | Added 1.5 (session-start menu with smart recipe list display). Revised 2.1 to clarify JSON↔MD architecture: JSON is system-of-record, MD files are derived and human-editable, bidirectional sync handled by agent at session start. |
 | 0.3 | 2026-05-03 | Tier 2 complete: 2.1 (JSON schemas in schema/, data/ placeholders, bidirectional sync instruction); 2.2 (instructions/ module split — 7 modules); 2.3 (session-state.md template, re-evaluation module updated); 2.4 (analytics.md module, analytics mode in main instructions, Option 7 in session-start menu). barkeeper-instructions.md bumped to v2.0. README file structure updated. |
 | 0.4 | 2026-05-04 | Tier 3.1 v0.1: Hybrid static web UI in app/ — vanilla JS SPA, GitHub API read/write, PAT auth. Implements setup, dashboard, onboarding wizard (all 6 flavor axes), inventory manager, recipe browser + detail, profile dashboard with SVG radar chart, shopping list. No backend, no build step, deployable to GitHub Pages. |
+| 0.5 | 2026-05-04 | Roadmap re-analysis for Phase 3. Added 3.1.x sub-phases (deployment, recommender, recipe edit, image upload, inventory search). Added 3.5 (backend/auth layer — Supabase recommended), 3.6 (multi-user accounts), 3.7 (community recipe sharing), 3.8 (discussion forum). Expanded Tier 4 with multi-bar, event mode, public profile, bot-in-forum, guest mode ideas. |

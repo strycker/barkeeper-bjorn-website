@@ -17,7 +17,29 @@ Barkeeper Bjorn is a set of markdown configuration files that turn any modern LL
 
 ---
 
-## Quick Start
+## Web UI
+
+A single-page web app for managing your bar profile, inventory, recipes, and shopping list — no server required.
+
+**Live demo:** deploy your own in two steps:
+
+1. **Fork this repo** on GitHub
+2. **Enable GitHub Pages:** repo Settings → Pages → Source: **GitHub Actions** → Save
+
+Your app will be live at `https://<your-username>.github.io/barkeeper-bjorn-website/` within about 60 seconds of the next push to main. The workflow file is already included — nothing else to configure.
+
+**First run:** open the URL, click **Setup**, and enter:
+- A [GitHub Personal Access Token](https://github.com/settings/tokens/new?scopes=repo&description=Barkeeper+Bjorn) with `repo` scope
+- Your GitHub username and the repo name (e.g. `barkeeper-bjorn-website`)
+- Branch: `main`
+
+The app reads and writes the `data/*.json` files in your own repo — your data stays in your GitHub account.
+
+> **Netlify alternative:** connect the repo at [app.netlify.com](https://app.netlify.com) — the `netlify.toml` at the repo root handles all configuration automatically.
+
+---
+
+## Quick Start (AI agent — text interface)
 
 ### Option 1 — Claude Projects (recommended)
 
