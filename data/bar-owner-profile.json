@@ -1,5 +1,5 @@
 {
-  "_comment": "Generated from bar-owner-profile.md. Edit bar-owner-profile.md directly — do not hand-edit this file.",
+  "_comment": "Generated from bar-owner-profile.md. Edit bar-owner-profile.md directly â do not hand-edit this file.",
   "_schema": "../schema/bar-owner-profile.schema.json",
   "_sync": {
     "source_md": "bar-owner-profile.md",
@@ -7,24 +7,56 @@
     "md_hash": null
   },
   "identity": {
-    "full_name": null,
-    "preferred_name": null,
-    "location": null,
-    "timezone": null
+    "full_name": "Glenn Strycker",
+    "preferred_name": "Glenn",
+    "location": "Chicago, IL",
+    "timezone": "CST"
   },
   "flavor_profile": {
     "axes": {
-      "sweetness": { "position": null, "confidence": "—", "last_evaluated": null },
-      "acid": { "position": null, "confidence": "—", "last_evaluated": null },
-      "strength": { "position": null, "confidence": "—", "last_evaluated": null },
-      "complexity": { "position": null, "confidence": "—", "last_evaluated": null },
-      "season": { "position": null, "confidence": "—", "last_evaluated": null },
-      "risk": { "position": null, "confidence": "—", "last_evaluated": null }
+      "sweetness": {
+        "position": "Middle",
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-04"
+      },
+      "acid": {
+        "position": "Strong A",
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-04"
+      },
+      "strength": {
+        "position": "Strong A",
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-04"
+      },
+      "complexity": {
+        "position": "Strong B",
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-04"
+      },
+      "season": {
+        "position": "Strong B",
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-04"
+      },
+      "risk": {
+        "position": "Strong B",
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-04"
+      }
     },
     "supplemental": {
-      "smoke": { "position": null, "notes": null },
-      "funk": { "position": null, "notes": null },
-      "savory_saline": { "position": null, "notes": null }
+      "smoke": {
+        "position": "neutral"
+      },
+      "funk": {
+        "position": null,
+        "notes": null
+      },
+      "savory_saline": {
+        "position": null,
+        "notes": null
+      }
     }
   },
   "archetypes": [],
@@ -40,5 +72,19 @@
   },
   "evolution_log": [],
   "guests": [],
-  "last_updated": null
+  "last_updated": "2026-05-04",
+  "background": {
+    "profession": "Data Scientist",
+    "drinking_frequency": "weekly",
+    "typical_context": "Dinner with my wife, small gatherings with 2-3 couples as guests"
+  },
+  "equipment": {
+    "shaker": "Boston two-piece",
+    "mixing_glass": true,
+    "jigger": true,
+    "bar_spoon": true,
+    "strainer": "fine mesh",
+    "citrus_press": true,
+    "ice_setup": "standard cubes"
+  }
 }
