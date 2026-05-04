@@ -70,6 +70,9 @@
       case 'profile':
         ProfileView.render(content);
         break;
+      case 'recommender':
+        RecommenderView.render(content);
+        break;
       case 'shopping':
         ShoppingView.render(content);
         break;
