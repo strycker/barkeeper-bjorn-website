@@ -100,6 +100,21 @@ Base: [spirit] | Method: [shaken/stirred/built] | Occasion: [one phrase]
 
 ---
 
+### 1.6 — Move bartender personalization earlier in agent onboarding
+
+**Problem:** In the text-based AI agent flow, the bartender name/voice/personality questions appear late in onboarding — after the flavor axes, after the inventory questions. By that point the agent has been speaking generically for several exchanges. The user should meet their bartender (and confirm the name and persona) immediately after providing their own name and location, so the rest of onboarding feels like a conversation with a known character rather than a generic assistant.
+
+**Fix:** Reorder the onboarding script in `barkeeper-instructions.md` so that after collecting the user's name and general background (questions 1–2), the agent immediately asks:
+> *"Before we go any further — I'm Barkeeper Bjorn by default, but you can rename me and shape my personality. Want to keep the defaults, or customize?"*
+
+If the user says keep defaults, proceed. If they want to customize, collect: new name, voice preset (professional / warm / terse / theatrical), and specialty focus (classics / modern / tiki / NA-forward / no preference).
+
+This same order fix is tracked for the web UI onboarding in **3.1.7**.
+
+**Files:** `barkeeper-instructions.md`, `instructions/onboarding.md`
+
+---
+
 ## Tier 2 — Structural Improvements ✓ Complete
 
 These required new files or meaningful refactoring of existing ones. No new tech stack.
@@ -258,6 +273,120 @@ These complete the single-user static-site story before we introduce a backend l
 - Add search input that filters bottle chips across all categories in real-time
 - Category filter dropdown to jump-scroll to a section
 - "Total count" stat kept in sync as bottles are added/removed
+
+**3.1.7 — Onboarding UX improvements** *(priority: high — affects every new user)*
+
+Several flow and interaction fixes based on first-run feedback:
+
+- **Skip and return:** Every onboarding step gets a "Skip for now →" link. Skipped answers are left null; user can return from the Dashboard via a new "Revisit Onboarding" menu item. Resume picks up from the first unanswered step.
+- **Barkeeper personalization order:** Move the bartender name/voice/personality step to step 2, immediately after collecting the user's name and location. Currently it comes far too late — the user should meet their bartender before being asked detailed flavor questions.
+- **Flavor axes: sliders + Middle option:** Replace the A/B choice cards with the same slider bar component used on the Profile page. Explicitly label the center position "Middle / Both / Depends on my mood" so users aren't forced into a binary when they genuinely like both ends. Pre-fill the slider from any saved value; null stays centered until moved.
+- **Open-text inventory entry during onboarding:** After the equipment step, add an optional free-text area: "Paste a list of what's in your bar (one per line, or comma-separated) — you can clean it up in the Inventory tab later." App parses the text, attempts to categorize each item, and pre-populates inventory with a review-and-edit step before saving. This lets users with an existing list (from a prior AI-chat session) skip tedious manual entry.
+- **Files:** `app/js/views/onboarding.js`, `app/css/app.css`
+
+---
+
+**3.1.8 — Dashboard & navigation enhancements** *(priority: high — first impression and discoverability)*
+
+- **Images in UI:**
+  - Header title bar: add `barkeeper_bjorn_002.png` as a small avatar next to "Barkeeper Bjorn" text
+  - Dashboard hero: show `bar_equipment_001.png` as a muted background or welcome-section image
+  - Onboarding welcome step: show `barkeeper_bjorn_001.png` with a caption — user meets Bjorn before answering questions
+- **Expanded dashboard menu items** (add to returning-user quick-action grid):
+  - "Revisit Onboarding" → `#onboarding` (resume flow; see 3.1.7)
+  - "Enhance Profile" → `#profile`
+  - "Recommend a Cocktail" → `#recommender` (already featured; rename for consistency)
+  - "Classroom / Mixology 101" → `#classroom` (new view; see 3.1.15)
+  - "Chat with [bartender name]" → `#chat` (shown grayed-out with lock icon if no Claude API key; links to 3.1.6)
+  - "Feedback" → opens a mailto or GitHub Issues link in a new tab
+- **Settings button in nav:** Add a gear icon button in the upper-right nav bar (separate from Setup). Routes to `#settings` — a new view covering logout, bartender rename, personality, theme, Export/Import. See 3.1.9.
+- **Files:** `app/index.html`, `app/css/app.css`, `app/js/views/dashboard.js`, `app/js/views/settings.js` (new)
+
+---
+
+**3.1.9 — Settings page** *(priority: high — logout and bartender rename are frequently needed)*
+
+A standalone Settings view (`#settings`) separate from the first-run Setup flow:
+
+- **Bartender identity:** Rename the bartender (writes to `barkeeper.json`); change voice/personality preset (a dropdown: "Professional & measured", "Warm & playful", "Terse & opinionated", "Theatrical & verbose")
+- **API keys:** Move GitHub PAT + repo config here (keep Setup for first-run only); add Anthropic API key field (for 3.1.6); show masked values with a "Reveal" toggle
+- **Export / Import:** Primary entry point for data portability (see 3.1.10)
+- **Logout:** Clears all `bb_*` localStorage keys; redirects to Setup; shows confirmation dialog
+- **Danger zone:** "Reset all data" — overwrites all 4 data files with empty defaults after a two-step confirmation; useful for re-testing onboarding
+- **Files:** `app/js/views/settings.js` (new), `app/index.html` (route + nav), `app/css/app.css`
+
+---
+
+**3.1.10 — Export / Import** *(priority: high — data portability and safe onboarding re-testing)*
+
+Closes a real gap: users with existing Barkeeper Bjorn data (from Claude Projects or ChatGPT) need a way to import it, and users who want to re-test onboarding need to export first so they don't lose their real data.
+
+- **Export — JSON bundle:** "Export All Data" button in Settings → bundles all 4 data files (`inventory.json`, `recipes.json`, `bar-owner-profile.json`, `barkeeper.json`) into a single `barkeeper-bjorn-export-YYYY-MM-DD.json` with a version header. Triggers a browser file download — no server involved.
+- **Export — AI context text:** Secondary export format: a clean markdown/text summary of inventory + profile + originals, formatted for pasting directly into Claude, ChatGPT, Gemini, or Grok as context. Covers the same data the AI agent uses.
+- **Import:** "Import Data" button in Settings → file picker accepts the export JSON format → shows a diff preview ("This will replace X bottles, Y recipes…") → on confirm, writes all 4 files to GitHub in one batch
+- **Selective import:** Checkboxes per section — import only inventory, or only recipes, keeping other sections untouched. Essential for "clear and re-onboard, then restore recipes."
+- **Reset & re-onboard flow:** Export → Reset → re-run onboarding → optional Import of specific sections
+- **Format versioning:** Export bundle includes `format_version` field; Import validates and warns on version mismatch
+- **Files:** `app/js/export.js` (new — bundle builder + downloader + importer), `app/js/views/settings.js`, `app/css/app.css`
+
+---
+
+**3.1.11 — Inventory structured fields + tiers + in-place editing** *(priority: medium-high — significant daily-use UX)*
+
+The current inventory model treats each bottle as a single freeform string. This creates three problems: no structured metadata, no editing (only delete + re-add), and missing tier options.
+
+- **Structured spirit fields:** Store each bottle as an object `{ type, brand, style, tier, notes }` rather than a flat string. Display as a formatted chip: *"Montelobos Espadin"* with a tooltip showing type/tier/notes. Edit opens a small inline form with individual fields. Example: `{ type: "Mezcal", brand: "Montelobos", style: "Espadin", notes: "Oaxaca, artesanal", tier: "Premium" }`.
+- **In-place editing:** Clicking a bottle chip opens an edit popover — change any field and save without deleting and re-adding. Enables changing tier, correcting a name, or adding a note without data loss.
+- **Expanded tier options:** Current tiers (Well / Call / Premium / Ultra-Premium / Craft) missing common levels. Add:
+  - **"Standard / Common"** — everyday accessible bottles (e.g. Evan Williams, Olmeca)
+  - **"Dirt Cheap"** — value/bottom-shelf (e.g. plastic-handle vodka, Carlo Rossi)
+  - Reorder tier list: Dirt Cheap → Well → Standard → Call → Premium → Ultra-Premium → Craft
+- **Barware strainers → checkboxes:** Change strainer field from a single dropdown to a multi-select checkbox grid (user may own Hawthorne, Julep, Fine Mesh, and Conical simultaneously)
+- **Schema impact:** `inventory.json` spirit arrays change from `string[]` to `object[]`; engine and views need to handle both formats for backward compatibility during migration
+- **Files:** `app/js/views/inventory.js`, `app/css/app.css`, `app/js/recommender-engine.js` (update keyword matching to check `brand + style` string), schema files
+
+---
+
+**3.1.12 — Recommender enhancements: mood sliders + scope toggle** *(priority: medium)*
+
+The current recommender is profile-anchored — it always scores against your saved flavor profile. Two additions make it dramatically more useful for per-session use:
+
+- **"What are you in the mood for?" mood sliders:** At the top of the Recommender view, show the same 6-axis slider bars as the Profile page, pre-loaded from the saved profile. User can adjust any axis for this session without saving — "tonight I want something more refreshing and less boozy than usual." Recommendations re-score live as sliders move.
+- **Inventory scope control:** Replace the fixed "You Can Make / One Bottle Away" tabs with a single slider or segmented control: *"Only what I have"* → *"Allow 1 missing ingredient"* → *"Allow 2 missing ingredients."* All results shown in one ranked list filtered by the selected scope. One-away and two-away items show what's missing with a link to the shopping list.
+- **Occasion tag filter:** Optional — quick-select chips for "After dinner," "Aperitif," "Party / batch," "Refreshing / warm weather," "Cozy / winter." Filters the recipe list by the `occasion` field.
+- **Files:** `app/js/views/recommender.js`, `app/js/recommender-engine.js` (expose configurable `maxMissing` param), `app/css/app.css`
+
+---
+
+**3.1.13 — Recipe Book enhancements** *(priority: medium — ties to 3.1.3)*
+
+- **"Submit New Recipe" button** in the Recipe Book header → routes to the recipe add form (3.1.3); pre-fills creator from profile
+- **"Generate New Recipe with AI" button:** If Claude API key is configured (3.1.6), opens the chat view with a pre-seeded prompt asking Bjorn to design a new original based on inventory and profile. If no API key, shows a copyable prompt the user can paste into their Claude/ChatGPT session.
+- **Files:** `app/js/views/recipes.js`
+
+---
+
+**3.1.14 — Name standardization and spell-check suggestions** *(priority: medium-low)*
+
+When a user types an ingredient or bottle name into any inventory input field, the app compares the entry against a built-in canonical list and offers a correction suggestion.
+
+- Canonical examples: "lemon" → "Lemons", "lime juice" → "Fresh Lime Juice", "simple" → "Simple Syrup", "angostura" → "Angostura Bitters", "cointreau" → "Cointreau (Triple Sec)"
+- Suggestions appear as a small inline tooltip ("Did you mean: **Lemons**?") — user can accept with one click or dismiss and keep their text
+- Canonical list lives in `app/js/canonical-names.js`; it pulls from the same vocabulary used in `classics-db.js` ingredient keywords, so canonical forms are guaranteed to match the recommender engine
+- **Files:** `app/js/canonical-names.js` (new), `app/js/views/inventory.js` (input handler hookup)
+
+---
+
+**3.1.15 — Classroom / Mixology 101** *(priority: lower — new content area, significant scope)*
+
+A reference section for learning bartending fundamentals — useful for new users who don't know the difference between shaking and stirring, or why you double-strain.
+
+- **Static content initially:** Curated reference pages rendered from embedded JS data objects: Techniques (shake, stir, build, throw, fat-wash, infuse), Glassware guide (what glass and why), Ingredient deep-dives (vermouth storage, bitters families, citrus ratios), Cocktail ratio frameworks (Sour template 2:¾:¾, Old Fashioned template, Highball ratios)
+- **With Claude API (3.1.6):** Interactive — user can ask Bjorn questions in context of the current lesson ("Why does bruising matter?" → AI explains)
+- **Routes:** `#classroom`, sub-pages: `#classroom/techniques`, `#classroom/glassware`, `#classroom/ratios`, `#classroom/ingredients`
+- **Files:** `app/js/views/classroom.js` (new), `app/js/data/classroom-content.js` (new), `app/css/app.css`
+
+---
 
 **3.1.6 — Claude API integration (bring your own API key)**
 
@@ -477,3 +606,4 @@ Things worth capturing but not yet scoped.
 | 0.4 | 2026-05-04 | Tier 3.1 v0.1: Hybrid static web UI in app/ — vanilla JS SPA, GitHub API read/write, PAT auth. Implements setup, dashboard, onboarding wizard (all 6 flavor axes), inventory manager, recipe browser + detail, profile dashboard with SVG radar chart, shopping list. No backend, no build step, deployable to GitHub Pages. |
 | 0.5 | 2026-05-04 | Roadmap re-analysis for Phase 3. Added 3.1.x sub-phases (deployment, recommender, recipe edit, image upload, inventory search). Added 3.5 (backend/auth layer — Supabase recommended), 3.6 (multi-user accounts), 3.7 (community recipe sharing), 3.8 (discussion forum). Expanded Tier 4 with multi-bar, event mode, public profile, bot-in-forum, guest mode ideas. |
 | 0.6 | 2026-05-04 | 3.1.1 (GitHub Pages deployment) complete. 3.1.2 (cocktail recommender) complete — 75-recipe classics database, inventory matching engine, flavor-score ranking, buildable + one-away tabs. Added 3.1.6: Claude API integration (bring-your-own Anthropic API key, browser-based, unlocks AI chat + cocktail design + AI-powered recommendations). |
+| 0.7 | 2026-05-04 | Added 1.6 (barkeeper personalization order in agent onboarding). Added 3.1.7–3.1.15: onboarding UX (skip/return, slider axes, barkeeper-first order, open-text inventory entry), dashboard enhancements (images, expanded menu, settings button), settings page, export/import, inventory structured fields + new tiers + in-place edit + strainer checkboxes, recommender mood sliders + scope toggle, recipe book buttons, name standardization, Classroom/Mixology 101. |
