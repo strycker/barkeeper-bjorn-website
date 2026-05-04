@@ -259,6 +259,31 @@ These complete the single-user static-site story before we introduce a backend l
 - Category filter dropdown to jump-scroll to a section
 - "Total count" stat kept in sync as bottles are added/removed
 
+**3.1.6 — Claude API integration (bring your own API key)**
+
+Currently the web UI has zero AI — recommendations are rule-based JS and there's no inference anywhere. This item adds an optional Claude API connection so users can unlock AI-powered features directly from the browser.
+
+**How it would work:**
+- User enters their [Anthropic API key](https://console.anthropic.com/settings/keys) in the Setup view alongside the GitHub PAT (stored in localStorage as `bb_anthropic_key`)
+- API key is never sent anywhere except `api.anthropic.com` — stays in the browser just like the GitHub PAT
+- The key is optional: the app works without it (rule-based mode), and unlocks AI features when present
+- Browser → Anthropic API calls use `Authorization: x-api-key {key}` against `https://api.anthropic.com/v1/messages`
+- **CORS note:** Anthropic's API allows direct browser calls, but this should be verified; a thin Cloudflare Worker proxy may be needed as a fallback
+
+**Features unlocked by Claude API key:**
+1. **"Ask Bjorn" button** — a chat panel where the user can type natural language ("make me something smoky and boozy") and Bjorn responds using the full system prompt from `barkeeper-instructions.md`, with inventory + profile injected as context
+2. **AI cocktail design** — generate a new original from scratch, with full rationale and attribution string
+3. **AI-powered recommendations** — instead of pure inventory matching, Bjorn explains *why* a recipe fits the user's current mood and taste, and suggests variations
+4. **Inventory advice** — "what's the single best bottle I could add given what I have?" with explanation
+5. **Forum bot** (prerequisite for 3.8) — Bjorn can answer questions in community threads
+
+**Context injection strategy:**
+- System prompt: contents of `barkeeper-instructions.md` (fetched from repo via GitHub API, cached)
+- User context block: inventory summary + flavor profile axes (serialized from State)
+- Model: `claude-sonnet-4-6` by default; user can override to `claude-opus-4-7` in Setup for higher quality
+
+**Files:** `app/js/claude-api.js` (API wrapper), `app/js/views/chat.js` (chat panel), Setup view additions, `app/css/app.css` (chat panel styles)
+
 ---
 
 ### 3.5 — Backend / auth layer (prerequisite for multi-user) ⚠ Architecture decision point
@@ -451,3 +476,4 @@ Things worth capturing but not yet scoped.
 | 0.3 | 2026-05-03 | Tier 2 complete: 2.1 (JSON schemas in schema/, data/ placeholders, bidirectional sync instruction); 2.2 (instructions/ module split — 7 modules); 2.3 (session-state.md template, re-evaluation module updated); 2.4 (analytics.md module, analytics mode in main instructions, Option 7 in session-start menu). barkeeper-instructions.md bumped to v2.0. README file structure updated. |
 | 0.4 | 2026-05-04 | Tier 3.1 v0.1: Hybrid static web UI in app/ — vanilla JS SPA, GitHub API read/write, PAT auth. Implements setup, dashboard, onboarding wizard (all 6 flavor axes), inventory manager, recipe browser + detail, profile dashboard with SVG radar chart, shopping list. No backend, no build step, deployable to GitHub Pages. |
 | 0.5 | 2026-05-04 | Roadmap re-analysis for Phase 3. Added 3.1.x sub-phases (deployment, recommender, recipe edit, image upload, inventory search). Added 3.5 (backend/auth layer — Supabase recommended), 3.6 (multi-user accounts), 3.7 (community recipe sharing), 3.8 (discussion forum). Expanded Tier 4 with multi-bar, event mode, public profile, bot-in-forum, guest mode ideas. |
+| 0.6 | 2026-05-04 | 3.1.1 (GitHub Pages deployment) complete. 3.1.2 (cocktail recommender) complete — 75-recipe classics database, inventory matching engine, flavor-score ranking, buildable + one-away tabs. Added 3.1.6: Claude API integration (bring-your-own Anthropic API key, browser-based, unlocks AI chat + cocktail design + AI-powered recommendations). |
