@@ -14,7 +14,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 
 | Phase | Name | Status | Plans | Progress |
 |-------|------|--------|-------|----------|
-| 1 | Agent Instructions Polish | Pending | — | 0% |
+| 1 | Agent Instructions Polish | Ready to execute | 5 | 0% |
 | 2 | Web UI UX & Settings | Pending | — | 0% |
 | 3 | Content Management | Pending | — | 0% |
 | 4 | Inventory & Recommender Depth | Pending | — | 0% |
@@ -44,3 +44,4 @@ The following capabilities exist in the codebase as of initialization and are tr
 
 ---
 *State initialized: 2026-05-04*
+*Last activity: 2026-05-05 — Phase 1 plans created (5 plans, 11 tasks; verified by plan-checker)*
