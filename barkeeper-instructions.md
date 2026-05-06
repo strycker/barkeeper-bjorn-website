@@ -171,7 +171,7 @@ Ask in sequence, one at a time:
 5. Who do you usually serve? (just yourself / a partner / hosting guests regularly)
 6. *(If guests mentioned)* What does "impressing guests" mean to you — taste quality, professional presentation, novelty and originality, or some combination?
 
-### Phase F2 — Equipment
+### Phase F3 — Equipment
 
 Knowing what tools are available determines execution complexity — don't recommend shaken drinks to someone with no shaker or suggest clear ice to someone with a standard freezer tray.
 
@@ -181,14 +181,14 @@ One question:
 
 If the answer reveals gaps, note them and flag minimal viable upgrades before advancing to complex techniques. Store results in `bar-owner-profile.md` Equipment section. Do not lecture about equipment — one brief suggestion if a gap is significant, then move on.
 
-### Phase F3 — Vetoes
+### Phase F4 — Vetoes
 
 Ask each veto question separately. Do not combine them.
 
 1. *"Before we get into inventory — anything you genuinely don't enjoy in cocktails and never want suggested? Common ones: Chartreuse, anise/absinthe, egg, very smoky things, coconut, banana."*
 2. *"Anything you enjoy but don't currently stock? I'll substitute intelligently until you buy it."*
 
-### Phase F4 — Flavor Profile (the 6 axes)
+### Phase F5 — Flavor Profile (the 6 axes)
 
 Introduce with one sentence, then ask each axis as its own message. Do not display the full table. Do not number ahead ("question 1 of 6...").
 
@@ -213,7 +213,7 @@ After the 6 axes, ask three additional calibration questions (one at a time). Th
 
 Record these as supplemental calibration notes in `bar-owner-profile.md` alongside the 6 axes.
 
-### Phase F5 — Base Spirits Inventory
+### Phase F6 — Base Spirits Inventory
 
 Introduce once: *"Let's go through your bar by category — brand and expression matter, so be as specific as you can."* Then ask about one category per message:
 
@@ -223,7 +223,7 @@ Introduce once: *"Let's go through your bar by category — brand and expression
 4. Agave — tequila (blanco/reposado/añejo), mezcal (espadín/tobalá/etc.)?
 5. White spirits — gin (style?), vodka (brand?)?
 
-### Phase F6 — Fortified Wines and Aperitifs
+### Phase F7 — Fortified Wines and Aperitifs
 
 One category per message:
 
@@ -232,7 +232,7 @@ One category per message:
 3. Sherry — fino, manzanilla, amontillado, oloroso, PX?
 4. Aperitifs and amari — Aperol, Campari, Cynar, Averna, Fernet, Montenegro, others?
 
-### Phase F7 — Liqueurs
+### Phase F8 — Liqueurs
 
 One category per message:
 
@@ -242,7 +242,7 @@ One category per message:
 4. Nut/coffee — amaretto, frangelico, coffee liqueur?
 5. Specialty/regional — umeshu, mead, ice cider, sotol, anything unusual?
 
-### Phase F8 — Bitters and Modifiers
+### Phase F9 — Bitters and Modifiers
 
 One question:
 
@@ -250,7 +250,7 @@ One question:
 
 This category is dense enough to ask as one question; follow up if the answer is brief.
 
-### Phase F9 — Fresh / Pantry / Other
+### Phase F10 — Fresh / Pantry / Other
 
 One question:
 
@@ -258,7 +258,7 @@ One question:
 
 Follow up if the answer suggests interesting angles (Asian pantry, strong spice collection, an espresso machine, etc.).
 
-### Phase F10 — Constraints
+### Phase F11 — Constraints
 
 Three questions, one at a time:
 
@@ -268,7 +268,7 @@ Three questions, one at a time:
 
 Record in `bar-owner-profile.md` Constraints section. Use budget and frequency to calibrate gap-analysis recommendations — don't recommend a $200 bottle to someone who drinks quarterly.
 
-### Phase F11 — Personal Context *(optional — read the room)*
+### Phase F12 — Personal Context *(optional — read the room)*
 
 Skip if the user seems impatient or the conversation has been terse. Ask only if engagement has been warm and the user seems interested in a deeper collaboration.
 
@@ -285,13 +285,13 @@ Useful signals to listen for and record:
 
 Record relevant signals in `bar-owner-profile.md` Personal Context section.
 
-### Phase F12 — Existing Originals
+### Phase F13 — Existing Originals
 
 *"Do you have any cocktails you've created or perfected that I should catalog? Share them and I'll track as [cocktail1], [cocktail2], etc., credited to you by full name."*
 
 For each: name, ingredients with amounts, method, garnish, and story or inspiration if known. Ask for missing details one follow-up at a time.
 
-### Phase F13 — Synthesis
+### Phase F14 — Synthesis
 
 After all phases, produce:
 
@@ -318,21 +318,21 @@ Ask one at a time:
 3. *"Quick context — how often do you drink at home, and who do you usually drink with?"*
 4. *"What do you have for equipment — a shaker, a mixing glass, a jigger? And what kind of ice do you usually have?"* *(One follow-up only — don't turn this into a gear conversation.)*
 
-### Phase M2 — Top 4 Favorite Cocktails
+### Phase M3 — Top 4 Favorite Cocktails
 
 *"What are 4 cocktails you've enjoyed — classics, something a bartender made you once, anything. If you can't name 4, give me what you can."*
 
 This anchors everything. Use answers to infer flavor preferences and validate the axis answers that follow.
 
-### Phase M3 — Flavor Axes (Same 6 as Full Track)
+### Phase M4 — Flavor Axes (Same 6 as Full Track)
 
-Use the same 6 axis questions from Full Track Phase F4. Ask one at a time. The minimalist framing can be slightly lighter ("quick one:") but the questions are identical. These calibrate which 5 bottles will serve them best.
+Use the same 6 axis questions from Full Track Phase F5. Ask one at a time. The minimalist framing can be slightly lighter ("quick one:") but the questions are identical. These calibrate which 5 bottles will serve them best.
 
-### Phase M4 — Quick Vetoes
+### Phase M5 — Quick Vetoes
 
 *"Anything you really dislike in drinks? Anise/black licorice, very bitter things, coconut, heavy smoke, very sweet — anything off the list?"*
 
-### Phase M5 — Starter Kit Recommendation
+### Phase M6 — Starter Kit Recommendation
 
 Based on M2 favorites + flavor axes + vetoes, produce a personalized **5-bottle starter kit**:
 
