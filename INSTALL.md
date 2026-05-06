@@ -53,6 +53,18 @@ Claude has a memory tool that persists short notes across all conversations in y
    - `recipes.md`
 4. Under **Capabilities**, enable: Web Browsing, Code Interpreter (for math on recipe scaling).
 5. Under **Conversation starters**, paste the contents of `INIT_PROMPT.md` as the first starter (or the short one-liner: *"Initialize Barkeeper Bjorn."*). This makes the init prompt fire automatically when a user opens the GPT for the first time, without them having to paste it manually.
+
+   **Paste this into the Conversation starters field:**
+
+   ```
+   Initialize Barkeeper Bjorn.
+
+   Read all your knowledge files (barkeeper.md, barkeeper-instructions.md, bar-owner-profile.md, inventory.md, recipes.md) before responding.
+
+   If my user files (bar-owner-profile.md, inventory.md, recipes.md) are empty or template-only, run the onboarding flow described in barkeeper-instructions.md. Start by asking whether I'm building a serious home bar or just looking to make a few favorite cocktails well (Minimalist track vs. Full track).
+
+   If my user files are already populated, greet me by name and ask what I'd like to do tonight: build a drink, design an original, get a gap analysis on my bar, or something else.
+   ```
 6. Save and start a conversation. The init prompt should run automatically.
 
 ### Updating user files
@@ -77,6 +89,18 @@ Gemini supports Gems with custom instructions and uploaded files, similar to Cus
 2. Paste `barkeeper-instructions.md` into the instructions field.
 3. Upload the four user files (`barkeeper.md`, `bar-owner-profile.md`, `inventory.md`, `recipes.md`).
 4. In the Gem's **opening message** field (if available), paste: *"Initialize Barkeeper Bjorn."* This triggers the onboarding flow automatically on first open.
+
+   **Paste this into the opening message field:**
+
+   ```
+   Initialize Barkeeper Bjorn.
+
+   Read all your knowledge files (barkeeper.md, barkeeper-instructions.md, bar-owner-profile.md, inventory.md, recipes.md) before responding.
+
+   If my user files (bar-owner-profile.md, inventory.md, recipes.md) are empty or template-only, run the onboarding flow described in barkeeper-instructions.md. Start by asking whether I'm building a serious home bar or just looking to make a few favorite cocktails well (Minimalist track vs. Full track).
+
+   If my user files are already populated, greet me by name and ask what I'd like to do tonight: build a drink, design an original, get a gap analysis on my bar, or something else.
+   ```
 5. If no opening message field exists, start the first conversation by pasting the contents of `INIT_PROMPT.md`.
 
 Gemini's context limits and file handling differ from Claude/ChatGPT. The agent files should still work, but expect occasional "I don't see that file" issues — re-uploading or re-pasting may be needed.
@@ -97,6 +121,18 @@ If your platform supports a single long system prompt and no file uploads:
    ```
 2. Paste the concatenated text as the system prompt.
 3. Set the first user message (or "conversation starter" if the platform supports it) to: *"Initialize Barkeeper Bjorn."* This triggers the onboarding or session-start menu automatically.
+
+   **Paste this into the system prompt field:**
+
+   ```
+   Initialize Barkeeper Bjorn.
+
+   Read all your knowledge files (barkeeper.md, barkeeper-instructions.md, bar-owner-profile.md, inventory.md, recipes.md) before responding.
+
+   If my user files (bar-owner-profile.md, inventory.md, recipes.md) are empty or template-only, run the onboarding flow described in barkeeper-instructions.md. Start by asking whether I'm building a serious home bar or just looking to make a few favorite cocktails well (Minimalist track vs. Full track).
+
+   If my user files are already populated, greet me by name and ask what I'd like to do tonight: build a drink, design an original, get a gap analysis on my bar, or something else.
+   ```
 4. If there is no opening-message field, paste `INIT_PROMPT.md` manually as your first message.
 
 This works but is less elegant — updating files means rebuilding the entire system prompt.
