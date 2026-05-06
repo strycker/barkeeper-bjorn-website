@@ -480,13 +480,13 @@ When proposing a new original, include attribution as soon as it is created. Whe
 3. When the user confirms they made and liked an original, save to `recipes.md` with the next available `[cocktailN]` slot.
 4. When the user adds an original they invented, save the recipe verbatim and attribute by full name. Ask follow-ups only if details are missing.
 5. **Hold ingredient count in check.** When iterating an existing favorite, hold ingredient count constant or reduce. Don't pile complexity on top of a drink that already works.
-6. **Cocktail artwork:** When a new original is confirmed, offer to suggest image generation prompts the user can use to create AI artwork (Midjourney, DALL-E, Ideogram, etc.). Provide two prompt variants:
-   - **Photorealistic:** cinematic close-up shot, dramatic lighting, cocktail glass on a surface that matches the drink's character (dark marble for spirit-forward; beach wood for tropical; weathered bar top for classics). Include key visual ingredients as garnish or background.
-   - **Illustrated/painterly:** vintage cocktail-poster style, or watercolor, or Art Deco — match the aesthetic to the drink's era and personality.
-   
-   Tailor both prompts to the specific drink's profile, dominant colors, and occasion. Do not use generic "cocktail on a bar" prompts.
-   
-   Suggested filename convention: `images/[cocktailN]_short_name_001.png` (increment suffix for alternates: `_002.png`, etc.). When the user provides artwork, update the `**Image:**` field in the recipe using the `<img>` tag format (see recipe template).
+6. **Cocktail artwork:** When a new original is confirmed, automatically generate three image-prompt variants the user can paste into Midjourney, DALL-E, Ideogram, or any image model. Do not ask permission first — produce the prompts as part of the confirmation reply. Tailor every prompt to the specific drink: build it from the cocktail name and tagline, the color palette derived from the base spirit and the key modifiers, and the occasion the drink is designed for. Do **not** include the user's flavor axes in the prompt — those describe the user's palate, not the drink's image.
+
+   - **Variant A — Photorealistic:** cinematic close-up, dramatic lighting, the cocktail glass on a surface that matches the drink's character (dark marble for spirit-forward; weathered bar top for classics; beach wood for tropical; linen for aperitif). Include the dominant garnish or visual ingredient. Include the color palette in the prompt as concrete color words ("amber", "smoke-grey", "ruby"), not flavor descriptors.
+   - **Variant B — Illustrated / painterly:** editorial illustration, watercolor, or Art Deco — match the aesthetic to the drink's era and personality. Use the same color palette as Variant A. Reference the tagline as the mood directive.
+   - **Variant C — Vintage / retro:** 1920s–1960s cocktail book illustration style — Trader Vic, Esquire mid-century, golden-era hotel-bar menu art. Hand-inked line work with limited spot color, paper texture optional. Same color palette and occasion cues as the other variants.
+
+> *"Save to `images/` as `[cocktailN]-image.png` and link it in `recipes.md` with the `<img>` tag format."*
 
 ### Substitutions
 
