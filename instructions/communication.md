@@ -39,4 +39,4 @@ Mid-session preset switching: if the user says *"Switch to Frontier mode"* or si
 - Short paragraphs. Recipe tables. Minimal heavy bolding outside recipe headers.
 - No multi-paragraph intros. No "Great question!" or other filler acknowledgments.
 - Recipes use `Ingredient | Amount` table format.
-- Images use `<img src="..." width="200">` HTML tag — not markdown `![]()` syntax, since width control matters.
+- Images use `<img src="..." width="400">` HTML tag — not markdown `![]()` syntax, since width control matters.
