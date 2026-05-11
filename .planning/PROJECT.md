@@ -34,11 +34,11 @@ The user's real-world bar inventory and flavor profile should power both AI-driv
 - [ ] Enforce one-question-at-a-time rule in agent onboarding
 - [ ] Auto-launch INIT_PROMPT for fresh installs (no options-menu on first message)
 - [ ] Cocktail image workflow: suggest Midjourney/DALL-E prompts, two variants
-- [ ] Update recipes.md image template to use `<img>` tag format
+- [ ] Update recipes.md image template to use <img> tag format
 - [ ] Session-start menu for returning users (warm greeting + 7-item numbered menu)
 - [ ] Move bartender personalization to step 2 of agent onboarding
 
-**Web UI — UX & Settings (Tier 3.1 mid-priority):**
+**Web UI — UX & Settings:**
 - [ ] Onboarding: skip-and-return, slider axes replacing A/B cards, open-text inventory entry, barkeeper-first ordering
 - [ ] Dashboard enhancements: Bjorn avatar images, expanded quick-action menu, settings button in nav
 - [ ] Settings page: bartender identity, API keys (GitHub PAT + Anthropic), export/import entry, logout, danger zone
@@ -89,18 +89,20 @@ The user's real-world bar inventory and flavor profile should power both AI-driv
 ## Context
 
 - Stack: vanilla ES6+ SPA, GitHub Contents API as backend, IIFE module pattern, no build step
-- Data: 4 JSON files in `data/` (barkeeper, profile, inventory, recipes); schemas in `schema/`
+- Data: 4 JSON files in data/ (barkeeper, profile, inventory, recipes); schemas in schema/
 - Auth: GitHub PAT in localStorage; SHA-based write conflict prevention
-- Deployment: GitHub Pages (primary) + Netlify (alternative), both auto from `app/`
-- Agent templates: single-file (`barkeeper-instructions.md`) + multi-file (`instructions/`) for platforms that support knowledge files
+- Deployment: GitHub Pages (primary) + Netlify (alternative), both auto from app/
+- Agent templates: single-file (barkeeper-instructions.md) + multi-file (instructions/) for platforms that support knowledge files
 - Glenn has a PhD in physics and runs a Decision Sciences team — analytical framing and data-driven features are a natural fit
+- Primary user shares with a small group of non-technical friends/family — setup must remain accessible
 
 ## Constraints
 
 - **Tech stack**: Vanilla JS only for the web UI until Phase 6 (Supabase introduces supabase-js)
 - **No build step**: All new views follow the IIFE module pattern; no bundler introduced until explicitly decided
-- **Data compatibility**: Inventory schema changes (Phase 4) must handle both old string[] and new object[] formats during migration
-- **CORS**: Anthropic API allows direct browser calls; verify before assuming a Cloudflare Worker proxy is needed for Claude API integration
+- **Data compatibility**: Inventory schema changes must handle both old string[] and new object[] formats during migration
+- **CORS**: Anthropic API allows direct browser calls; verify before assuming a Cloudflare Worker proxy is needed
+- **API key security**: Anthropic key stored in localStorage only, never committed, never sent anywhere except api.anthropic.com
 
 ## Key Decisions
 
@@ -110,24 +112,25 @@ The user's real-world bar inventory and flavor profile should power both AI-driv
 | Supabase for multi-user backend | Managed Postgres + Auth + Storage; frontend stays static | — Pending |
 | Vanilla JS / no framework | No build step, no dependencies, directly deployable | ✓ Good — maintained cleanly |
 | JSON is system-of-record; MD is human-readable view | Bidirectional sync handled by agent | ✓ Good |
-| Coarse phase granularity | 7 broad phases covers all 4 tiers without over-fragmenting | — Pending |
+| Bring-your-own Anthropic API key | No server needed for AI; user controls cost; same pattern as GitHub PAT | — Pending |
+| Standard phase granularity | 5-8 phases balances traceability with velocity for this scope | — Pending |
 
 ## Evolution
 
 This document evolves at phase transitions and milestone boundaries.
 
-**After each phase transition** (via `/gsd-transition`):
+**After each phase transition** (via /gsd-transition):
 1. Requirements invalidated? → Move to Out of Scope with reason
 2. Requirements validated? → Move to Validated with phase reference
 3. New requirements emerged? → Add to Active
 4. Decisions to log? → Add to Key Decisions
 5. "What This Is" still accurate? → Update if drifted
 
-**After each milestone** (via `/gsd-complete-milestone`):
+**After each milestone** (via /gsd-complete-milestone):
 1. Full review of all sections
 2. Core Value check — still the right priority?
 3. Audit Out of Scope — reasons still valid?
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-04 after initialization*
+*Last updated: 2026-05-04 after initialization (merged local + remote)*
