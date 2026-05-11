@@ -1,112 +1,136 @@
-# Barkeeper Bjorn Web UI
+# Barkeeper Bjorn
 
 ## What This Is
 
-A personal home-bar management web app — no backend, no build step — that runs entirely as a static SPA deployed on GitHub Pages. It reads and writes JSON data files stored in the user's own GitHub repo via the GitHub Contents API. The app lets you manage your inventory, track recipes, get cocktail recommendations from your current bar stock, and (soon) chat with an AI bartender powered by a bring-your-own Anthropic API key.
+Barkeeper Bjorn is a dual-purpose home bar management system: a set of portable Markdown agent templates that configure any LLM (Claude, ChatGPT, Gemini, Grok) as a personalized bartender assistant, and a companion static web UI (vanilla JS SPA) that manages bar data stored as JSON in GitHub. No build step, no backend, deployable to GitHub Pages or Netlify in minutes.
 
 ## Core Value
 
-Given what's in your bar right now, tell me what I can make — and make it personal to my taste.
+The user's real-world bar inventory and flavor profile should power both AI-driven conversation and rule-based recommendations — seamlessly, whether the user is in a chat session or the web app.
 
 ## Requirements
 
 ### Validated
 
-- ✓ GitHub PAT auth + repo config → stored in localStorage, no backend — Phase 3.1
-- ✓ Setup view: PAT + owner/repo/branch form with connection validation — Phase 3.1
-- ✓ Dashboard: returning-user greeting, stat bar, new-user CTA — Phase 3.1
-- ✓ Onboarding wizard: 15-step flow covering name, track, flavor axes (A/B), equipment, smoke pref — Phase 3.1
-- ✓ Inventory manager: tabbed (Spirits/Pantry/Vetoes), bottle chips, add/remove, save to GitHub — Phase 3.1
-- ✓ Recipe browser: card grid + detail drill-down (Originals/Favorites/Wishlist tabs) — Phase 3.1
-- ✓ Profile dashboard: SVG radar chart, live slider updates, supplemental prefs, evolution log — Phase 3.1
-- ✓ Shopping list: priority-ranked, "Got It" flow, add-item form — Phase 3.1
-- ✓ GitHub Pages deployment via Actions workflow — Phase 3.1.1
-- ✓ Cocktail recommender: 75-recipe classics DB, inventory matching, flavor scoring, buildable + one-away tabs — Phase 3.1.2
+- ✓ GitHub PAT authentication + repo config (Setup view) — existing
+- ✓ Dashboard: stat bar, returning-user greeting, new-user CTA, recent originals — existing
+- ✓ Onboarding wizard: full step-by-step flow, all 6 flavor axes (A/B cards), save to GitHub — existing
+- ✓ Inventory manager: tabbed (Spirits / Pantry / Vetoes), bottle chips, add/remove, inline save — existing
+- ✓ Recipe browser: card grid, originals + favorites + wishlist tabs, full recipe detail view — existing
+- ✓ Profile dashboard: SVG hexagonal radar chart, live sliders, supplemental prefs, evolution log — existing
+- ✓ Shopping list: priority-ranked list, add manually, "Got It" flow, ROI context — existing
+- ✓ Recommender: 75-recipe classics DB, inventory matching, flavor-score ranking, buildable + one-away tabs — existing
+- ✓ GitHub Pages deployment (pages.yml) — existing
+- ✓ Netlify support (netlify.toml) — existing
+- ✓ JSON schemas (schema/) — existing
+- ✓ Modular agent prompt architecture (instructions/) — existing
+- ✓ Session-state template — existing
+- ✓ Analytics mode in agent instructions — existing
+- ✓ JSON ↔ Markdown bidirectional sync spec — existing
 
 ### Active
 
-- [ ] Settings page: logout, bartender rename/personality, API keys, export/import entry point
-- [ ] Export / Import: JSON bundle download + AI-context text export + selective import
-- [ ] Onboarding UX: skip/return, slider bars for flavor axes + Middle option, barkeeper-first step, open-text inventory paste
-- [ ] Dashboard & nav enhancements: images (header avatar, welcome hero, onboarding portrait), expanded menu items
-- [ ] Inventory structured fields: brand/type/style/tier objects, in-place editing, new tiers (Standard, Dirt Cheap), strainer checkboxes
-- [ ] Claude API integration: bring-your-own Anthropic key, chat panel, AI cocktail design, AI recommendations
-- [ ] Recommender enhancements: per-session mood sliders, scope toggle (0/1/2 missing), occasion tags
-- [ ] Recipe add/edit form: inline editor for originals with all fields
-- [ ] Recipe Book buttons: Submit New Recipe, Generate with AI
+**Agent Instructions (Tier 1):**
+- [ ] Enforce one-question-at-a-time rule in agent onboarding
+- [ ] Auto-launch INIT_PROMPT for fresh installs (no options-menu on first message)
+- [ ] Cocktail image workflow: suggest Midjourney/DALL-E prompts, two variants
+- [ ] Update recipes.md image template to use <img> tag format
+- [ ] Session-start menu for returning users (warm greeting + 7-item numbered menu)
+- [ ] Move bartender personalization to step 2 of agent onboarding
+
+**Web UI — UX & Settings:**
+- [ ] Onboarding: skip-and-return, slider axes replacing A/B cards, open-text inventory entry, barkeeper-first ordering
+- [ ] Dashboard enhancements: Bjorn avatar images, expanded quick-action menu, settings button in nav
+- [ ] Settings page: bartender identity, API keys (GitHub PAT + Anthropic), export/import entry, logout, danger zone
+- [ ] Inventory search: real-time filter input + category dropdown
+
+**Web UI — Content Management:**
+- [ ] Recipe add/edit form (new original, full fields, append to recipes.originals)
+- [ ] Image upload via GitHub API (file picker → base64 → PUT /contents/images/)
+- [ ] Export/Import: JSON bundle + AI-context text export; selective import per section
+- [ ] Recipe Book enhancements: "Submit New Recipe" button, "Generate with AI" button
+
+**Web UI — Data Depth:**
+- [ ] Inventory structured fields: bottle as object {type, brand, style, tier, notes}, in-place edit popover
+- [ ] Expanded tier options (Dirt Cheap → Well → Standard → Call → Premium → Ultra-Premium → Craft)
+- [ ] Strainer field: multi-select checkboxes instead of dropdown
+- [ ] Recommender mood sliders: per-session axis overrides without saving
+- [ ] Recommender scope toggle: "Only what I have" → "Allow 1 missing" → "Allow 2 missing"
+- [ ] Occasion tag filter on recommender
+- [ ] Ingredient name standardization / spell-check suggestions vs. canonical-names.js
+
+**AI Integration:**
+- [ ] Claude API integration (bring-your-own Anthropic key): "Ask Bjorn" chat panel, AI cocktail design, AI recommendations, inventory advice
+- [ ] Classroom / Mixology 101: techniques, glassware, ratios, ingredients reference; AI-interactive with Claude API
+
+**Backend & Multi-User (Tier 3.5-3.6):**
+- [ ] Supabase backend: managed Postgres + Auth + Storage; replaces GitHub API for multi-user mode
+- [ ] Solo mode preserved (PAT-based) alongside hosted mode (Supabase)
+- [ ] Email/password + GitHub OAuth authentication
+- [ ] Per-user data isolation (row-level security)
+- [ ] Multi-user accounts: sign up, login, session persistence, account settings
+
+**Community (Tier 3.7-3.8):**
+- [ ] Per-recipe visibility toggle (private / public)
+- [ ] Community feed: paginated card grid of public originals, filter by spirit/method/flavor
+- [ ] "Save to my collection" one-click copy from community
+- [ ] Recipe ratings (star or thumbs)
+- [ ] Discussion forum: recipe-attached comments + stand-alone topics, markdown support, moderation
+
+**API & Multi-Agent (Tier 3.2-3.3):**
+- [ ] REST API (FastAPI): buildable cocktails, recommendations, cocktail design, inventory gaps, flavor axes, session log
+- [ ] Multi-agent system: Sommelier, Analytics Brain, Archivist, Shopper sub-agents orchestrated by Bjorn
 
 ### Out of Scope
 
-- Backend / server — no server-side code this milestone; GitHub API is the data layer
-- Multi-user / auth system — single-user (PAT per fork) until Phase 3.5 (Supabase)
-- Community recipe sharing / forum — Phase 3.7–3.8, not this milestone
-- Automated test suite — no test framework; manual + CI pipeline only (acknowledged debt)
-- Mobile native app — web responsive only
+- Enterprise / POS integration — Tier 3.4 (separate product spec, not this roadmap)
+- Tier 4 ideas parking lot — captured in to-do.md but not planned; revisit after Tier 3 is shipped
 
 ## Context
 
-### Codebase state
-- Vanilla ES6+ SPA in `app/` — no framework, no bundler, no npm dependencies
-- IIFE module pattern throughout; views export a single `render(container)` function
-- State module holds 4 JSON data files in memory with SHA-tracked GitHub writes
-- Hash-based router (`#dashboard`, `#inventory`, `#recipes`, `#profile`, `#shopping`, `#recommender`)
-- Dark amber/bourbon theme; single CSS file with custom properties
-- GitHub Actions deploys `app/` to GitHub Pages on push to main
-
-### User context
-- Primary user (Glenn) has a PhD in physics, runs a Decision Sciences team — appreciates analytics depth
-- Has existing Barkeeper Bjorn data from Claude Projects / ChatGPT sessions — wants import path
-- Real inventory already populated via onboarding; recommender live but untested against real inventory
-- Wants to share with a few non-technical friends/family — setup must be accessible
-
-### Key friction points (from user feedback)
-- Onboarding is tedious — needs paste-in capability for existing data
-- Inventory uses freeform strings — needs structured fields (brand, style, tier)
-- Recommender exists but mood/occasion targeting is missing
-- AI chat is the most-wanted feature; no LLM inference runs in the browser yet
-
-### Technical decisions already made
-- No backend this milestone — GitHub Contents API remains the data layer
-- Bring-your-own API key pattern for Claude integration (stored in localStorage, browser-only)
-- JSON schema in `schema/` validated; `data/*.json` are system of record
-- `classics-db.js` uses keyword+searchIn matching strategy for inventory-to-recipe matching
+- Stack: vanilla ES6+ SPA, GitHub Contents API as backend, IIFE module pattern, no build step
+- Data: 4 JSON files in data/ (barkeeper, profile, inventory, recipes); schemas in schema/
+- Auth: GitHub PAT in localStorage; SHA-based write conflict prevention
+- Deployment: GitHub Pages (primary) + Netlify (alternative), both auto from app/
+- Agent templates: single-file (barkeeper-instructions.md) + multi-file (instructions/) for platforms that support knowledge files
+- Glenn has a PhD in physics and runs a Decision Sciences team — analytical framing and data-driven features are a natural fit
+- Primary user shares with a small group of non-technical friends/family — setup must remain accessible
 
 ## Constraints
 
-- **Tech stack**: Vanilla JS only — no framework, no bundler, no npm. Every new module follows the IIFE pattern.
-- **No backend**: All data lives in the user's GitHub repo. No server, no database, no auth service this milestone.
-- **Backward compatibility**: Existing `data/*.json` files and localStorage keys must not break. Schema changes require migration helpers.
-- **Deployment**: Static files only — must deploy cleanly to GitHub Pages and Netlify with zero config.
-- **API key security**: Anthropic key stored in localStorage only, never sent anywhere except `api.anthropic.com`. Never logged, never committed.
+- **Tech stack**: Vanilla JS only for the web UI until Phase 6 (Supabase introduces supabase-js)
+- **No build step**: All new views follow the IIFE module pattern; no bundler introduced until explicitly decided
+- **Data compatibility**: Inventory schema changes must handle both old string[] and new object[] formats during migration
+- **CORS**: Anthropic API allows direct browser calls; verify before assuming a Cloudflare Worker proxy is needed
+- **API key security**: Anthropic key stored in localStorage only, never committed, never sent anywhere except api.anthropic.com
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| GitHub Contents API as sole data layer | No backend required; user owns data in their own repo; trivial fork-to-deploy | ✓ Good |
-| PAT in localStorage (not OAuth) | OAuth needs a backend callback; PAT is sufficient for single-user; acceptable tradeoff | ✓ Good |
-| IIFE module pattern (not ES modules) | Works without a bundler; GitHub Pages serves without MIME-type issues; no build step | ✓ Good |
-| Vanilla JS, no framework | Zero dependencies, zero build surface; trivial to deploy and audit | ✓ Good |
+| GitHub API as backend (solo mode) | Zero infrastructure, free, PAT-authenticated, repo = storage | ✓ Good — works well for single user |
+| Supabase for multi-user backend | Managed Postgres + Auth + Storage; frontend stays static | — Pending |
+| Vanilla JS / no framework | No build step, no dependencies, directly deployable | ✓ Good — maintained cleanly |
+| JSON is system-of-record; MD is human-readable view | Bidirectional sync handled by agent | ✓ Good |
 | Bring-your-own Anthropic API key | No server needed for AI; user controls cost; same pattern as GitHub PAT | — Pending |
-| JSON as system of record (not Markdown) | Web UI writes JSON; agent sessions use Markdown; bidirectional sync via `_sync` metadata | ✓ Good |
-| 75-recipe classics database in browser | No API call needed for recommendations; instant results; easily extended | ✓ Good |
+| Standard phase granularity | 5-8 phases balances traceability with velocity for this scope | — Pending |
 
 ## Evolution
 
 This document evolves at phase transitions and milestone boundaries.
 
-**After each phase transition** (via `/gsd-transition`):
+**After each phase transition** (via /gsd-transition):
 1. Requirements invalidated? → Move to Out of Scope with reason
 2. Requirements validated? → Move to Validated with phase reference
 3. New requirements emerged? → Add to Active
 4. Decisions to log? → Add to Key Decisions
 5. "What This Is" still accurate? → Update if drifted
 
-**After each milestone** (via `/gsd-complete-milestone`):
+**After each milestone** (via /gsd-complete-milestone):
 1. Full review of all sections
 2. Core Value check — still the right priority?
 3. Audit Out of Scope — reasons still valid?
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-04 after initialization*
+*Last updated: 2026-05-04 after initialization (merged local + remote)*

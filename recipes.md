@@ -27,7 +27,7 @@
 
 **Profile:** Brief flavor/occasion description.
 
-**Image:** <img src="https://raw.githubusercontent.com/USERNAME/barkeeper-bjorn/refs/heads/BRANCH/images/[cocktailN]_short_name_001.png" width="200"> *(optional — replace USERNAME and BRANCH; add multiple img tags for alternates)*
+**Image:** <img src="https://raw.githubusercontent.com/USERNAME/barkeeper-bjorn/refs/heads/BRANCH/images/[cocktailN]-image.png" width="400" alt="[Drink Name]"> *(optional — replace USERNAME and BRANCH; add multiple img tags for alternates)*
 
 #### Why it works
 Brief structural explanation.
