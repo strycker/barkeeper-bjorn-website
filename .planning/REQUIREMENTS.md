@@ -114,16 +114,60 @@ _Generated: 2026-05-11 from PROJECT.md + research synthesis_
 
 ## Traceability
 
-_Filled by roadmapper agent._
+_Updated: 2026-05-11_
 
-| REQ-ID | Phase |
-|--------|-------|
-| SET-01 – SET-08 | TBD |
-| EXP-01 – EXP-04 | TBD |
-| IMP-01 – IMP-06 | TBD |
-| INV-01 – INV-06 | TBD |
-| ONB-01 – ONB-06 | TBD |
-| PAR-01 – PAR-05 | TBD |
-| CHAT-01 – CHAT-09 | TBD |
-| REC-01 – REC-04 | TBD |
-| DASH-01 – DASH-05 | TBD |
+| REQ-ID | Phase | Status |
+|--------|-------|--------|
+| SET-01 | Phase 1: Settings & Navigation | Pending |
+| SET-02 | Phase 1: Settings & Navigation | Pending |
+| SET-03 | Phase 1: Settings & Navigation | Pending |
+| SET-04 | Phase 1: Settings & Navigation | Pending |
+| SET-05 | Phase 1: Settings & Navigation | Pending |
+| SET-06 | Phase 1: Settings & Navigation | Pending |
+| SET-07 | Phase 1: Settings & Navigation | Pending |
+| SET-08 | Phase 1: Settings & Navigation | Pending |
+| DASH-01 | Phase 1: Settings & Navigation | Pending |
+| DASH-02 | Phase 1: Settings & Navigation | Pending |
+| DASH-03 | Phase 1: Settings & Navigation | Pending |
+| DASH-04 | Phase 1: Settings & Navigation | Pending |
+| DASH-05 | Phase 1: Settings & Navigation | Pending |
+| EXP-01 | Phase 2: Export, Import & Inventory Fields | Pending |
+| EXP-02 | Phase 2: Export, Import & Inventory Fields | Pending |
+| EXP-03 | Phase 2: Export, Import & Inventory Fields | Pending |
+| EXP-04 | Phase 2: Export, Import & Inventory Fields | Pending |
+| IMP-01 | Phase 2: Export, Import & Inventory Fields | Pending |
+| IMP-02 | Phase 2: Export, Import & Inventory Fields | Pending |
+| IMP-03 | Phase 2: Export, Import & Inventory Fields | Pending |
+| IMP-04 | Phase 2: Export, Import & Inventory Fields | Pending |
+| IMP-05 | Phase 2: Export, Import & Inventory Fields | Pending |
+| IMP-06 | Phase 2: Export, Import & Inventory Fields | Pending |
+| INV-01 | Phase 2: Export, Import & Inventory Fields | Pending |
+| INV-02 | Phase 2: Export, Import & Inventory Fields | Pending |
+| INV-03 | Phase 2: Export, Import & Inventory Fields | Pending |
+| INV-04 | Phase 2: Export, Import & Inventory Fields | Pending |
+| INV-05 | Phase 2: Export, Import & Inventory Fields | Pending |
+| INV-06 | Phase 2: Export, Import & Inventory Fields | Pending |
+| PAR-01 | Phase 3: Inventory Text Parser | Pending |
+| PAR-02 | Phase 3: Inventory Text Parser | Pending |
+| PAR-03 | Phase 3: Inventory Text Parser | Pending |
+| PAR-04 | Phase 3: Inventory Text Parser | Pending |
+| PAR-05 | Phase 3: Inventory Text Parser | Pending |
+| CHAT-01 | Phase 4: Claude Chat & Recommender Enhancements | Pending |
+| CHAT-02 | Phase 4: Claude Chat & Recommender Enhancements | Pending |
+| CHAT-03 | Phase 4: Claude Chat & Recommender Enhancements | Pending |
+| CHAT-04 | Phase 4: Claude Chat & Recommender Enhancements | Pending |
+| CHAT-05 | Phase 4: Claude Chat & Recommender Enhancements | Pending |
+| CHAT-06 | Phase 4: Claude Chat & Recommender Enhancements | Pending |
+| CHAT-07 | Phase 4: Claude Chat & Recommender Enhancements | Pending |
+| CHAT-08 | Phase 4: Claude Chat & Recommender Enhancements | Pending |
+| CHAT-09 | Phase 4: Claude Chat & Recommender Enhancements | Pending |
+| REC-01 | Phase 4: Claude Chat & Recommender Enhancements | Pending |
+| REC-02 | Phase 4: Claude Chat & Recommender Enhancements | Pending |
+| REC-03 | Phase 4: Claude Chat & Recommender Enhancements | Pending |
+| REC-04 | Phase 4: Claude Chat & Recommender Enhancements | Pending |
+| ONB-01 | Phase 5: Onboarding UX | Pending |
+| ONB-02 | Phase 5: Onboarding UX | Pending |
+| ONB-03 | Phase 5: Onboarding UX | Pending |
+| ONB-04 | Phase 5: Onboarding UX | Pending |
+| ONB-05 | Phase 5: Onboarding UX | Pending |
+| ONB-06 | Phase 5: Onboarding UX | Pending |
