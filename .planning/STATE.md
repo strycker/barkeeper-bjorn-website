@@ -6,7 +6,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 
 **Core value:** The user's real-world bar inventory and flavor profile should power both AI-driven conversation and rule-based recommendations — seamlessly, whether in a chat session or the web app.
 
-**Current focus:** Phase 1 — Agent Instructions Polish
+**Current focus:** Phase 2 — Web UI UX & Settings
 
 ---
 
@@ -44,4 +44,4 @@ The following capabilities exist in the codebase as of initialization and are tr
 
 ---
 *State initialized: 2026-05-04*
-*Last activity: 2026-05-05 — Phase 1 plans created (5 plans, 11 tasks; verified by plan-checker)*
+*Last activity: 2026-05-11 — Phase 2 UI-SPEC approved (02-UI-SPEC.md; 6/6 dimensions passed)*

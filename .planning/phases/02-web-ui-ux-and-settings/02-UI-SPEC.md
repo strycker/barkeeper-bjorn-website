@@ -1,7 +1,8 @@
 ---
 phase: 2
 slug: web-ui-ux-and-settings
-status: draft
+status: approved
+reviewed_at: 2026-05-11
 shadcn_initialized: false
 preset: none
 created: 2026-05-11
@@ -42,10 +43,19 @@ Declared values (multiples of 4):
 | 2xl | 32px | Setup card top margin, wizard progress margin |
 | 3xl | 40px | New-user welcome top margin, setup card margin |
 
-Exceptions:
-- Header height: 58px (fixed legacy value; do not change)
-- Header horizontal padding: 20px (not on the 8-pt grid; do not change)
-- Nav item padding: 6px 12px (legacy; do not change)
+**Phase 2 spacing contract:** Executors apply ONLY the values in the table above when creating or modifying Phase 2 components. All token values are multiples of 4.
+
+**Legacy values (pre-existing, not modified by Phase 2):**
+
+These values exist in `app/css/app.css` from before Phase 2. Executors MUST NOT change them; they are NOT part of the Phase 2 spacing contract and are listed here for reference only.
+
+| Legacy value | Source | Notes |
+|-------------|--------|-------|
+| 58px | Header height | Not a multiple of 4; pre-existing fixed layout value |
+| 20px | Header horizontal padding | Not on the 8-pt grid; pre-existing |
+| 6px 12px | Nav item padding | Not a multiple of 4; pre-existing |
+
+Other exceptions:
 - Wizard max-width: 540px (layout constraint; not a spacing token)
 - Touch targets for "Skip for now" links: minimum 44px tall (accessibility)
 
@@ -55,24 +65,39 @@ Exceptions:
 
 ## Typography
 
-| Role | Size | Weight | Line Height | CSS reference |
-|------|------|--------|-------------|---------------|
-| Body | 15px | 400 (normal) | 1.6 | `body` rule |
-| Label / small | 13px (0.88rem) | 400 | 1.4 | `label`, nav links, `.btn` |
-| Heading (h2/h3) | 20px (1.3rem) / 16px (1.05rem) | 400 / 700 | 1.3 | `h2`, `h3` |
-| Display (h1) | 26px (1.7rem) | 400 | 1.2 | `h1`, amber color |
+Four canonical size tokens for Phase 2. All component-level font sizes reference exactly one of these four tokens.
+
+| Token | Size | Weight | Line Height | Usage |
+|-------|------|--------|-------------|-------|
+| small | 13px (0.88rem) | 400 | 1.4 | Nav links, badge text, helper text, slider pole labels, "Middle" center label, slider labels, progress banner text, avatar caption, settings section headings (uppercase), inventory section titles (uppercase) |
+| body | 15px (1rem) | 400 | 1.6 | Default body text, card content, form labels, wizard option text, chip text |
+| heading | 20px (1.3rem) | 400 | 1.3 | h2, wizard question headers (`wizard-question`), section titles, h3 treated as heading |
+| display | 26px (1.7rem) | 400 | 1.2 | h1, page titles (amber color) |
+
+Font weights used: 400 (regular) and 600 (semibold, used for CTA link text and selected states only). No other weights.
 
 Font family for ALL elements: `'Georgia', serif` — no system-ui, no sans-serif in this phase.
 
-Additional Phase 2 specifics:
-- Progress banner text: 14px (0.9rem), `var(--text-dim)`, weight 400
-- Onboarding wizard question: 19px (1.2rem), weight 400, line-height 1.5 (existing `.wizard-question`)
-- "Coming soon" badge text: 11px (0.75rem), weight 400, uppercase, letter-spacing 0.08em
-- Inventory section title: 12px (0.78rem), uppercase, letter-spacing 0.12em, `var(--amber-dim)` (existing `.inventory-section-title`)
-- Slider pole labels: 13px (0.82rem), `var(--text-dim)`, weight 400
-- Slider center label "Middle": 11px (0.75rem), `var(--text-muted)`, centered below tick
+**Token mapping for Phase 2 component additions (previously declared as separate sizes, now mapped):**
 
-> Source: `app/css/app.css` — all sizes confirmed from codebase. Phase-specific sizes derived from existing small-text patterns.
+| Component use | Previous size | Canonical token |
+|--------------|--------------|----------------|
+| Progress banner text | 14px | small (13px) |
+| Onboarding wizard question | 19px | heading (20px) |
+| "Coming soon" badge text | 11px | small (13px) |
+| Inventory section title | 12px | small (13px) |
+| Slider pole labels | 13px | small (13px) |
+| Slider center label "Middle" | 11px | small (13px) |
+| h3 (e.g. settings sub-headings) | 16px | heading (20px) |
+
+Additional typographic modifiers that may be combined with size tokens (do not create new size tokens):
+- `text-transform: uppercase` + `letter-spacing: 0.1em` → settings section headings (small token)
+- `text-transform: uppercase` + `letter-spacing: 0.12em` → inventory section titles (small token)
+- `letter-spacing: 0.08em` → "Coming soon" badge (small token)
+- `font-style: italic` → avatar caption (small token)
+- `font-weight: 600` → CTA link text in progress banner (small token)
+
+> Source: `app/css/app.css` — all sizes confirmed from codebase. Phase-specific sizes mapped to 4-token canonical scale per checker revision 2026-05-11.
 
 ---
 
@@ -115,6 +140,10 @@ Additional Phase 2 specifics:
 - "Coming soon" grayed card: opacity 0.45 applied to entire `.menu-item`; pointer-events none; badge background `--bg4`, text `--text-muted`
 - Progress banner: background `--bg3`, border-left 3px solid `--amber`, text `--text-dim`, CTA link `--amber`
 
+**Focal points:**
+- Dashboard: the featured "What Can I Make Right Now?" card (`.menu-item--featured`) is the primary visual anchor — amber border distinguishes it from all other grid items.
+- Onboarding welcome screen (step 1): the Bjorn avatar (120×120px, amber ring) is the primary visual anchor — it is the only circular amber-bordered element on the screen.
+
 > Source: `app/css/app.css` `:root` confirmed. Color roles from CONTEXT.md locked decisions + existing CSS patterns.
 
 ---
@@ -129,10 +158,10 @@ Extends the existing `.axis-slider` CSS class from the Profile view.
 ```
 .axis-slider-group
   .axis-slider-poles          ← flex row: left-label | spacer | right-label
-    .axis-pole-label--left    ← 13px, --text-dim
-    .axis-pole-label--right   ← 13px, --text-dim, text-align right
+    .axis-pole-label--left    ← small token (13px), --text-dim
+    .axis-pole-label--right   ← small token (13px), --text-dim, text-align right
   input[type=range].axis-slider  ← existing class; width 100%
-  .axis-slider-center-label   ← "Middle", 11px, --text-muted, text-align center, margin-top 4px
+  .axis-slider-center-label   ← "Middle", small token (13px), --text-muted, text-align center, margin-top 4px
 ```
 
 **Behavior:**
@@ -165,7 +194,7 @@ Extends the existing `.axis-slider` CSS class from the Profile view.
 .wizard-paste-wrap
   label                       ← "Paste your spirits list (comma-separated)"
   textarea.wizard-paste-input ← 5 rows, placeholder: "e.g. Bulleit Bourbon, Aperol, Angostura Bitters"
-  .wizard-paste-hint          ← 13px --text-muted: "You can add bitters, syrups, and other pantry items from the Inventory view."
+  .wizard-paste-hint          ← small token (13px), --text-muted: "You can add bitters, syrups, and other pantry items from the Inventory view."
   .wizard-chip-preview        ← flex-wrap, gap 8px; appears after parsing
     .bottle-chip (existing)   ← each parsed item; includes chip-remove button
   button.btn.btn-primary      ← "Looks good →" (hidden until ≥1 chip exists)
@@ -197,7 +226,7 @@ Extends the existing `.axis-slider` CSS class from the Profile view.
 - Border-radius: `var(--radius)` (8px)
 - Padding: 12px 16px
 - Margin-bottom: 16px (md)
-- Font-size: 14px (0.9rem)
+- Font-size: small token (13px)
 - Text color: `var(--text-dim)`
 - CTA link color: `var(--amber)`, no underline, font-weight 600
 - Visibility: shown when `profile.onboarding_complete` is absent or false; removed from DOM once true
@@ -230,7 +259,7 @@ Extends `.menu-item` with modifier class `.menu-item--disabled`.
 - Display: inline-block
 - Background: `var(--bg4)`
 - Color: `var(--text-muted)`
-- Font-size: 11px (0.75rem)
+- Font-size: small token (13px)
 - Padding: 2px 8px
 - Border-radius: 3px
 - Text-transform: uppercase
@@ -286,7 +315,7 @@ Added to the returning-user dashboard above the greeting, below the page top.
 
 **Styles for `.wizard-avatar-wrap`:**
 - Text-align: center
-- Margin-bottom: 20px (md + sm = 24px)
+- Margin-bottom: 24px (lg)
 
 **Styles for `.wizard-avatar`:**
 - Width: 120px
@@ -298,7 +327,7 @@ Added to the returning-user dashboard above the greeting, below the page top.
 - Margin: 0 auto 12px
 
 **Styles for `.wizard-avatar-caption`:**
-- Font-size: 13px (0.82rem)
+- Font-size: small token (13px)
 - Color: `var(--text-dim)`
 - Font-style: italic
 
@@ -356,7 +385,7 @@ Four sections rendered top-to-bottom inside `.settings-wrap`:
 - Margin-bottom: 16px (md)
 
 **Styles for `.settings-section__heading`:**
-- Font-size: 13px (0.82rem)
+- Font-size: small token (13px)
 - Color: `var(--amber)`
 - Text-transform: uppercase
 - Letter-spacing: 0.1em
@@ -383,13 +412,13 @@ button.btn.btn-ghost  "Reset all data"
 ```
 p.danger-warning-text   ← "This will overwrite your inventory, recipes, profile, and bartender settings with empty defaults. GitHub credentials are preserved."
 button.btn.btn-danger   "Yes, delete everything"
-button.btn.btn-ghost    "Cancel"
+button.btn.btn-ghost    "Never mind, keep my data"
 ```
 
 **Behavior:**
 - First click on "Reset all data" → DOM replaces button with warning text + two buttons (no page reload)
 - Second click on "Yes, delete everything" → executes reset, shows success toast, redirects to `#dashboard`
-- "Cancel" → reverts to State 1
+- "Never mind, keep my data" → reverts to State 1
 
 > Source: CONTEXT.md D-18. SETTINGS-04 requirement.
 
@@ -462,16 +491,18 @@ The 7-item grid (3+3+1) is acceptable per D-24 note. Item 7 spans full width on 
 | Progress banner | "Your profile is incomplete — [Finish setup →]" |
 | Inventory paste "save" CTA | "Looks good →" |
 | Inventory paste hint | "You can add bitters, syrups, and other pantry items from the Inventory view." |
-| Settings save CTA | "Save changes" |
+| Settings save CTA (Bartender Identity section) | "Update bartender settings" |
+| Settings save CTA (GitHub Connection section) | "Update GitHub connection" |
 | Settings section: Bartender | "Bartender Identity" |
 | Settings section: GitHub | "GitHub Connection" |
 | Settings section: Account | "Account" |
 | Settings section: Danger | "Danger Zone" |
 | Logout button | "Log out" |
-| Logout confirmation | "This will clear all saved credentials and return you to setup. Continue?" — dialog with "Log out" confirm + "Cancel" |
+| Logout confirmation | "This will clear all saved credentials and return you to setup. Continue?" — dialog with "Log out" confirm + "Stay logged in" |
 | Reset first-click button | "Reset all data" |
 | Reset warning text | "This will overwrite your inventory, recipes, profile, and bartender settings with empty defaults. Your GitHub credentials are preserved." |
 | Reset confirm button | "Yes, delete everything" |
+| Reset cancel button | "Never mind, keep my data" |
 | Reset success toast | "All data has been reset." |
 | "Coming soon" toast | "Unlock by adding your Anthropic API key in Settings." |
 | Inventory search placeholder | "Search inventory…" |
@@ -485,15 +516,16 @@ The 7-item grid (3+3+1) is acceptable per D-24 note. Item 7 spans full width on 
 **Destructive action confirmation details:**
 
 1. **Reset all data** — two-click reveal pattern (D-18):
-   - Click 1: reveals warning text + "Yes, delete everything" button
+   - Click 1: reveals warning text + "Yes, delete everything" button + "Never mind, keep my data" button
    - Click 2: executes without additional dialog
    - No typed confirmation required in Phase 2
 
 2. **Log out** — single inline confirmation dialog (D-19):
    - `confirm()` browser dialog acceptable for Phase 2 (Settings page is low-traffic, no custom dialog component needed)
    - Confirm button label: "Log out" — do not use "OK"
+   - Cancel button label: "Stay logged in" — do not use "Cancel"
 
-> Source: CONTEXT.md D-07, D-14, D-15, D-18, D-19, D-24, D-25, D-26. Remaining copy is discretionary (Claude's Discretion section).
+> Source: CONTEXT.md D-07, D-14, D-15, D-18, D-19, D-24, D-25, D-26. Remaining copy is discretionary (Claude's Discretion section). "Cancel" and "Save" as standalone root words are blocked generic labels per checker dimension 1.
 
 ---
 
@@ -581,3 +613,4 @@ This project uses no npm packages, no component registry, and no third-party CSS
 | ROADMAP.md Phase 2 | Files-touched list and success criteria |
 | Claude's Discretion | 6 items resolved: banner style, disabled card visual treatment, 3×2+1 grid layout, search+filter same row, avatar sizing, exact copywriting |
 | User input | 0 — all questions answered by upstream artifacts |
+| Checker revision 2026-05-11 | BLOCK 1: "Cancel" replaced with "Stay logged in"; "Save changes" replaced with section-scoped "Update bartender settings" / "Update GitHub connection". BLOCK 2: 9 font sizes consolidated to 4 canonical tokens (small 13px, body 15px, heading 20px, display 26px). BLOCK 3: Non-multiple-of-4 legacy spacing values (58px, 6px) moved to a read-only legacy subsection, excluded from Phase 2 contract. FLAG 2: Focal point declarations added to Color section. |
