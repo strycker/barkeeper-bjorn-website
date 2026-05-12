@@ -1,8 +1,63 @@
 {
-  "identity": {},
-  "flavor_profile": {
-    "axes": {}
+  "identity": {
+    "full_name": "Glenn Strycker",
+    "preferred_name": "Glenn",
+    "location": "Chicago, IL",
+    "timezone": "CST"
   },
-  "onboarding_complete": false,
-  "last_updated": "2026-05-12"
+  "flavor_profile": {
+    "axes": {
+      "sweetness": {
+        "position": 0.21,
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-12"
+      },
+      "acid": {
+        "position": 0.67,
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-12"
+      },
+      "strength": {
+        "position": 0.86,
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-12"
+      },
+      "complexity": {
+        "position": 0.76,
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-12"
+      },
+      "season": {
+        "position": 0.73,
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-12"
+      },
+      "risk": {
+        "position": 0.71,
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-12"
+      }
+    },
+    "supplemental": {
+      "smoke": {
+        "position": "neutral"
+      }
+    }
+  },
+  "onboarding_complete": true,
+  "last_updated": "2026-05-12",
+  "background": {
+    "profession": "Data Scientist",
+    "drinking_frequency": "weekly",
+    "typical_context": "With my wife"
+  },
+  "equipment": {
+    "shaker": "Boston two-piece",
+    "mixing_glass": true,
+    "jigger": true,
+    "bar_spoon": true,
+    "strainer": "fine mesh",
+    "citrus_press": true,
+    "ice_setup": "standard cubes"
+  }
 }
