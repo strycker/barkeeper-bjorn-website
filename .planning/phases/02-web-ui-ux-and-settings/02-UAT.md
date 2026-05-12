@@ -30,7 +30,8 @@ note: axisToValue() bug fixed (TypeError on float positions) + user applied addi
 ### 3. Bjorn Avatar in Header and Onboarding Welcome
 
 expected: With GitHub configured, the onboarding welcome step (step 1) shows a circular Bjorn avatar image with a caption below it. The app header shows a small circular avatar icon. If the image URL is broken (wrong repo), the header falls back to an SVG icon rather than showing a broken-image placeholder.
-result: [pending]
+result: pass
+note: Avatar was cropped as circle — fixed to rectangular max-width:240px.
 
 ### 4. Settings Page — Four Sections, Logout, and Reset
 
