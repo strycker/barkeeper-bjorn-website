@@ -1,6 +1,12 @@
 {
   "last_updated": "2026-05-12",
-  "base_spirits": {},
+  "base_spirits": {
+    "whiskey": [
+      {
+        "name": "Bourbon"
+      }
+    ]
+  },
   "pantry": {},
   "barware": {},
   "unassigned": [
