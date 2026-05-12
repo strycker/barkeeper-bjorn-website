@@ -1,6 +1,7 @@
 {
   "identity": {
-    "_skipped_background": true
+    "_skipped_background": true,
+    "_skipped_equipment": true
   },
   "flavor_profile": {
     "axes": {
