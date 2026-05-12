@@ -9,6 +9,23 @@
   // ─── Nav active state ─────────────────────────────────────────────
 
   function updateNav(route) {
+    const configured = GitHubAPI.isConfigured();
+    const setupLink    = document.getElementById('nav-setup-link');
+    const settingsLink = document.getElementById('nav-settings-link');
+    if (setupLink)    setupLink.style.display    = configured ? 'none' : '';
+    if (settingsLink) settingsLink.style.display = configured ? ''     : 'none';
+
+    // Update header avatar from GitHubAPI.cfg() at render time (D-03)
+    const avatarImg = document.getElementById('header-avatar');
+    if (avatarImg && configured) {
+      const cfg = GitHubAPI.cfg();
+      if (cfg.owner && cfg.repo && !avatarImg.src) {
+        avatarImg.src = `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/main/images/barkeeper_bjorn_icon.png`;
+        avatarImg.onerror = () => { avatarImg.style.display = 'none'; };
+        avatarImg.onload  = () => { avatarImg.style.display = ''; };
+      }
+    }
+
     document.querySelectorAll('#main-nav a[data-route]').forEach(a => {
       a.classList.toggle('active', a.dataset.route === route);
     });
