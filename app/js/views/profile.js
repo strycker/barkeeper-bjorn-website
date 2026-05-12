@@ -376,10 +376,10 @@ const ProfileView = (() => {
     if (!el) return;
 
     const fields = [
-      { key: 'full_name',      label: 'Full Name',       placeholder: 'Glenn Strycker' },
-      { key: 'preferred_name', label: 'Preferred Name',  placeholder: 'Glenn' },
-      { key: 'location',       label: 'Location',        placeholder: 'Austin, TX' },
-      { key: 'timezone',       label: 'Time Zone',       placeholder: 'CST/CDT' },
+      { key: 'full_name',      label: 'Full Name',       placeholder: 'Ernest Raymond Beaumont Gantt' },
+      { key: 'preferred_name', label: 'Preferred Name',  placeholder: 'Don the Beachcomber' },
+      { key: 'location',       label: 'Location',        placeholder: 'Hollywood, CA' },
+      { key: 'timezone',       label: 'Time Zone',       placeholder: 'PST' },
     ];
 
     el.innerHTML = `
