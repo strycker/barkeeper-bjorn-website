@@ -41,7 +41,7 @@ result: pass
 ### 5. Inventory Real-Time Search and Category Scroll
 
 expected: On #inventory, a "Search inventory…" input and a category dropdown are visible above the content. Typing filters chips in real-time with no page reload — chips not matching disappear, sections with no visible chips hide their header. Clearing restores everything. Selecting a category from the dropdown smooth-scrolls to that section.
-result: [pending]
+result: pass
 
 ### 6. Regression — No Console Errors on Any Route
 
