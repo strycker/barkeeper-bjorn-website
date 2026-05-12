@@ -9,8 +9,8 @@
 
 | # | Phase | Goal | Requirements | Status |
 |---|-------|------|--------------|--------|
-| 1 | Agent Instructions Polish | Fix all open Tier 1 agent instruction issues | AGENT-01–06 | Pending |
-| 2 | Web UI UX & Settings | Onboarding overhaul, dashboard images, settings page, inventory search | ONB-01–04, NAV-01–05, SETTINGS-01–04, INV-01–02 | Pending |
+| 1 | Agent Instructions Polish | Fix all open Tier 1 agent instruction issues | AGENT-01–06 | Complete |
+| 2 | Web UI UX & Settings | Onboarding overhaul, dashboard images, settings page, inventory search | ONB-01–04, NAV-01–05, SETTINGS-01–04, INV-01–02 | Complete |
 | 3 | Content Management | Recipe add/edit, image upload, export/import | RECIPE-01–05, EXPORT-01–04 | Pending |
 | 4 | Inventory & Recommender Depth | Structured bottle objects, in-place editing, mood sliders, scope toggle, name standardization | INV-03–07, REC-01–03 | Pending |
 | 5 | AI Integration | Claude API, Ask Bjorn chat, AI cocktail design, Classroom | AI-01–07 | Pending |
