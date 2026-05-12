@@ -690,3 +690,73 @@ a:hover { color: var(--amber); }
   .rec-score { text-align: left; display: flex; align-items: center; gap: 8px; }
   .score-bar-wrap { width: 80px; }
 }
+
+/* ============================================================
+   Phase 2 — Onboarding Wizard Extensions
+   ============================================================ */
+
+/* Wizard avatar (onboarding welcome step — NAV-03) */
+.wizard-avatar-wrap {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.wizard-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--amber);
+  display: block;
+  margin: 0 auto 12px;
+}
+.wizard-avatar-caption {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+/* Axis slider group (ONB-02) — supplements existing .axis-slider */
+.axis-slider-group {
+  margin-bottom: 24px;
+}
+.axis-slider-poles {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.axis-pole-label--left,
+.axis-pole-label--right {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.axis-pole-label--right {
+  text-align: right;
+}
+.axis-slider-center-label {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* Inventory paste step (ONB-04) */
+.wizard-paste-wrap {
+  margin-top: 8px;
+}
+.wizard-paste-input {
+  width: 100%;
+  resize: vertical;
+  min-height: 80px;
+}
+.wizard-paste-hint {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+  margin-bottom: 12px;
+}
+.wizard-chip-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
