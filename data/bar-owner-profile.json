@@ -1,55 +1,8 @@
 {
-  "identity": {
-    "_skipped_background": true,
-    "_skipped_equipment": true
-  },
+  "identity": {},
   "flavor_profile": {
-    "axes": {
-      "sweetness": {
-        "_skipped": true,
-        "position": 0.5
-      },
-      "acid": {
-        "_skipped": true,
-        "position": 0.5
-      },
-      "strength": {
-        "_skipped": true,
-        "position": 0.5
-      },
-      "complexity": {
-        "_skipped": true,
-        "position": 0.5
-      },
-      "season": {
-        "_skipped": true,
-        "position": 0.5
-      },
-      "risk": {
-        "_skipped": true,
-        "position": 0.5
-      },
-      "smoke": {
-        "_skipped": true,
-        "position": 0.5
-      }
-    },
-    "supplemental": {
-      "smoke": {
-        "position": "neutral"
-      }
-    }
+    "axes": {}
   },
-  "onboarding_complete": true,
-  "last_updated": "2026-05-12",
-  "background": {},
-  "equipment": {
-    "shaker": "Boston two-piece",
-    "mixing_glass": false,
-    "jigger": false,
-    "bar_spoon": false,
-    "strainer": "Hawthorne",
-    "citrus_press": false,
-    "ice_setup": "standard cubes"
-  }
+  "onboarding_complete": false,
+  "last_updated": "2026-05-12"
 }
