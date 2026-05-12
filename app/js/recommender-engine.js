@@ -1,40 +1,43 @@
 // Recommender Engine — matches classics-db recipes against user inventory + flavor profile
 const RecommenderEngine = (() => {
 
+  // Safe lowercase — handles null/undefined/non-string inventory items
+  const lc = s => (typeof s === 'string' ? s : String(s ?? '')).toLowerCase();
+
   // Map classics-db searchIn keys → extractor functions for actual inventory structure
   // Inventory top-level: base_spirits{whiskey,brandy,rum,agave,white_spirits,other},
   //   fortified_wines_and_aperitif_wines[], liqueurs_and_cordials{fruit_forward,nut_coffee,herbal,specialty_regional},
   //   bitters{anchors,aromatic_smoke,nut_earth,fruit_botanical,other},
   //   syrups[], mixers[], refrigerator_perishables[], pantry_spice_rack[], fresh_produce[], vetoes{...}
   const SECTION_MAP = {
-    whiskey:            inv => (inv.base_spirits?.whiskey || []).map(s => s.toLowerCase()),
-    brandy:             inv => (inv.base_spirits?.brandy  || []).map(s => s.toLowerCase()),
-    rum:                inv => (inv.base_spirits?.rum      || []).map(s => s.toLowerCase()),
-    agave:              inv => (inv.base_spirits?.agave    || []).map(s => s.toLowerCase()),
-    white_spirits:      inv => (inv.base_spirits?.white_spirits || []).map(s => s.toLowerCase()),
+    whiskey:            inv => (inv.base_spirits?.whiskey || []).map(lc),
+    brandy:             inv => (inv.base_spirits?.brandy  || []).map(lc),
+    rum:                inv => (inv.base_spirits?.rum      || []).map(lc),
+    agave:              inv => (inv.base_spirits?.agave    || []).map(lc),
+    white_spirits:      inv => (inv.base_spirits?.white_spirits || []).map(lc),
     other_spirits:      inv => [
       ...(inv.base_spirits?.other || []),
       ...(inv.non_alcoholic_spirits || []),
-    ].map(s => s.toLowerCase()),
-    fortified:          inv => (inv.fortified_wines_and_aperitif_wines || []).map(s => s.toLowerCase()),
-    liqueurs_fruit:     inv => (inv.liqueurs_and_cordials?.fruit_forward     || []).map(s => s.toLowerCase()),
-    liqueurs_nut:       inv => (inv.liqueurs_and_cordials?.nut_coffee        || []).map(s => s.toLowerCase()),
-    liqueurs_herbal:    inv => (inv.liqueurs_and_cordials?.herbal            || []).map(s => s.toLowerCase()),
-    liqueurs_specialty: inv => (inv.liqueurs_and_cordials?.specialty_regional|| []).map(s => s.toLowerCase()),
+    ].map(lc),
+    fortified:          inv => (inv.fortified_wines_and_aperitif_wines || []).map(lc),
+    liqueurs_fruit:     inv => (inv.liqueurs_and_cordials?.fruit_forward     || []).map(lc),
+    liqueurs_nut:       inv => (inv.liqueurs_and_cordials?.nut_coffee        || []).map(lc),
+    liqueurs_herbal:    inv => (inv.liqueurs_and_cordials?.herbal            || []).map(lc),
+    liqueurs_specialty: inv => (inv.liqueurs_and_cordials?.specialty_regional|| []).map(lc),
     bitters_anchors:    inv => [
       ...(inv.bitters?.anchors       || []),
       ...(inv.bitters?.aromatic_smoke|| []),
-    ].map(s => s.toLowerCase()),
+    ].map(lc),
     bitters_other:      inv => [
       ...(inv.bitters?.nut_earth      || []),
       ...(inv.bitters?.fruit_botanical|| []),
       ...(inv.bitters?.other          || []),
-    ].map(s => s.toLowerCase()),
-    syrups:             inv => (inv.syrups              || []).map(s => s.toLowerCase()),
-    mixers:             inv => (inv.mixers              || []).map(s => s.toLowerCase()),
-    perishables:        inv => (inv.refrigerator_perishables || []).map(s => s.toLowerCase()),
-    pantry:             inv => (inv.pantry_spice_rack   || []).map(s => s.toLowerCase()),
-    produce:            inv => (inv.fresh_produce        || []).map(s => s.toLowerCase()),
+    ].map(lc),
+    syrups:             inv => (inv.syrups              || []).map(lc),
+    mixers:             inv => (inv.mixers              || []).map(lc),
+    perishables:        inv => (inv.refrigerator_perishables || []).map(lc),
+    pantry:             inv => (inv.pantry_spice_rack   || []).map(lc),
+    produce:            inv => (inv.fresh_produce        || []).map(lc),
   };
 
   // Build a flat inventory lookup from all sections (cached per call)

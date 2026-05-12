@@ -46,14 +46,16 @@ result: pass
 ### 6. Regression — No Console Errors on Any Route
 
 expected: Navigating to #dashboard, #inventory, #recipes, #profile, #recommender, #shopping, #settings, and #onboarding produces no JS errors in the browser DevTools console.
-result: [pending]
+result: issue
+reported: "recommender-engine.js:10 Uncaught TypeError: s.toLowerCase is not a function — SECTION_MAP extractors called .toLowerCase() on non-string inventory items. #shopping showed a browser-extension async listener warning (not an app error)."
+severity: major
 
 ## Summary
 
 total: 6
-passed: 1
-issues: 1
-pending: 4
+passed: 5
+issues: 2
+pending: 0
 skipped: 0
 blocked: 0
 
@@ -66,3 +68,11 @@ blocked: 0
   test: 2
   fix: "utils.js axisToValue() — add typeof pos === 'number' guard before .toLowerCase() call. FIXED in this session."
   artifacts: [app/js/utils.js]
+
+- truth: "#recommender loads without JS errors after onboarding"
+  status: failed
+  reason: "recommender-engine.js SECTION_MAP extractors called .toLowerCase() on non-string inventory items. Root cause: same pattern as axisToValue — no type guard before string method call."
+  severity: major
+  test: 6
+  fix: "recommender-engine.js — added lc() helper (safe toLowerCase with typeof guard); replaced all .map(s => s.toLowerCase()) with .map(lc). FIXED in this session."
+  artifacts: [app/js/recommender-engine.js]
