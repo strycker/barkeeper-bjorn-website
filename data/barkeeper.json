@@ -3,11 +3,5 @@
     "name": "Barkeeper Bjorn"
   },
   "active_preset": "Professional Mixologist",
-  "last_updated": "2026-05-12",
-  "_skipped": {
-    "bartender_name": true
-  },
-  "personality": {
-    "specialty": "Craft & artisanal"
-  }
+  "last_updated": "2026-05-12"
 }
