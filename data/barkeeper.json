@@ -1,5 +1,5 @@
 {
-  "_comment": "Generated from barkeeper.md. Edit barkeeper.md directly — do not hand-edit this file.",
+  "_comment": "Generated from barkeeper.md. Edit barkeeper.md directly â do not hand-edit this file.",
   "_schema": "../schema/barkeeper.schema.json",
   "_sync": {
     "source_md": "barkeeper.md",
@@ -12,5 +12,8 @@
     "persona_version": "1.1"
   },
   "active_preset": "Professional Mixologist",
-  "last_updated": null
+  "last_updated": "2026-05-12",
+  "personality": {
+    "specialty": "Classic cocktails"
+  }
 }
