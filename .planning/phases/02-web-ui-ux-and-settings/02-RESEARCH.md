@@ -663,17 +663,13 @@ The Settings view must dispatch this event after successfully updating GitHub cr
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **Does `inventory.spirits` exist in the current data schema?**
-   - What we know: CONTEXT.md D-15 says parsed inventory paste items go to `inventory.spirits` as strings.
-   - What's unclear: The current `inventory.json` structure uses `base_spirits.whiskey`, `base_spirits.rum`, etc. (BOTTLE_SECTIONS in inventory.js). There is no `inventory.spirits` flat array in the current schema. This may be an intentional simplification for the paste step — a flat staging area — or a mismatch with the existing structure.
-   - Recommendation: Clarify with user, OR default to writing to `base_spirits.other` or a new `inventory.spirits_paste` key, OR add a review step that lets users assign to categories (the UI-SPEC says chip preview only; no category assignment in Phase 2). The safest approach: write to a new `inventory.unassigned_paste` array and note in the UI that users should move items to the correct category from the Inventory view.
+   - **RESOLVED:** No. `inventory.spirits` does not exist as a flat array. The schema uses `base_spirits.{category}` (whiskey, rum, etc.). CONTEXT.md D-14/D-15 have been updated to reflect the correct write target: `inventory.unassigned` (new top-level array). Plans write to `inventory.unassigned`.
 
 2. **How does `barkeeper.json` store voice preset and bartender name?**
-   - What we know: Settings SETTINGS-01 reads from `State.get('barkeeper')`. The file is `data/barkeeper.json`.
-   - What's unclear: The exact schema of `barkeeper.json` was not read in this research session.
-   - Recommendation: Read `data/barkeeper.json` at planning time to confirm field names (`identity.name`, `personality.voice_preset`, etc.) before writing the Settings save logic.
+   - **RESOLVED:** Confirmed from `data/barkeeper.json`. Schema: `identity.name` (string, e.g. "Barkeeper Bjorn"), `active_preset` (string, e.g. "Professional Mixologist"). No nested personality object — `active_preset` is top-level. Settings save logic must use `State.patch('barkeeper', b => { b.identity.name = newName; b.active_preset = newPreset; return b; })`.
 
 ---
 

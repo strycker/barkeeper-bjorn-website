@@ -92,9 +92,9 @@ Scope: how the web app looks and behaves for the user. Not: new data capabilitie
 
 - **D-13:** Input format: comma-separated list. Example: `"Bulleit Bourbon, Aperol, Angostura Bitters, Dry Vermouth"`. Parsing: split on comma, trim whitespace, drop empty strings.
 
-- **D-14:** After parsing, show a chip-preview of the items before saving. User can remove any misparse from the chip list. "Looks good →" button saves all chips to `inventory.spirits` as string entries (existing format; Phase 4 upgrades to objects).
+- **D-14:** After parsing, show a chip-preview of the items before saving. User can remove any misparse from the chip list. "Looks good →" button saves all chips to `inventory.unassigned` as string entries (new top-level array; `inventory.spirits` does not exist as a flat array in the schema — see research; Phase 4 upgrades to structured objects).
 
-- **D-15:** Parsed items always go into `inventory.spirits`. A note in the UI: "You can add bitters, syrups, and other pantry items from the Inventory view."
+- **D-15:** Parsed items always go into `inventory.unassigned` (top-level array on the inventory object). A note in the UI: "You can add bitters, syrups, and other pantry items from the Inventory view."
 
 ### Settings Page (SETTINGS-01 to SETTINGS-04)
 
