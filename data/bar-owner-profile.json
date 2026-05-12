@@ -1,5 +1,10 @@
 {
-  "identity": {},
+  "identity": {
+    "full_name": "Glenn Strycker",
+    "preferred_name": "Glenn",
+    "location": "Chicago, IL",
+    "timezone": "CST"
+  },
   "flavor_profile": {
     "axes": {
       "sweetness": {
@@ -42,15 +47,17 @@
   "onboarding_complete": true,
   "last_updated": "2026-05-12",
   "background": {
-    "drinking_frequency": "weekly"
+    "drinking_frequency": "weekly",
+    "profession": "Data",
+    "typical_context": "with wife"
   },
   "equipment": {
     "shaker": "Boston two-piece",
-    "mixing_glass": false,
-    "jigger": false,
-    "bar_spoon": false,
-    "strainer": "Hawthorne",
-    "citrus_press": false,
+    "mixing_glass": true,
+    "jigger": true,
+    "bar_spoon": true,
+    "strainer": "fine mesh",
+    "citrus_press": true,
     "ice_setup": "standard cubes"
   }
 }
