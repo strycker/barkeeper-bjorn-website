@@ -24,15 +24,15 @@ const SettingsView = (() => {
   };
   const DEFAULT_BARKEEPER = {
     identity: { name: 'Barkeeper Bjorn' },
-    active_preset: 'Warm & playful',
+    active_preset: 'Professional Mixologist',
     last_updated: null,
   };
 
   // ─── Voice preset options (locked by Phase 1 D-11) ───────────────────────
   const VOICE_PRESETS = [
-    'Warm & playful',
     'Professional Mixologist',
     'Terse & direct',
+    'Warm & playful',
     'Theatrical & poetic',
     'Educational & nerdy',
   ];
@@ -72,7 +72,7 @@ const SettingsView = (() => {
     const barkeeper = State.get('barkeeper') || {};
     const cfg       = GitHubAPI.cfg();
     const bkName    = barkeeper.identity?.name || 'Barkeeper Bjorn';
-    const bkPreset  = barkeeper.active_preset  || 'Warm & playful';
+    const bkPreset  = barkeeper.active_preset  || 'Professional Mixologist';
 
     container.innerHTML = `
       <div class="page-header">
