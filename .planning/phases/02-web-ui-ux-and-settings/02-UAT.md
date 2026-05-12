@@ -36,7 +36,7 @@ note: Avatar was cropped as circle — fixed to rectangular max-width:240px.
 ### 4. Settings Page — Four Sections, Logout, and Reset
 
 expected: The nav shows a gear icon (not "Setup") after GitHub is configured. Clicking it navigates to #settings with 4 sections: Bartender Identity, GitHub Connection, Account, Danger Zone. Renaming the bartender saves correctly with a toast. Logout shows a CSS confirmation dialog (not window.confirm()), clears all bb_* localStorage keys on confirm, and redirects to #setup. "Reset all data" requires two clicks (first click reveals confirmation); after confirm, profile/inventory/recipes/barkeeper revert to defaults but bb_token/bb_owner/bb_repo/bb_branch are preserved.
-result: [pending]
+result: pass
 
 ### 5. Inventory Real-Time Search and Category Scroll
 
