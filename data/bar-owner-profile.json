@@ -1,5 +1,5 @@
 {
-  "_comment": "Generated from bar-owner-profile.md. Edit bar-owner-profile.md directly â do not hand-edit this file.",
+  "_comment": "Generated from bar-owner-profile.md. Edit bar-owner-profile.md directly Ã¢ÂÂ do not hand-edit this file.",
   "_schema": "../schema/bar-owner-profile.schema.json",
   "_sync": {
     "source_md": "bar-owner-profile.md",
@@ -15,34 +15,34 @@
   "flavor_profile": {
     "axes": {
       "sweetness": {
-        "position": "Middle",
+        "position": 0.5,
         "confidence": "Tentative",
-        "last_evaluated": "2026-05-04"
+        "last_evaluated": "2026-05-12"
       },
       "acid": {
-        "position": "Middle",
+        "position": 0.5,
         "confidence": "Tentative",
-        "last_evaluated": "2026-05-04"
+        "last_evaluated": "2026-05-12"
       },
       "strength": {
-        "position": "Strong A",
+        "position": 0.5,
         "confidence": "Tentative",
-        "last_evaluated": "2026-05-04"
+        "last_evaluated": "2026-05-12"
       },
       "complexity": {
-        "position": "Strong B",
+        "position": 0.5,
         "confidence": "Tentative",
-        "last_evaluated": "2026-05-04"
+        "last_evaluated": "2026-05-12"
       },
       "season": {
-        "position": "Strong B",
+        "position": 0.5,
         "confidence": "Tentative",
-        "last_evaluated": "2026-05-04"
+        "last_evaluated": "2026-05-12"
       },
       "risk": {
-        "position": "Strong B",
+        "position": 0.5,
         "confidence": "Tentative",
-        "last_evaluated": "2026-05-04"
+        "last_evaluated": "2026-05-12"
       }
     },
     "supplemental": {
@@ -72,11 +72,11 @@
   },
   "evolution_log": [],
   "guests": [],
-  "last_updated": "2026-05-04",
+  "last_updated": "2026-05-12",
   "background": {
     "profession": "Data Scientist",
     "drinking_frequency": "weekly",
-    "typical_context": "Dinner with my wife, small gatherings with 2-3 couples as guests"
+    "typical_context": "Couple dinner, several guests"
   },
   "equipment": {
     "shaker": "Boston two-piece",
@@ -86,5 +86,6 @@
     "strainer": "fine mesh",
     "citrus_press": true,
     "ice_setup": "standard cubes"
-  }
+  },
+  "onboarding_complete": true
 }
