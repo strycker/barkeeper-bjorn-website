@@ -5,6 +5,7 @@
   "active_preset": "Warm & playful",
   "last_updated": "2026-05-12",
   "_skipped": {
-    "bartender_name": true
+    "bartender_name": true,
+    "bartender_specialty": true
   }
 }
