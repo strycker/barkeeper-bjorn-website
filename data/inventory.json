@@ -5,6 +5,12 @@
       {
         "name": "Bourbon"
       }
+    ],
+    "brandy": [
+      {
+        "name": "Cognac",
+        "tier": "premium-accessible"
+      }
     ]
   },
   "pantry": {},
