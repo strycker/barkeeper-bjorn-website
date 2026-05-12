@@ -41,6 +41,12 @@
     "supplemental": {
       "smoke": {
         "position": "neutral"
+      },
+      "funk": {
+        "position": "neutral"
+      },
+      "savory_saline": {
+        "position": "interesting"
       }
     }
   },
