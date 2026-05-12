@@ -70,4 +70,4 @@ Wave 2 plans (02-03, 02-04) depend on Wave 1 completing first.
 
 ---
 *State initialized: 2026-05-04*
-*Last activity: 2026-05-12 — Phase 1 VALIDATION.md created (Nyquist audit in progress; 6/6 requirements automatable via grep, 2 manual-only SC1+SC2); Phase 2 validation complete (55/55 static checks passing; 14/15 automated, 1 manual-only)*
+*Last activity: 2026-05-12 — Phase 1 validation complete (63/63 static checks passing; 6/6 automated, 2 manual-only SC1+SC2); Phase 2 validation complete (55/55 static checks passing; 14/15 automated, 1 manual-only)*

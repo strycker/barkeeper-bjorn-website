@@ -89,5 +89,5 @@ created: 2026-05-12
 | Gaps found | 6 |
 | Resolved (automated) | 6 |
 | Escalated (manual-only) | 2 |
-| Static analysis checks | TBD (see phase-01-checks.sh) |
-| Checks passing | TBD |
+| Static analysis checks | 63 |
+| Checks passing | 63 |
