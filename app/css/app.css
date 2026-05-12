@@ -848,3 +848,34 @@ a:hover { color: var(--amber); }
   border: 1px solid var(--amber-dim, var(--amber));
   flex-shrink: 0;
 }
+
+/* ============================================================
+   Phase 2 — Settings Page (SETTINGS-01 through SETTINGS-04)
+   ============================================================ */
+
+.settings-wrap {
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.settings-section {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+.settings-section__heading {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--amber);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.settings-section--danger {
+  border-color: var(--red);
+}
+.settings-section--danger .settings-section__heading {
+  color: var(--red);
+}

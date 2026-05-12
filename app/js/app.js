@@ -93,6 +93,9 @@
       case 'shopping':
         ShoppingView.render(content);
         break;
+      case 'settings':
+        SettingsView.render(content);
+        break;
       default:
         DashboardView.render(content);
     }
