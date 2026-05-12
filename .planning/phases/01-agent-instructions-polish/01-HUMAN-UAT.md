@@ -1,14 +1,14 @@
 ---
-status: partial
+status: complete
 phase: 01-agent-instructions-polish
 source: [01-VERIFICATION.md]
 started: 2026-05-11T00:00:00Z
-updated: 2026-05-11T00:00:00Z
+updated: 2026-05-12T00:00:00Z
 ---
 
 ## Current Test
 
-Awaiting human testing on live AI platform.
+[testing complete]
 
 ## Tests
 
@@ -24,16 +24,17 @@ observation: Onboarding stopped after 2 questions (voice preset + bar-building g
 ### 2. One-Question-At-A-Time Rule in Live Session (SC2 / AGENT-01)
 
 expected: Every agent reply during onboarding asks exactly one question. No numbered question lists. Session-start menu appears immediately after the single greeting line with no explanation of what the agent does.
-result: [pending]
+result: pass
+reported: "Each reply contained exactly one question, no multi-part bundling."
 
 **How to test:** During onboarding on any platform, answer one question at a time and watch whether the agent asks only one question per reply. Also try sending a vague opener ("hi") after onboarding to see if the session-start menu appears without preamble.
 
 ## Summary
 
 total: 2
-passed: 0
+passed: 2
 issues: 0
-pending: 2
+pending: 0
 skipped: 0
 blocked: 0
 
