@@ -65,6 +65,15 @@
 
 **Files touched:** `app/js/views/onboarding.js`, `app/js/views/dashboard.js`, `app/js/views/settings.js` (new), `app/js/views/inventory.js`, `app/index.html`, `app/css/app.css`
 
+**Plans:** 5 plans
+
+Plans:
+- [ ] 02-00-PLAN.md — Create manual smoke-test checklist for all 5 success criteria
+- [ ] 02-01-PLAN.md — Onboarding overhaul: 17-step wizard, sliders, skip logic, inventory paste, Bjorn welcome avatar
+- [ ] 02-02-PLAN.md — Dashboard hero image, progress banner, 7-item grid, header avatar, nav gating
+- [ ] 02-03-PLAN.md — Settings page: bartender identity, GitHub connection, logout, reset all data
+- [ ] 02-04-PLAN.md — Inventory real-time search and category jump-scroll filter
+
 **Success criteria:**
 1. A new user can skip any onboarding step and return later via "Revisit Onboarding" on the Dashboard
 2. Flavor axes show as sliders with "Middle" center label; saved values pre-fill correctly
