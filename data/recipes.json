@@ -1,14 +1,5 @@
 {
-  "_comment": "Generated from recipes.md. Edit recipes.md directly — do not hand-edit this file.",
-  "_schema": "../schema/recipes.schema.json",
-  "_sync": {
-    "source_md": "recipes.md",
-    "last_synced": null,
-    "md_hash": null
-  },
-  "last_updated": null,
   "originals": [],
-  "profile_coverage_matrix": [],
-  "confirmed_favorites": [],
-  "wishlist": []
+  "favorites": [],
+  "last_updated": "2026-05-12"
 }
