@@ -14,12 +14,8 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 
 | Phase | Name | Status | Plans | Progress |
 |-------|------|--------|-------|----------|
-| 1 | Agent Instructions Polish | Ready to execute | 5 | 0% |
-<<<<<<< claude/plan-phase-2-G475P
+| 1 | Agent Instructions Polish | Verified | 5 | 100% |
 | 2 | Web UI UX & Settings | Executed | 5 | 100% |
-=======
-| 2 | Web UI UX & Settings | Context gathered | — | 0% |
->>>>>>> main
 | 3 | Content Management | Pending | — | 0% |
 | 4 | Inventory & Recommender Depth | Pending | — | 0% |
 | 5 | AI Integration | Pending | — | 0% |
@@ -74,8 +70,4 @@ Wave 2 plans (02-03, 02-04) depend on Wave 1 completing first.
 
 ---
 *State initialized: 2026-05-04*
-<<<<<<< claude/plan-phase-2-G475P
-*Last activity: 2026-05-12 — Phase 2 execution complete (all 5 plans executed; branch claude/plan-phase-2-G475P pushed)*
-=======
-*Last activity: 2026-05-11 — Phase 2 context gathered (10 areas discussed; CONTEXT.md written)*
->>>>>>> main
+*Last activity: 2026-05-12 — Phase 1 UAT complete (2/2 manual tests passed: SC1 INIT_PROMPT flow ✓, SC2 one-question rule ✓); Phase 2 validation complete (55/55 static checks passing; 14/15 automated, 1 manual-only)*
