@@ -161,7 +161,7 @@ const OnboardingView = (() => {
 
   function renderBartenderVoice(body, container) {
     const presets = [
-      'Warm & playful', 'Professional Mixologist', 'Terse & direct',
+      'Professional Mixologist', 'Warm & playful', 'Terse & direct',
       'Theatrical & poetic', 'Educational & nerdy'
     ];
     const current = _answers.bartender_voice || '';
@@ -236,11 +236,11 @@ const OnboardingView = (() => {
       <div class="form-row">
         <div class="form-group">
           <label>Full Name (for attribution)</label>
-          <input type="text" id="wiz-fullname" placeholder="Glenn Strycker" value="${Utils.escapeHtml(_answers.full_name || '')}">
+          <input type="text" id="wiz-fullname" placeholder="Ernest Raymond Beaumont Gantt" value="${Utils.escapeHtml(_answers.full_name || '')}">
         </div>
         <div class="form-group">
           <label>Preferred Name</label>
-          <input type="text" id="wiz-prefname" placeholder="Glenn" value="${Utils.escapeHtml(_answers.preferred_name || '')}">
+          <input type="text" id="wiz-prefname" placeholder="Don the Beachcomber" value="${Utils.escapeHtml(_answers.preferred_name || '')}">
         </div>
       </div>`;
     navButtons(body, container, {
