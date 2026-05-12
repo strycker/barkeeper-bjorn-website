@@ -1,10 +1,7 @@
 {
   "identity": {
-    "name": "Bjorn"
+    "name": "Barkeeper Bjorn"
   },
   "active_preset": "Professional Mixologist",
-  "last_updated": "2026-05-12",
-  "personality": {
-    "specialty": "No preference (broad and balanced)"
-  }
+  "last_updated": "2026-05-12"
 }
