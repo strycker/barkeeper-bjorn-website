@@ -1,5 +1,7 @@
 {
-  "identity": {},
+  "identity": {
+    "_skipped_background": true
+  },
   "flavor_profile": {
     "axes": {
       "sweetness": {
