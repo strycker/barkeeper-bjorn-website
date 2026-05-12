@@ -19,12 +19,14 @@ awaiting: user response
 ### 1. Skip-and-Return Onboarding Flow
 
 expected: Navigate to #onboarding, skip a step (e.g. bartender name on step 2). Continue through to "done". Navigate to #dashboard. A progress banner should be visible with "incomplete" or "Finish setup →" text. Clicking "Finish setup →" should land you on the bartender_name step — not back at the welcome step.
-result: [pending]
+result: pass
 
 ### 2. Flavor Axis Sliders
 
 expected: Steps 10–15 in onboarding (axis_sweetness through axis_risk) render a horizontal range slider — not radio buttons or A/B cards. Left and right pole labels are visible (e.g. "Dry / bone-dry" and "Sweet / balanced"). A "Middle" center label is visible below the slider track. After completing onboarding, the saved axis values in #profile are floats (0.0–1.0), not the string "Middle".
-result: [pending]
+result: issue
+reported: "Beginning entry seemed correct (sliders visible in onboarding), but #profile menu selection is broken — nothing visible when navigating to #profile."
+severity: major
 
 ### 3. Bjorn Avatar in Header and Onboarding Welcome
 
@@ -49,12 +51,18 @@ result: [pending]
 ## Summary
 
 total: 6
-passed: 0
-issues: 0
-pending: 6
+passed: 1
+issues: 1
+pending: 4
 skipped: 0
 blocked: 0
 
 ## Gaps
 
-[none yet]
+- truth: "After completing onboarding with slider-saved axis values, #profile renders with the flavor radar chart and axis sliders showing saved float values"
+  status: failed
+  reason: "User reported: profile menu selection broken / nothing visible. Root cause: Utils.axisToValue() called pos.toLowerCase() on a numeric float (onboarding saves raw floats, profile expects string labels). TypeError crashes render() before any HTML is set."
+  severity: major
+  test: 2
+  fix: "utils.js axisToValue() — add typeof pos === 'number' guard before .toLowerCase() call. FIXED in this session."
+  artifacts: [app/js/utils.js]

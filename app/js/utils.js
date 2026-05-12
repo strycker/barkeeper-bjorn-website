@@ -84,9 +84,10 @@ const Utils = (() => {
     return count;
   }
 
-  // Axis position string → 0..1 numeric (A=0, B=1, Middle=0.5)
+  // Axis position string or float → 0..1 numeric (A=0, B=1, Middle=0.5)
   function axisToValue(pos) {
-    if (!pos || pos === '—' || pos === null) return null;
+    if (pos === null || pos === undefined || pos === '—') return null;
+    if (typeof pos === 'number') return Math.max(0, Math.min(1, pos));
     const p = pos.toLowerCase();
     if (p.includes('strong a')) return 0.05;
     if (p.includes('lean a'))   return 0.25;
