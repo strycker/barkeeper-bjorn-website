@@ -1,19 +1,7 @@
 {
-  "_comment": "Generated from barkeeper.md. Edit barkeeper.md directly Ã¢ÂÂ do not hand-edit this file.",
-  "_schema": "../schema/barkeeper.schema.json",
-  "_sync": {
-    "source_md": "barkeeper.md",
-    "last_synced": null,
-    "md_hash": null
-  },
   "identity": {
-    "name": "Barkeeper Bjorn",
-    "foundation_model": "Claude Opus 4.7",
-    "persona_version": "1.1"
+    "name": "Barkeeper Bjorn"
   },
-  "active_preset": "Professional Mixologist",
-  "last_updated": "2026-05-12",
-  "personality": {
-    "specialty": "Classic cocktails"
-  }
+  "active_preset": "Warm & playful",
+  "last_updated": "2026-05-12"
 }
