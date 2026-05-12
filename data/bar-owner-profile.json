@@ -1,8 +1,56 @@
 {
   "identity": {},
   "flavor_profile": {
-    "axes": {}
+    "axes": {
+      "sweetness": {
+        "position": 0.5,
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-12"
+      },
+      "acid": {
+        "position": 0.5,
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-12"
+      },
+      "strength": {
+        "position": 0.5,
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-12"
+      },
+      "complexity": {
+        "position": 0.5,
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-12"
+      },
+      "season": {
+        "position": 0.5,
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-12"
+      },
+      "risk": {
+        "position": 0.5,
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-12"
+      }
+    },
+    "supplemental": {
+      "smoke": {
+        "position": "neutral"
+      }
+    }
   },
-  "onboarding_complete": false,
-  "last_updated": "2026-05-12"
+  "onboarding_complete": true,
+  "last_updated": "2026-05-12",
+  "background": {
+    "drinking_frequency": "weekly"
+  },
+  "equipment": {
+    "shaker": "Boston two-piece",
+    "mixing_glass": false,
+    "jigger": false,
+    "bar_spoon": false,
+    "strainer": "Hawthorne",
+    "citrus_press": false,
+    "ice_setup": "standard cubes"
+  }
 }
