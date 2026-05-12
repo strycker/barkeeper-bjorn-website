@@ -52,11 +52,6 @@ gcf() {
   grep -cF "$1" "$2" || true
 }
 
-# Count lines matching extended regex in file
-gce() {
-  grep -cE "$1" "$2" || true
-}
-
 echo "======================================================"
 echo " Phase 1 — Agent Instructions Polish — Static Analysis"
 echo " Repo root: $REPO_ROOT"
@@ -157,7 +152,7 @@ check "AGENT-03-a" "automatically generate three image-prompt variants in barkee
 check "AGENT-03-b" "1920s vintage/retro variant C present in barkeeper-instructions.md" \
   "$(gcf '1920s' barkeeper-instructions.md)" ge 1
 
-check "AGENT-03-c" "flavor axes excluded: Do not include the user s flavor axes in barkeeper-instructions.md" \
+check "AGENT-03-c" "flavor axes excluded: Do not include the users flavor axes in barkeeper-instructions.md" \
   "$(gcf "Do **not** include the user's flavor axes" barkeeper-instructions.md)" ge 1
 
 # "offer to suggest" must be ABSENT (replaced by auto-generate)
@@ -328,11 +323,10 @@ NAME_LINE="${NAME_LINE:-0}"
 VOICE_LINE="${VOICE_LINE:-0}"
 SPEC_LINE="${SPEC_LINE:-0}"
 
-# name before voice
-check "AGENT-06-y" "D-13 field order: Bartender name (line $NAME_LINE) before Voice preset (line $VOICE_LINE) in Phase F2" \
+check "AGENT-06-y" "D-13: Bartender name field found in Phase F2 block (line > 0)" \
   "$NAME_LINE" gt 0
 
-check "AGENT-06-z" "D-13 field order: Voice preset (line $VOICE_LINE) before Specialty focus (line $SPEC_LINE) in Phase F2" \
+check "AGENT-06-z" "D-13: Voice preset field found in Phase F2 block (line > 0)" \
   "$VOICE_LINE" gt 0
 
 # Verify ordering: name_line < voice_line < spec_line
