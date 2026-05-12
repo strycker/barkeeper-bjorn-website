@@ -15,7 +15,9 @@ Awaiting human testing on live AI platform.
 ### 1. Fresh Session INIT_PROMPT Flow (SC1 / AGENT-02)
 
 expected: Agent immediately begins onboarding with a single question about bar-building goals (Full vs. Minimalist track). It does NOT say "What would you like to do?" or present an options menu or summarize capabilities.
-result: [pending]
+result: pass
+reported: "Initial response is the Phase F2 voice-preset question ('Welcome — I'm Barkeeper Bjorn. Before we get started: I come with a default style…'). After 'Keep', asks one bar-building goal question. No options menu. One question per reply."
+observation: Onboarding stopped after 2 questions (voice preset + bar-building goal) rather than continuing through identity fields and flavor axes. May indicate premature onboarding termination in agent flow.
 
 **How to test:** On ChatGPT, open the Barkeeper Bjorn Custom GPT configured per INSTALL.md. The Conversation Starter should auto-fire. Observe the first agent response.
 
