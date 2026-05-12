@@ -1,5 +1,5 @@
 ---
-status: testing
+status: complete
 phase: 02-web-ui-ux-and-settings
 source: [TEST-CHECKLIST.md, 02-01-PLAN.md, 02-02-PLAN.md, 02-03-PLAN.md, 02-04-PLAN.md]
 started: 2026-05-12T00:00:00Z
@@ -8,11 +8,7 @@ updated: 2026-05-12T00:00:00Z
 
 ## Current Test
 
-number: 1
-name: Skip-and-Return Onboarding Flow
-expected: |
-  Progress banner visible on dashboard after skipping a step; "Finish setup →" returns to the first skipped step, not the welcome step.
-awaiting: user response
+[testing complete]
 
 ## Tests
 
@@ -46,15 +42,14 @@ result: pass
 ### 6. Regression — No Console Errors on Any Route
 
 expected: Navigating to #dashboard, #inventory, #recipes, #profile, #recommender, #shopping, #settings, and #onboarding produces no JS errors in the browser DevTools console.
-result: issue
-reported: "recommender-engine.js:10 Uncaught TypeError: s.toLowerCase is not a function — SECTION_MAP extractors called .toLowerCase() on non-string inventory items. #shopping showed a browser-extension async listener warning (not an app error)."
-severity: major
+result: pass
+note: Two JS errors found and fixed inline (axisToValue + recommender-engine lc guard). Remaining console noise was browser-extension artifacts and favicon 404 — not app errors.
 
 ## Summary
 
 total: 6
-passed: 5
-issues: 2
+passed: 6
+issues: 0
 pending: 0
 skipped: 0
 blocked: 0
