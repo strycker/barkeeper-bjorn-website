@@ -6,7 +6,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 
 **Core value:** The user's real-world bar inventory and flavor profile should power both AI-driven conversation and rule-based recommendations — seamlessly, whether in a chat session or the web app.
 
-**Current focus:** Phase 1 — Agent Instructions Polish
+**Current focus:** Phase 2 — Web UI UX & Settings
 
 ---
 
@@ -15,7 +15,11 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 | Phase | Name | Status | Plans | Progress |
 |-------|------|--------|-------|----------|
 | 1 | Agent Instructions Polish | Ready to execute | 5 | 0% |
+<<<<<<< claude/plan-phase-2-G475P
+| 2 | Web UI UX & Settings | Executed | 5 | 100% |
+=======
 | 2 | Web UI UX & Settings | Context gathered | — | 0% |
+>>>>>>> main
 | 3 | Content Management | Pending | — | 0% |
 | 4 | Inventory & Recommender Depth | Pending | — | 0% |
 | 5 | AI Integration | Pending | — | 0% |
@@ -36,6 +40,32 @@ The following capabilities exist in the codebase as of initialization and are tr
 
 ---
 
+## Phase 2 Plan Index
+
+| Plan | Wave | Objective | Requirements | Files |
+|------|------|-----------|--------------|-------|
+| 02-00 | 0 | Create TEST-CHECKLIST.md | All 15 | .planning/phases/02-web-ui-ux-and-settings/TEST-CHECKLIST.md |
+| 02-01 | 1 | Onboarding overhaul (17 steps, sliders, skip, inventory paste) | ONB-01–04, NAV-03 | app/js/views/onboarding.js, app/css/app.css |
+| 02-02 | 1 | Dashboard hero + avatar + 7-item grid + nav gating | NAV-01–02, NAV-04–05 | app/js/views/dashboard.js, app/js/app.js, app/index.html, app/css/app.css |
+| 02-03 | 2 | Settings page (4 sections, logout, reset) | SETTINGS-01–04, NAV-05 | app/js/views/settings.js |
+| 02-04 | 2 | Inventory search + category filter | INV-01–02 | app/js/views/inventory.js, app/css/app.css |
+
+Wave 1 plans (02-01, 02-02) are independent and can execute in parallel.
+Wave 2 plans (02-03, 02-04) depend on Wave 1 completing first.
+
+---
+
+## Key Decisions (Phase 2)
+
+- **inventory.unassigned** — inventory paste items from onboarding go to `inventory.unassigned` (new top-level array), NOT `inventory.spirits` (which does not exist as a flat array in the schema)
+- **Sequential State.save()** — "Reset all data" in Settings must await each of the 4 saves sequentially to avoid GitHub API 409 SHA conflicts
+- **No window.confirm()** — logout confirmation uses existing `.confirm-dialog` / `.confirm-dialog-overlay` CSS classes (lines 575–591 in app.css)
+- **Image URLs at runtime** — all Bjorn avatar URLs constructed from `GitHubAPI.cfg()` at render time; never hardcoded
+- **IIFE module pattern** — settings.js must follow `const SettingsView = (() => { function render(container) {…} return { render }; })();`
+- **Search scope** — inventory search queries `.bottle-chip` scoped to `#tab-content`, not `document`
+
+---
+
 ## Notes
 
 - `gsd-sdk` is not installed; use `git commit` directly for doc commits
@@ -44,4 +74,8 @@ The following capabilities exist in the codebase as of initialization and are tr
 
 ---
 *State initialized: 2026-05-04*
+<<<<<<< claude/plan-phase-2-G475P
+*Last activity: 2026-05-12 — Phase 2 execution complete (all 5 plans executed; branch claude/plan-phase-2-G475P pushed)*
+=======
 *Last activity: 2026-05-11 — Phase 2 context gathered (10 areas discussed; CONTEXT.md written)*
+>>>>>>> main

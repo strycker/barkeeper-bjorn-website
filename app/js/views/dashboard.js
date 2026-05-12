@@ -42,6 +42,20 @@ const DashboardView = (() => {
     const hour = new Date().getHours();
     const timeGreet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
+    // Hero image (NAV-02)
+    const cfg = GitHubAPI.cfg();
+    if (cfg.owner && cfg.repo) {
+      const heroEl = document.createElement('div');
+      heroEl.className = 'dash-hero';
+      const heroImg = document.createElement('img');
+      heroImg.className = 'dash-hero-img';
+      heroImg.src = `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/main/images/barkeeper_bjorn_002.png`;
+      heroImg.alt = '';
+      heroImg.onerror = () => { heroEl.style.display = 'none'; };
+      heroEl.appendChild(heroImg);
+      container.appendChild(heroEl);
+    }
+
     const greetEl = document.createElement('div');
     greetEl.innerHTML = `
       <p class="greeting">
@@ -50,6 +64,14 @@ const DashboardView = (() => {
       </p>
       <p class="greeting-sub">What are we doing tonight?</p>`;
     container.appendChild(greetEl);
+
+    // Progress banner (D-07)
+    if (!profile.onboarding_complete) {
+      const bannerEl = document.createElement('div');
+      bannerEl.className = 'dash-progress-banner';
+      bannerEl.innerHTML = `<span class="banner-text">Your profile is incomplete — </span><a href="#onboarding" class="banner-cta">Finish setup →</a>`;
+      container.appendChild(bannerEl);
+    }
 
     // Stats bar
     const statsEl = document.createElement('div');
@@ -102,6 +124,33 @@ const DashboardView = (() => {
         <span class="menu-item-title">What Should I Buy Next?</span>
         <span class="menu-item-desc">${shopping > 0 ? `${shopping} item${shopping !== 1 ? 's' : ''} queued` : 'Gap analysis & prioritized list'}</span>
       </a>`;
+
+    // Two disabled coming-soon cards (NAV-04, D-24)
+    menuEl.insertAdjacentHTML('beforeend', `
+      <div class="menu-item menu-item--disabled" data-coming-soon aria-disabled="true" tabindex="-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="28" height="28" aria-hidden="true">
+          <path d="M8 12h8M12 8v8M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+        </svg>
+        <span class="menu-item-title">Chat with Bjorn</span>
+        <span class="menu-item-desc"><span class="coming-soon-badge">Coming soon</span></span>
+      </div>
+      <div class="menu-item menu-item--disabled" data-coming-soon aria-disabled="true" tabindex="-1">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="28" height="28" aria-hidden="true">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+        <span class="menu-item-title">Classroom</span>
+        <span class="menu-item-desc"><span class="coming-soon-badge">Coming soon</span></span>
+      </div>`);
+
+    // Toast on disabled card click (D-25)
+    menuEl.addEventListener('click', e => {
+      if (e.target.closest('[data-coming-soon]')) {
+        Utils.showToast('Unlock by adding your Anthropic API key in Settings.');
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+
     container.appendChild(menuEl);
 
     // Quick-view: recent originals if any

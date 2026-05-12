@@ -690,3 +690,225 @@ a:hover { color: var(--amber); }
   .rec-score { text-align: left; display: flex; align-items: center; gap: 8px; }
   .score-bar-wrap { width: 80px; }
 }
+
+/* ============================================================
+   Phase 2 — Onboarding Wizard Extensions
+   ============================================================ */
+
+/* Wizard avatar (onboarding welcome step — NAV-03) */
+.wizard-avatar-wrap {
+  text-align: center;
+  margin-bottom: 24px;
+}
+.wizard-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--amber);
+  display: block;
+  margin: 0 auto 12px;
+}
+.wizard-avatar-caption {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+/* Axis slider group (ONB-02) — supplements existing .axis-slider */
+.axis-slider-group {
+  margin-bottom: 24px;
+}
+.axis-slider-poles {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.axis-pole-label--left,
+.axis-pole-label--right {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+.axis-pole-label--right {
+  text-align: right;
+}
+.axis-slider-center-label {
+  text-align: center;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* Inventory paste step (ONB-04) */
+.wizard-paste-wrap {
+  margin-top: 8px;
+}
+.wizard-paste-input {
+  width: 100%;
+  resize: vertical;
+  min-height: 80px;
+}
+.wizard-paste-hint {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+  margin-bottom: 12px;
+}
+.wizard-chip-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+/* ============================================================
+   Phase 2 — Dashboard Visual Enhancements
+   ============================================================ */
+
+/* Dashboard hero image (NAV-02) */
+.dash-hero {
+  width: 100%;
+  max-height: 180px;
+  overflow: hidden;
+  border-radius: var(--radius);
+  margin-bottom: 24px;
+  background: var(--bg3);
+}
+.dash-hero-img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  opacity: 0.6;
+}
+
+/* Dashboard progress banner (D-07) */
+.dash-progress-banner {
+  background: var(--bg3);
+  border-left: 3px solid var(--amber);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.banner-text { color: var(--text-dim); }
+.banner-cta {
+  color: var(--amber);
+  font-weight: 600;
+  text-decoration: none;
+}
+.banner-cta:hover { color: var(--amber-glow, var(--amber)); text-decoration: underline; }
+
+/* Dashboard 7-item grid — responsive columns (NAV-04) */
+@media (min-width: 641px) {
+  .menu-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 640px) {
+  .menu-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Coming-soon disabled cards (D-24) */
+.menu-item--disabled {
+  opacity: 0.45;
+  cursor: default;
+  pointer-events: auto;
+  border-color: var(--border);
+}
+.menu-item--disabled:hover {
+  border-color: var(--border);
+  background: var(--bg2);
+  transform: none;
+}
+.coming-soon-badge {
+  display: inline-block;
+  background: var(--bg4);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  padding: 2px 8px;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: 4px;
+}
+
+/* ============================================================
+   Phase 2 — Header Avatar (NAV-01)
+   ============================================================ */
+.header-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--amber-dim, var(--amber));
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   Phase 2 — Settings Page (SETTINGS-01 through SETTINGS-04)
+   ============================================================ */
+
+.settings-wrap {
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.settings-section {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+.settings-section__heading {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--amber);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.settings-section--danger {
+  border-color: var(--red);
+}
+.settings-section--danger .settings-section__heading {
+  color: var(--red);
+}
+
+/* ============================================================
+   Phase 2 — Inventory Search + Filter Bar (INV-01, INV-02)
+   ============================================================ */
+
+.inv-search-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* .inv-search-input inherits existing input[type="text"] styles */
+.inv-search-input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* .inv-category-select inherits existing select styles */
+.inv-category-select {
+  width: 180px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .inv-search-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .inv-category-select {
+    width: 100%;
+  }
+}
