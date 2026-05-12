@@ -19,7 +19,7 @@ awaiting: user response
 ### 1. Skip-and-Return Onboarding Flow
 
 expected: Navigate to #onboarding, skip a step (e.g. bartender name on step 2). Continue through to "done". Navigate to #dashboard. A progress banner should be visible with "incomplete" or "Finish setup →" text. Clicking "Finish setup →" should land you on the bartender_name step — not back at the welcome step.
-result: [pending]
+result: pass
 
 ### 2. Flavor Axis Sliders
 
