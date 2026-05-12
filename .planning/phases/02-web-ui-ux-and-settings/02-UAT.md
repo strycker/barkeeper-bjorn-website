@@ -24,14 +24,14 @@ result: pass
 ### 2. Flavor Axis Sliders
 
 expected: Steps 10–15 in onboarding (axis_sweetness through axis_risk) render a horizontal range slider — not radio buttons or A/B cards. Left and right pole labels are visible (e.g. "Dry / bone-dry" and "Sweet / balanced"). A "Middle" center label is visible below the slider track. After completing onboarding, the saved axis values in #profile are floats (0.0–1.0), not the string "Middle".
-result: issue
-reported: "Beginning entry seemed correct (sliders visible in onboarding), but #profile menu selection is broken — nothing visible when navigating to #profile."
-severity: major
+result: pass
+note: axisToValue() bug fixed (TypeError on float positions) + user applied additional local fix. Profile now loads correctly.
 
 ### 3. Bjorn Avatar in Header and Onboarding Welcome
 
 expected: With GitHub configured, the onboarding welcome step (step 1) shows a circular Bjorn avatar image with a caption below it. The app header shows a small circular avatar icon. If the image URL is broken (wrong repo), the header falls back to an SVG icon rather than showing a broken-image placeholder.
-result: [pending]
+result: pass
+note: Avatar was cropped as circle — fixed to rectangular max-width:240px.
 
 ### 4. Settings Page — Four Sections, Logout, and Reset
 
