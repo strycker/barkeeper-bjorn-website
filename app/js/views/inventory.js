@@ -253,6 +253,53 @@ const InventoryView = (() => {
 
     const sectionsEl = document.getElementById('inv-sections');
 
+    // ── Search bar (INV-01, INV-02) ──────────────────────────────────────────
+    const searchBar = document.createElement('div');
+    searchBar.className = 'inv-search-bar';
+    searchBar.innerHTML = `
+      <input type="text" class="inv-search-input" placeholder="Search inventory…"
+             aria-label="Search inventory">
+      <select class="inv-category-select" aria-label="Jump to category">
+        <option value="">All categories</option>
+        ${[...BOTTLE_SECTIONS, ...STRING_SECTIONS].map(s =>
+          `<option value="${Utils.escapeHtml(s.key)}">${Utils.escapeHtml(s.label)}</option>`
+        ).join('')}
+      </select>`;
+    sectionsEl.appendChild(searchBar);
+
+    const searchInput    = searchBar.querySelector('.inv-search-input');
+    const categorySelect = searchBar.querySelector('.inv-category-select');
+
+    // Real-time chip filter — scoped to #tab-content (never query document directly)
+    searchInput.addEventListener('input', () => {
+      const query      = searchInput.value.toLowerCase();
+      const tabContent = document.querySelector('#tab-content');
+      if (!tabContent) return;
+
+      tabContent.querySelectorAll('.bottle-chip').forEach(chip => {
+        const text = chip.textContent.toLowerCase();
+        chip.style.display = text.includes(query) ? '' : 'none';
+      });
+
+      // Hide section title when no chips are visible in that section
+      tabContent.querySelectorAll('.inventory-section').forEach(sec => {
+        const hasVisible = [...sec.querySelectorAll('.bottle-chip')]
+          .some(c => c.style.display !== 'none');
+        const title = sec.querySelector('.inventory-section-title');
+        if (title) title.style.display = hasVisible ? '' : 'none';
+      });
+    });
+
+    // Category jump-scroll — smooth scroll to the matching section header
+    categorySelect.addEventListener('change', () => {
+      const key = categorySelect.value;
+      if (!key) return;
+      const section = document.querySelector(`.inventory-section[data-sectionKey="${key}"]`);
+      if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Reset select to default after jump so user can re-select the same category
+      categorySelect.value = '';
+    });
+
     // Tabs
     const tabsEl = document.createElement('div');
     tabsEl.className = 'tabs';
@@ -271,6 +318,11 @@ const InventoryView = (() => {
         tabsEl.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
         tab.classList.add('active');
         renderTabContent(t.id, inv, contentEl);
+        // Reset search so stale filter from previous tab does not apply to new tab content
+        if (searchInput) {
+          searchInput.value = '';
+          searchInput.dispatchEvent(new Event('input'));
+        }
       });
       tabsEl.appendChild(tab);
     });

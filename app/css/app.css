@@ -879,3 +879,36 @@ a:hover { color: var(--amber); }
 .settings-section--danger .settings-section__heading {
   color: var(--red);
 }
+
+/* ============================================================
+   Phase 2 — Inventory Search + Filter Bar (INV-01, INV-02)
+   ============================================================ */
+
+.inv-search-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* .inv-search-input inherits existing input[type="text"] styles */
+.inv-search-input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* .inv-category-select inherits existing select styles */
+.inv-category-select {
+  width: 180px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .inv-search-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .inv-category-select {
+    width: 100%;
+  }
+}
