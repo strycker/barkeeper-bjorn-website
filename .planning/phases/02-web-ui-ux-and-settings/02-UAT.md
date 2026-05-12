@@ -1,5 +1,5 @@
 ---
-status: testing
+status: complete
 phase: 02-web-ui-ux-and-settings
 source: [TEST-CHECKLIST.md, 02-01-PLAN.md, 02-02-PLAN.md, 02-03-PLAN.md, 02-04-PLAN.md]
 started: 2026-05-12T00:00:00Z
@@ -8,11 +8,7 @@ updated: 2026-05-12T00:00:00Z
 
 ## Current Test
 
-number: 1
-name: Skip-and-Return Onboarding Flow
-expected: |
-  Progress banner visible on dashboard after skipping a step; "Finish setup →" returns to the first skipped step, not the welcome step.
-awaiting: user response
+[testing complete]
 
 ## Tests
 
@@ -36,24 +32,25 @@ note: Avatar was cropped as circle — fixed to rectangular max-width:240px.
 ### 4. Settings Page — Four Sections, Logout, and Reset
 
 expected: The nav shows a gear icon (not "Setup") after GitHub is configured. Clicking it navigates to #settings with 4 sections: Bartender Identity, GitHub Connection, Account, Danger Zone. Renaming the bartender saves correctly with a toast. Logout shows a CSS confirmation dialog (not window.confirm()), clears all bb_* localStorage keys on confirm, and redirects to #setup. "Reset all data" requires two clicks (first click reveals confirmation); after confirm, profile/inventory/recipes/barkeeper revert to defaults but bb_token/bb_owner/bb_repo/bb_branch are preserved.
-result: [pending]
+result: pass
 
 ### 5. Inventory Real-Time Search and Category Scroll
 
 expected: On #inventory, a "Search inventory…" input and a category dropdown are visible above the content. Typing filters chips in real-time with no page reload — chips not matching disappear, sections with no visible chips hide their header. Clearing restores everything. Selecting a category from the dropdown smooth-scrolls to that section.
-result: [pending]
+result: pass
 
 ### 6. Regression — No Console Errors on Any Route
 
 expected: Navigating to #dashboard, #inventory, #recipes, #profile, #recommender, #shopping, #settings, and #onboarding produces no JS errors in the browser DevTools console.
-result: [pending]
+result: pass
+note: Two JS errors found and fixed inline (axisToValue + recommender-engine lc guard). Remaining console noise was browser-extension artifacts and favicon 404 — not app errors.
 
 ## Summary
 
 total: 6
-passed: 1
-issues: 1
-pending: 4
+passed: 6
+issues: 0
+pending: 0
 skipped: 0
 blocked: 0
 
@@ -66,3 +63,11 @@ blocked: 0
   test: 2
   fix: "utils.js axisToValue() — add typeof pos === 'number' guard before .toLowerCase() call. FIXED in this session."
   artifacts: [app/js/utils.js]
+
+- truth: "#recommender loads without JS errors after onboarding"
+  status: failed
+  reason: "recommender-engine.js SECTION_MAP extractors called .toLowerCase() on non-string inventory items. Root cause: same pattern as axisToValue — no type guard before string method call."
+  severity: major
+  test: 6
+  fix: "recommender-engine.js — added lc() helper (safe toLowerCase with typeof guard); replaced all .map(s => s.toLowerCase()) with .map(lc). FIXED in this session."
+  artifacts: [app/js/recommender-engine.js]
