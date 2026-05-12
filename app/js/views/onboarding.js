@@ -182,7 +182,7 @@ const OnboardingView = (() => {
         _step++; renderStep(container);
       },
       skipFn: () => {
-        _answers.bartender_voice = 'Warm & playful';
+        _answers.bartender_voice = 'Professional Mixologist';
         State.patch('barkeeper', b => {
           if (!b._skipped) b._skipped = {};
           b._skipped.bartender_voice = true;
