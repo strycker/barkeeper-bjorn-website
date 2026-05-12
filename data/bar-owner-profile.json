@@ -6,34 +6,32 @@
   "flavor_profile": {
     "axes": {
       "sweetness": {
-        "position": 0.5,
-        "confidence": "Tentative",
-        "last_evaluated": "2026-05-12"
+        "_skipped": true,
+        "position": 0.5
       },
       "acid": {
-        "position": 0.5,
-        "confidence": "Tentative",
-        "last_evaluated": "2026-05-12"
+        "_skipped": true,
+        "position": 0.5
       },
       "strength": {
-        "position": 0.5,
-        "confidence": "Tentative",
-        "last_evaluated": "2026-05-12"
+        "_skipped": true,
+        "position": 0.5
       },
       "complexity": {
-        "position": 0.5,
-        "confidence": "Tentative",
-        "last_evaluated": "2026-05-12"
+        "_skipped": true,
+        "position": 0.5
       },
       "season": {
-        "position": 0.5,
-        "confidence": "Tentative",
-        "last_evaluated": "2026-05-12"
+        "_skipped": true,
+        "position": 0.5
       },
       "risk": {
-        "position": 0.5,
-        "confidence": "Tentative",
-        "last_evaluated": "2026-05-12"
+        "_skipped": true,
+        "position": 0.5
+      },
+      "smoke": {
+        "_skipped": true,
+        "position": 0.5
       }
     },
     "supplemental": {
