@@ -1,0 +1,45 @@
+{
+  "phase": "03",
+  "phase_name": "Content Management",
+  "status": "COMPLETE",
+  "areas_completed": ["Recipe form integration", "Image upload placement", "Export/Import UX", "Generate with AI behavior"],
+  "areas_remaining": [],
+  "decisions": [
+    {
+      "area": "Recipe form integration",
+      "decisions": [
+        "D-01: Form appears via in-place content replacement — renderForm(r, container) replaces view content; back button returns to detail (edit) or grid (new). No new route.",
+        "D-02: Save gate — name, creator, ingredients, method are required; all other fields optional.",
+        "D-03: Entry points — 'New Recipe' button in Recipe Book page header for add; 'Edit' button on recipe detail card for edit."
+      ]
+    },
+    {
+      "area": "Image upload placement",
+      "decisions": [
+        "D-04: Upload UI lives on the recipe detail view, below the existing images section. Not inside the edit form.",
+        "D-05: Filename pattern: {id}_{timestamp}.{ext}",
+        "D-06: Post-upload — patch recipe.images array in State, re-save, re-render images section inline immediately using raw GitHub URL."
+      ]
+    },
+    {
+      "area": "Export/Import UX",
+      "decisions": [
+        "D-07: Export and import both use ZIP format (all 4 data files bundled). Format symmetry required.",
+        "D-08: Import flow — ZIP preview (list what will be overwritten), then single confirm click before writing to GitHub.",
+        "D-09: Export trigger is a button click; import supports both file picker and drag-and-drop onto a drop zone.",
+        "D-10: Export/Import section lives in the existing Settings page (no new route or nav item)."
+      ]
+    },
+    {
+      "area": "Generate with AI behavior",
+      "decisions": [
+        "D-11: User provides a freeform text prompt (e.g. 'smoky mezcal sour'); AI fills name, tagline, ingredients, method, glassware, garnish, tasting_notes, suggested_occasions.",
+        "D-12: Generate lives inside the recipe form — prompt field at the top of the form, available when creating a new recipe.",
+        "D-13: UX — spinner on Generate button while pending; fields populate inline when response arrives; user edits then saves.",
+        "D-14: Anthropic API key stored in localStorage, configured in Settings. If absent, Generate button is hidden/disabled with tooltip pointing to Settings."
+      ]
+    }
+  ],
+  "deferred": [],
+  "timestamp": "2026-05-13"
+}

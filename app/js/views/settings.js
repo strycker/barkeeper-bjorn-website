@@ -144,6 +144,20 @@ const SettingsView = (() => {
           <button class="btn btn-ghost btn-sm" id="st-logout">Log out</button>
         </div>
 
+        <!-- ── Section 5: Export & Import (EXPORT-01–04) ───────────────── -->
+        <div class="settings-section" id="sect-export">
+          <div class="settings-section__heading">Export & Import</div>
+          <p style="color:var(--text-dim);font-size:0.9rem;margin-bottom:16px;">
+            Download your bar data as a portable JSON bundle or as an AI-context text file,
+            or restore from a previous export.
+          </p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+            <button class="btn btn-secondary btn-sm" id="st-export-json">Export All Data (JSON)</button>
+            <button class="btn btn-secondary btn-sm" id="st-export-ai">Export AI Context (text)</button>
+          </div>
+          <div id="st-import-area"></div>
+        </div>
+
         <!-- ── Section 4: Danger Zone (SETTINGS-04) ─────────────────────── -->
         <div class="settings-section settings-section--danger" id="sect-danger"
              role="region" aria-label="Danger Zone">
@@ -233,6 +247,15 @@ const SettingsView = (() => {
         saveBtn.disabled = false;
       }
     });
+
+    // ── Event: Export / Import (EXPORT-01–04) ────────────────────────────
+    container.querySelector('#st-export-json').addEventListener('click', () => {
+      DataExport.exportJSON();
+    });
+    container.querySelector('#st-export-ai').addEventListener('click', () => {
+      DataExport.exportAIContext();
+    });
+    DataExport.renderImportUI(container.querySelector('#st-import-area'));
 
     // ── Event: Logout (SETTINGS-03) ───────────────────────────────────────
     container.querySelector('#st-logout').addEventListener('click', () => {

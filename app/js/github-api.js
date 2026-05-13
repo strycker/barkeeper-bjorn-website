@@ -73,5 +73,28 @@ const GitHubAPI = (() => {
     return !!(token && owner && repo);
   }
 
-  return { readJSON, writeJSON, validateConfig, getRateLimit, isConfigured, cfg };
+  // Upload arbitrary file content. base64Content must be a raw base64 string.
+  // sha required for updates; pass null/undefined for new files.
+  async function writeFile(filePath, base64Content, sha, message) {
+    const { branch } = cfg();
+    return request('PUT', `/contents/${filePath}`, {
+      message: message || `Upload ${filePath} via Barkeeper Bjorn web UI`,
+      content: base64Content,
+      sha: sha || undefined,
+      branch,
+    });
+  }
+
+  // Returns the SHA of an existing file, or null if it doesn't exist.
+  async function getFileSHA(filePath) {
+    try {
+      const { branch } = cfg();
+      const resp = await request('GET', `/contents/${filePath}?ref=${encodeURIComponent(branch)}`);
+      return resp.sha;
+    } catch {
+      return null;
+    }
+  }
+
+  return { readJSON, writeJSON, writeFile, getFileSHA, validateConfig, getRateLimit, isConfigured, cfg };
 })();
