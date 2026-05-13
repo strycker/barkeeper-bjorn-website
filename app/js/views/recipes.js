@@ -9,9 +9,12 @@ const RecipesView = (() => {
     const wishlist  = recipes.wishlist || [];
 
     container.innerHTML = `
-      <div class="page-header">
-        <h1>Recipe Book</h1>
-        <p>${originals.length} original${originals.length !== 1 ? 's' : ''} · ${favorites.length} confirmed favorite${favorites.length !== 1 ? 's' : ''}</p>
+      <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h1>Recipe Book</h1>
+          <p>${originals.length} original${originals.length !== 1 ? 's' : ''} · ${favorites.length} confirmed favorite${favorites.length !== 1 ? 's' : ''}</p>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="rb-generate-ai" style="align-self:center;">✨ Generate with AI</button>
       </div>
       <div class="tabs">
         <div class="tab active" data-tab="originals">Originals (${originals.length})</div>
@@ -39,6 +42,80 @@ const RecipesView = (() => {
     }
 
     renderTab('originals', recipes, tabContent);
+
+    container.querySelector('#rb-generate-ai').addEventListener('click', () => {
+      showAIPromptModal(container);
+    });
+  }
+
+  function showAIPromptModal(container) {
+    const inventory = State.get('inventory') || {};
+    const profile   = State.get('profile')   || {};
+    const barkeeper = State.get('barkeeper') || {};
+
+    const spirits = Object.entries(inventory.base_spirits || {})
+      .flatMap(([cat, items]) => items.map(i => (typeof i === 'string' ? i : i.name) + ` (${cat})`));
+    const pantry  = Object.values(inventory.pantry || {}).flat()
+      .map(i => typeof i === 'string' ? i : i.name);
+    const axes    = profile.flavor_profile?.axes || {};
+
+    const inventoryText = [
+      spirits.length ? `Spirits: ${spirits.join(', ')}` : '',
+      pantry.length  ? `Pantry: ${pantry.join(', ')}` : '',
+    ].filter(Boolean).join('\n') || 'Not set yet.';
+
+    const profileText = Object.entries(axes)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join(', ') || 'Not set yet.';
+
+    const bkName = barkeeper.identity?.name || 'Barkeeper Bjorn';
+    const bkPreset = barkeeper.active_preset || 'Professional Mixologist';
+
+    const prompt = `You are ${bkName}, a ${bkPreset} bartender. Design a new original cocktail for my home bar.
+
+My inventory:
+${inventoryText}
+
+My flavor profile: ${profileText}
+
+Please provide:
+- Name and tagline
+- Creator attribution (format: "Original by ${bkName}")
+- Full ingredient list with amounts (e.g. "2 oz Bourbon")
+- Method (step-by-step instructions)
+- Method type (shaken/stirred/built/blended/thrown/other)
+- Glassware and garnish
+- Flavor profile description
+- Why it works (the reasoning behind the recipe)`.trim();
+
+    const hasApiKey = !!localStorage.getItem('bb_anthropic_key');
+
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-dialog-overlay';
+    overlay.innerHTML = `
+      <div class="confirm-dialog" style="max-width:560px;width:90vw;">
+        <h3 style="margin-bottom:8px;">Generate with AI</h3>
+        ${hasApiKey
+          ? `<p style="color:var(--amber-dim);font-size:0.85rem;margin-bottom:12px;">AI generation coming in a future update. Copy the prompt below to use with any AI assistant.</p>`
+          : `<p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:12px;">Copy this prompt and paste it into Claude, ChatGPT, or any AI assistant.</p>`}
+        <textarea id="ai-prompt-text" rows="12"
+          style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;font-size:0.82rem;color:var(--text-dim);font-family:monospace;resize:vertical;"
+          readonly>${Utils.escapeHtml(prompt)}</textarea>
+        <div class="dialog-btns" style="margin-top:12px;">
+          <button class="btn btn-ghost btn-sm" id="ai-close">Close</button>
+          <button class="btn btn-primary btn-sm" id="ai-copy">Copy Prompt</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#ai-close').addEventListener('click', () => overlay.remove());
+    overlay.querySelector('#ai-copy').addEventListener('click', () => {
+      navigator.clipboard.writeText(prompt).then(() => {
+        const btn = overlay.querySelector('#ai-copy');
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy Prompt'; }, 2000);
+      });
+    });
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   }
 
   function renderTab(tabName, recipes, container) {
@@ -263,6 +340,83 @@ const RecipesView = (() => {
           }).join('')}
         </div>` : ''}`;
 
+    // Image upload (RECIPE-03)
+    const imgSection = document.createElement('div');
+    imgSection.innerHTML = `
+      <div class="section-label" style="margin-top:20px;">Upload Image</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-secondary btn-sm" id="rd-img-btn">Choose File</button>
+        <span id="rd-img-name" style="font-size:0.85rem;color:var(--text-dim);">No file chosen</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="rd-img-upload" style="display:none;margin-top:10px;">Upload to GitHub</button>
+      <p id="rd-img-status" style="font-size:0.82rem;min-height:1.2em;margin-top:6px;color:var(--text-muted);"></p>`;
+
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/png,image/jpeg,image/webp,image/gif';
+    fileInput.style.display = 'none';
+    imgSection.appendChild(fileInput);
+
+    let selectedFile = null;
+    imgSection.querySelector('#rd-img-btn').addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => {
+      selectedFile = fileInput.files[0] || null;
+      imgSection.querySelector('#rd-img-name').textContent = selectedFile ? selectedFile.name : 'No file chosen';
+      imgSection.querySelector('#rd-img-upload').style.display = selectedFile ? '' : 'none';
+    });
+
+    imgSection.querySelector('#rd-img-upload').addEventListener('click', async () => {
+      if (!selectedFile) return;
+      const ext = selectedFile.name.split('.').pop().toLowerCase();
+      const filename = `${r.id}_${Date.now()}.${ext}`;
+      const statusEl = imgSection.querySelector('#rd-img-status');
+      const uploadBtn = imgSection.querySelector('#rd-img-upload');
+      uploadBtn.disabled = true;
+      statusEl.textContent = 'Reading file…';
+      statusEl.style.color = 'var(--text-muted)';
+
+      try {
+        const base64 = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result.split(',')[1]);
+          reader.onerror = reject;
+          reader.readAsDataURL(selectedFile);
+        });
+
+        statusEl.textContent = 'Uploading to GitHub…';
+        const sha = await GitHubAPI.getFileSHA(`images/${filename}`);
+        await GitHubAPI.writeFile(`images/${filename}`, base64, sha, `Upload image for ${r.name}`);
+
+        // Patch recipe images array
+        const recipes = State.get('recipes') || {};
+        const originals = recipes.originals || [];
+        const idx = originals.findIndex(x => x.id === r.id);
+        if (idx >= 0) {
+          if (!originals[idx].images) originals[idx].images = [];
+          originals[idx].images.push({ filename, alt_text: r.name });
+          recipes.originals = originals;
+          recipes.last_updated = new Date().toISOString().slice(0, 10);
+          State.set('recipes', recipes);
+          await State.save('recipes');
+        }
+
+        statusEl.textContent = `Uploaded: images/${filename}`;
+        statusEl.style.color = 'var(--green)';
+        Utils.toast('Image uploaded successfully.');
+        selectedFile = null;
+        fileInput.value = '';
+        imgSection.querySelector('#rd-img-name').textContent = 'No file chosen';
+        uploadBtn.style.display = 'none';
+        uploadBtn.disabled = false;
+      } catch (err) {
+        statusEl.textContent = `Upload failed: ${Utils.escapeHtml(err.message)}`;
+        statusEl.style.color = 'var(--red)';
+        Utils.toast('Upload failed: ' + err.message, 'error');
+        uploadBtn.disabled = false;
+      }
+    });
+
+    wrap.appendChild(imgSection);
     container.appendChild(wrap);
   }
 
