@@ -53,13 +53,22 @@ const RecipesView = (() => {
   }
 
   function renderOriginalsGrid(originals, container) {
+    const addBtn = document.createElement('div');
+    addBtn.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:12px;';
+    addBtn.innerHTML = `<button class="btn btn-secondary btn-sm">+ Add Recipe</button>`;
+    addBtn.querySelector('button').addEventListener('click', () => {
+      renderForm(null, document.getElementById('main-content'));
+    });
+    container.appendChild(addBtn);
+
     if (originals.length === 0) {
-      container.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">🍹</div>
-          <p>No original cocktails yet.</p>
-          <p style="font-size:0.85rem;color:var(--text-muted);">Design one with your AI bartender and it will appear here.</p>
-        </div>`;
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.innerHTML = `
+        <div class="empty-icon">🍹</div>
+        <p>No original cocktails yet.</p>
+        <p style="font-size:0.85rem;color:var(--text-muted);">Design one with your AI bartender and it will appear here.</p>`;
+      container.appendChild(empty);
       return;
     }
 
@@ -157,11 +166,30 @@ const RecipesView = (() => {
   function renderDetail(r, container) {
     container.innerHTML = '';
 
-    const back = document.createElement('button');
-    back.className = 'back-btn';
-    back.innerHTML = `← Back to Recipes`;
-    back.addEventListener('click', () => render(container));
-    container.appendChild(back);
+    const topBar = document.createElement('div');
+    topBar.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;';
+    topBar.innerHTML = `
+      <button class="back-btn" style="margin-bottom:0;">← Back to Recipes</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-secondary btn-sm" data-action="edit">Edit</button>
+        <button class="btn btn-danger btn-sm" data-action="delete">Delete</button>
+      </div>`;
+    topBar.querySelector('[data-action="edit"]').addEventListener('click', () => {
+      renderForm(r, container);
+    });
+    topBar.querySelector('[data-action="delete"]').addEventListener('click', () => {
+      if (!confirm(`Delete "${r.name}"? This cannot be undone.`)) return;
+      const recipes = State.get('recipes') || {};
+      recipes.originals = (recipes.originals || []).filter(x => x.id !== r.id);
+      recipes.last_updated = new Date().toISOString().slice(0, 10);
+      State.set('recipes', recipes);
+      State.save('recipes').then(() => {
+        Utils.toast('Recipe deleted.');
+        render(container);
+      }).catch(err => Utils.toast('Save failed: ' + err.message, 'error'));
+    });
+    topBar.querySelector('.back-btn').addEventListener('click', () => render(container));
+    container.appendChild(topBar);
 
     const wrap = document.createElement('div');
     wrap.className = 'recipe-detail';
@@ -236,6 +264,225 @@ const RecipesView = (() => {
         </div>` : ''}`;
 
     container.appendChild(wrap);
+  }
+
+  function renderForm(r, container) {
+    const isEdit = !!r;
+    container.innerHTML = '';
+
+    const back = document.createElement('button');
+    back.className = 'back-btn';
+    back.textContent = isEdit ? '← Back to Recipe' : '← Back to Recipes';
+    back.addEventListener('click', () => {
+      if (isEdit) renderDetail(r, container);
+      else render(container);
+    });
+    container.appendChild(back);
+
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'max-width:680px;';
+
+    const title = document.createElement('h2');
+    title.textContent = isEdit ? `Edit: ${r.name}` : 'New Recipe';
+    title.style.cssText = 'color:var(--amber);font-weight:normal;margin-bottom:20px;';
+    wrap.appendChild(title);
+
+    // Build ingredient rows HTML
+    const ingRows = (r?.ingredients?.length ? r.ingredients : [{ amount: '', name: '', notes: '' }])
+      .map((ing, i) => ingredientRowHtml(ing, i)).join('');
+
+    wrap.innerHTML += `
+      <div class="form-group">
+        <label>Name *</label>
+        <input type="text" id="rf-name" value="${Utils.escapeHtml(r?.name || '')}" placeholder="Cocktail name">
+      </div>
+      <div class="form-group">
+        <label>Tagline</label>
+        <input type="text" id="rf-tagline" value="${Utils.escapeHtml(r?.tagline || '')}" placeholder="One-line description">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Creator *</label>
+          <input type="text" id="rf-creator" value="${Utils.escapeHtml(r?.creator || '')}" placeholder="Who made this?">
+        </div>
+        <div class="form-group">
+          <label>Date Created</label>
+          <input type="date" id="rf-date" value="${Utils.escapeHtml(r?.date_created || '')}">
+        </div>
+      </div>
+
+      <div class="section-label" style="margin-top:8px;">Ingredients</div>
+      <div id="rf-ingredients">${ingRows}</div>
+      <button type="button" class="btn btn-ghost btn-sm" id="rf-add-ing" style="margin-bottom:16px;">+ Add Ingredient</button>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Method Type</label>
+          <select id="rf-method-type">
+            <option value="">—</option>
+            ${['shaken','stirred','built','blended','thrown','other'].map(m =>
+              `<option value="${m}" ${r?.method_type === m ? 'selected' : ''}>${m}</option>`
+            ).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Glassware</label>
+          <input type="text" id="rf-glassware" value="${Utils.escapeHtml(r?.glassware || '')}" placeholder="e.g. coupe">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Method / Instructions</label>
+        <textarea id="rf-method" rows="2" placeholder="Stir with ice for 30 seconds...">${Utils.escapeHtml(r?.method || '')}</textarea>
+      </div>
+      <div class="form-group">
+        <label>Garnish</label>
+        <input type="text" id="rf-garnish" value="${Utils.escapeHtml(r?.garnish || '')}" placeholder="e.g. lemon twist">
+      </div>
+      <div class="form-group">
+        <label>Profile</label>
+        <textarea id="rf-profile" rows="2" placeholder="Flavor/occasion description">${Utils.escapeHtml(r?.profile || '')}</textarea>
+      </div>
+      <div class="form-group">
+        <label>Why It Works</label>
+        <textarea id="rf-why" rows="2" placeholder="The science behind it">${Utils.escapeHtml(r?.why_it_works || '')}</textarea>
+      </div>
+
+      <div class="section-label" style="margin-top:8px;">Ratings & Status</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Owner Rating (1–10)</label>
+          <input type="number" id="rf-rating" min="1" max="10" value="${r?.ratings?.bar_owner || ''}">
+        </div>
+        <div class="form-group">
+          <label>Guest Feedback</label>
+          <input type="text" id="rf-guests" value="${Utils.escapeHtml(r?.ratings?.guests || '')}" placeholder="What did they think?">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Rating Notes</label>
+        <input type="text" id="rf-rating-notes" value="${Utils.escapeHtml(r?.ratings?.notes || '')}" placeholder="Any notes on the rating">
+      </div>
+      <div class="form-group" style="display:flex;align-items:center;gap:10px;">
+        <input type="checkbox" id="rf-built" ${r?.confirmed_built ? 'checked' : ''} style="width:auto;margin:0;">
+        <label for="rf-built" style="margin:0;">Confirmed Built</label>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="btn btn-primary" id="rf-save">${isEdit ? 'Save Changes' : 'Create Recipe'}</button>
+        <button class="btn btn-secondary" id="rf-cancel">Cancel</button>
+      </div>`;
+
+    container.appendChild(wrap);
+
+    wrap.querySelector('#rf-cancel').addEventListener('click', () => {
+      if (isEdit) renderDetail(r, container);
+      else render(container);
+    });
+
+    wrap.querySelector('#rf-add-ing').addEventListener('click', () => {
+      const ingList = wrap.querySelector('#rf-ingredients');
+      const idx = ingList.querySelectorAll('.rf-ing-row').length;
+      ingList.insertAdjacentHTML('beforeend', ingredientRowHtml({ amount: '', name: '', notes: '' }, idx));
+      bindIngredientRemove(wrap);
+    });
+
+    bindIngredientRemove(wrap);
+
+    wrap.querySelector('#rf-save').addEventListener('click', () => {
+      const name = wrap.querySelector('#rf-name').value.trim();
+      const creator = wrap.querySelector('#rf-creator').value.trim();
+      if (!name) { Utils.toast('Name is required.', 'error'); return; }
+      if (!creator) { Utils.toast('Creator is required.', 'error'); return; }
+
+      const ingredients = [...wrap.querySelectorAll('.rf-ing-row')].map(row => {
+        const ing = {
+          amount: row.querySelector('.rf-ing-amount').value.trim(),
+          name: row.querySelector('.rf-ing-name').value.trim(),
+        };
+        const notes = row.querySelector('.rf-ing-notes').value.trim();
+        if (notes) ing.notes = notes;
+        return ing;
+      }).filter(i => i.name);
+
+      const ratingVal = parseInt(wrap.querySelector('#rf-rating').value, 10);
+      const guestsVal = wrap.querySelector('#rf-guests').value.trim();
+      const ratingNotesVal = wrap.querySelector('#rf-rating-notes').value.trim();
+      const hasRating = ratingVal || guestsVal || ratingNotesVal;
+
+      const updated = {
+        id: isEdit ? r.id : `cocktail${Date.now()}`,
+        name,
+        creator,
+        ingredients,
+        method: wrap.querySelector('#rf-method').value.trim() || (isEdit ? r.method : ''),
+      };
+      const tagline = wrap.querySelector('#rf-tagline').value.trim();
+      if (tagline) updated.tagline = tagline;
+      const dateVal = wrap.querySelector('#rf-date').value;
+      if (dateVal) updated.date_created = dateVal;
+      const methodType = wrap.querySelector('#rf-method-type').value;
+      if (methodType) updated.method_type = methodType;
+      const glassware = wrap.querySelector('#rf-glassware').value.trim();
+      if (glassware) updated.glassware = glassware;
+      const garnish = wrap.querySelector('#rf-garnish').value.trim();
+      if (garnish) updated.garnish = garnish;
+      const profile = wrap.querySelector('#rf-profile').value.trim();
+      if (profile) updated.profile = profile;
+      const why = wrap.querySelector('#rf-why').value.trim();
+      if (why) updated.why_it_works = why;
+      updated.confirmed_built = wrap.querySelector('#rf-built').checked;
+      if (hasRating) {
+        updated.ratings = {};
+        if (ratingVal) updated.ratings.bar_owner = ratingVal;
+        if (guestsVal) updated.ratings.guests = guestsVal;
+        if (ratingNotesVal) updated.ratings.notes = ratingNotesVal;
+      }
+
+      const recipes = State.get('recipes') || {};
+      const originals = recipes.originals || [];
+      if (isEdit) {
+        const idx = originals.findIndex(x => x.id === r.id);
+        if (idx >= 0) originals[idx] = updated;
+        else originals.push(updated);
+      } else {
+        originals.push(updated);
+      }
+      recipes.originals = originals;
+      recipes.last_updated = new Date().toISOString().slice(0, 10);
+      State.set('recipes', recipes);
+
+      const saveBtn = wrap.querySelector('#rf-save');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving…';
+
+      State.save('recipes').then(() => {
+        Utils.toast(isEdit ? 'Recipe updated.' : 'Recipe created.');
+        renderDetail(updated, container);
+      }).catch(err => {
+        Utils.toast('Save failed: ' + err.message, 'error');
+        saveBtn.disabled = false;
+        saveBtn.textContent = isEdit ? 'Save Changes' : 'Create Recipe';
+      });
+    });
+  }
+
+  function ingredientRowHtml(ing, i) {
+    return `
+      <div class="rf-ing-row form-row" style="align-items:center;margin-bottom:6px;">
+        <input class="rf-ing-amount" type="text" value="${Utils.escapeHtml(ing.amount || '')}" placeholder="2 oz" style="flex:0 0 90px;">
+        <input class="rf-ing-name"   type="text" value="${Utils.escapeHtml(ing.name  || '')}" placeholder="Ingredient">
+        <input class="rf-ing-notes"  type="text" value="${Utils.escapeHtml(ing.notes || '')}" placeholder="Notes (opt)" style="flex:0 0 160px;">
+        <button type="button" class="btn-icon rf-ing-remove" title="Remove" style="flex:none;">✕</button>
+      </div>`;
+  }
+
+  function bindIngredientRemove(wrap) {
+    wrap.querySelectorAll('.rf-ing-remove').forEach(btn => {
+      btn.onclick = () => {
+        const row = btn.closest('.rf-ing-row');
+        if (wrap.querySelectorAll('.rf-ing-row').length > 1) row.remove();
+      };
+    });
   }
 
   return { render };
