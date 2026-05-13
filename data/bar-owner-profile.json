@@ -8,34 +8,34 @@
   "flavor_profile": {
     "axes": {
       "sweetness": {
-        "position": 0.5,
+        "position": "Lean A",
         "confidence": "Tentative",
-        "last_evaluated": "2026-05-12"
+        "last_evaluated": "2026-05-13"
       },
       "acid": {
-        "position": 0.5,
+        "position": "Lean B",
         "confidence": "Tentative",
-        "last_evaluated": "2026-05-12"
+        "last_evaluated": "2026-05-13"
       },
       "strength": {
-        "position": 0.5,
+        "position": "Strong B",
         "confidence": "Tentative",
-        "last_evaluated": "2026-05-12"
+        "last_evaluated": "2026-05-13"
       },
       "complexity": {
-        "position": 0.5,
+        "position": "Lean B",
         "confidence": "Tentative",
-        "last_evaluated": "2026-05-12"
+        "last_evaluated": "2026-05-13"
       },
       "season": {
-        "position": 0.5,
+        "position": "Lean B",
         "confidence": "Tentative",
-        "last_evaluated": "2026-05-12"
+        "last_evaluated": "2026-05-13"
       },
       "risk": {
-        "position": 0.5,
+        "position": "Lean B",
         "confidence": "Tentative",
-        "last_evaluated": "2026-05-12"
+        "last_evaluated": "2026-05-13"
       }
     },
     "supplemental": {
@@ -51,7 +51,7 @@
     }
   },
   "onboarding_complete": true,
-  "last_updated": "2026-05-12",
+  "last_updated": "2026-05-13",
   "background": {
     "drinking_frequency": "weekly",
     "profession": "Data",
