@@ -2,46 +2,130 @@
   "last_updated": "2026-05-14",
   "base_spirits": {
     "whiskey": [
-      { "name": "Bourbon", "created_at": "2026-05-14T00:00:00Z", "updated_at": "2026-05-14T00:00:00Z" },
-      { "name": "Japanese Whisky", "created_at": "2026-05-14T00:00:00Z", "updated_at": "2026-05-14T00:00:00Z" }
+      {
+        "name": "Bourbon"
+      },
+      {
+        "name": "Whisky"
+      },
+      {
+        "name": "Whiskey"
+      },
+      {
+        "name": "Irish"
+      },
+      {
+        "name": "Japanese Whisky"
+      }
     ],
     "brandy": [
-      { "name": "Cognac", "tier": "premium-accessible", "created_at": "2026-05-14T00:00:00Z", "updated_at": "2026-05-14T00:00:00Z" }
+      {
+        "name": "Cognac",
+        "tier": "premium-accessible"
+      }
     ],
-    "rum": [],
-    "agave": [],
+    "rum": [
+      {
+        "name": "White Jamaican Rum"
+      },
+      {
+        "name": "Dark Jamaican Rum"
+      }
+    ],
+    "agave": [
+      {
+        "name": "mezcal"
+      }
+    ],
     "white_spirits": [
-      { "name": "Gin", "created_at": "2026-05-14T00:00:00Z", "updated_at": "2026-05-14T00:00:00Z" }
-    ],
-    "other": []
+      {
+        "name": "Gin"
+      }
+    ]
   },
-  "fortified_wines_and_aperitif_wines": [],
+  "pantry": {},
+  "barware": {},
+  "unassigned": [
+    "Bourbon"
+  ],
+  "fortified_wines_and_aperitif_wines": [
+    {
+      "name": "Cocchi"
+    },
+    {
+      "name": "Sweet Vermouth"
+    }
+  ],
   "liqueurs_and_cordials": {
-    "fruit_forward": [],
-    "nut_coffee": [],
-    "herbal": [],
-    "specialty_regional": []
+    "fruit_forward": [
+      {
+        "name": "Cointreau"
+      }
+    ],
+    "nut_coffee": [
+      {
+        "name": "Coffee Liqueur"
+      }
+    ],
+    "herbal": [
+      {
+        "name": "Campari"
+      }
+    ],
+    "specialty_regional": [
+      {
+        "name": "Aperol"
+      }
+    ]
   },
   "bitters": {
-    "anchors": [],
-    "aromatic_smoke": [],
-    "nut_earth": [],
-    "fruit_botanical": [],
-    "other": []
+    "anchors": [
+      {
+        "name": "Angostura"
+      }
+    ],
+    "fruit_botanical": [
+      {
+        "name": "Orange Bitters"
+      }
+    ]
   },
-  "syrups": [],
-  "non_alcoholic_spirits": [],
-  "mixers": [],
-  "refrigerator_perishables": [],
-  "pantry_spice_rack": [],
-  "fresh_produce": [],
-  "specialty_ingredients": [],
-  "garnish_and_service": [],
-  "past_inventory": [],
+  "syrups": [
+    {
+      "name": "Cardamom Syrup"
+    }
+  ],
+  "mixers": [
+    "Sparkling water"
+  ],
+  "refrigerator_perishables": [
+    "Cream"
+  ],
+  "pantry_spice_rack": [
+    "Salt",
+    "Sugar",
+    "Brown Sugar",
+    "Nutmeg",
+    "Cinnamon"
+  ],
+  "fresh_produce": [
+    "Oranges",
+    "Lemons",
+    "Mint",
+    "Basil",
+    "Rosemary"
+  ],
   "vetoes": {
-    "disliked_ingredients": [],
-    "substitute_for_now": []
-  },
-  "shopping_list": [],
-  "unassigned": []
+    "disliked_ingredients": [
+      "Chartreuse",
+      "Egg White",
+      "Eggs"
+    ],
+    "substitute_for_now": [
+      {
+        "missing": "Tequila",
+        "substitute": "Mezcal"
+      }
+    ]
+  }
 }
