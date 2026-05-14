@@ -119,6 +119,12 @@ Old tier classes (`.tier-industrial`, `.tier-premium-accessible`, `.tier-boutiqu
 
 ---
 
+## Visual Hierarchy
+
+**Inventory view initial state:** The bottle chip grid is the primary visual anchor; the active section tab's amber underline establishes hierarchy between tabs and content.
+
+---
+
 ## Component Contracts
 
 ### 1. Bottle Chip (Extended — D-01, D-07)
@@ -130,6 +136,7 @@ Old tier classes (`.tier-industrial`, `.tier-premium-accessible`, `.tier-boutiqu
 - Secondary text: `bottle.brand` when present — 12px / `--text-muted` — rendered inline after a middot separator: `· Maker's Mark`
 - Tier dot: 7px circle, color per tier palette above
 - Click target (not remove button): entire chip surface minus the × button triggers inline edit expand (D-07)
+- Remove button (×): `aria-label="Remove {style}"` — icon-only action requires label fallback for screen readers; color `var(--red)` on hover
 - Selected/active chip state: `border-color: var(--amber)` and `background: rgba(212,148,58,0.08)` — same as `.wizard-option.selected`
 
 **Chip tooltip (HTML `title` attr):** Full bottle object summary: `"{style} — {brand} — {tier} tier"`, each field omitted if null.
@@ -173,7 +180,7 @@ Banner markup pattern (new CSS class `.canonical-suggestion`):
 - Background: `rgba(212,148,58,0.08)` — same amber tint as selected wizard option
 - Border: `1px solid var(--amber-dim)`
 - Border-radius: `var(--radius-sm)` (5px)
-- Padding: `6px 10px`
+- Padding: `8px 12px`
 - Font: 12px / `--text`
 - Text: "Did you mean: **{canonical name}**?"
 - Action: inline `<button>` labeled "Use it" — `.btn-ghost.btn-sm` style, displayed inline (not block)
@@ -242,7 +249,7 @@ Active state: `background: var(--amber-dim); border-color: var(--amber); color: 
 - Level 1 ("Allow 1 missing"): adds section below — "One Bottle Away" with amber left border heading
 - Level 2 ("Allow 2 missing"): adds section below that — "Two Bottles Away" with `--blue` left border heading
 
-**Section headings:** `h3` style — 17px / `--text` / normal weight, with count badge (`.rec-badge` pattern).
+**Section headings (`.rec-section-heading`):** `h3` element — 20px (heading size) / `--text` / normal weight (400), with count badge (`.rec-badge` pattern). These are named, semantically heading-level section headings and use the heading scale entry (20px).
 
 **Two-away card additions (D-18):** Below the ingredient chip row, two missing-ingredient rows are shown. Each row:
 - Text: missing ingredient name in `--amber`
@@ -346,7 +353,7 @@ The following CSS classes are new for Phase 4. All follow existing naming conven
 | `.bottle-edit-fields` | Default-visible fields wrapper inside edit form |
 | `.bottle-edit-fields--expanded` | Extended fields wrapper (hidden until toggle clicked) |
 | `.bottle-edit-toggle` | "More fields ▾" text link |
-| `.canonical-suggestion` | Canonical name suggestion banner (amber tint, amber border) |
+| `.canonical-suggestion` | Canonical name suggestion banner (amber tint, amber border, `padding: 8px 12px`) |
 | `.canonical-suggestion__action` | "Use it" button inside suggestion banner |
 | `.rec-layout` | Desktop two-column grid wrapper for recommender |
 | `.rec-sidebar` | Left control column (280px fixed) |
@@ -358,7 +365,7 @@ The following CSS classes are new for Phase 4. All follow existing naming conven
 | `.rec-scope-btn` | Individual scope button (`.rec-filter-chip` visual) |
 | `.rec-scope-btn.active` | Active scope button state |
 | `.rec-occasion-heading` | "Occasions" section label |
-| `.rec-section-heading` | Cumulative results section heading (h3 level) |
+| `.rec-section-heading` | Cumulative results section heading — `h3` element at 20px (heading size) / 400 / `--text` |
 | `.rec-twoaway-missing` | Two-away card missing ingredient row |
 | `.rec-twoaway-link` | "Add to shopping list →" link inside two-away card |
 | `.rec-card--twoaway` | Two-away card modifier (blue left border) |
@@ -415,6 +422,10 @@ No third-party registries. No npm packages. All new code is vanilla JS following
 | CSS breakpoint 860px for sidebar | Claude's Discretion (consistent with existing 640px breakpoint) |
 | CTA labels (Save Bottle, Add Bottle, Revert Changes) | gsd-ui-checker revision — 2026-05-14 |
 | Typography collapsed from 5 to 4 sizes (13px dropped, 14px remapped) | gsd-ui-checker revision — 2026-05-14 |
+| `.rec-section-heading` remapped from 17px to 20px (heading scale) | gsd-ui-checker revision — 2026-05-14 |
+| `.canonical-suggestion` padding fixed from 6px/10px to 8px/12px (4-point grid) | gsd-ui-checker revision — 2026-05-14 |
+| × button `aria-label="Remove {style}"` added | gsd-ui-checker revision — 2026-05-14 |
+| Visual Hierarchy section added (inventory focal point) | gsd-ui-checker revision — 2026-05-14 |
 
 ---
 
