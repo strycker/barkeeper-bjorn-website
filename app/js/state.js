@@ -23,6 +23,16 @@ const State = (() => {
     return () => { _listeners = _listeners.filter(f => f !== fn); };
   }
 
+  // Normalize on read — coerces malformed/legacy data to canonical schema shape.
+  // Safe to call on already-canonical data (idempotent).
+  function _normalize(key, data) {
+    if (typeof Normalize !== 'undefined' && Normalize.byKey) {
+      try { return Normalize.byKey(key, data); }
+      catch (err) { console.warn(`Normalize failed for ${key}:`, err); return data; }
+    }
+    return data;
+  }
+
   async function loadAll() {
     if (_loading) return;
     _loading = true;
@@ -35,7 +45,7 @@ const State = (() => {
         })
       );
       results.forEach(({ key, data, sha }) => {
-        _data[key] = data;
+        _data[key] = _normalize(key, data);
         _shas[key] = sha;
       });
       _loaded = true;
@@ -48,18 +58,41 @@ const State = (() => {
     }
   }
 
+  // Detect a 409 / SHA-mismatch error from the GitHub Contents API.
+  function _isShaConflict(err) {
+    if (!err || !err.message) return false;
+    const m = err.message.toLowerCase();
+    return m.includes('does not match') || m.includes('sha') || m.includes('409');
+  }
+
   async function save(key, message) {
     const path = FILES[key];
-    const result = await GitHubAPI.writeJSON(path, _data[key], _shas[key], message);
-    // Update SHA after successful write
-    _shas[key] = result.content.sha;
-    notify({ type: 'saved', key });
+    try {
+      const result = await GitHubAPI.writeJSON(path, _data[key], _shas[key], message);
+      _shas[key] = result.content.sha;
+      notify({ type: 'saved', key });
+    } catch (err) {
+      // BUG-03 mitigation: on stale-SHA conflict, refetch the current SHA and retry once.
+      // Stale SHAs occur after partial imports, multi-tab edits, or external file changes.
+      if (_isShaConflict(err)) {
+        const freshSha = await GitHubAPI.getFileSHA(path);
+        if (freshSha && freshSha !== _shas[key]) {
+          _shas[key] = freshSha;
+          const retry = await GitHubAPI.writeJSON(path, _data[key], _shas[key], message);
+          _shas[key] = retry.content.sha;
+          notify({ type: 'saved', key });
+          return;
+        }
+      }
+      throw err;
+    }
   }
 
   function get(key) { return _data[key]; }
 
   function set(key, data) {
-    _data[key] = data;
+    // Normalize on set so corrupted import payloads cannot be persisted unfixed.
+    _data[key] = _normalize(key, data);
     notify({ type: 'updated', key });
   }
 
