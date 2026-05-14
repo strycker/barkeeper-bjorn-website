@@ -98,14 +98,22 @@ Plans:
 - EXPORT-03: "Import Data" — file picker, diff preview, batch write to GitHub
 - EXPORT-04: Selective import — per-section checkboxes (inventory, recipes, profile, barkeeper)
 
-**Files touched:** `app/js/views/recipes.js`, `app/js/export.js` (new), `app/js/views/settings.js`, `app/css/app.css`
+**Files touched:** `app/js/views/recipes.js`, `app/js/export.js`, `app/js/claude-api.js` (new), `app/js/views/settings.js`, `app/css/app.css`, `app/index.html`
+
+**Plans:** 4 plans
+
+Plans:
+- [ ] 03-00-PLAN.md — Create manual smoke-test checklist
+- [ ] 03-01-PLAN.md — Export/Import ZIP upgrade: drop zone, drag-and-drop, sequential writes, AI-context text export
+- [ ] 03-02-PLAN.md — Recipe form: Utils.toast fixes, New Recipe button, D-02 validation, AI prompt block scaffold
+- [ ] 03-03-PLAN.md — AI integration: claude-api.js, AI Integration settings section, live Generate wiring
 
 **Success criteria:**
 1. User can create a new original recipe from within the web app and it persists to GitHub
 2. User can edit an existing recipe without deleting and re-adding it
 3. Uploading an image via the browser writes it to `images/` and displays the raw GitHub URL
-4. "Export All Data" produces a valid JSON bundle that triggers a file download
-5. Importing a previously exported bundle shows a diff preview before any writes; selective import respects unchecked sections
+4. "Export All Data (ZIP)" downloads a ZIP bundle containing all 4 data files
+5. Importing a previously exported ZIP shows a 4-file preview before any writes; Confirm Import writes all four sequentially
 
 ---
 

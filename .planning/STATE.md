@@ -6,7 +6,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 
 **Core value:** The user's real-world bar inventory and flavor profile should power both AI-driven conversation and rule-based recommendations — seamlessly, whether in a chat session or the web app.
 
-**Current focus:** Phase 2 — Web UI UX & Settings
+**Current focus:** Phase 3 — Content Management
 
 ---
 
@@ -16,7 +16,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 |-------|------|--------|-------|----------|
 | 1 | Agent Instructions Polish | Verified | 5 | 100% |
 | 2 | Web UI UX & Settings | Verified | 5 | 100% |
-| 3 | Content Management | Pending | — | 0% |
+| 3 | Content Management | Planned | 4 | 0% |
 | 4 | Inventory & Recommender Depth | Pending | — | 0% |
 | 5 | AI Integration | Pending | — | 0% |
 | 6 | Backend & Multi-User | Pending | — | 0% |
@@ -51,6 +51,20 @@ Wave 2 plans (02-03, 02-04) depend on Wave 1 completing first.
 
 ---
 
+## Phase 3 Plan Index
+
+| Plan | Wave | Objective | Requirements | Files |
+|------|------|-----------|--------------|-------|
+| 03-00 | 0 | Create TEST-CHECKLIST.md | RECIPE-01–05, EXPORT-01–04 | .planning/phases/03-content-management/TEST-CHECKLIST.md |
+| 03-01 | 1 | Export/Import ZIP: drop zone, drag-and-drop, sequential writes, AI-context text | EXPORT-01–04 | app/js/export.js, app/js/views/settings.js, app/index.html, app/css/app.css |
+| 03-02 | 1 | Recipe form: Utils.toast fixes, New Recipe button, D-02 validation, AI prompt scaffold | RECIPE-01–05 | app/js/views/recipes.js |
+| 03-03 | 2 | AI integration: claude-api.js, AI Integration settings section, live Generate wiring | RECIPE-05 | app/js/claude-api.js, app/js/views/settings.js, app/js/views/recipes.js |
+
+Wave 1 plans (03-01, 03-02) are independent and can execute in parallel.
+Wave 2 plan (03-03) depends on both Wave 1 plans completing first (claude-api.js must exist; recipe form AI scaffold must be in place).
+
+---
+
 ## Key Decisions (Phase 2)
 
 - **inventory.unassigned** — inventory paste items from onboarding go to `inventory.unassigned` (new top-level array), NOT `inventory.spirits` (which does not exist as a flat array in the schema)
@@ -62,6 +76,28 @@ Wave 2 plans (02-03, 02-04) depend on Wave 1 completing first.
 
 ---
 
+## Key Decisions (Phase 3)
+
+- **D-01: In-place form replacement** — recipe form uses `renderForm(r, container)` replacing view content in-place; no `#recipes/new` route added
+- **D-02: Save gate** — `name`, `creator`, ≥1 ingredient, and `method` are required; all other fields optional
+- **D-03: Entry points** — "+ New Recipe" button in Recipe Book header; "Edit" button on recipe detail card
+- **D-04: Image upload placement** — on recipe detail view below images section; not part of edit form
+- **D-05: Image filename pattern** — `{id}_{timestamp}.{ext}` (e.g. `cocktail1234_1747000000000.jpg`)
+- **D-06: Post-upload** — patch `recipe.images`, call `State.save('recipes')`, re-render images inline; raw GitHub URL
+- **D-07: ZIP format** — export and import both use ZIP (overrides ROADMAP EXPORT-01 JSON bundle wording)
+- **D-08: Import UX** — preview listing 4 files → single "Confirm Import" → sequential writes; no per-section checkboxes
+- **D-09: Drop zone** — import supports file picker AND drag-and-drop; `dragover.preventDefault()` is mandatory
+- **D-10: Settings placement** — Export/Import lives in existing `#sect-export` in settings.js; no new route
+- **D-11: AI fields populated** — Anthropic populates: name, tagline, ingredients[], method, glassware, garnish, tasting_notes, suggested_occasions
+- **D-12: AI prompt visibility** — AI prompt block rendered ONLY when `isNew === true`; not on edit form
+- **D-13: Generate UX** — spinner on Generate button while in-flight; form fields populate inline on success; no streaming
+- **D-14: Anthropic key storage** — `localStorage.bb_anthropic_key`; configured in new #sect-ai-key section in Settings
+- **Utils.toast bug** — 8 broken call sites in recipes.js (lines ~264, 266, 405, 414, 548, 549, 613, 616) call non-existent `Utils.toast`; fixed in 03-02 → `Utils.showToast`
+- **No duplicate script tag** — `app/js/export.js` already has a `<script>` tag in index.html at line 88; 03-01 adds JSZip CDN and claude-api.js tags only
+- **Sequential State.save() for import** — canonical reference: settings.js:289–302 (Reset all data handler); ZIP import copies this pattern exactly
+
+---
+
 ## Notes
 
 - `gsd-sdk` is not installed; use `git commit` directly for doc commits
@@ -70,4 +106,4 @@ Wave 2 plans (02-03, 02-04) depend on Wave 1 completing first.
 
 ---
 *State initialized: 2026-05-04*
-*Last activity: 2026-05-12 — Phase 2 UAT complete (6/6 tests passed; 2 bugs found and fixed inline: axisToValue float crash + recommender lc guard); Phase 2 status → Verified*
+*Last activity: 2026-05-14 — Phase 3 plans created (03-00 through 03-03); Phase 3 status → Planned*

@@ -583,18 +583,13 @@ if (res.status === 529) throw new Error('Anthropic API overloaded. Try again in 
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Anthropic model ID for "Claude 4.6/4.7"** — The user mentioned this in the additional context. As of my training, the most recent verifiable Anthropic Sonnet ID is `claude-sonnet-4-5-20250929`. The planner should query `https://docs.anthropic.com/en/docs/about-claude/models` at implementation time to confirm the current "smart default" model. Strongly recommend storing the model in `localStorage.bb_chat_model` (matches SET-05 from REQUIREMENTS.md) with a default fallback, so the user can swap models without code changes.
-   - What we know: Phase 3 needs a single non-streaming `/v1/messages` call.
-   - What's unclear: Exact current model ID.
-   - Recommendation: Default to a constant in `claude-api.js`; allow override from `localStorage.bb_chat_model` if present.
+1. **Anthropic model ID for "Claude 4.6/4.7"** — RESOLVED: Use `claude-sonnet-4-6` as `DEFAULT_MODEL` constant in `claude-api.js`; allow `localStorage.bb_chat_model` override (matches SET-05). Executor MUST re-verify the current model ID at `https://docs.anthropic.com/en/docs/about-claude/models` before pinning — model IDs drift every ~6 months.
 
-2. **Recipe deletion** — The existing detail view at recipes.js:252-267 includes a Delete button that uses `window.confirm()`. CONTEXT defers deletion to Phase 4+, but the button exists in production. Should Phase 3 leave it alone (the safest read of CONTEXT) or remove it (cleaner UX)?
-   - Recommendation: Leave the existing Delete button untouched (per CONTEXT deferred list — recipe deletion is out of scope, and the existing `confirm()` is explicitly called out at UI-SPEC anti-pattern #7 as "pre-existing and out of scope").
+2. **Recipe deletion** — RESOLVED: Leave the existing Delete button untouched. Deletion is explicitly deferred in CONTEXT.md and the existing `confirm()` is noted as "pre-existing and out of scope" in UI-SPEC anti-pattern #7.
 
-3. **`Utils.toast` vs `Utils.showToast`** — recipes.js calls a non-existent `Utils.toast` at 8 sites. This is a real, latent bug. Should the planner include a fix task?
-   - Recommendation: Yes — add a single-task fix to the plan. Either rename calls or add `toast: showToast` alias to utils.js:111 return statement. The alias is cheaper.
+3. **`Utils.toast` vs `Utils.showToast`** — RESOLVED: Plan 03-02 Task 1 fixes all 8 broken call sites in `recipes.js` by renaming `Utils.toast` → `Utils.showToast`. No alias needed.
 
 ---
 
