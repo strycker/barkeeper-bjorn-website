@@ -3,28 +3,31 @@ status: testing
 phase: 03-content-management
 source: [03-01-SUMMARY.md, 03-02-SUMMARY.md, 03-03-SUMMARY.md]
 started: 2026-05-14T00:00:00Z
-updated: 2026-05-14T00:00:00Z
+updated: 2026-05-14T01:00:00Z
 ---
 
 ## Current Test
 
-number: 1
-name: ZIP Export
+number: 3
+name: ZIP Import — File Picker
 expected: |
-  Settings → click "Export All Data (ZIP)" → browser downloads a .zip file.
-  Open the ZIP — it contains 4 JSON files: barkeeper.json, bar-owner-profile.json,
-  inventory.json, recipes.json.
+  Settings → (drag zone visible) → click to pick a file → select the ZIP just exported →
+  a preview panel appears listing the 4 file names with an overwrite warning →
+  click "Confirm Import" → progress messages appear → toast "Import complete."
+  Data is written (verify by reloading the page).
 awaiting: user response
 
 ## Tests
 
 ### 1. ZIP Export
 expected: Settings → click "Export All Data (ZIP)" → browser downloads a .zip file. Open the ZIP — it contains 4 JSON files: barkeeper.json, bar-owner-profile.json, inventory.json, recipes.json.
-result: [pending]
+result: pass
 
 ### 2. AI-Context Text Export
 expected: Settings → click "Export for AI (text)" → browser downloads a .txt file named barkeeper-bjorn-ai-context-YYYY-MM-DD.txt. File contains a readable markdown summary of persona, inventory, and recipes.
-result: [pending]
+result: issue
+reported: "similar text export says [object Object] for the slider bar flavor profile choices"
+severity: minor
 
 ### 3. ZIP Import — File Picker
 expected: Settings → (drag zone visible) → click to pick a file → select the ZIP just exported → a preview panel appears listing the 4 file names with an overwrite warning → click "Confirm Import" → progress messages appear → toast "Import complete." Data is written (verify by reloading the page).
@@ -65,12 +68,23 @@ result: [pending]
 ## Summary
 
 total: 11
-passed: 0
-issues: 0
-pending: 11
+passed: 1
+issues: 1
+pending: 9
 skipped: 0
 blocked: 0
 
 ## Gaps
 
-[none yet]
+- truth: "AI-context text export contains readable flavor profile values (e.g. '- sweet_tart: 0.7')"
+  status: failed
+  reason: "User reported: similar text export says [object Object] for the slider bar flavor profile choices"
+  severity: minor
+  test: 2
+  root_cause: "axes values stored as {position: N, _skipped: bool} objects; export.js does `- ${k}: ${v}` which stringifies the object"
+  artifacts:
+    - path: "app/js/export.js"
+      issue: "line ~109: `lines.push(`- ${k}: ${v}`)` — v is an object, not a scalar"
+  missing:
+    - "Extract v.position (or render 'skipped') before interpolating into the line string"
+  debug_session: ""
