@@ -48,7 +48,7 @@ const RecipesView = (() => {
     });
   }
 
-  function showAIPromptModal(container) {
+  function buildPromptContext() {
     const inventory = State.get('inventory') || {};
     const profile   = State.get('profile')   || {};
     const barkeeper = State.get('barkeeper') || {};
@@ -68,8 +68,14 @@ const RecipesView = (() => {
       .map(([k, v]) => `${k}: ${v}`)
       .join(', ') || 'Not set yet.';
 
-    const bkName = barkeeper.identity?.name || 'Barkeeper Bjorn';
-    const bkPreset = barkeeper.active_preset || 'Professional Mixologist';
+    const bkName   = barkeeper.identity?.name || 'Barkeeper Bjorn';
+    const bkPreset = barkeeper.active_preset  || 'Professional Mixologist';
+
+    return { inventoryText, profileText, bkName, bkPreset };
+  }
+
+  function showAIPromptModal(container) {
+    const { inventoryText, profileText, bkName, bkPreset } = buildPromptContext();
 
     const prompt = `You are ${bkName}, a ${bkPreset} bartender. Design a new original cocktail for my home bar.
 
@@ -441,6 +447,28 @@ Please provide:
     title.style.cssText = 'color:var(--amber);font-weight:normal;margin-bottom:20px;';
     wrap.appendChild(title);
 
+    // AI prompt block — shown only for new recipes (D-12)
+    const hasKey = !!localStorage.getItem('bb_anthropic_key');
+    if (!isEdit) {
+      wrap.innerHTML += `
+        <div class="rf-ai-prompt-wrap" id="rf-ai-wrap" style="margin-bottom:20px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);">
+          <div class="section-label" style="margin-bottom:8px;">Generate with AI</div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <label for="rf-ai-prompt" style="font-size:0.82rem;">Describe the cocktail you want</label>
+            <textarea id="rf-ai-prompt" rows="2"
+                      placeholder="e.g. a smoky mezcal sour with honey and citrus"
+                      style="font-family:monospace;font-size:0.82rem;padding:10px;resize:vertical;"></textarea>
+          </div>
+          <button class="btn btn-primary btn-sm" id="rf-generate" type="button"
+                  ${hasKey ? '' : 'disabled'}
+                  title="${hasKey ? '' : 'Add your Anthropic API key in Settings to use AI generation'}"
+                  style="${hasKey ? '' : 'opacity:0.4;cursor:not-allowed;'}">
+            Generate
+          </button>
+          <span id="rf-generate-status" style="font-size:0.82rem;color:var(--text-muted);margin-left:10px;"></span>
+        </div>`;
+    }
+
     // Build ingredient rows HTML
     const ingRows = (r?.ingredients?.length ? r.ingredients : [{ amount: '', name: '', notes: '' }])
       .map((ing, i) => ingredientRowHtml(ing, i)).join('');
@@ -528,6 +556,21 @@ Please provide:
 
     container.appendChild(wrap);
 
+    // Generate button stub: live wiring lands in plan 03-03 (Wave 2 / ClaudeAPI).
+    // If no API key, button is disabled at render time (handled above) — skip listener.
+    if (!isEdit && hasKey) {
+      const genBtn = wrap.querySelector('#rf-generate');
+      if (genBtn) {
+        genBtn.addEventListener('click', () => {
+          if (typeof ClaudeAPI === 'undefined' || typeof handleGenerate === 'undefined') {
+            Utils.showToast('AI generation module not yet loaded.', 'error');
+            return;
+          }
+          handleGenerate(wrap);
+        });
+      }
+    }
+
     wrap.querySelector('#rf-cancel').addEventListener('click', () => {
       if (isEdit) renderDetail(r, container);
       else render(container);
@@ -547,6 +590,15 @@ Please provide:
       const creator = wrap.querySelector('#rf-creator').value.trim();
       if (!name) { Utils.showToast('Name is required.', 'error'); return; }
       if (!creator) { Utils.showToast('Creator is required.', 'error'); return; }
+
+      // Ingredient validation (D-02): at least one ingredient with a name
+      const ingRowsForValidation = [...wrap.querySelectorAll('.rf-ing-row')];
+      const filledIngredients = ingRowsForValidation.filter(row => row.querySelector('.rf-ing-name').value.trim());
+      if (!filledIngredients.length) { Utils.showToast('At least one ingredient is required.', 'error'); return; }
+
+      // Method validation (D-02)
+      const methodVal = wrap.querySelector('#rf-method').value.trim();
+      if (!methodVal) { Utils.showToast('Method is required.', 'error'); return; }
 
       const ingredients = [...wrap.querySelectorAll('.rf-ing-row')].map(row => {
         const ing = {
