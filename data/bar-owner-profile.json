@@ -52,21 +52,21 @@
     },
     "supplemental": {
       "smoke": {
-        "position": "positive",
+        "position": "neutral",
         "rationale": "Inferred from inventory (Turkish Tobacco bitters, Cherry Maple Smoked bitters, Montelobos Espadin mezcal) and originals (Crossover, Smokey the Pear, Dave's Folly all incorporate smoke meaningfully)."
       },
       "funk": {
-        "position": "positive",
+        "position": "neutral",
         "rationale": "Inferred from inventory (both white and dark Jamaican rum stocked — ester-forward category) and Smokey the Pear v2 explicitly preferring white Jamaican rum as sub-base for ester complementarity with pear."
       },
       "savory_saline": {
-        "position": "neutral",
+        "position": "interesting",
         "rationale": "No strong evidence of preference or aversion in documented originals or inventory. Worth exploring."
       }
     }
   },
   "onboarding_complete": true,
-  "last_updated": "2026-05-03",
+  "last_updated": "2026-05-14",
   "background": {
     "drinking_frequency": "Regular home cocktail-maker; treats mixology as a craft and ongoing creative project",
     "profession": "Vice President of Decision Sciences. Leads an 8-9 person team of PhDs specializing in predictive modeling (supervised and unsupervised learning). Physics PhD. Strong applied background in financial modeling for investment predictions.",
