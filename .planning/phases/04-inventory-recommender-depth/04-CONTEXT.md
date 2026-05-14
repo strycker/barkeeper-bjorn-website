@@ -139,6 +139,7 @@ Upgrade inventory bottles from simple objects to fully structured entries with i
 - **Full multi-level undo history** — User requested this as a future capability. Add to roadmap backlog as Phase 5+ item. The timestamp fields (D-04) lay groundwork but full undo requires an in-memory or localStorage change stack.
 - **Page-level inventory import** — Inventory page with its own targeted JSON import (captured in roadmap backlog from Phase 3 UAT).
 - **Type enum persistence to GitHub** — For now, custom-added type categories live in localStorage only. Persisting them to `barkeeper.json` or a new config file is a future consideration.
+- **Ingredient hierarchy / automatic derivations** — When the user has a base ingredient, the recommender should infer derived ingredients automatically: limes → lime juice, lemons → lemon juice, sugar → simple syrup, mint → muddled mint, eggs → egg white, etc. Currently the engine matches strictly by keyword, so having "limes" in produce does not satisfy a recipe calling for "lime juice." Requires a derivation map (base → set of derivable products) and engine pass that expands the lookup before matching. Captured 2026-05-14; deferred to Phase 5+ for discussion and design.
 
 </deferred>
 

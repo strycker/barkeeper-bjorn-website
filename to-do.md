@@ -593,6 +593,7 @@ Things worth capturing but not yet scoped.
 - **"What's depleted?" tracker:** The agent asks at session start whether anything ran out since last time, and updates inventory before recommending.
 - **Event mode:** Configure a temporary cocktail menu for a party or event. Track what gets made, how many servings, what runs low. Auto-generates a depletion report at the end.
 - **Public profile / bartender page:** A public-facing URL for your bar — shareable link that shows your public recipes, flavor profile radar, and "signature cocktails." Think portfolio page for cocktail enthusiasts.
+- **Ingredient hierarchy / automatic derivations:** When a user lists a base ingredient, the recommender should infer common derivatives: limes → lime juice, lemons → lemon juice, sugar → simple syrup, mint → muddled mint, eggs → egg white/yolk, etc. Currently the engine matches strictly by keyword, so "limes" in produce does not satisfy a recipe calling for "lime juice." Needs a derivation map and lookup-expansion pass in `recommender-engine.js`. Discuss design (static map vs. AI-assisted inference, user-overridable substitutions, transitive derivations) before implementing — target Phase 5+ or later. (Captured 2026-05-14 during Phase 4 context discussion)
 
 ---
 
