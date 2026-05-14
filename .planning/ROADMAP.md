@@ -105,7 +105,7 @@ Plans:
 Plans:
 - [ ] 03-00-PLAN.md — Create manual smoke-test checklist
 - [ ] 03-01-PLAN.md — Export/Import ZIP upgrade: drop zone, drag-and-drop, sequential writes, AI-context text export
-- [ ] 03-02-PLAN.md — Recipe form: Utils.toast fixes, New Recipe button, D-02 validation, AI prompt block scaffold
+- [x] 03-02-PLAN.md — Recipe form: Utils.toast fixes, New Recipe button, D-02 validation, AI prompt block scaffold
 - [ ] 03-03-PLAN.md — AI integration: claude-api.js, AI Integration settings section, live Generate wiring
 
 **Success criteria:**

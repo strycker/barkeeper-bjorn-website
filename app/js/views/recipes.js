@@ -48,7 +48,7 @@ const RecipesView = (() => {
     });
   }
 
-  function showAIPromptModal(container) {
+  function buildPromptContext() {
     const inventory = State.get('inventory') || {};
     const profile   = State.get('profile')   || {};
     const barkeeper = State.get('barkeeper') || {};
@@ -68,8 +68,14 @@ const RecipesView = (() => {
       .map(([k, v]) => `${k}: ${v}`)
       .join(', ') || 'Not set yet.';
 
-    const bkName = barkeeper.identity?.name || 'Barkeeper Bjorn';
-    const bkPreset = barkeeper.active_preset || 'Professional Mixologist';
+    const bkName   = barkeeper.identity?.name || 'Barkeeper Bjorn';
+    const bkPreset = barkeeper.active_preset  || 'Professional Mixologist';
+
+    return { inventoryText, profileText, bkName, bkPreset };
+  }
+
+  function showAIPromptModal(container) {
+    const { inventoryText, profileText, bkName, bkPreset } = buildPromptContext();
 
     const prompt = `You are ${bkName}, a ${bkPreset} bartender. Design a new original cocktail for my home bar.
 
@@ -132,7 +138,7 @@ Please provide:
   function renderOriginalsGrid(originals, container) {
     const addBtn = document.createElement('div');
     addBtn.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:12px;';
-    addBtn.innerHTML = `<button class="btn btn-secondary btn-sm">+ Add Recipe</button>`;
+    addBtn.innerHTML = `<button class="btn btn-secondary btn-sm">+ New Recipe</button>`;
     addBtn.querySelector('button').addEventListener('click', () => {
       renderForm(null, document.getElementById('main-content'));
     });
@@ -144,7 +150,7 @@ Please provide:
       empty.innerHTML = `
         <div class="empty-icon">🍹</div>
         <p>No original cocktails yet.</p>
-        <p style="font-size:0.85rem;color:var(--text-muted);">Design one with your AI bartender and it will appear here.</p>`;
+        <p style="font-size:0.85rem;color:var(--text-muted);">Click "+ New Recipe" or "✨ Generate with AI" to create your first one.</p>`;
       container.appendChild(empty);
       return;
     }
@@ -261,9 +267,9 @@ Please provide:
       recipes.last_updated = new Date().toISOString().slice(0, 10);
       State.set('recipes', recipes);
       State.save('recipes').then(() => {
-        Utils.toast('Recipe deleted.');
+        Utils.showToast('Recipe deleted.');
         render(container);
-      }).catch(err => Utils.toast('Save failed: ' + err.message, 'error'));
+      }).catch(err => Utils.showToast('Save failed: ' + err.message, 'error'));
     });
     topBar.querySelector('.back-btn').addEventListener('click', () => render(container));
     container.appendChild(topBar);
@@ -402,7 +408,7 @@ Please provide:
 
         statusEl.textContent = `Uploaded: images/${filename}`;
         statusEl.style.color = 'var(--green)';
-        Utils.toast('Image uploaded successfully.');
+        Utils.showToast('Image uploaded successfully.');
         selectedFile = null;
         fileInput.value = '';
         imgSection.querySelector('#rd-img-name').textContent = 'No file chosen';
@@ -411,13 +417,73 @@ Please provide:
       } catch (err) {
         statusEl.textContent = `Upload failed: ${Utils.escapeHtml(err.message)}`;
         statusEl.style.color = 'var(--red)';
-        Utils.toast('Upload failed: ' + err.message, 'error');
+        Utils.showToast('Upload failed: ' + err.message, 'error');
         uploadBtn.disabled = false;
       }
     });
 
     wrap.appendChild(imgSection);
     container.appendChild(wrap);
+  }
+
+  // ── handleGenerate — live AI recipe generation (D-13) ─────────────────
+  // Reads #rf-ai-prompt, calls ClaudeAPI.generateRecipe with current
+  // buildPromptContext(), populates form fields inline, manages spinner +
+  // form-field disable state. Errors surface as red toasts.
+  async function handleGenerate(wrap) {
+    const prompt = wrap.querySelector('#rf-ai-prompt').value.trim();
+    if (!prompt) {
+      Utils.showToast('Enter a description before generating.', 'error');
+      return;
+    }
+
+    const genBtn   = wrap.querySelector('#rf-generate');
+    const statusEl = wrap.querySelector('#rf-generate-status');
+
+    // Disable Generate button and all form fields while in-flight (D-13)
+    genBtn.disabled = true;
+    genBtn.textContent = 'Generating…';
+    statusEl.textContent = '';
+    const formFields = wrap.querySelectorAll('input, textarea, button:not(#rf-generate)');
+    formFields.forEach(el => { el.disabled = true; });
+
+    try {
+      const ctx = buildPromptContext();  // { bkName, bkPreset, inventoryText, profileText }
+      const recipe = await ClaudeAPI.generateRecipe(prompt, ctx);
+
+      // Populate form fields inline (D-13). Assigning to input.value does not
+      // parse HTML — no XSS vector. escapeHtml is only needed for innerHTML sinks.
+      if (recipe.name)          wrap.querySelector('#rf-name').value      = recipe.name;
+      if (recipe.tagline)       wrap.querySelector('#rf-tagline').value   = recipe.tagline;
+      if (recipe.method)        wrap.querySelector('#rf-method').value    = recipe.method;
+      if (recipe.glassware)     wrap.querySelector('#rf-glassware').value = recipe.glassware;
+      if (recipe.garnish)       wrap.querySelector('#rf-garnish').value   = recipe.garnish;
+      if (recipe.tasting_notes) wrap.querySelector('#rf-profile').value   = recipe.tasting_notes;
+
+      // Rebuild ingredient rows from AI response (ingredientRowHtml escapes)
+      if (Array.isArray(recipe.ingredients) && recipe.ingredients.length) {
+        const ingContainer = wrap.querySelector('#rf-ingredients');
+        ingContainer.innerHTML = recipe.ingredients
+          .map((ing, i) => ingredientRowHtml(ing, i))
+          .join('');
+        bindIngredientRemove(wrap);
+      }
+
+      Utils.showToast('AI draft loaded — review and save.');
+
+    } catch (err) {
+      Utils.showToast('Generation failed: ' + err.message, 'error');
+    } finally {
+      // Always re-enable form fields and reset Generate button regardless of outcome
+      const allFields = wrap.querySelectorAll('input, textarea, button');
+      allFields.forEach(el => { el.disabled = false; });
+      genBtn.textContent = 'Generate';
+      // Edge case: user removed key during generation — re-disable Generate
+      if (!localStorage.getItem('bb_anthropic_key')) {
+        genBtn.disabled = true;
+        genBtn.style.opacity = '0.4';
+      }
+    }
   }
 
   function renderForm(r, container) {
@@ -440,6 +506,28 @@ Please provide:
     title.textContent = isEdit ? `Edit: ${r.name}` : 'New Recipe';
     title.style.cssText = 'color:var(--amber);font-weight:normal;margin-bottom:20px;';
     wrap.appendChild(title);
+
+    // AI prompt block — shown only for new recipes (D-12)
+    const hasKey = !!localStorage.getItem('bb_anthropic_key');
+    if (!isEdit) {
+      wrap.innerHTML += `
+        <div class="rf-ai-prompt-wrap" id="rf-ai-wrap" style="margin-bottom:20px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);">
+          <div class="section-label" style="margin-bottom:8px;">Generate with AI</div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <label for="rf-ai-prompt" style="font-size:0.82rem;">Describe the cocktail you want</label>
+            <textarea id="rf-ai-prompt" rows="2"
+                      placeholder="e.g. a smoky mezcal sour with honey and citrus"
+                      style="font-family:monospace;font-size:0.82rem;padding:10px;resize:vertical;"></textarea>
+          </div>
+          <button class="btn btn-primary btn-sm" id="rf-generate" type="button"
+                  ${hasKey ? '' : 'disabled'}
+                  title="${hasKey ? '' : 'Add your Anthropic API key in Settings to use AI generation'}"
+                  style="${hasKey ? '' : 'opacity:0.4;cursor:not-allowed;'}">
+            Generate
+          </button>
+          <span id="rf-generate-status" style="font-size:0.82rem;color:var(--text-muted);margin-left:10px;"></span>
+        </div>`;
+    }
 
     // Build ingredient rows HTML
     const ingRows = (r?.ingredients?.length ? r.ingredients : [{ amount: '', name: '', notes: '' }])
@@ -528,6 +616,21 @@ Please provide:
 
     container.appendChild(wrap);
 
+    // Generate button stub: live wiring lands in plan 03-03 (Wave 2 / ClaudeAPI).
+    // If no API key, button is disabled at render time (handled above) — skip listener.
+    if (!isEdit && hasKey) {
+      const genBtn = wrap.querySelector('#rf-generate');
+      if (genBtn) {
+        genBtn.addEventListener('click', () => {
+          if (typeof ClaudeAPI === 'undefined' || typeof handleGenerate === 'undefined') {
+            Utils.showToast('AI generation module not yet loaded.', 'error');
+            return;
+          }
+          handleGenerate(wrap);
+        });
+      }
+    }
+
     wrap.querySelector('#rf-cancel').addEventListener('click', () => {
       if (isEdit) renderDetail(r, container);
       else render(container);
@@ -545,8 +648,17 @@ Please provide:
     wrap.querySelector('#rf-save').addEventListener('click', () => {
       const name = wrap.querySelector('#rf-name').value.trim();
       const creator = wrap.querySelector('#rf-creator').value.trim();
-      if (!name) { Utils.toast('Name is required.', 'error'); return; }
-      if (!creator) { Utils.toast('Creator is required.', 'error'); return; }
+      if (!name) { Utils.showToast('Name is required.', 'error'); return; }
+      if (!creator) { Utils.showToast('Creator is required.', 'error'); return; }
+
+      // Ingredient validation (D-02): at least one ingredient with a name
+      const ingRowsForValidation = [...wrap.querySelectorAll('.rf-ing-row')];
+      const filledIngredients = ingRowsForValidation.filter(row => row.querySelector('.rf-ing-name').value.trim());
+      if (!filledIngredients.length) { Utils.showToast('At least one ingredient is required.', 'error'); return; }
+
+      // Method validation (D-02)
+      const methodVal = wrap.querySelector('#rf-method').value.trim();
+      if (!methodVal) { Utils.showToast('Method is required.', 'error'); return; }
 
       const ingredients = [...wrap.querySelectorAll('.rf-ing-row')].map(row => {
         const ing = {
@@ -610,10 +722,10 @@ Please provide:
       saveBtn.textContent = 'Saving…';
 
       State.save('recipes').then(() => {
-        Utils.toast(isEdit ? 'Recipe updated.' : 'Recipe created.');
+        Utils.showToast(isEdit ? 'Recipe updated.' : 'Recipe created.');
         renderDetail(updated, container);
       }).catch(err => {
-        Utils.toast('Save failed: ' + err.message, 'error');
+        Utils.showToast('Save failed: ' + err.message, 'error');
         saveBtn.disabled = false;
         saveBtn.textContent = isEdit ? 'Save Changes' : 'Create Recipe';
       });

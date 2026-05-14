@@ -144,16 +144,35 @@ const SettingsView = (() => {
           <button class="btn btn-ghost btn-sm" id="st-logout">Log out</button>
         </div>
 
+        <!-- ── Section: AI Integration (D-14) ───────────────────────────── -->
+        <div class="settings-section" id="sect-ai-key">
+          <div class="settings-section__heading">AI Integration</div>
+          <div class="form-group">
+            <label for="st-anthropic-key">Anthropic API Key</label>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <input type="password" id="st-anthropic-key"
+                     value="${Utils.escapeHtml(localStorage.getItem('bb_anthropic_key') || '')}"
+                     placeholder="sk-ant-…" autocomplete="off" style="flex:1;">
+              <button class="btn-icon" id="st-ai-key-toggle" type="button" title="Show/hide key">Show</button>
+            </div>
+          </div>
+          <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:12px;">
+            Your Anthropic API key enables the Generate with AI feature on new recipes. Stored only in this browser.
+          </p>
+          <button class="btn btn-primary btn-sm" id="st-save-ai-key" type="button">Save API key</button>
+          <p id="st-ai-key-status" style="min-height:1.2em;margin-top:8px;font-size:0.82rem;"></p>
+        </div>
+
         <!-- ── Section 5: Export & Import (EXPORT-01–04) ───────────────── -->
         <div class="settings-section" id="sect-export">
           <div class="settings-section__heading">Export & Import</div>
           <p style="color:var(--text-dim);font-size:0.9rem;margin-bottom:16px;">
-            Download your bar data as a portable JSON bundle or as an AI-context text file,
+            Download your bar data as a portable ZIP bundle or as an AI-context text file,
             or restore from a previous export.
           </p>
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
-            <button class="btn btn-secondary btn-sm" id="st-export-json">Export All Data (JSON)</button>
-            <button class="btn btn-secondary btn-sm" id="st-export-ai">Export AI Context (text)</button>
+            <button class="btn btn-secondary btn-sm" id="st-export-json">Export All Data (ZIP)</button>
+            <button class="btn btn-secondary btn-sm" id="st-export-ai">Export for AI (text)</button>
           </div>
           <div id="st-import-area"></div>
         </div>
@@ -248,9 +267,38 @@ const SettingsView = (() => {
       }
     });
 
+    // ── Event: AI Integration section (D-14) ─────────────────────────────
+    container.querySelector('#st-ai-key-toggle').addEventListener('click', () => {
+      const inp = container.querySelector('#st-anthropic-key');
+      const btn = container.querySelector('#st-ai-key-toggle');
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        btn.textContent = 'Hide';
+      } else {
+        inp.type = 'password';
+        btn.textContent = 'Show';
+      }
+    });
+
+    container.querySelector('#st-save-ai-key').addEventListener('click', () => {
+      const key = container.querySelector('#st-anthropic-key').value.trim();
+      const statusEl = container.querySelector('#st-ai-key-status');
+      if (key) {
+        localStorage.setItem('bb_anthropic_key', key);
+        statusEl.textContent = 'Saved ✓';
+        statusEl.style.color = 'var(--green)';
+        Utils.showToast('Anthropic API key saved.');
+      } else {
+        localStorage.removeItem('bb_anthropic_key');
+        statusEl.textContent = 'Cleared';
+        statusEl.style.color = 'var(--text-muted)';
+        Utils.showToast('Anthropic API key cleared.');
+      }
+    });
+
     // ── Event: Export / Import (EXPORT-01–04) ────────────────────────────
     container.querySelector('#st-export-json').addEventListener('click', () => {
-      DataExport.exportJSON();
+      DataExport.exportJSON().catch(err => Utils.showToast(err.message, 'error'));
     });
     container.querySelector('#st-export-ai').addEventListener('click', () => {
       DataExport.exportAIContext();
