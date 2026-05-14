@@ -14,8 +14,8 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 
 | Phase | Name | Status | Plans | Progress |
 |-------|------|--------|-------|----------|
-| 1 | Agent Instructions Polish | Verified | 5 | 100% |
-| 2 | Web UI UX & Settings | Verified | 5 | 100% |
+| 1 | Agent Instructions Polish | Shipped | 5 | 100% |
+| 2 | Web UI UX & Settings | Shipped | 5 | 100% |
 | 3 | Content Management | Shipped | 4 | 100% |
 | 4 | Inventory & Recommender Depth | Pending | — | 0% |
 | 5 | AI Integration | Pending | — | 0% |
@@ -106,4 +106,4 @@ Wave 2 plan (03-03) depends on both Wave 1 plans completing first (claude-api.js
 
 ---
 *State initialized: 2026-05-04*
-*Last activity: 2026-05-14 — Phase 3 shipped via PR #23 (merged to main). UAT: 9/11 passed, 2 minor issues found and fixed post-UAT (flavor axes [object Object] in text export; AI generate missing creator/method_type/why_it_works). API request/response logging added to claude-api.js (bb_api_log, capped 50). Dashboard hero image uncropped. ROADMAP backlog updated with page-level imports, AI-08, and API log UI panel.*
+*Last activity: 2026-05-14 — Phases 1–3 all marked Shipped. Phase 2 backfilled: 5 SUMMARY.md files (02-00 through 02-04) and 02-VERIFICATION.md created from UAT records (02-UAT.md status: complete, all 5 SC passed). Phase 1 status updated from Verified → Shipped (artifacts already existed: 5 SUMMARY.md, VALIDATION.md, VERIFICATION.md, HUMAN-UAT.md). Phase 3 shipped via PR #23 (merged to main).*
