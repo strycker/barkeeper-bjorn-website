@@ -8,11 +8,11 @@ updated: 2026-05-14T01:00:00Z
 
 ## Current Test
 
-number: 4
-name: ZIP Import — Drag-and-Drop
+number: 5
+name: Invalid File Rejection
 expected: |
-  Drag the ZIP file onto the drop zone in Settings → drop zone border turns amber during
-  hover → preview panel appears with the same 4-file listing → Confirm Import writes normally.
+  Drag a non-ZIP file (e.g. a .jpg or .txt) onto the import drop zone → red error
+  message appears in the import area → no data is written.
 awaiting: user response
 
 ## Tests
@@ -33,7 +33,7 @@ result: pass
 
 ### 4. ZIP Import — Drag-and-Drop
 expected: Drag the ZIP file onto the drop zone in Settings → drop zone border turns amber during hover → preview panel appears with the same 4-file listing as the file picker flow. Confirm Import writes data normally.
-result: [pending]
+result: pass
 
 ### 5. Invalid File Rejection
 expected: Drag a non-ZIP file (e.g. a .jpg or .txt) onto the import drop zone → red error message appears in the import area ("Invalid file…" or similar) → no data is written, no writes appear in the network tab.
@@ -66,9 +66,9 @@ result: [pending]
 ## Summary
 
 total: 11
-passed: 2
+passed: 3
 issues: 1
-pending: 8
+pending: 7
 skipped: 0
 blocked: 0
 

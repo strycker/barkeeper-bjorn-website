@@ -154,6 +154,7 @@ Plans:
 - AI-05: AI inventory advice — "best single bottle to add" with explanation
 - AI-06: Classroom view (`#classroom`) — static reference: Techniques, Glassware, Ratios, Ingredients
 - AI-07: Classroom becomes interactive with Claude API key — ask Bjorn questions in lesson context
+- AI-08: AI-powered legacy import — user pastes or uploads a legacy markdown file (e.g. old chat session notes) and Claude parses it into structured JSON fields (inventory, profile, recipes, barkeeper), presenting a preview before confirming the write to GitHub. Bridges the gap between freeform markdown notes and the structured data store.
 
 **Files touched:** `app/js/claude-api.js` (new), `app/js/views/chat.js` (new), `app/js/views/classroom.js` (new), `app/js/data/classroom-content.js` (new), `app/js/views/settings.js`, `app/index.html`, `app/css/app.css`
 
