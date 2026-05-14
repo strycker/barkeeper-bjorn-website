@@ -8,12 +8,12 @@ updated: 2026-05-14T01:00:00Z
 
 ## Current Test
 
-number: 8
-name: Edit Recipe Form
+number: 9
+name: AI Integration Section in Settings
 expected: |
-  From a recipe detail card, click "Edit" → form opens pre-filled with all existing
-  values. Edit a field and click "Save Changes" → recipe detail re-renders with updated
-  values. No page reload required.
+  Settings page has an "AI Integration" section with a masked key input (shows •••),
+  a Show/Hide toggle, and a "Save API key" button. Clicking Show reveals the key;
+  Hide re-masks it. Saving a key shows "Saved ✓" and a toast.
 awaiting: user response
 
 ## Tests
@@ -50,7 +50,7 @@ result: pass
 
 ### 8. Edit Recipe Form
 expected: From a recipe detail card, click "Edit" → the same form opens pre-filled with all existing values (name, ingredients, method, glassware, etc.). Edit a field and click "Save Changes" → the recipe detail re-renders with the updated values. No page reload required.
-result: [pending]
+result: pass
 
 ### 9. AI Integration Section in Settings
 expected: Settings page has an "AI Integration" section with a label "Anthropic API Key", a password input (shows ••• not raw text), a "Show" toggle button, and a "Save API key" button. Clicking Show reveals the key text; clicking Hide re-masks it. Entering a key and clicking Save shows "Saved ✓" status text and a toast "Anthropic API key saved."
@@ -67,9 +67,9 @@ result: [pending]
 ## Summary
 
 total: 11
-passed: 6
+passed: 7
 issues: 1
-pending: 4
+pending: 3
 skipped: 0
 blocked: 0
 
