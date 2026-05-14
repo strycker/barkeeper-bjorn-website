@@ -14,9 +14,9 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 
 | Phase | Name | Status | Plans | Progress |
 |-------|------|--------|-------|----------|
-| 1 | Agent Instructions Polish | Verified | 5 | 100% |
-| 2 | Web UI UX & Settings | Verified | 5 | 100% |
-| 3 | Content Management | Complete | 4 | 100% |
+| 1 | Agent Instructions Polish | Shipped | 5 | 100% |
+| 2 | Web UI UX & Settings | Shipped | 5 | 100% |
+| 3 | Content Management | Shipped | 4 | 100% |
 | 4 | Inventory & Recommender Depth | Pending | — | 0% |
 | 5 | AI Integration | Pending | — | 0% |
 | 6 | Backend & Multi-User | Pending | — | 0% |
@@ -106,4 +106,4 @@ Wave 2 plan (03-03) depends on both Wave 1 plans completing first (claude-api.js
 
 ---
 *State initialized: 2026-05-04*
-*Last activity: 2026-05-14 — Phase 3 plan 03-03 executed; AI integration shipped (claude-api.js IIFE, Settings AI Integration section with masked key input, handleGenerate wired to ClaudeAPI.generateRecipe with inline field population and spinner UX); Phase 3 complete 4/4 plans. Nyquist gap-fill: tests/check-phase3.sh created (9 static analysis checks, all passing); 03-VALIDATION.md wave_0_complete set to true, Validation Audit section added (9/9 gaps filled, all static checks green).*
+*Last activity: 2026-05-14 — Phases 1–3 all marked Shipped. Phase 2 backfilled: 5 SUMMARY.md files (02-00 through 02-04) and 02-VERIFICATION.md created from UAT records (02-UAT.md status: complete, all 5 SC passed). Phase 1 status updated from Verified → Shipped (artifacts already existed: 5 SUMMARY.md, VALIDATION.md, VERIFICATION.md, HUMAN-UAT.md). Phase 3 shipped via PR #23 (merged to main).*
