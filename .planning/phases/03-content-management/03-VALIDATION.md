@@ -3,7 +3,7 @@ phase: 3
 slug: content-management
 status: draft
 nyquist_compliant: false
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-05-13
 ---
 
@@ -37,22 +37,31 @@ created: 2026-05-13
 
 ## Per-Task Verification Map
 
-| Surface | Plan | Wave | Requirement | Test Type | Verification |
-|---------|------|------|-------------|-----------|-------------|
-| New Recipe button + form renders | 03-02 | 1 | RECIPE-01, RECIPE-04 | manual | Click "New Recipe" → form appears in-place; no route change |
-| Required field gate | 03-02 | 1 | RECIPE-01 | manual | Submit with empty name → toast error; form stays open |
-| Edit button + pre-filled form | 03-02 | 1 | RECIPE-02 | manual | Recipe detail → click Edit → form pre-filled; Save → detail re-renders |
-| Image upload UI | 03-02 | 1 | RECIPE-03 | manual | Recipe detail → choose file → spinner → image appears below |
-| AI prompt field (new recipe only) | 03-02 | 1 | RECIPE-05 | manual | New Recipe form has prompt field; Edit form does not |
-| AI generate (key present) | 03-03 | 2 | RECIPE-05 | manual | Enter prompt → spinner → fields populate; key absent → button hidden |
-| AI key field in Settings | 03-03 | 2 | RECIPE-05 | manual | Settings → AI Integration section → save key → persists across reload |
-| ZIP export download | 03-01 | 1 | EXPORT-01 | manual | Export → ZIP file downloads; open ZIP → 4 JSON files present |
-| AI-context text export | 03-01 | 1 | EXPORT-02 | manual | Export for AI → .md file downloads; contains persona + inventory + recipes |
-| ZIP import file picker | 03-01 | 1 | EXPORT-03 | manual | Import → file picker → valid ZIP → preview panel shows 4 files |
-| ZIP import drag-and-drop | 03-01 | 1 | EXPORT-03 | manual | Drag ZIP onto drop zone → same preview panel |
-| Import confirm → writes to GitHub | 03-01 | 1 | EXPORT-03 | manual | Confirm Import → 4 API writes → toast success → State reloads |
-| Import preview lists files | 03-01 | 1 | EXPORT-04 | manual | Preview panel lists each of the 4 file names with overwrite warning |
-| Invalid ZIP rejected | 03-01 | 1 | EXPORT-03 | manual | Non-ZIP file → toast error; no writes |
+| Surface | Plan | Wave | Requirement | Test Type | Command | Status |
+|---------|------|------|-------------|-----------|---------|--------|
+| claude-api.js exists | 03-03 | 2 | RECIPE-05 | automated | `bash tests/check-phase3.sh` | ✅ |
+| anthropic-dangerous-direct-browser-access header | 03-03 | 2 | RECIPE-05 | automated | `bash tests/check-phase3.sh` | ✅ |
+| handleGenerate wired in recipes.js | 03-03 | 2 | RECIPE-05 | automated | `bash tests/check-phase3.sh` | ✅ |
+| sect-ai-key in settings.js | 03-03 | 2 | RECIPE-05 | automated | `bash tests/check-phase3.sh` | ✅ |
+| bb_anthropic_key stored in settings.js | 03-03 | 2 | RECIPE-05 | automated | `bash tests/check-phase3.sh` | ✅ |
+| dragover event in export.js | 03-01 | 1 | EXPORT-03, D-09 | automated | `bash tests/check-phase3.sh` | ✅ |
+| claude-api.js script tag in index.html | 03-01 | 1 | RECIPE-05 | automated | `bash tests/check-phase3.sh` | ✅ |
+| JSZip script tag in index.html | 03-01 | 1 | EXPORT-01 | automated | `bash tests/check-phase3.sh` | ✅ |
+| JS syntax valid (all 4 modified files) | 03-01–03-03 | 1–2 | all | automated | `bash tests/check-phase3.sh` | ✅ |
+| New Recipe button + form renders | 03-02 | 1 | RECIPE-01, RECIPE-04 | manual | — | ⬜ |
+| Required field gate | 03-02 | 1 | RECIPE-01 | manual | — | ⬜ |
+| Edit button + pre-filled form | 03-02 | 1 | RECIPE-02 | manual | — | ⬜ |
+| Image upload UI | 03-02 | 1 | RECIPE-03 | manual | — | ⬜ |
+| AI prompt field (new recipe only) | 03-02 | 1 | RECIPE-05 | manual | — | ⬜ |
+| AI generate (key present) | 03-03 | 2 | RECIPE-05 | manual | — | ⬜ |
+| AI key field in Settings | 03-03 | 2 | RECIPE-05 | manual | — | ⬜ |
+| ZIP export download | 03-01 | 1 | EXPORT-01 | manual | — | ⬜ |
+| AI-context text export | 03-01 | 1 | EXPORT-02 | manual | — | ⬜ |
+| ZIP import file picker | 03-01 | 1 | EXPORT-03 | manual | — | ⬜ |
+| ZIP import drag-and-drop | 03-01 | 1 | EXPORT-03 | manual | — | ⬜ |
+| Import confirm → writes to GitHub | 03-01 | 1 | EXPORT-03 | manual | — | ⬜ |
+| Import preview lists files | 03-01 | 1 | EXPORT-04 | manual | — | ⬜ |
+| Invalid ZIP rejected | 03-01 | 1 | EXPORT-03 | manual | — | ⬜ |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -65,6 +74,7 @@ Wave 0 creates the TEST-CHECKLIST.md before implementation begins.
 - [ ] `03-00-PLAN.md` executed — TEST-CHECKLIST.md present at `.planning/phases/03-content-management/TEST-CHECKLIST.md`
 - [ ] Checklist covers all 14 verification rows above
 - [ ] Dev server confirmed reachable (`python3 -m http.server 8000`)
+- [x] `tests/check-phase3.sh` created and passing — 9 static analysis checks (`bash tests/check-phase3.sh`)
 
 ---
 
