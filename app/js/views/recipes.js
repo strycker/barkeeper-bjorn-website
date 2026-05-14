@@ -426,6 +426,66 @@ Please provide:
     container.appendChild(wrap);
   }
 
+  // ── handleGenerate — live AI recipe generation (D-13) ─────────────────
+  // Reads #rf-ai-prompt, calls ClaudeAPI.generateRecipe with current
+  // buildPromptContext(), populates form fields inline, manages spinner +
+  // form-field disable state. Errors surface as red toasts.
+  async function handleGenerate(wrap) {
+    const prompt = wrap.querySelector('#rf-ai-prompt').value.trim();
+    if (!prompt) {
+      Utils.showToast('Enter a description before generating.', 'error');
+      return;
+    }
+
+    const genBtn   = wrap.querySelector('#rf-generate');
+    const statusEl = wrap.querySelector('#rf-generate-status');
+
+    // Disable Generate button and all form fields while in-flight (D-13)
+    genBtn.disabled = true;
+    genBtn.textContent = 'Generating…';
+    statusEl.textContent = '';
+    const formFields = wrap.querySelectorAll('input, textarea, button:not(#rf-generate)');
+    formFields.forEach(el => { el.disabled = true; });
+
+    try {
+      const ctx = buildPromptContext();  // { bkName, bkPreset, inventoryText, profileText }
+      const recipe = await ClaudeAPI.generateRecipe(prompt, ctx);
+
+      // Populate form fields inline (D-13). Assigning to input.value does not
+      // parse HTML — no XSS vector. escapeHtml is only needed for innerHTML sinks.
+      if (recipe.name)          wrap.querySelector('#rf-name').value      = recipe.name;
+      if (recipe.tagline)       wrap.querySelector('#rf-tagline').value   = recipe.tagline;
+      if (recipe.method)        wrap.querySelector('#rf-method').value    = recipe.method;
+      if (recipe.glassware)     wrap.querySelector('#rf-glassware').value = recipe.glassware;
+      if (recipe.garnish)       wrap.querySelector('#rf-garnish').value   = recipe.garnish;
+      if (recipe.tasting_notes) wrap.querySelector('#rf-profile').value   = recipe.tasting_notes;
+
+      // Rebuild ingredient rows from AI response (ingredientRowHtml escapes)
+      if (Array.isArray(recipe.ingredients) && recipe.ingredients.length) {
+        const ingContainer = wrap.querySelector('#rf-ingredients');
+        ingContainer.innerHTML = recipe.ingredients
+          .map((ing, i) => ingredientRowHtml(ing, i))
+          .join('');
+        bindIngredientRemove(wrap);
+      }
+
+      Utils.showToast('AI draft loaded — review and save.');
+
+    } catch (err) {
+      Utils.showToast('Generation failed: ' + err.message, 'error');
+    } finally {
+      // Always re-enable form fields and reset Generate button regardless of outcome
+      const allFields = wrap.querySelectorAll('input, textarea, button');
+      allFields.forEach(el => { el.disabled = false; });
+      genBtn.textContent = 'Generate';
+      // Edge case: user removed key during generation — re-disable Generate
+      if (!localStorage.getItem('bb_anthropic_key')) {
+        genBtn.disabled = true;
+        genBtn.style.opacity = '0.4';
+      }
+    }
+  }
+
   function renderForm(r, container) {
     const isEdit = !!r;
     container.innerHTML = '';
