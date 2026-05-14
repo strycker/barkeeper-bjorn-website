@@ -62,9 +62,11 @@ Upgrade inventory bottles from simple objects to fully structured entries with i
 
 - **D-25: Ingredient matching string** — For each `bottleEntry` object, the engine extracts `style` as the primary match string, `brand` as secondary. The `_buildLookup` extractor functions must be updated to handle both old strings (backward compat during transition) and new objects.
 
-### Known Bug — Hotfixed Before Phase 4 Planning
+### Known Bugs
 
 - **BUG-01 (hotfixed 2026-05-14):** The recommender engine's `lc` helper in `recommender-engine.js` was converting bottle objects to `"[object object]"` instead of extracting their `.name` field. This caused all object-format bottles (Bourbon, Gin, Japanese Whisky, etc.) to appear as missing in the one-away tab even when present in inventory. **Fix applied:** `lc` now extracts `s?.name` from objects before lowercasing. Planner must include a regression test in the Phase 4 test checklist verifying that bottles stored as `{name: "X"}` objects match correctly against the classics DB.
+
+- **BUG-02 (open, to fix in Phase 4):** Recommender false positives — drinks are sometimes listed as buildable or one-away when the user is actually 2+ bottles away. Example reported 2026-05-14: a Scotch-based recipe appeared in "one bottle away" claiming the only missing ingredient was "Honey-Ginger Syrup," even though the user had no Scotch in inventory. Likely cause: overly broad keyword matching in `_hasIngredient` (e.g., keyword `"whisky"` matching a user's `"Japanese Whisky"` against a recipe that specifically needs Scotch). The substring `.includes()` match in `_hasIngredient` does not distinguish between spirit subtypes (Bourbon vs Rye vs Scotch vs Japanese Whisky are all "whiskey" but not interchangeable for many classic recipes). Planner must: (1) audit the classics DB ingredient keywords for over-broad terms, (2) decide whether to tighten keyword specificity, add a spirit-subtype guard in the engine, or both, (3) include false-positive regression tests in the Phase 4 test checklist.
 
 ### Claude's Discretion
 
