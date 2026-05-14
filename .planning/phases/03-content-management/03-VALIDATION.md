@@ -99,3 +99,30 @@ Wave 0 creates the TEST-CHECKLIST.md before implementation begins.
 - [ ] `nyquist_compliant: true` set in frontmatter
 
 **Approval:** pending
+
+---
+
+## Validation Audit
+
+**Audited:** 2026-05-14
+**Auditor:** gsd-nyquist-auditor (claude-sonnet-4-6)
+**Script:** `tests/check-phase3.sh`
+**Result:** 9/9 static checks green
+
+### Gap Coverage
+
+| # | Gap | Requirement | Check | Result |
+|---|-----|-------------|-------|--------|
+| 1 | claude-api.js exists | RECIPE-05 | `[ -f app/js/claude-api.js ]` | FILLED |
+| 2 | anthropic-dangerous-direct-browser-access header | RECIPE-05 | `grep -qF "anthropic-dangerous-direct-browser-access" claude-api.js` | FILLED |
+| 3 | handleGenerate wired in recipes.js | RECIPE-05 | `grep -q "function handleGenerate" recipes.js` | FILLED |
+| 4 | sect-ai-key in settings.js | RECIPE-05 | `grep -qF "sect-ai-key" settings.js` | FILLED |
+| 5 | bb_anthropic_key stored in settings.js | RECIPE-05 | `grep -qF "bb_anthropic_key" settings.js` | FILLED |
+| 6 | dragover event in export.js | EXPORT-03, D-09 | `grep -q "addEventListener.*dragover" export.js` | FILLED |
+| 7 | claude-api.js script tag in index.html | RECIPE-05 | `grep -qF "claude-api.js" index.html` | FILLED |
+| 8 | JSZip script tag in index.html | EXPORT-01 | `grep -qi "jszip" index.html` | FILLED |
+| 9 | JS syntax valid (all 4 modified files) | all | `node --check` on each file | FILLED |
+
+### Manual-Only Gaps (not automatable without browser)
+
+All 10 manual-only behaviors listed in the Manual-Only Verifications table above require live browser interaction and cannot be covered by static analysis or headless Node. Each has a test instruction in that table. No escalations — these are appropriately scoped as manual.
