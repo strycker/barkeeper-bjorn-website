@@ -91,5 +91,25 @@
     {
       "name": "Cardamom Syrup"
     }
+  ],
+  "mixers": [
+    "Sparkling water"
+  ],
+  "refrigerator_perishables": [
+    "Cream"
+  ],
+  "pantry_spice_rack": [
+    "Salt",
+    "Sugar",
+    "Brown Sugar",
+    "Nutmeg",
+    "Cinnamon"
+  ],
+  "fresh_produce": [
+    "Oranges",
+    "Lemons",
+    "Mint",
+    "Basil",
+    "Rosemary"
   ]
 }
