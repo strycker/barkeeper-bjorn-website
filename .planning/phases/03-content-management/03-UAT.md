@@ -8,13 +8,11 @@ updated: 2026-05-14T01:00:00Z
 
 ## Current Test
 
-number: 3
-name: ZIP Import — File Picker
+number: 4
+name: ZIP Import — Drag-and-Drop
 expected: |
-  Settings → (drag zone visible) → click to pick a file → select the ZIP just exported →
-  a preview panel appears listing the 4 file names with an overwrite warning →
-  click "Confirm Import" → progress messages appear → toast "Import complete."
-  Data is written (verify by reloading the page).
+  Drag the ZIP file onto the drop zone in Settings → drop zone border turns amber during
+  hover → preview panel appears with the same 4-file listing → Confirm Import writes normally.
 awaiting: user response
 
 ## Tests
@@ -31,7 +29,7 @@ severity: minor
 
 ### 3. ZIP Import — File Picker
 expected: Settings → (drag zone visible) → click to pick a file → select the ZIP just exported → a preview panel appears listing the 4 file names with an overwrite warning → click "Confirm Import" → progress messages appear → toast "Import complete." Data is written (verify by reloading the page).
-result: [pending]
+result: pass
 
 ### 4. ZIP Import — Drag-and-Drop
 expected: Drag the ZIP file onto the drop zone in Settings → drop zone border turns amber during hover → preview panel appears with the same 4-file listing as the file picker flow. Confirm Import writes data normally.
@@ -68,9 +66,9 @@ result: [pending]
 ## Summary
 
 total: 11
-passed: 1
+passed: 2
 issues: 1
-pending: 9
+pending: 8
 skipped: 0
 blocked: 0
 
