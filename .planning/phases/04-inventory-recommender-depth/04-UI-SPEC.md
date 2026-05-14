@@ -52,24 +52,26 @@ Exceptions:
 
 ## Typography
 
-Existing type scale is honored exactly. Phase 4 introduces no new sizes or weights.
+Existing type scale is honored exactly. Phase 4 introduces no new sizes or weights. The scale is exactly 4 sizes.
 
 | Role | Size | Weight | Line Height | CSS |
 |------|------|--------|-------------|-----|
+| Small / muted / label / meta | 12px (0.78–0.82rem) | 400 | 1.4 | chip text, card meta, form hints, section titles, tier labels, score labels |
 | Body | 15px | 400 (normal) | 1.6 | `html, body` base |
-| Label / meta | 13px (0.85rem) | 400 | 1.4 | chip text, card meta, form hints |
-| Small / muted | 12px (0.78–0.82rem) | 400 | 1.4 | section titles, tier labels, score labels |
 | Heading | 20px (1.3rem) | 400 | 1.2 | `h2` — section headings |
 | Display | 26px (1.7rem) | 400 | 1.1 | `h1` — page title |
 
 Font weights used: 400 (regular) and 600 (bold/semibold — `.btn-primary`, `.settings-section__heading`, headings where `font-weight: bold`). No third weight is introduced.
 
 Specific Phase 4 type usages:
-- Inline edit form field labels: 13px / 400 / `color: var(--text-dim)` (inherits existing `label` rule)
-- Canonical name suggestion banner: 13px / 400 / `color: var(--amber)` — matches `.rec-oneaway-banner` color treatment
-- Mood slider axis labels: 12px / 400 / `color: var(--text-muted)` — matches `.flavor-slider-labels`
-- Section heading "Two Bottles Away": 14px (0.9rem) / 400 / `color: var(--text-dim)` — same level as "One Bottle Away" section heading
-- Equipment tab strainer checkbox labels: 14px (0.9rem) / 400 / `color: var(--text)`
+- Inline edit form field labels: 12px / 400 / `color: var(--text-dim)`
+- Inline edit expand toggle ("More fields ▾" / "Fewer fields ▴"): 12px / 400 / `color: var(--text-dim)`
+- Canonical name suggestion banner: 12px / 400 / `color: var(--amber)` — matches `.rec-oneaway-banner` color treatment
+- Mood slider axis labels (pole labels): 12px / 400 / `color: var(--text-muted)` — matches `.flavor-slider-labels`
+- Mood slider axis name label (above each slider): 12px / 400 / `color: var(--text-dim)`
+- "Two Bottles Away" section heading: 15px / 400 / `color: var(--text-dim)` — same visual level as "One Bottle Away" section heading, uses body size
+- Equipment tab strainer checkbox labels: 15px / 400 / `color: var(--text)`
+- Equipment tab empty state: 15px / 400 / `color: var(--text-dim)`
 
 ---
 
@@ -87,7 +89,7 @@ All values from existing `:root` custom properties in `app/css/app.css`. Phase 4
 Accent (`--amber`) reserved for:
 - Active tab underline border
 - Chip edit state — left border on the expanded inline edit form below a chip
-- Mood slider "Save changes to profile" primary CTA button background
+- Mood slider "Save Bottle" primary CTA button background
 - Tier dot color for "Craft" tier (see tier palette below)
 - Canonical name suggestion banner text (`color: var(--amber)`)
 - "Unsaved changes" sticky save bar text
@@ -124,7 +126,7 @@ Old tier classes (`.tier-industrial`, `.tier-premium-accessible`, `.tier-boutiqu
 **Existing chip** (`bottle-chip`): tier dot + style name + remove button.
 
 **Phase 4 chip display:**
-- Primary text: `bottle.style` (e.g. "Bourbon") at 14px / `--text`
+- Primary text: `bottle.style` (e.g. "Bourbon") at 15px / `--text`
 - Secondary text: `bottle.brand` when present — 12px / `--text-muted` — rendered inline after a middot separator: `· Maker's Mark`
 - Tier dot: 7px circle, color per tier palette above
 - Click target (not remove button): entire chip surface minus the × button triggers inline edit expand (D-07)
@@ -148,22 +150,22 @@ Old tier classes (`.tier-industrial`, `.tier-premium-accessible`, `.tier-boutiqu
 - `best_for` — select: Sipping / Mixing / Both
 - `notes` — textarea, 2 rows max height, resizable vertically
 
-**Expand toggle:** Text link "More fields ▾" / "Fewer fields ▴" in `--text-dim` at 13px. No animation required; toggle show/hide is instant (no transition).
+**Expand toggle:** Text link "More fields ▾" / "Fewer fields ▴" in `--text-dim` at 12px. No animation required; toggle show/hide is instant (no transition).
 
 **Buttons:**
-- Save: `.btn.btn-primary.btn-sm` — "Save" — patches State, marks dirty, collapses form
-- Revert: `.btn.btn-ghost.btn-sm` — "Revert" — restores snapshot values, collapses form
+- Save: `.btn.btn-primary.btn-sm` — "Save Bottle" — patches State, marks dirty, collapses form
+- Revert: `.btn.btn-ghost.btn-sm` — "Revert Changes" — restores snapshot values, collapses form
 - Buttons sit in a `display:flex; gap:8px; justify-content:flex-end` row at bottom of form
 
-**Form collapse:** On Save or Revert, the form is removed from DOM. The chip grid re-renders with updated values.
+**Form collapse:** On Save Bottle or Revert Changes, the form is removed from DOM. The chip grid re-renders with updated values.
 
 **One-at-a-time rule:** Clicking a second chip while a form is open closes the open form first (revert behavior, no save prompt) then opens the new form below the new chip's section grid.
 
 ### 3. Add-Bottle Row (Extended — D-01, D-02, D-24)
 
-**Existing:** Single text input + tier select + "Add" button.
+**Existing:** Single text input + tier select + "Add Bottle" button.
 
-**Phase 4 change:** Tier select is removed from the add-bottle row (tier is set in the edit form after adding). The add-bottle row becomes: style/name input + "Add" button only. Tier defaults to null on add.
+**Phase 4 change:** Tier select is removed from the add-bottle row (tier is set in the edit form after adding). The add-bottle row becomes: style/name input + "Add Bottle" button only. Tier defaults to null on add.
 
 **Canonical name banner (D-24):** Renders as a block element immediately below the add-bottle input (not inside the input, not a tooltip). Visible only when `CanonicalNames.suggest(value)` returns a result.
 
@@ -172,7 +174,7 @@ Banner markup pattern (new CSS class `.canonical-suggestion`):
 - Border: `1px solid var(--amber-dim)`
 - Border-radius: `var(--radius-sm)` (5px)
 - Padding: `6px 10px`
-- Font: 13px / `--text`
+- Font: 12px / `--text`
 - Text: "Did you mean: **{canonical name}**?"
 - Action: inline `<button>` labeled "Use it" — `.btn-ghost.btn-sm` style, displayed inline (not block)
 - Behavior: clicking "Use it" sets input value to canonical name and removes banner; banner clears on input clear
@@ -189,7 +191,7 @@ Banner markup pattern (new CSS class `.canonical-suggestion`):
 - Checked state: label text color changes to `var(--amber)`, border-color `var(--amber)`
 - Data path: `inventory.equipment.strainers` array
 
-**Empty state for Equipment tab:** "No equipment tracked yet. Check the strainers you own below." in `--text-dim` at 14px.
+**Empty state for Equipment tab:** "No equipment tracked yet. Check the strainers you own below." in `--text-dim` at 15px.
 
 ### 5. Recommender Layout (D-20, D-21)
 
@@ -216,7 +218,7 @@ Banner markup pattern (new CSS class `.canonical-suggestion`):
 5. Season (Summer ← → Winter)
 6. Risk (Safe ← → Adventurous)
 
-**Visual:** Each slider uses the existing `.axis-slider` CSS class (webkit-styled range input, 4px track, 16px thumb, amber border). Pole labels use `.axis-pole-label--left` / `.axis-pole-label--right` at 12px / `--text-muted`. Axis name label at 13px / `--text-dim` above the slider.
+**Visual:** Each slider uses the existing `.axis-slider` CSS class (webkit-styled range input, 4px track, 16px thumb, amber border). Pole labels use `.axis-pole-label--left` / `.axis-pole-label--right` at 12px / `--text-muted`. Axis name label at 12px / `--text-dim` above the slider.
 
 **Section heading:** "Mood" in `.inventory-section-title` style (12px, uppercase, letter-spaced, `--amber-dim`).
 
@@ -244,7 +246,7 @@ Active state: `background: var(--amber-dim); border-color: var(--amber); color: 
 
 **Two-away card additions (D-18):** Below the ingredient chip row, two missing-ingredient rows are shown. Each row:
 - Text: missing ingredient name in `--amber`
-- Inline link: "Add to shopping list →" in `--blue` / 13px — appends item to `inventory.unassigned` shopping list and shows toast "Added to shopping list"
+- Inline link: "Add to shopping list →" in `--blue` / 12px — appends item to `inventory.unassigned` shopping list and shows toast "Added to shopping list"
 
 ### 8. Occasion Filter Chips (D-19)
 
@@ -266,11 +268,11 @@ Active state: `background: var(--amber-dim); border-color: var(--amber); color: 
 
 | Element | Copy |
 |---------|------|
-| Primary CTA — add bottle | "Add" |
+| Primary CTA — add bottle | "Add Bottle" |
 | Primary CTA — save inventory | "Save to GitHub" |
 | Primary CTA — save mood to profile | "Save to Profile" |
-| Primary CTA — save inline edit | "Save" |
-| Secondary CTA — revert inline edit | "Revert" |
+| Primary CTA — save inline edit | "Save Bottle" |
+| Secondary CTA — revert inline edit | "Revert Changes" |
 | Secondary CTA — collapse mood sliders (mobile) | "Hide Sliders ▴" |
 | Secondary CTA — expand mood sliders (mobile) | "Adjust Mood ▾" |
 | Secondary CTA — reset sliders to saved | "Reset to saved" |
@@ -288,7 +290,7 @@ Active state: `background: var(--amber-dim); border-color: var(--amber); color: 
 | Empty — bottle section | "Nothing here yet" (existing pattern — `font-style: italic; color: var(--text-muted)`) |
 | Error — save failed | "Save failed: {error message}" (existing pattern from `saveInventory`) |
 | Error — recommender no inventory | "Complete onboarding first so I know your inventory and taste preferences." (existing pattern) |
-| Destructive — remove bottle chip | No confirmation dialog. Clicking × removes immediately; user recovers via Revert on open form or Discard on save bar. |
+| Destructive — remove bottle chip | No confirmation dialog. Clicking × removes immediately; user recovers via Revert Changes on open form or Discard on save bar. |
 | Section heading — scope level 0 | "You Can Make These" |
 | Section heading — scope level 1 | "One Bottle Away" |
 | Section heading — scope level 2 | "Two Bottles Away" |
@@ -308,7 +310,7 @@ All inventory edits follow the existing three-step pattern:
 2. `markDirty()` → sticky save bar appears (`display: flex`, `top: 60px`)
 3. "Save to GitHub" → `State.save('inventory')` → save bar hidden, toast shown
 
-Inline edit form Save button triggers steps 1–2 only. The sticky save bar handles step 3.
+Inline edit form Save Bottle button triggers steps 1–2 only. The sticky save bar handles step 3.
 
 ### Migration Write (D-06)
 
@@ -411,6 +413,8 @@ No third-party registries. No npm packages. All new code is vanilla JS following
 | Levenshtein thresholds | Claude's Discretion (CONTEXT.md §Claude's Discretion) |
 | Edit-distance threshold values | Claude's Discretion |
 | CSS breakpoint 860px for sidebar | Claude's Discretion (consistent with existing 640px breakpoint) |
+| CTA labels (Save Bottle, Add Bottle, Revert Changes) | gsd-ui-checker revision — 2026-05-14 |
+| Typography collapsed from 5 to 4 sizes (13px dropped, 14px remapped) | gsd-ui-checker revision — 2026-05-14 |
 
 ---
 
