@@ -106,4 +106,4 @@ Wave 2 plan (03-03) depends on both Wave 1 plans completing first (claude-api.js
 
 ---
 *State initialized: 2026-05-04*
-*Last activity: 2026-05-14 — Phase 4 context gathered. Stopped at: Phase 4 context gathered. Resume file: `.planning/phases/04-inventory-recommender-depth/04-CONTEXT.md`. Prior: Phases 1–3 all marked Shipped. Phase 3 shipped via PR #23 (merged to main).*
+*Last activity: 2026-05-14 — Phase 4 UI-SPEC written. Stopped at: UI design contract complete. Resume file: `.planning/phases/04-inventory-recommender-depth/04-UI-SPEC.md`. Prior: Phase 4 context gathered (04-CONTEXT.md). Phases 1–3 all marked Shipped. Phase 3 shipped via PR #23 (merged to main).*
