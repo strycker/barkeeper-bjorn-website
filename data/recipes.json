@@ -7,15 +7,15 @@
       "ingredients": [
         {
           "amount": "1 oz",
-          "name": "mezcal"
+          "name": "Mezcal"
         },
         {
           "amount": "1 oz",
-          "name": "white Jamaican rum"
+          "name": "White Jamaican Rum"
         },
         {
           "amount": "2.5 oz",
-          "name": "pear juice"
+          "name": "Pear Juice"
         },
         {
           "amount": "1 oz",
@@ -43,13 +43,13 @@
           "name": "Black walnut bitters"
         }
       ],
-      "method": "Shake hard with ice. Strain into a chilled martini glass.",
+      "method": "Shake hard with ice.  Strain into a chilled martini glass.",
       "tagline": "Smokey Mezcal cocktail with pear juice and rhubarb bitters",
       "date_created": "2026-05-01",
       "method_type": "shaken",
       "glassware": "Martini",
       "garnish": "Pear slice + cocktail cherry",
-      "profile": "Smoky-meets-pear shaken cocktail. Desert/Mexican thematic — the prickly pear preserves are the structural pun (a \"pear\" that isn't a pear, growing in mezcal country). Recommended sub-spirit pairing: white Jamaican rum first choice (funky/vegetal echoes agave's roasted notes; Jamaican esters complement pear esters), gin second (London Dry > floral — botanicals can complement pear, but heavy florals will fight it), vodka third (subtracts smoke without adding character).",
+      "profile": "Smoky-meets-pear shaken cocktail. Desert/Mexican thematic -- the prickly pear preserves are the structural pun (a \"pear\" that isn't a pear, growing in mezcal country). Recommended sub-spirit pairing: white Jamaican rum first choice (funky/vegetal echoes agave's roasted notes; Jamaican esters complement pear esters), gin second (London Dry > floral botanicals can complement pear, but heavy florals will fight it), vodka third (subtracts smoke without adding character).",
       "why_it_works": "Mezcal offers smokey flavors that compliment the pear",
       "confirmed_built": true,
       "ratings": {
