@@ -8,11 +8,13 @@ updated: 2026-05-14T01:00:00Z
 
 ## Current Test
 
-number: 10
-name: Generate Button — Disabled Without Key
+number: 11
+name: Generate Button — Enabled With Key
 expected: |
-  Settings → AI Integration → clear the API key (save empty) → Recipes → "+ New Recipe"
-  → Generate button is greyed out / disabled with tooltip about needing an API key.
+  Add an Anthropic API key in Settings → New Recipe form → Generate button is enabled.
+  Enter a cocktail description, click Generate → button shows "Generating…" and form
+  fields are disabled. On success, fields populate and toast "AI draft loaded — review
+  and save." On error (bad key), red toast "Generation failed: …" and button re-enables.
 awaiting: user response
 
 ## Tests
@@ -57,7 +59,7 @@ result: pass
 
 ### 10. Generate Button — Disabled Without Key
 expected: Open Settings → AI Integration → clear the API key (save empty) → navigate to Recipes → click "+ New Recipe" → the Generate button in the AI section is greyed out / disabled. Hovering shows a tooltip about needing an API key in Settings.
-result: [pending]
+result: pass
 
 ### 11. Generate Button — Enabled With Key
 expected: Add an Anthropic API key in Settings → New Recipe form → Generate button is enabled. Enter a cocktail description in the prompt field (e.g. "a smoky mezcal sour with honey"), click Generate → button shows "Generating…" and form fields are disabled. On success, name, tagline, method, glassware, garnish, profile, and ingredient rows are all populated. Toast "AI draft loaded — review and save." On error (bad key), red toast "Generation failed: Invalid API key…" and button re-enables.
@@ -66,9 +68,9 @@ result: [pending]
 ## Summary
 
 total: 11
-passed: 8
+passed: 9
 issues: 1
-pending: 2
+pending: 1
 skipped: 0
 blocked: 0
 
