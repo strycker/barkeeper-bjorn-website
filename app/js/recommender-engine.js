@@ -1,8 +1,8 @@
 // Recommender Engine — matches classics-db recipes against user inventory + flavor profile
 const RecommenderEngine = (() => {
 
-  // Safe lowercase — handles null/undefined/non-string inventory items
-  const lc = s => (typeof s === 'string' ? s : String(s ?? '')).toLowerCase();
+  // Safe lowercase — handles strings, bottle objects {name}, and null/undefined
+  const lc = s => (typeof s === 'string' ? s : (s?.name ?? String(s ?? ''))).toLowerCase();
 
   // Map classics-db searchIn keys → extractor functions for actual inventory structure
   // Inventory top-level: base_spirits{whiskey,brandy,rum,agave,white_spirits,other},
