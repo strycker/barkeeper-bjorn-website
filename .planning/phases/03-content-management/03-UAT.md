@@ -8,11 +8,12 @@ updated: 2026-05-14T01:00:00Z
 
 ## Current Test
 
-number: 5
-name: Invalid File Rejection
+number: 6
+name: New Recipe Form — In-Place
 expected: |
-  Drag a non-ZIP file (e.g. a .jpg or .txt) onto the import drop zone → red error
-  message appears in the import area → no data is written.
+  Recipes → Originals tab → click "+ New Recipe" → an empty recipe form appears in the
+  main content area. The URL hash stays at #recipes (no route change). A "← Back to
+  Recipes" button appears at the top.
 awaiting: user response
 
 ## Tests
@@ -37,7 +38,7 @@ result: pass
 
 ### 5. Invalid File Rejection
 expected: Drag a non-ZIP file (e.g. a .jpg or .txt) onto the import drop zone → red error message appears in the import area ("Invalid file…" or similar) → no data is written, no writes appear in the network tab.
-result: [pending]
+result: pass
 
 ### 6. New Recipe Form — In-Place
 expected: Recipes → Originals tab → click "+ New Recipe" → an empty recipe form appears in the main content area. The URL hash stays at #recipes (no route change). A "← Back to Recipes" button appears at the top.
@@ -66,9 +67,9 @@ result: [pending]
 ## Summary
 
 total: 11
-passed: 3
+passed: 4
 issues: 1
-pending: 7
+pending: 6
 skipped: 0
 blocked: 0
 
