@@ -106,4 +106,4 @@ Wave 2 plan (03-03) depends on both Wave 1 plans completing first (claude-api.js
 
 ---
 *State initialized: 2026-05-04*
-*Last activity: 2026-05-14 — Phase 4 context gathered. Stopped at: Phase 4 context gathered. Resume file: `.planning/phases/04-inventory-recommender-depth/04-CONTEXT.md`. Prior: Phases 1–3 all marked Shipped. Phase 3 shipped via PR #23 (merged to main).*
+*Last activity: 2026-05-14 — Phase 4 UI-SPEC revised (checker blocking fixes). Fixed: `.rec-section-heading` remapped to 20px (heading scale); `.canonical-suggestion` padding corrected to `8px 12px` (4-point grid); × button `aria-label` added; Visual Hierarchy section added. Resume file: `.planning/phases/04-inventory-recommender-depth/04-UI-SPEC.md`.*
