@@ -111,5 +111,18 @@
     "Mint",
     "Basil",
     "Rosemary"
-  ]
+  ],
+  "vetoes": {
+    "disliked_ingredients": [
+      "Chartreuse",
+      "Egg White",
+      "Eggs"
+    ],
+    "substitute_for_now": [
+      {
+        "missing": "Tequila",
+        "substitute": "Mexcal"
+      }
+    ]
+  }
 }
