@@ -148,12 +148,12 @@ const SettingsView = (() => {
         <div class="settings-section" id="sect-export">
           <div class="settings-section__heading">Export & Import</div>
           <p style="color:var(--text-dim);font-size:0.9rem;margin-bottom:16px;">
-            Download your bar data as a portable JSON bundle or as an AI-context text file,
+            Download your bar data as a portable ZIP bundle or as an AI-context text file,
             or restore from a previous export.
           </p>
           <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
-            <button class="btn btn-secondary btn-sm" id="st-export-json">Export All Data (JSON)</button>
-            <button class="btn btn-secondary btn-sm" id="st-export-ai">Export AI Context (text)</button>
+            <button class="btn btn-secondary btn-sm" id="st-export-json">Export All Data (ZIP)</button>
+            <button class="btn btn-secondary btn-sm" id="st-export-ai">Export for AI (text)</button>
           </div>
           <div id="st-import-area"></div>
         </div>
@@ -250,7 +250,7 @@ const SettingsView = (() => {
 
     // ── Event: Export / Import (EXPORT-01–04) ────────────────────────────
     container.querySelector('#st-export-json').addEventListener('click', () => {
-      DataExport.exportJSON();
+      DataExport.exportJSON().catch(err => Utils.showToast(err.message, 'error'));
     });
     container.querySelector('#st-export-ai').addEventListener('click', () => {
       DataExport.exportAIContext();

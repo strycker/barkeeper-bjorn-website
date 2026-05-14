@@ -1,4 +1,4 @@
-// Data Export / Import module — JSON bundle and AI-context text.
+// Data Export / Import module — ZIP bundle and AI-context text.
 // Exposed as DataExport IIFE; consumed by SettingsView.
 
 const DataExport = (() => {
@@ -23,15 +23,32 @@ const DataExport = (() => {
     return new Date().toISOString().slice(0, 10);
   }
 
-  // ── EXPORT-01: JSON bundle ────────────────────────────────────────────────
+  // ── EXPORT-01 / D-07: ZIP bundle ──────────────────────────────────────────
 
-  function exportJSON() {
-    const bundle = {
-      _export: { version: EXPORT_VERSION, app: 'barkeeper-bjorn', date: new Date().toISOString() },
+  async function exportJSON() {
+    if (typeof JSZip === 'undefined') {
+      Utils.showToast('ZIP library not loaded. Check your internet connection.', 'error');
+      return;
+    }
+    const zip = new JSZip();
+    const filenames = {
+      inventory: 'inventory.json',
+      recipes:   'recipes.json',
+      profile:   'bar-owner-profile.json',
+      barkeeper: 'barkeeper.json',
     };
-    SECTIONS.forEach(k => { bundle[k] = State.get(k) || {}; });
-    const filename = `barkeeper-bjorn-export-${today()}.json`;
-    triggerDownload(JSON.stringify(bundle, null, 2), filename, 'application/json');
+    SECTIONS.forEach(key => {
+      zip.file(filenames[key], JSON.stringify(State.get(key) || {}, null, 2));
+    });
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `barkeeper-bjorn-export-${today()}.zip`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   // ── EXPORT-02: AI-context text ────────────────────────────────────────────
@@ -150,138 +167,165 @@ const DataExport = (() => {
     }
 
     const text = lines.join('\n');
-    triggerDownload(text, `barkeeper-bjorn-context-${today()}.md`, 'text/markdown');
+    triggerDownload(text, `barkeeper-bjorn-ai-context-${today()}.txt`, 'text/plain');
   }
 
-  // ── EXPORT-03 / EXPORT-04: Import with diff preview + selective import ───
+  // ── EXPORT-03 / D-08 / D-09: ZIP import with drop zone + preview ─────────
 
   function renderImportUI(container) {
     container.innerHTML = `
       <div class="section-label" style="margin-top:4px;">Import Data</div>
       <p style="font-size:0.88rem;color:var(--text-dim);margin-bottom:12px;">
-        Select a previously exported JSON bundle. You'll see a summary before anything is written.
+        Drop a ZIP export file here or choose one. All 4 data files will be overwritten on GitHub after confirmation.
       </p>
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        <button class="btn btn-secondary btn-sm" id="imp-choose">Choose File</button>
-        <span id="imp-filename" style="font-size:0.85rem;color:var(--text-dim);">No file chosen</span>
+      <div class="import-drop-zone" id="imp-drop-zone">
+        <div style="font-size:0.95rem;margin-bottom:6px;">Drop a ZIP export file here</div>
+        <div style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px;">— or —</div>
+        <button class="btn btn-secondary btn-sm" id="imp-choose" type="button">Choose File…</button>
       </div>
-      <div id="imp-preview" style="display:none;margin-top:16px;"></div>`;
+      <div class="import-preview" id="imp-preview" style="display:none;"></div>`;
 
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
-    fileInput.accept = '.json,application/json';
+    fileInput.accept = '.zip,application/zip,application/x-zip-compressed';
     fileInput.style.display = 'none';
     container.appendChild(fileInput);
 
+    const zone = container.querySelector('#imp-drop-zone');
     container.querySelector('#imp-choose').addEventListener('click', () => fileInput.click());
-
     fileInput.addEventListener('change', () => {
       const file = fileInput.files[0];
+      if (file) handleFile(file);
+    });
+
+    // Drag-and-drop: dragover MUST preventDefault or drop never fires
+    zone.addEventListener('dragover', e => {
+      e.preventDefault();
+      zone.classList.add('dragover');
+    });
+    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
       if (!file) return;
-      container.querySelector('#imp-filename').textContent = file.name;
-
-      const reader = new FileReader();
-      reader.onload = e => {
-        try {
-          const bundle = JSON.parse(e.target.result);
-          renderImportPreview(bundle, container.querySelector('#imp-preview'));
-        } catch {
-          Utils.toast('Invalid JSON file.', 'error');
-        }
-      };
-      reader.readAsText(file);
-    });
-  }
-
-  function renderImportPreview(bundle, el) {
-    if (!bundle._export) {
-      el.style.display = '';
-      el.innerHTML = `<p style="color:var(--red);font-size:0.88rem;">Not a valid Barkeeper Bjorn export file (missing _export header).</p>`;
-      return;
-    }
-
-    const sectionsInBundle = SECTIONS.filter(k => k in bundle);
-    const summaries = sectionsInBundle.map(k => {
-      const current = State.get(k) || {};
-      const incoming = bundle[k] || {};
-      return { key: k, summary: describeDiff(k, current, incoming) };
-    });
-
-    const checkboxes = summaries.map(({ key, summary }) => `
-      <label style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;cursor:pointer;">
-        <input type="checkbox" class="imp-section-cb" data-key="${key}" checked
-               style="width:auto;margin-top:3px;flex:none;">
-        <div>
-          <div style="font-size:0.9rem;color:var(--text);font-weight:500;">${key}</div>
-          <div style="font-size:0.82rem;color:var(--text-dim);">${Utils.escapeHtml(summary)}</div>
-        </div>
-      </label>`).join('');
-
-    el.style.display = '';
-    el.innerHTML = `
-      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;">
-        <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:0.06em;">
-          Export from ${bundle._export.date ? new Date(bundle._export.date).toLocaleDateString() : 'unknown date'}
-          · v${bundle._export.version || '?'}
-        </div>
-        <div id="imp-checks">${checkboxes}</div>
-        <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
-          <button class="btn btn-primary btn-sm" id="imp-run">Import Selected</button>
-          <button class="btn btn-ghost btn-sm" id="imp-cancel">Cancel</button>
-        </div>
-        <p id="imp-status" style="font-size:0.82rem;min-height:1.2em;margin-top:8px;"></p>
-      </div>`;
-
-    el.querySelector('#imp-cancel').addEventListener('click', () => { el.style.display = 'none'; });
-
-    el.querySelector('#imp-run').addEventListener('click', async () => {
-      const selected = [...el.querySelectorAll('.imp-section-cb:checked')].map(cb => cb.dataset.key);
-      if (!selected.length) { Utils.toast('Select at least one section.', 'error'); return; }
-
-      const runBtn   = el.querySelector('#imp-run');
-      const statusEl = el.querySelector('#imp-status');
-      runBtn.disabled = true;
-      statusEl.textContent = 'Importing…';
-      statusEl.style.color = 'var(--text-muted)';
-
-      try {
-        for (const key of selected) {
-          State.set(key, bundle[key]);
-          await State.save(key, `Import ${key} from bundle via Settings`);
-        }
-        statusEl.textContent = `Imported: ${selected.join(', ')}`;
-        statusEl.style.color = 'var(--green)';
-        Utils.toast(`Imported ${selected.length} section${selected.length > 1 ? 's' : ''} successfully.`);
-        el.style.display = 'none';
-      } catch (err) {
-        statusEl.textContent = `Import failed: ${Utils.escapeHtml(err.message)}`;
-        statusEl.style.color = 'var(--red)';
-        Utils.toast('Import failed: ' + err.message, 'error');
-        runBtn.disabled = false;
+      if (!/\.zip$/i.test(file.name)) {
+        Utils.showToast('Drop a .zip file.', 'error');
+        return;
       }
+      handleFile(file);
     });
+
+    async function handleFile(file) {
+      if (typeof JSZip === 'undefined') {
+        Utils.showToast('ZIP library not loaded. Check your internet connection.', 'error');
+        return;
+      }
+      const preview = container.querySelector('#imp-preview');
+      try {
+        const zip = await JSZip.loadAsync(file);
+        const expected = {
+          'barkeeper.json':         'barkeeper',
+          'bar-owner-profile.json': 'profile',
+          'inventory.json':         'inventory',
+          'recipes.json':           'recipes',
+        };
+        const parsed = {};
+        let allPresent = true;
+
+        // Promise.all is safe here — reads ZIP entries from local memory, no GitHub API calls.
+        // Sequential await is only required for State.save() to avoid 409 SHA conflicts.
+        const rows = await Promise.all(Object.entries(expected).map(async ([filename, key]) => {
+          const entry = zip.file(filename);
+          if (!entry) {
+            allPresent = false;
+            return { filename, key, ok: false, size: 0 };
+          }
+          const text = await entry.async('string');
+          try {
+            parsed[key] = JSON.parse(text);
+            return { filename, key, ok: true, size: text.length };
+          } catch {
+            throw new Error(`Invalid JSON in ${filename}`);
+          }
+        }));
+
+        renderPreview(rows, parsed, allPresent, preview);
+      } catch (err) {
+        preview.style.display = '';
+        preview.innerHTML = `<p style="color:var(--red);font-size:0.88rem;">${Utils.escapeHtml('Not a valid Barkeeper Bjorn export. Expected a ZIP containing 4 JSON files. ' + err.message)}</p>`;
+      }
+    }
+
+    function renderPreview(rows, parsed, allPresent, preview) {
+      const rowsHtml = rows.map(({ filename, ok, size }) => `
+        <div class="import-preview-row">
+          <span class="badge badge-blue" style="flex:none;">json</span>
+          <span style="flex:1;">${Utils.escapeHtml(filename)}</span>
+          <span style="font-size:0.82rem;color:var(--text-muted);">${size ? (size / 1024).toFixed(1) + ' KB' : ''}</span>
+          <span style="color:${ok ? 'var(--green)' : 'var(--red)'};">${ok ? '✓' : '✕'}</span>
+        </div>`).join('');
+
+      preview.style.display = '';
+      preview.innerHTML = `
+        <div style="font-size:0.88rem;color:var(--text-dim);font-weight:600;margin-bottom:12px;">Ready to import 4 files</div>
+        <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:12px;">
+          These files will overwrite your current data on GitHub. This cannot be undone.
+        </p>
+        ${rowsHtml}
+        ${!allPresent ? `<p style="font-size:0.82rem;color:var(--red);margin-top:10px;">ZIP must contain all 4 data files.</p>` : ''}
+        <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" id="imp-confirm" type="button"
+                  ${!allPresent ? 'disabled' : ''}>Confirm Import</button>
+          <button class="btn btn-ghost btn-sm" id="imp-cancel" type="button">Cancel</button>
+        </div>
+        <p id="imp-status" style="font-size:0.82rem;min-height:1.2em;margin-top:8px;"></p>`;
+
+      preview.querySelector('#imp-cancel').addEventListener('click', () => {
+        preview.style.display = 'none';
+      });
+
+      if (!allPresent) return;
+
+      preview.querySelector('#imp-confirm').addEventListener('click', async () => {
+        const confirmBtn = preview.querySelector('#imp-confirm');
+        const statusEl   = preview.querySelector('#imp-status');
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Importing…';
+
+        const writeOrder = ['barkeeper', 'profile', 'inventory', 'recipes'];
+        const filenames  = {
+          barkeeper: 'barkeeper.json',
+          profile:   'bar-owner-profile.json',
+          inventory: 'inventory.json',
+          recipes:   'recipes.json',
+        };
+
+        try {
+          // Sequential writes — parallel State.save causes GitHub 409 SHA conflicts
+          for (const key of writeOrder) {
+            statusEl.textContent = `Writing ${filenames[key]}…`;
+            statusEl.style.color = 'var(--text-muted)';
+            State.set(key, parsed[key]);
+            await State.save(key, 'Import ZIP bundle');
+          }
+          statusEl.textContent = 'Import complete.';
+          statusEl.style.color = 'var(--green)';
+          Utils.showToast('Import complete.');
+          preview.style.display = 'none';
+        } catch (err) {
+          statusEl.textContent = `Import failed: ${Utils.escapeHtml(err.message)}`;
+          statusEl.style.color = 'var(--red)';
+          Utils.showToast('Import failed: ' + err.message, 'error');
+          confirmBtn.disabled = false;
+          confirmBtn.textContent = 'Confirm Import';
+        }
+      });
+    }
   }
 
-  function describeDiff(key, current, incoming) {
-    if (key === 'recipes') {
-      const curCount = (current.originals || []).length;
-      const incCount = (incoming.originals || []).length;
-      return `${incCount} original${incCount !== 1 ? 's' : ''} (currently ${curCount})`;
-    }
-    if (key === 'inventory') {
-      const curSpirits = Object.values(current.base_spirits || {}).flat().length;
-      const incSpirits = Object.values(incoming.base_spirits || {}).flat().length;
-      return `${incSpirits} spirit entr${incSpirits !== 1 ? 'ies' : 'y'} (currently ${curSpirits})`;
-    }
-    if (key === 'profile') {
-      const axes = Object.keys(incoming.flavor_profile?.axes || {}).length;
-      return `${axes} flavor axis setting${axes !== 1 ? 's' : ''}`;
-    }
-    if (key === 'barkeeper') {
-      return `Bartender: ${incoming.identity?.name || 'Barkeeper Bjorn'}`;
-    }
-    return 'Will be replaced with bundle data.';
-  }
+  // EXPORT_VERSION retained for potential future use
+  void EXPORT_VERSION;
 
   return { exportJSON, exportAIContext, renderImportUI };
 })();
