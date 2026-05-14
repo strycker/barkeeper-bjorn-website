@@ -8,12 +8,13 @@ updated: 2026-05-14T01:00:00Z
 
 ## Current Test
 
-number: 6
-name: New Recipe Form — In-Place
+number: 7
+name: Required Field Validation
 expected: |
-  Recipes → Originals tab → click "+ New Recipe" → an empty recipe form appears in the
-  main content area. The URL hash stays at #recipes (no route change). A "← Back to
-  Recipes" button appears at the top.
+  In the New Recipe form, click "Create Recipe" with nothing filled in → toast "Name is
+  required." Form stays open. Fill name only → toast "Creator is required." Fill both
+  but no ingredients → toast "At least one ingredient is required." Add ingredient but
+  leave Method blank → toast "Method is required." Form stays open throughout.
 awaiting: user response
 
 ## Tests
@@ -42,7 +43,7 @@ result: pass
 
 ### 6. New Recipe Form — In-Place
 expected: Recipes → Originals tab → click "+ New Recipe" → an empty recipe form appears in the main content area. The URL hash stays at #recipes (no route change). A "← Back to Recipes" button appears at the top.
-result: [pending]
+result: pass
 
 ### 7. Required Field Validation
 expected: In the New Recipe form, click "Create Recipe" without filling anything in → toast "Name is required." appears and the form stays open. Fill only the name and try again → toast "Creator is required." Fill name + creator but no ingredients → toast "At least one ingredient is required." Add an ingredient but leave Method blank → toast "Method is required." Form stays open throughout.
@@ -67,9 +68,9 @@ result: [pending]
 ## Summary
 
 total: 11
-passed: 4
+passed: 5
 issues: 1
-pending: 6
+pending: 5
 skipped: 0
 blocked: 0
 
