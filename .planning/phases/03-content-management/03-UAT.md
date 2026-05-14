@@ -8,13 +8,12 @@ updated: 2026-05-14T01:00:00Z
 
 ## Current Test
 
-number: 7
-name: Required Field Validation
+number: 8
+name: Edit Recipe Form
 expected: |
-  In the New Recipe form, click "Create Recipe" with nothing filled in → toast "Name is
-  required." Form stays open. Fill name only → toast "Creator is required." Fill both
-  but no ingredients → toast "At least one ingredient is required." Add ingredient but
-  leave Method blank → toast "Method is required." Form stays open throughout.
+  From a recipe detail card, click "Edit" → form opens pre-filled with all existing
+  values. Edit a field and click "Save Changes" → recipe detail re-renders with updated
+  values. No page reload required.
 awaiting: user response
 
 ## Tests
@@ -47,7 +46,7 @@ result: pass
 
 ### 7. Required Field Validation
 expected: In the New Recipe form, click "Create Recipe" without filling anything in → toast "Name is required." appears and the form stays open. Fill only the name and try again → toast "Creator is required." Fill name + creator but no ingredients → toast "At least one ingredient is required." Add an ingredient but leave Method blank → toast "Method is required." Form stays open throughout.
-result: [pending]
+result: pass
 
 ### 8. Edit Recipe Form
 expected: From a recipe detail card, click "Edit" → the same form opens pre-filled with all existing values (name, ingredients, method, glassware, etc.). Edit a field and click "Save Changes" → the recipe detail re-renders with the updated values. No page reload required.
@@ -68,9 +67,9 @@ result: [pending]
 ## Summary
 
 total: 11
-passed: 5
+passed: 6
 issues: 1
-pending: 5
+pending: 4
 skipped: 0
 blocked: 0
 
