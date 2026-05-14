@@ -455,10 +455,18 @@ Please provide:
       // parse HTML — no XSS vector. escapeHtml is only needed for innerHTML sinks.
       if (recipe.name)          wrap.querySelector('#rf-name').value      = recipe.name;
       if (recipe.tagline)       wrap.querySelector('#rf-tagline').value   = recipe.tagline;
+      // Auto-fill creator with AI-returned value or fall back to bartender name (D-02 required)
+      wrap.querySelector('#rf-creator').value = recipe.creator || ctx.bkName || 'Barkeeper Bjorn';
       if (recipe.method)        wrap.querySelector('#rf-method').value    = recipe.method;
       if (recipe.glassware)     wrap.querySelector('#rf-glassware').value = recipe.glassware;
       if (recipe.garnish)       wrap.querySelector('#rf-garnish').value   = recipe.garnish;
       if (recipe.tasting_notes) wrap.querySelector('#rf-profile').value   = recipe.tasting_notes;
+      if (recipe.why_it_works)  wrap.querySelector('#rf-why').value       = recipe.why_it_works;
+      if (recipe.method_type) {
+        const mtSelect = wrap.querySelector('#rf-method-type');
+        const validTypes = ['shaken','stirred','built','blended','thrown','other'];
+        if (validTypes.includes(recipe.method_type)) mtSelect.value = recipe.method_type;
+      }
 
       // Rebuild ingredient rows from AI response (ingredientRowHtml escapes)
       if (Array.isArray(recipe.ingredients) && recipe.ingredients.length) {

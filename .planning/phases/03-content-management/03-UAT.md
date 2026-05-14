@@ -1,19 +1,14 @@
 ---
-status: testing
+status: complete
 phase: 03-content-management
 source: [03-01-SUMMARY.md, 03-02-SUMMARY.md, 03-03-SUMMARY.md]
 started: 2026-05-14T00:00:00Z
-updated: 2026-05-14T01:00:00Z
+updated: 2026-05-14T02:00:00Z
 ---
 
 ## Current Test
 
-number: 10
-name: Generate Button — Disabled Without Key
-expected: |
-  Settings → AI Integration → clear the API key (save empty) → Recipes → "+ New Recipe"
-  → Generate button is greyed out / disabled with tooltip about needing an API key.
-awaiting: user response
+[testing complete]
 
 ## Tests
 
@@ -57,22 +52,40 @@ result: pass
 
 ### 10. Generate Button — Disabled Without Key
 expected: Open Settings → AI Integration → clear the API key (save empty) → navigate to Recipes → click "+ New Recipe" → the Generate button in the AI section is greyed out / disabled. Hovering shows a tooltip about needing an API key in Settings.
-result: [pending]
+result: pass
 
 ### 11. Generate Button — Enabled With Key
 expected: Add an Anthropic API key in Settings → New Recipe form → Generate button is enabled. Enter a cocktail description in the prompt field (e.g. "a smoky mezcal sour with honey"), click Generate → button shows "Generating…" and form fields are disabled. On success, name, tagline, method, glassware, garnish, profile, and ingredient rows are all populated. Toast "AI draft loaded — review and save." On error (bad key), red toast "Generation failed: Invalid API key…" and button re-enables.
-result: [pending]
+result: issue
+reported: "info returned from the API may not have all of the necessary fields or json formatting, because it did not populate all of the required fields for saving this cocktail. Method type was not selected and Why it works was blank."
+severity: minor
 
 ## Summary
 
 total: 11
-passed: 8
-issues: 1
-pending: 2
+passed: 9
+issues: 2
+pending: 0
 skipped: 0
 blocked: 0
 
 ## Gaps
+
+- truth: "AI generate auto-populates creator, method_type, and why_it_works so the recipe can be saved without manual follow-up"
+  status: failed
+  reason: "User reported: Method type was not selected and Why it works was blank; could not save without filling those manually"
+  severity: minor
+  test: 11
+  root_cause: "handleGenerate does not fill #rf-creator (required field — D-02); claude-api.js buildSystemPrompt schema omits method_type and why_it_works; creator should default to ctx.bkName post-generate"
+  artifacts:
+    - path: "app/js/views/recipes.js"
+      issue: "handleGenerate does not set wrap.querySelector('#rf-creator').value after AI fill"
+    - path: "app/js/claude-api.js"
+      issue: "buildSystemPrompt schema omits method_type and why_it_works fields"
+  missing:
+    - "Add `if (recipe.creator) wrap.querySelector('#rf-creator').value = recipe.creator; else wrap.querySelector('#rf-creator').value = ctx.bkName;` in handleGenerate"
+    - "Add method_type and why_it_works to buildSystemPrompt JSON schema and map them in handleGenerate"
+  debug_session: ""
 
 - truth: "AI-context text export contains readable flavor profile values (e.g. '- sweet_tart: 0.7')"
   status: failed

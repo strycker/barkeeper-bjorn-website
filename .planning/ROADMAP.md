@@ -232,6 +232,7 @@ Plans:
 
 These items were captured during UAT and planning sessions but are not yet scheduled to a specific phase. They should be triaged into the appropriate phase during discuss-phase.
 
+- **Anthropic API request/response log** — Every call to the Anthropic API should be recorded in localStorage (`bb_api_log`, capped at 50 entries). Each entry stores: timestamp, type (request/response/error), model, prompt, system prompt, raw response text, token usage, and HTTP status. A "View API Log" panel in Settings (or a dedicated `#api-log` route) lets the developer inspect entries, copy raw JSON, and clear the log. Useful for debugging AI prompts, verifying model outputs, and iterating on system prompts during development. Basic implementation (localStorage log) added to `claude-api.js` in Phase 3 gap-fix; UI panel is the remaining backlog item. (Captured 2026-05-14)
 - **Page-level imports** — In addition to the all-data ZIP import in Settings, each data view should have its own targeted import: Recipes page accepts a multi-recipe JSON/ZIP file with a per-recipe select-or-save-all preview; Inventory page accepts an inventory JSON file; Profile page accepts a bar-owner-profile JSON. Each shows a diff preview before writing. (Captured 2026-05-14 during Phase 3 UAT)
 - **AI-powered legacy import (AI-08)** — User pastes or uploads a legacy markdown file (e.g. old chat session notes) and Claude parses it into structured JSON fields, presenting a preview before writing. Scheduled under Phase 5 as AI-08. (Captured 2026-05-14)
 

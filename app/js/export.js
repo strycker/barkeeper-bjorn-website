@@ -106,7 +106,11 @@ const DataExport = (() => {
     lines.push('## Flavor Profile');
     const axes = profile.flavor_profile?.axes || {};
     if (Object.keys(axes).length) {
-      Object.entries(axes).forEach(([k, v]) => lines.push(`- ${k}: ${v}`));
+      Object.entries(axes).forEach(([k, v]) => {
+        if (v?._skipped) return;
+        const pos = typeof v === 'object' ? v.position : v;
+        lines.push(`- ${k}: ${pos}`);
+      });
     } else {
       lines.push('_Not set._');
     }
