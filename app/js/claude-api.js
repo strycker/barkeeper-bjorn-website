@@ -40,9 +40,23 @@ const ClaudeAPI = (() => {
       `  "glassware": string,`,
       `  "garnish": string,`,
       `  "tasting_notes": string,`,
+      `  "method_type": "shaken" | "stirred" | "built" | "blended" | "thrown" | "other",`,
+      `  "why_it_works": string,`,
       `  "suggested_occasions": [string]`,
       `}`,
     ].join('\n');
+  }
+
+  const LOG_KEY     = 'bb_api_log';
+  const LOG_MAX     = 50;
+
+  function appendLog(entry) {
+    try {
+      const log = JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
+      log.push({ ts: new Date().toISOString(), ...entry });
+      if (log.length > LOG_MAX) log.splice(0, log.length - LOG_MAX);
+      localStorage.setItem(LOG_KEY, JSON.stringify(log));
+    } catch { /* storage full or disabled — silently skip */ }
   }
 
   function extractJSON(text) {
@@ -59,6 +73,15 @@ const ClaudeAPI = (() => {
     const model = getModel();
     const systemPrompt = buildSystemPrompt(ctx);
 
+    const requestBody = {
+      model,
+      max_tokens: 1500,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }],
+    };
+
+    appendLog({ type: 'request', model, prompt: userPrompt, system: systemPrompt });
+
     const res = await fetch(ENDPOINT, {
       method: 'POST',
       headers: {
@@ -67,28 +90,25 @@ const ClaudeAPI = (() => {
         'anthropic-version': API_VERSION,
         'anthropic-dangerous-direct-browser-access': 'true',
       },
-      body: JSON.stringify({
-        model,
-        max_tokens: 1500,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }],
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!res.ok) {
-      if (res.status === 401) throw new Error('Invalid API key. Check Settings.');
-      if (res.status === 429) {
-        const retry = res.headers.get('retry-after') || '?';
-        throw new Error(`Rate limited — retry after ${retry}s.`);
-      }
-      if (res.status === 529) throw new Error('Anthropic API overloaded. Try again in a moment.');
       const errBody = await res.json().catch(() => ({ error: { message: res.statusText } }));
-      throw new Error(errBody.error?.message || `HTTP ${res.status}`);
+      const msg =
+        res.status === 401 ? 'Invalid API key. Check Settings.' :
+        res.status === 429 ? `Rate limited — retry after ${res.headers.get('retry-after') || '?'}s.` :
+        res.status === 529 ? 'Anthropic API overloaded. Try again in a moment.' :
+        errBody.error?.message || `HTTP ${res.status}`;
+      appendLog({ type: 'error', status: res.status, message: msg });
+      throw new Error(msg);
     }
 
     const data = await res.json();
     const text = data.content?.[0]?.text || '';
     if (!text) throw new Error('Empty response from Anthropic API.');
+
+    appendLog({ type: 'response', status: res.status, raw: text, usage: data.usage });
 
     try {
       return extractJSON(text);
