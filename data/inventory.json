@@ -41,10 +41,9 @@
       {
         "name": "Gin"
       }
-    ]
+    ],
+    "other": []
   },
-  "pantry": {},
-  "barware": {},
   "unassigned": [
     "Bourbon"
   ],
@@ -54,6 +53,9 @@
     },
     {
       "name": "Sweet Vermouth"
+    },
+    {
+      "name": "Lillet"
     }
   ],
   "liqueurs_and_cordials": {
@@ -84,11 +86,14 @@
         "name": "Angostura"
       }
     ],
+    "aromatic_smoke": [],
+    "nut_earth": [],
     "fruit_botanical": [
       {
         "name": "Orange Bitters"
       }
-    ]
+    ],
+    "other": []
   },
   "syrups": [
     {
@@ -127,5 +132,10 @@
         "substitute": "Mezcal"
       }
     ]
-  }
+  },
+  "non_alcoholic_spirits": [],
+  "specialty_ingredients": [],
+  "garnish_and_service": [],
+  "past_inventory": [],
+  "shopping_list": []
 }
