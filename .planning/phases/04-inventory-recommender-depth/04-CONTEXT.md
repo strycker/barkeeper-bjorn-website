@@ -62,6 +62,10 @@ Upgrade inventory bottles from simple objects to fully structured entries with i
 
 - **D-25: Ingredient matching string** — For each `bottleEntry` object, the engine extracts `style` as the primary match string, `brand` as secondary. The `_buildLookup` extractor functions must be updated to handle both old strings (backward compat during transition) and new objects.
 
+### Known Bug — Hotfixed Before Phase 4 Planning
+
+- **BUG-01 (hotfixed 2026-05-14):** The recommender engine's `lc` helper in `recommender-engine.js` was converting bottle objects to `"[object object]"` instead of extracting their `.name` field. This caused all object-format bottles (Bourbon, Gin, Japanese Whisky, etc.) to appear as missing in the one-away tab even when present in inventory. **Fix applied:** `lc` now extracts `s?.name` from objects before lowercasing. Planner must include a regression test in the Phase 4 test checklist verifying that bottles stored as `{name: "X"}` objects match correctly against the classics DB.
+
 ### Claude's Discretion
 
 - Exact edit-distance threshold for fuzzy canonical name matching (recommend Levenshtein ≤ 2 for short tokens, ≤ 3 for longer ones)
