@@ -6,7 +6,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 
 **Core value:** The user's real-world bar inventory and flavor profile should power both AI-driven conversation and rule-based recommendations — seamlessly, whether in a chat session or the web app.
 
-**Current focus:** Phase 3 — Content Management
+**Current focus:** Phase 4 — Inventory & Recommender Depth
 
 ---
 
@@ -16,7 +16,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 |-------|------|--------|-------|----------|
 | 1 | Agent Instructions Polish | Verified | 5 | 100% |
 | 2 | Web UI UX & Settings | Verified | 5 | 100% |
-| 3 | Content Management | In Progress | 4 | 75% |
+| 3 | Content Management | Complete | 4 | 100% |
 | 4 | Inventory & Recommender Depth | Pending | — | 0% |
 | 5 | AI Integration | Pending | — | 0% |
 | 6 | Backend & Multi-User | Pending | — | 0% |
@@ -106,4 +106,4 @@ Wave 2 plan (03-03) depends on both Wave 1 plans completing first (claude-api.js
 
 ---
 *State initialized: 2026-05-04*
-*Last activity: 2026-05-14 — Phase 3 plan 03-02 executed; recipe form hardening shipped (8 Utils.toast fixes, "+ New Recipe" relabel, D-02 validation gate for ingredients+method, D-12 AI prompt scaffold with no-key disabled state); Phase 3 progress 3/4 plans complete*
+*Last activity: 2026-05-14 — Phase 3 plan 03-03 executed; AI integration shipped (claude-api.js IIFE, Settings AI Integration section with masked key input, handleGenerate wired to ClaudeAPI.generateRecipe with inline field population and spinner UX); Phase 3 complete 4/4 plans*
