@@ -133,7 +133,11 @@
       }
     ]
   },
-  "non_alcoholic_spirits": [],
+  "non_alcoholic_spirits": [
+    {
+      "name": "Seedlip"
+    }
+  ],
   "specialty_ingredients": [],
   "garnish_and_service": [],
   "past_inventory": [],
