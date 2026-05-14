@@ -132,7 +132,7 @@ Please provide:
   function renderOriginalsGrid(originals, container) {
     const addBtn = document.createElement('div');
     addBtn.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:12px;';
-    addBtn.innerHTML = `<button class="btn btn-secondary btn-sm">+ Add Recipe</button>`;
+    addBtn.innerHTML = `<button class="btn btn-secondary btn-sm">+ New Recipe</button>`;
     addBtn.querySelector('button').addEventListener('click', () => {
       renderForm(null, document.getElementById('main-content'));
     });
@@ -144,7 +144,7 @@ Please provide:
       empty.innerHTML = `
         <div class="empty-icon">🍹</div>
         <p>No original cocktails yet.</p>
-        <p style="font-size:0.85rem;color:var(--text-muted);">Design one with your AI bartender and it will appear here.</p>`;
+        <p style="font-size:0.85rem;color:var(--text-muted);">Click "+ New Recipe" or "✨ Generate with AI" to create your first one.</p>`;
       container.appendChild(empty);
       return;
     }
@@ -261,9 +261,9 @@ Please provide:
       recipes.last_updated = new Date().toISOString().slice(0, 10);
       State.set('recipes', recipes);
       State.save('recipes').then(() => {
-        Utils.toast('Recipe deleted.');
+        Utils.showToast('Recipe deleted.');
         render(container);
-      }).catch(err => Utils.toast('Save failed: ' + err.message, 'error'));
+      }).catch(err => Utils.showToast('Save failed: ' + err.message, 'error'));
     });
     topBar.querySelector('.back-btn').addEventListener('click', () => render(container));
     container.appendChild(topBar);
@@ -402,7 +402,7 @@ Please provide:
 
         statusEl.textContent = `Uploaded: images/${filename}`;
         statusEl.style.color = 'var(--green)';
-        Utils.toast('Image uploaded successfully.');
+        Utils.showToast('Image uploaded successfully.');
         selectedFile = null;
         fileInput.value = '';
         imgSection.querySelector('#rd-img-name').textContent = 'No file chosen';
@@ -411,7 +411,7 @@ Please provide:
       } catch (err) {
         statusEl.textContent = `Upload failed: ${Utils.escapeHtml(err.message)}`;
         statusEl.style.color = 'var(--red)';
-        Utils.toast('Upload failed: ' + err.message, 'error');
+        Utils.showToast('Upload failed: ' + err.message, 'error');
         uploadBtn.disabled = false;
       }
     });
@@ -545,8 +545,8 @@ Please provide:
     wrap.querySelector('#rf-save').addEventListener('click', () => {
       const name = wrap.querySelector('#rf-name').value.trim();
       const creator = wrap.querySelector('#rf-creator').value.trim();
-      if (!name) { Utils.toast('Name is required.', 'error'); return; }
-      if (!creator) { Utils.toast('Creator is required.', 'error'); return; }
+      if (!name) { Utils.showToast('Name is required.', 'error'); return; }
+      if (!creator) { Utils.showToast('Creator is required.', 'error'); return; }
 
       const ingredients = [...wrap.querySelectorAll('.rf-ing-row')].map(row => {
         const ing = {
@@ -610,10 +610,10 @@ Please provide:
       saveBtn.textContent = 'Saving…';
 
       State.save('recipes').then(() => {
-        Utils.toast(isEdit ? 'Recipe updated.' : 'Recipe created.');
+        Utils.showToast(isEdit ? 'Recipe updated.' : 'Recipe created.');
         renderDetail(updated, container);
       }).catch(err => {
-        Utils.toast('Save failed: ' + err.message, 'error');
+        Utils.showToast('Save failed: ' + err.message, 'error');
         saveBtn.disabled = false;
         saveBtn.textContent = isEdit ? 'Save Changes' : 'Create Recipe';
       });
