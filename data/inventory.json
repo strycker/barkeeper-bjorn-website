@@ -1,21 +1,47 @@
 {
-  "last_updated": "2026-05-12",
+  "last_updated": "2026-05-14",
   "base_spirits": {
     "whiskey": [
-      {
-        "name": "Bourbon"
-      }
+      { "name": "Bourbon", "created_at": "2026-05-14T00:00:00Z", "updated_at": "2026-05-14T00:00:00Z" },
+      { "name": "Japanese Whisky", "created_at": "2026-05-14T00:00:00Z", "updated_at": "2026-05-14T00:00:00Z" }
     ],
     "brandy": [
-      {
-        "name": "Cognac",
-        "tier": "premium-accessible"
-      }
-    ]
+      { "name": "Cognac", "tier": "premium-accessible", "created_at": "2026-05-14T00:00:00Z", "updated_at": "2026-05-14T00:00:00Z" }
+    ],
+    "rum": [],
+    "agave": [],
+    "white_spirits": [
+      { "name": "Gin", "created_at": "2026-05-14T00:00:00Z", "updated_at": "2026-05-14T00:00:00Z" }
+    ],
+    "other": []
   },
-  "pantry": {},
-  "barware": {},
-  "unassigned": [
-    "Bourbon"
-  ]
+  "fortified_wines_and_aperitif_wines": [],
+  "liqueurs_and_cordials": {
+    "fruit_forward": [],
+    "nut_coffee": [],
+    "herbal": [],
+    "specialty_regional": []
+  },
+  "bitters": {
+    "anchors": [],
+    "aromatic_smoke": [],
+    "nut_earth": [],
+    "fruit_botanical": [],
+    "other": []
+  },
+  "syrups": [],
+  "non_alcoholic_spirits": [],
+  "mixers": [],
+  "refrigerator_perishables": [],
+  "pantry_spice_rack": [],
+  "fresh_produce": [],
+  "specialty_ingredients": [],
+  "garnish_and_service": [],
+  "past_inventory": [],
+  "vetoes": {
+    "disliked_ingredients": [],
+    "substitute_for_now": []
+  },
+  "shopping_list": [],
+  "unassigned": []
 }
