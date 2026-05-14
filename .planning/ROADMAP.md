@@ -154,6 +154,7 @@ Plans:
 - AI-05: AI inventory advice — "best single bottle to add" with explanation
 - AI-06: Classroom view (`#classroom`) — static reference: Techniques, Glassware, Ratios, Ingredients
 - AI-07: Classroom becomes interactive with Claude API key — ask Bjorn questions in lesson context
+- AI-08: AI-powered legacy import — user pastes or uploads a legacy markdown file (e.g. old chat session notes) and Claude parses it into structured JSON fields (inventory, profile, recipes, barkeeper), presenting a preview before confirming the write to GitHub. Bridges the gap between freeform markdown notes and the structured data store.
 
 **Files touched:** `app/js/claude-api.js` (new), `app/js/views/chat.js` (new), `app/js/views/classroom.js` (new), `app/js/data/classroom-content.js` (new), `app/js/views/settings.js`, `app/index.html`, `app/css/app.css`
 
@@ -224,6 +225,15 @@ Plans:
 4. A user can create a forum topic in any category and reply to others' topics
 5. `GET /cocktails/buildable` returns correct recipes given a test inventory fixture
 6. Analytics Brain sub-agent produces a structured recommendation output with confidence scores
+
+---
+
+## Backlog / Future Enhancements
+
+These items were captured during UAT and planning sessions but are not yet scheduled to a specific phase. They should be triaged into the appropriate phase during discuss-phase.
+
+- **Page-level imports** — In addition to the all-data ZIP import in Settings, each data view should have its own targeted import: Recipes page accepts a multi-recipe JSON/ZIP file with a per-recipe select-or-save-all preview; Inventory page accepts an inventory JSON file; Profile page accepts a bar-owner-profile JSON. Each shows a diff preview before writing. (Captured 2026-05-14 during Phase 3 UAT)
+- **AI-powered legacy import (AI-08)** — User pastes or uploads a legacy markdown file (e.g. old chat session notes) and Claude parses it into structured JSON fields, presenting a preview before writing. Scheduled under Phase 5 as AI-08. (Captured 2026-05-14)
 
 ---
 
