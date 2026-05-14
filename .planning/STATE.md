@@ -16,7 +16,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 |-------|------|--------|-------|----------|
 | 1 | Agent Instructions Polish | Verified | 5 | 100% |
 | 2 | Web UI UX & Settings | Verified | 5 | 100% |
-| 3 | Content Management | In Progress | 4 | 50% |
+| 3 | Content Management | In Progress | 4 | 75% |
 | 4 | Inventory & Recommender Depth | Pending | — | 0% |
 | 5 | AI Integration | Pending | — | 0% |
 | 6 | Backend & Multi-User | Pending | — | 0% |
@@ -106,4 +106,4 @@ Wave 2 plan (03-03) depends on both Wave 1 plans completing first (claude-api.js
 
 ---
 *State initialized: 2026-05-04*
-*Last activity: 2026-05-14 — Phase 3 plan 03-01 executed; ZIP export/import with JSZip 3.10.1 + drag-and-drop drop zone shipped (EXPORT-01–04); Phase 3 progress 2/4 plans complete*
+*Last activity: 2026-05-14 — Phase 3 plan 03-02 executed; recipe form hardening shipped (8 Utils.toast fixes, "+ New Recipe" relabel, D-02 validation gate for ingredients+method, D-12 AI prompt scaffold with no-key disabled state); Phase 3 progress 3/4 plans complete*
