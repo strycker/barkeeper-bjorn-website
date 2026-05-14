@@ -17,7 +17,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 | 1 | Agent Instructions Polish | Shipped | 5 | 100% |
 | 2 | Web UI UX & Settings | Shipped | 5 | 100% |
 | 3 | Content Management | Shipped | 4 | 100% |
-| 4 | Inventory & Recommender Depth | Researched | — | 0% |
+| 4 | Inventory & Recommender Depth | Pattern-mapped | — | 0% |
 | 5 | AI Integration | Pending | — | 0% |
 | 6 | Backend & Multi-User | Pending | — | 0% |
 | 7 | Community, API & Multi-Agent | Pending | — | 0% |
@@ -106,4 +106,4 @@ Wave 2 plan (03-03) depends on both Wave 1 plans completing first (claude-api.js
 
 ---
 *State initialized: 2026-05-04*
-*Last activity: 2026-05-14 — Phase 4 research complete. Key findings: BUG-02 root cause confirmed (Rob Roy/Penicillin Scotch keyword over-match via bare "whisky" substring); `recipe.occasion` field is prose not tags (REC-03 blocker — planner must add `tags` array to classics-db recipes); `lc()` helper needs `s?.style ?? s?.name` update for D-25 backward compat. Resume file: `.planning/phases/04-inventory-recommender-depth/04-RESEARCH.md`.*
+*Last activity: 2026-05-14 — Phase 4 pattern mapping complete. 8 files classified; 7/8 have exact or role-match analogs; `canonical-names.js` (new file) patterned from recommender-engine.js IIFE structure. Key patterns: IIFE modules, dirty-state three-step flow (patch → markDirty → re-render), sequential State.save(), Utils.escapeHtml on all user strings. Resume file: `.planning/phases/04-inventory-recommender-depth/04-PATTERNS.md`.*
