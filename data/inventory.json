@@ -1,9 +1,18 @@
 {
-  "last_updated": "2026-05-12",
+  "last_updated": "2026-05-14",
   "base_spirits": {
     "whiskey": [
       {
         "name": "Bourbon"
+      },
+      {
+        "name": "Whisky"
+      },
+      {
+        "name": "Whiskey"
+      },
+      {
+        "name": "Irish"
       }
     ],
     "brandy": [
@@ -11,11 +20,76 @@
         "name": "Cognac",
         "tier": "premium-accessible"
       }
+    ],
+    "rum": [
+      {
+        "name": "White Jamaican Rum"
+      },
+      {
+        "name": "Dark Jamaican Rum"
+      }
+    ],
+    "agave": [
+      {
+        "name": "mezcal"
+      }
+    ],
+    "white_spirits": [
+      {
+        "name": "Gin"
+      }
     ]
   },
   "pantry": {},
   "barware": {},
   "unassigned": [
     "Bourbon"
+  ],
+  "fortified_wines_and_aperitif_wines": [
+    {
+      "name": "Cocchi"
+    },
+    {
+      "name": "Sweet Vermouth"
+    }
+  ],
+  "liqueurs_and_cordials": {
+    "fruit_forward": [
+      {
+        "name": "Cointreau"
+      }
+    ],
+    "nut_coffee": [
+      {
+        "name": "Coffee Liqueur"
+      }
+    ],
+    "herbal": [
+      {
+        "name": "Campari"
+      }
+    ],
+    "specialty_regional": [
+      {
+        "name": "Aperol"
+      }
+    ]
+  },
+  "bitters": {
+    "anchors": [
+      {
+        "name": "Angostura"
+      }
+    ],
+    "fruit_botanical": [
+      {
+        "name": "Orange Bitters"
+      }
+    ]
+  },
+  "syrups": [
+    {
+      "name": "Cardamom Syrup"
+    }
   ]
 }
