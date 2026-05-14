@@ -16,7 +16,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 |-------|------|--------|-------|----------|
 | 1 | Agent Instructions Polish | Verified | 5 | 100% |
 | 2 | Web UI UX & Settings | Verified | 5 | 100% |
-| 3 | Content Management | Complete | 4 | 100% |
+| 3 | Content Management | Shipped | 4 | 100% |
 | 4 | Inventory & Recommender Depth | Pending | — | 0% |
 | 5 | AI Integration | Pending | — | 0% |
 | 6 | Backend & Multi-User | Pending | — | 0% |
@@ -106,4 +106,4 @@ Wave 2 plan (03-03) depends on both Wave 1 plans completing first (claude-api.js
 
 ---
 *State initialized: 2026-05-04*
-*Last activity: 2026-05-14 — Phase 3 plan 03-03 executed; AI integration shipped (claude-api.js IIFE, Settings AI Integration section with masked key input, handleGenerate wired to ClaudeAPI.generateRecipe with inline field population and spinner UX); Phase 3 complete 4/4 plans. Nyquist gap-fill: tests/check-phase3.sh created (9 static analysis checks, all passing); 03-VALIDATION.md wave_0_complete set to true, Validation Audit section added (9/9 gaps filled, all static checks green).*
+*Last activity: 2026-05-14 — Phase 3 shipped via PR #23 (merged to main). UAT: 9/11 passed, 2 minor issues found and fixed post-UAT (flavor axes [object Object] in text export; AI generate missing creator/method_type/why_it_works). API request/response logging added to claude-api.js (bb_api_log, capped 50). Dashboard hero image uncropped. ROADMAP backlog updated with page-level imports, AI-08, and API log UI panel.*
