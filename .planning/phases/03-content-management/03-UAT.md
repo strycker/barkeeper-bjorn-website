@@ -8,12 +8,11 @@ updated: 2026-05-14T01:00:00Z
 
 ## Current Test
 
-number: 9
-name: AI Integration Section in Settings
+number: 10
+name: Generate Button — Disabled Without Key
 expected: |
-  Settings page has an "AI Integration" section with a masked key input (shows •••),
-  a Show/Hide toggle, and a "Save API key" button. Clicking Show reveals the key;
-  Hide re-masks it. Saving a key shows "Saved ✓" and a toast.
+  Settings → AI Integration → clear the API key (save empty) → Recipes → "+ New Recipe"
+  → Generate button is greyed out / disabled with tooltip about needing an API key.
 awaiting: user response
 
 ## Tests
@@ -54,7 +53,7 @@ result: pass
 
 ### 9. AI Integration Section in Settings
 expected: Settings page has an "AI Integration" section with a label "Anthropic API Key", a password input (shows ••• not raw text), a "Show" toggle button, and a "Save API key" button. Clicking Show reveals the key text; clicking Hide re-masks it. Entering a key and clicking Save shows "Saved ✓" status text and a toast "Anthropic API key saved."
-result: [pending]
+result: pass
 
 ### 10. Generate Button — Disabled Without Key
 expected: Open Settings → AI Integration → clear the API key (save empty) → navigate to Recipes → click "+ New Recipe" → the Generate button in the AI section is greyed out / disabled. Hovering shows a tooltip about needing an API key in Settings.
@@ -67,9 +66,9 @@ result: [pending]
 ## Summary
 
 total: 11
-passed: 7
+passed: 8
 issues: 1
-pending: 3
+pending: 2
 skipped: 0
 blocked: 0
 
