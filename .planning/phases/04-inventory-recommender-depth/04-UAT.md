@@ -18,7 +18,8 @@ awaiting: user response
 
 ### 1. Structured Bottle Chips Display
 expected: Open the Inventory page. Bottle entries show as clickable chips with the spirit name as primary text. If a brand is set, it appears below the name in smaller muted text. A small colored dot on the chip indicates tier (well=gray, standard=green, premium=blue, craft=amber, boutique=purple, rare/exceptional=bright amber-gold). Unset tier shows a hollow/transparent dot. Old string-only entries still display without errors.
-result: [pending]
+result: pass
+note: chip click was broken (container ReferenceError) — fixed before pass
 
 ### 2. Inline Edit Form — Open & Fields
 expected: Click a bottle chip body (not the × button). An edit form expands below the chip grid. The form shows Style (text input) and Type (text input with datalist) by default. Clicking "More fields ▾" reveals Brand, Tier (dropdown with 6 options + Unset), Best for, and Notes textarea. The toggle label changes to "Fewer fields ▴".
