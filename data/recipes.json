@@ -1,64 +1,6 @@
 {
-  "originals": [
-    {
-      "id": "cocktail1778776984398",
-      "name": "Smokey the Pear",
-      "creator": "Glenn Strycker",
-      "ingredients": [
-        {
-          "amount": "1 oz",
-          "name": "Mezcal"
-        },
-        {
-          "amount": "1 oz",
-          "name": "White Jamaican Rum"
-        },
-        {
-          "amount": "2.5 oz",
-          "name": "Pear Juice"
-        },
-        {
-          "amount": "1 oz",
-          "name": "Crème de Poire"
-        },
-        {
-          "amount": "0.5 oz",
-          "name": "Cocchi"
-        },
-        {
-          "amount": "1/2 tsp",
-          "name": "Prickly pear preserves",
-          "notes": "Optional"
-        },
-        {
-          "amount": "4 dashes",
-          "name": "Rhubarb bitters"
-        },
-        {
-          "amount": "2 dashes",
-          "name": "Angostura"
-        },
-        {
-          "amount": "2 dashes",
-          "name": "Black walnut bitters"
-        }
-      ],
-      "method": "Shake hard with ice.  Strain into a chilled martini glass.",
-      "tagline": "Smokey Mezcal cocktail with pear juice and rhubarb bitters",
-      "date_created": "2026-05-01",
-      "method_type": "shaken",
-      "glassware": "Martini",
-      "garnish": "Pear slice + cocktail cherry",
-      "profile": "Smoky-meets-pear shaken cocktail. Desert/Mexican thematic -- the prickly pear preserves are the structural pun (a \"pear\" that isn't a pear, growing in mezcal country). Recommended sub-spirit pairing: white Jamaican rum first choice (funky/vegetal echoes agave's roasted notes; Jamaican esters complement pear esters), gin second (London Dry > floral botanicals can complement pear, but heavy florals will fight it), vodka third (subtracts smoke without adding character).",
-      "why_it_works": "Mezcal offers smokey flavors that compliment the pear",
-      "confirmed_built": true,
-      "ratings": {
-        "bar_owner": 5,
-        "notes": "Dial back the mezcal and increase the pear flavor"
-      }
-    }
-  ],
+  "originals": [],
+  "last_updated": "2026-05-15",
   "confirmed_favorites": [],
-  "wishlist": [],
-  "last_updated": "2026-05-14"
+  "wishlist": []
 }
