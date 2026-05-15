@@ -84,9 +84,10 @@ const RecommenderView = (() => {
           ${recipe.garnish ? `<span class="rec-ing-chip rec-garnish">+ ${Utils.escapeHtml(recipe.garnish)}</span>` : ''}
         </div>
         ${isOneAway ? `
-          <div class="rec-oneaway-banner">
-            <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path d="M10 2a8 8 0 1 0 0 16A8 8 0 0 0 10 2zm1 11H9v-2h2v2zm0-4H9V5h2v4z"/></svg>
-            One bottle away: <strong>${Utils.escapeHtml(missingIngredient.name)}</strong>
+          <div class="rec-twoaway-missing">
+            <span class="rec-twoaway-label">One bottle away:</span>
+            <strong>${Utils.escapeHtml(missingIngredient.name)}</strong>
+            <button class="rec-twoaway-link" data-item="${Utils.escapeHtml(missingIngredient.name)}">Add to shopping list &#8594;</button>
           </div>` : ''}
         <div class="rec-glass">Glass: ${Utils.escapeHtml(recipe.glassware)}</div>
       </div>`;
@@ -255,7 +256,7 @@ const RecommenderView = (() => {
 
     cardsEl.innerHTML = html;
 
-    // Wire "Add to shopping list" buttons in two-away cards
+    // Wire "Add to shopping list" buttons in one-away and two-away cards
     cardsEl.querySelectorAll('.rec-twoaway-link').forEach(btn => {
       btn.addEventListener('click', () => addToShoppingList(btn.dataset.item));
     });

@@ -2,7 +2,140 @@
 
 const ShoppingView = (() => {
 
+  // Inventory section list for "Got it" placement dialog
+  const PLACEMENT_SECTIONS = [
+    { key: 'base_spirits.whiskey',             label: 'Whiskey / Bourbon / Scotch',   type: 'bottle' },
+    { key: 'base_spirits.brandy',              label: 'Brandy / Cognac',              type: 'bottle' },
+    { key: 'base_spirits.rum',                 label: 'Rum',                          type: 'bottle' },
+    { key: 'base_spirits.agave',               label: 'Agave (Tequila / Mezcal)',     type: 'bottle' },
+    { key: 'base_spirits.white_spirits',       label: 'White Spirits (Gin / Vodka)',  type: 'bottle' },
+    { key: 'base_spirits.other',               label: 'Other Spirits',                type: 'bottle' },
+    { key: 'fortified_wines_and_aperitif_wines', label: 'Fortified & Aperitif Wines', type: 'bottle' },
+    { key: 'liqueurs_and_cordials.fruit_forward', label: 'Liqueurs — Fruit-Forward', type: 'bottle' },
+    { key: 'liqueurs_and_cordials.nut_coffee',    label: 'Liqueurs — Nut & Coffee',  type: 'bottle' },
+    { key: 'liqueurs_and_cordials.herbal',        label: 'Liqueurs — Herbal',        type: 'bottle' },
+    { key: 'liqueurs_and_cordials.specialty_regional', label: 'Liqueurs — Specialty', type: 'bottle' },
+    { key: 'bitters.anchors',        label: 'Bitters — Anchors',          type: 'bottle' },
+    { key: 'bitters.aromatic_smoke', label: 'Bitters — Aromatic & Smoke', type: 'bottle' },
+    { key: 'bitters.nut_earth',      label: 'Bitters — Nut & Earth',      type: 'bottle' },
+    { key: 'bitters.fruit_botanical',label: 'Bitters — Fruit & Botanical',type: 'bottle' },
+    { key: 'bitters.other',          label: 'Bitters — Other',            type: 'bottle' },
+    { key: 'syrups',                 label: 'Syrups',                     type: 'bottle' },
+    { key: 'non_alcoholic_spirits',  label: 'Non-Alcoholic Spirits',      type: 'bottle' },
+    { key: 'mixers',                 label: 'Mixers',                     type: 'string' },
+    { key: 'refrigerator_perishables', label: 'Refrigerator / Perishables', type: 'string' },
+    { key: 'pantry_spice_rack',      label: 'Pantry & Spice Rack',        type: 'string' },
+    { key: 'fresh_produce',          label: 'Fresh Produce',              type: 'string' },
+    { key: 'specialty_ingredients',  label: 'Specialty Ingredients',      type: 'string' },
+    { key: 'garnish_and_service',    label: 'Garnish & Service',          type: 'string' },
+  ];
+
+  const TIER_OPTS = ['', 'well', 'standard', 'premium', 'craft', 'boutique', 'rare/exceptional'];
+  const TIER_LBL  = { '': 'Unset', 'well': 'Well', 'standard': 'Standard', 'premium': 'Premium', 'craft': 'Craft', 'boutique': 'Boutique', 'rare/exceptional': 'Rare/Exceptional' };
+
   let _dirty = false;
+
+  function _showPlacementDialog(bought, boughtIdx, container) {
+    const overlay = document.createElement('div');
+    overlay.className = 'confirm-dialog-overlay';
+    overlay.innerHTML = `
+      <div class="confirm-dialog" style="max-width:460px;">
+        <h3>Add to Inventory</h3>
+        <p>Where should <strong>${Utils.escapeHtml(bought.item || bought)}</strong> go?</p>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+          <label style="display:flex;flex-direction:column;gap:4px;font-size:0.88rem;">
+            Section
+            <select id="pd-section">
+              ${PLACEMENT_SECTIONS.map(s => `<option value="${Utils.escapeHtml(s.key)}">${Utils.escapeHtml(s.label)}</option>`).join('')}
+            </select>
+          </label>
+          <div id="pd-bottle-fields" style="display:flex;flex-direction:column;gap:8px;">
+            <label style="display:flex;flex-direction:column;gap:4px;font-size:0.88rem;">
+              Style / Name
+              <input type="text" id="pd-style" value="${Utils.escapeHtml(bought.item || bought)}">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:4px;font-size:0.88rem;">
+              Brand <span style="color:var(--text-muted);font-weight:400;">(optional)</span>
+              <input type="text" id="pd-brand" placeholder="e.g. Maker's Mark">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:4px;font-size:0.88rem;">
+              Type <span style="color:var(--text-muted);font-weight:400;">(optional)</span>
+              <input type="text" id="pd-type" placeholder="e.g. Bourbon">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:4px;font-size:0.88rem;">
+              Tier
+              <select id="pd-tier">
+                ${TIER_OPTS.map(t => `<option value="${Utils.escapeHtml(t)}">${Utils.escapeHtml(TIER_LBL[t])}</option>`).join('')}
+              </select>
+            </label>
+          </div>
+          <div id="pd-string-fields" style="display:none;flex-direction:column;gap:8px;">
+            <label style="display:flex;flex-direction:column;gap:4px;font-size:0.88rem;">
+              Name
+              <input type="text" id="pd-string-name" value="${Utils.escapeHtml(bought.item || bought)}">
+            </label>
+          </div>
+        </div>
+        <div class="dialog-btns">
+          <button class="btn btn-ghost btn-sm" id="pd-cancel">Cancel</button>
+          <button class="btn btn-primary btn-sm" id="pd-add">Add to Inventory</button>
+        </div>
+      </div>`;
+
+    document.body.appendChild(overlay);
+
+    const sectionSel = overlay.querySelector('#pd-section');
+    const bottleFields = overlay.querySelector('#pd-bottle-fields');
+    const stringFields = overlay.querySelector('#pd-string-fields');
+
+    function updateFields() {
+      const sec = PLACEMENT_SECTIONS.find(s => s.key === sectionSel.value);
+      const isStr = sec && sec.type === 'string';
+      bottleFields.style.display = isStr ? 'none' : 'flex';
+      stringFields.style.display = isStr ? 'flex' : 'none';
+    }
+    sectionSel.addEventListener('change', updateFields);
+
+    overlay.querySelector('#pd-cancel').addEventListener('click', () => overlay.remove());
+
+    overlay.querySelector('#pd-add').addEventListener('click', () => {
+      const sectionKey = sectionSel.value;
+      const sec = PLACEMENT_SECTIONS.find(s => s.key === sectionKey);
+      const now = new Date().toISOString();
+      const itemName = bought.item || bought;
+
+      State.patch('inventory', inv => {
+        // Resolve nested key path
+        const parts = sectionKey.split('.');
+        let obj = inv;
+        for (let i = 0; i < parts.length - 1; i++) {
+          if (!obj[parts[i]]) obj[parts[i]] = {};
+          obj = obj[parts[i]];
+        }
+        const last = parts[parts.length - 1];
+        if (!Array.isArray(obj[last])) obj[last] = [];
+
+        if (sec && sec.type === 'string') {
+          const name = overlay.querySelector('#pd-string-name').value.trim() || itemName;
+          obj[last].push(name);
+        } else {
+          const style = overlay.querySelector('#pd-style').value.trim() || itemName;
+          const brand = overlay.querySelector('#pd-brand').value.trim();
+          const type  = overlay.querySelector('#pd-type').value.trim();
+          const tier  = overlay.querySelector('#pd-tier').value;
+          obj[last].push({ style, brand, type, tier, best_for: '', notes: '', created_at: now, updated_at: now });
+        }
+
+        // Remove from shopping list
+        if (Array.isArray(inv.shopping_list)) inv.shopping_list.splice(boughtIdx, 1);
+      });
+
+      markDirty();
+      Utils.showToast(`"${itemName}" added to inventory ✓`);
+      overlay.remove();
+      render(container);
+    });
+  }
 
   function render(container) {
     _dirty = false;
@@ -148,14 +281,8 @@ const ShoppingView = (() => {
       });
 
       el.querySelector('[data-action="bought"]').addEventListener('click', () => {
-        const current = State.get('inventory');
-        const bought = current.shopping_list.splice(idx, 1)[0];
-        // Add to base spirits "other" as a simple entry (user can recategorize in inventory view)
-        if (!Array.isArray(current.base_spirits.other)) current.base_spirits.other = [];
-        current.base_spirits.other.push({ name: bought.item });
-        markDirty();
-        Utils.showToast(`"${bought.item}" moved to inventory. Recategorize in Inventory view.`, 'info', 4000);
-        render(container);
+        const bought = State.get('inventory').shopping_list[idx];
+        _showPlacementDialog(bought, idx, container);
       });
 
       listEl.appendChild(el);

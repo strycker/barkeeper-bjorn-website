@@ -225,7 +225,6 @@ const ProfileView = (() => {
       row.innerHTML = `
         <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">
           <strong style="font-size:0.9rem;">${a.key.charAt(0).toUpperCase() + a.key.slice(1)}</strong>
-          <span style="font-size:0.8rem;color:var(--amber);" id="axis-val-${a.key}">${posLabel}</span>
         </div>
         <div class="flavor-slider-wrap">
           <input type="range" class="axis-slider" id="slider-${a.key}"
@@ -241,12 +240,10 @@ const ProfileView = (() => {
         </div>`;
 
       const slider = row.querySelector(`#slider-${a.key}`);
-      const valLabel = row.querySelector(`#axis-val-${a.key}`);
 
       slider.addEventListener('input', () => {
         const newVal = parseInt(slider.value) / 100;
         _values[i] = newVal;
-        valLabel.textContent = Utils.valueToAxisLabel(newVal);
         updateRadarPolygon();
         // Update state
         const p = State.get('profile');

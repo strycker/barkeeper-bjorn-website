@@ -47,6 +47,15 @@ const CanonicalNames = (() => {
     for (const c of CURATED) {
       if (c.toLowerCase() === qLower) return null;
     }
+    // Prefix match: canonical starts with input (min 4 chars to avoid noise).
+    // Handles "Angostura" → "Angostura Bitters", "Green" → "Green Chartreuse", etc.
+    if (q.length >= 4) {
+      for (const c of CURATED) {
+        if (c.toLowerCase().startsWith(qLower)) {
+          return { canonical: c, distance: 0 };
+        }
+      }
+    }
     const threshold = q.length < 8 ? 2 : 3;
     let best = null;
     for (const c of CURATED) {
