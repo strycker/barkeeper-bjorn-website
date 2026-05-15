@@ -8,7 +8,10 @@
     "white_spirits": [],
     "other": []
   },
-  "unassigned": [],
+  "unassigned": [
+    "Rum",
+    "Lemons"
+  ],
   "fortified_wines_and_aperitif_wines": [],
   "syrups": [],
   "non_alcoholic_spirits": [],
