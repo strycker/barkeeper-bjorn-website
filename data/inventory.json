@@ -1,45 +1,80 @@
 {
-  "last_updated": "2026-05-14",
+  "last_updated": "2026-05-15",
   "base_spirits": {
     "whiskey": [
       {
-        "name": "Bourbon"
+        "style": "Bourbon",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-15T20:15:09.649Z",
+        "type": "",
+        "brand": "",
+        "tier": "boutique",
+        "best_for": "",
+        "notes": ""
       },
       {
-        "name": "Whisky"
+        "style": "Whisky",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-15T20:13:12.041Z"
       },
       {
-        "name": "Whiskey"
+        "style": "Whiskey",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-15T20:13:12.041Z"
       },
       {
-        "name": "Irish"
+        "style": "Irish",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-15T20:13:58.148Z",
+        "type": "Irish Whiskey",
+        "brand": "Jameson",
+        "tier": "well",
+        "best_for": "",
+        "notes": ""
       },
       {
-        "name": "Japanese Whisky"
+        "style": "Japanese Whisky",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-15T20:13:32.284Z",
+        "type": "Japanese Whisky",
+        "brand": "",
+        "tier": "well",
+        "best_for": "",
+        "notes": ""
       }
     ],
     "brandy": [
       {
-        "name": "Cognac",
-        "tier": "premium-accessible"
+        "tier": "",
+        "style": "Cognac",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-15T20:13:12.041Z"
       }
     ],
     "rum": [
       {
-        "name": "White Jamaican Rum"
+        "style": "White Jamaican Rum",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-15T20:13:12.041Z"
       },
       {
-        "name": "Dark Jamaican Rum"
+        "style": "Dark Jamaican Rum",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-15T20:13:12.041Z"
       }
     ],
     "agave": [
       {
-        "name": "mezcal"
+        "style": "mezcal",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-15T20:13:12.041Z"
       }
     ],
     "white_spirits": [
       {
-        "name": "Gin"
+        "style": "Gin",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-15T20:13:12.041Z"
       }
     ],
     "other": []
@@ -49,55 +84,75 @@
   ],
   "fortified_wines_and_aperitif_wines": [
     {
-      "name": "Cocchi"
+      "style": "Cocchi",
+      "created_at": "2026-05-15T20:13:12.041Z",
+      "updated_at": "2026-05-15T20:13:12.041Z"
     },
     {
-      "name": "Sweet Vermouth"
+      "style": "Sweet Vermouth",
+      "created_at": "2026-05-15T20:13:12.041Z",
+      "updated_at": "2026-05-15T20:13:12.041Z"
     },
     {
-      "name": "Lillet"
+      "style": "Lillet",
+      "created_at": "2026-05-15T20:13:12.041Z",
+      "updated_at": "2026-05-15T20:13:12.041Z"
     }
   ],
   "liqueurs_and_cordials": {
     "fruit_forward": [
       {
-        "name": "Cointreau"
+        "style": "Cointreau",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-15T20:13:12.041Z"
       }
     ],
     "nut_coffee": [
       {
-        "name": "Coffee Liqueur"
+        "style": "Coffee Liqueur",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-15T20:13:12.041Z"
       }
     ],
     "herbal": [
       {
-        "name": "Campari"
+        "style": "Campari",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-15T20:13:12.041Z"
       }
     ],
     "specialty_regional": [
       {
-        "name": "Aperol"
+        "style": "Aperol",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-15T20:13:12.041Z"
       }
     ]
   },
   "bitters": {
     "anchors": [
       {
-        "name": "Angostura"
+        "style": "Angostura",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-15T20:13:12.041Z"
       }
     ],
     "aromatic_smoke": [],
     "nut_earth": [],
     "fruit_botanical": [
       {
-        "name": "Orange Bitters"
+        "style": "Orange Bitters",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-15T20:13:12.041Z"
       }
     ],
     "other": []
   },
   "syrups": [
     {
-      "name": "Cardamom Syrup"
+      "style": "Cardamom Syrup",
+      "created_at": "2026-05-15T20:13:12.041Z",
+      "updated_at": "2026-05-15T20:13:12.041Z"
     }
   ],
   "mixers": [
@@ -135,11 +190,18 @@
   },
   "non_alcoholic_spirits": [
     {
-      "name": "Seedlip"
+      "style": "Seedlip",
+      "created_at": "2026-05-15T20:13:12.041Z",
+      "updated_at": "2026-05-15T20:13:12.041Z"
     }
   ],
   "specialty_ingredients": [],
   "garnish_and_service": [],
   "past_inventory": [],
-  "shopping_list": []
+  "shopping_list": [],
+  "equipment": {
+    "strainers": [
+      "Fine Mesh"
+    ]
+  }
 }
