@@ -47,7 +47,11 @@ feedback: |
 
 ### 6. BUG-02 Fix — Scotch Recipes Don't Match Japanese Whisky
 expected: In Recommender, if your only whisky is a Japanese Whisky (e.g., Suntory Toki), recipes like Rob Roy and Penicillin (which require Scotch) should NOT appear in "You Can Make These". Recipes that accept any whisky (Old Fashioned, Whiskey Sour, Manhattan) should still appear. Verify by checking what shows up with only Japanese Whisky in your inventory.
-result: [pending]
+result: pass
+feedback: |
+  Two recommender UX issues noted:
+  1. Cumulative scope sorting: with 1-away or 2-away active, recipes should sort by mood/occasion alignment globally across all sections, not pinned with "You Can Make" always first
+  2. One-away cards show "One bottle away: X" label but no "Add to shopping list" button — inconsistent with two-away cards; cards should match style
 
 ### 7. Recommender Two-Column Layout
 expected: Navigate to the Recommender page. On a wide screen (>860px), the page shows a sidebar on the left (~280px) containing mood controls, and the recipe cards in a wider column on the right. On a narrow screen (<860px), the sidebar stacks above the cards in a single column.
