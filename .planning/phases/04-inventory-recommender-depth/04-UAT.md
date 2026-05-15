@@ -68,7 +68,7 @@ result: pass
 
 ### 10. Occasion Filter Chips
 expected: Below the scope toggle in the sidebar, occasion chips appear (e.g., "Classic", "Sour", "Refreshing", "After-Dinner", "Party"). Clicking a chip filters the recipe cards to only recipes tagged with that occasion. Multiple chips can be active at once (OR logic). Clicking "All" resets the filter.
-result: [pending]
+result: pass
 
 ### 11. Save to Profile & Reset to Saved
 expected: In the Recommender, move one or more mood sliders. Click "Save to Profile". A success toast appears and the new slider values are now the saved baseline. Navigate away and back — sliders initialize to the new saved values. Alternatively, after moving sliders, click "Reset to saved" — sliders snap back to the baseline without a page reload.
