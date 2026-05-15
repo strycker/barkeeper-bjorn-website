@@ -41,6 +41,8 @@
   },
   "shopping_list": [],
   "equipment": {
-    "strainers": []
+    "strainers": [
+      "Fine Mesh"
+    ]
   }
 }
