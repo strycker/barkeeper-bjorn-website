@@ -59,7 +59,8 @@ result: pass
 
 ### 8. Mood Sliders — Ephemeral Re-Ranking
 expected: The Recommender sidebar shows 6 sliders: Sweetness, Acid, Strength, Complexity, Season, Risk — pre-loaded from your saved profile. Drag a slider to a new position and release. The recipe cards re-rank immediately. Your saved profile is NOT changed (verified by navigating away and back — sliders reset to saved values).
-result: [pending]
+result: pass
+feedback: Profile page sliders show numerical axis values as text — user wants those removed; slider position alone is sufficient
 
 ### 9. Scope Toggle — Cumulative Sections
 expected: The sidebar has three scope buttons: "You Can Make These", "One Bottle Away", "Two Bottles Away". Initially only "You Can Make These" recipes show. Click "One Bottle Away" — a second section appears below showing recipes missing exactly one ingredient, with a badge count and the missing bottle name on each card. Click "Two Bottles Away" — a third section appears below showing recipes missing exactly two ingredients, each with two missing-ingredient rows and shopping list links. Clicking "You Can Make These" again collapses back to buildable-only.
