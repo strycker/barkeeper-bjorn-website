@@ -43,8 +43,8 @@ const ProfileView = (() => {
         <button class="btn btn-ghost btn-sm" id="profile-discard-btn">Discard</button>
       </div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;">
-        <!-- Left: Radar chart -->
+      <div class="profile-flavor-grid">
+        <!-- Left/Top: Radar chart -->
         <div>
           <h2>Flavor Radar</h2>
           <div class="radar-container">
@@ -52,7 +52,7 @@ const ProfileView = (() => {
           </div>
         </div>
 
-        <!-- Right: Axis sliders -->
+        <!-- Right/Bottom: Axis sliders -->
         <div>
           <h2>Adjust Axes</h2>
           <div id="axis-controls"></div>
@@ -61,7 +61,7 @@ const ProfileView = (() => {
 
       <div class="divider"></div>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;">
+      <div class="profile-flavor-grid">
         <!-- Supplemental -->
         <div>
           <h2>Supplemental Preferences</h2>
