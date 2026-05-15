@@ -301,6 +301,17 @@ button, .btn {
 button:disabled, .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* ─── Radar / Profile ────────────────────────────────────────────── */
+.profile-flavor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+  align-items: start;
+}
+@media (max-width: 640px) {
+  .profile-flavor-grid {
+    grid-template-columns: 1fr;
+  }
+}
 .radar-container {
   display: flex;
   flex-direction: column;
@@ -1133,6 +1144,9 @@ a:hover { color: var(--amber); }
   }
   .rec-mood-sliders-inner {
     display: none;
+  }
+  .rec-mood-sliders-inner.is-open {
+    display: block;
   }
 }
 .rec-axis-row {

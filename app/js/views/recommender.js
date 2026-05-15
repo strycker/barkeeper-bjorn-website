@@ -358,11 +358,11 @@ const RecommenderView = (() => {
 
     // Mobile mood toggle (D-21)
     const moodToggle = container.querySelector('.mood-toggle-btn');
-    if (moodToggle) {
+    const slidersPanel = container.querySelector('.rec-mood-sliders-inner');
+    if (moodToggle && slidersPanel) {
       moodToggle.addEventListener('click', () => {
         _slidersVisible = !_slidersVisible;
-        const panel = container.querySelector('.rec-mood-sliders-inner');
-        if (panel) panel.style.display = _slidersVisible ? 'block' : 'none';
+        slidersPanel.classList.toggle('is-open', _slidersVisible);
         moodToggle.textContent = _slidersVisible ? 'Hide Sliders ▴' : 'Adjust Mood ▾';
       });
     }
