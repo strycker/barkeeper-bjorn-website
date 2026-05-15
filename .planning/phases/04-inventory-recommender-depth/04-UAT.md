@@ -84,7 +84,10 @@ feedback: |
 
 ### 12. Two-Away Shopping List Links
 expected: With the scope set to "Two Bottles Away", find a recipe card in that section. Each missing ingredient row has a "+ Add to shopping list" link. Clicking one appends that ingredient to your Shopping tab list (check the Shopping tab to confirm). The link works for both missing ingredient rows on the same card.
-result: [pending]
+result: pass
+issue: |
+  Bug found (fixed): Shopping "Got it" button auto-placed items in "Other Spirits".
+  Fix: replaced with a placement dialog (section selector + style/brand/type/tier fields for bottles; name-only for string sections). Item stays in shopping list until user confirms placement.
 
 ## Summary
 
