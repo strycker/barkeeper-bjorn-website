@@ -64,7 +64,7 @@ feedback: Profile page sliders show numerical axis values as text — user wants
 
 ### 9. Scope Toggle — Cumulative Sections
 expected: The sidebar has three scope buttons: "You Can Make These", "One Bottle Away", "Two Bottles Away". Initially only "You Can Make These" recipes show. Click "One Bottle Away" — a second section appears below showing recipes missing exactly one ingredient, with a badge count and the missing bottle name on each card. Click "Two Bottles Away" — a third section appears below showing recipes missing exactly two ingredients, each with two missing-ingredient rows and shopping list links. Clicking "You Can Make These" again collapses back to buildable-only.
-result: [pending]
+result: pass
 
 ### 10. Occasion Filter Chips
 expected: Below the scope toggle in the sidebar, occasion chips appear (e.g., "Classic", "Sour", "Refreshing", "After-Dinner", "Party"). Clicking a chip filters the recipe cards to only recipes tagged with that occasion. Multiple chips can be active at once (OR logic). Clicking "All" resets the filter.
