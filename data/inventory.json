@@ -8,7 +8,7 @@
         "updated_at": "2026-05-15T20:15:09.649Z",
         "type": "",
         "brand": "",
-        "tier": "boutique",
+        "tier": "",
         "best_for": "",
         "notes": ""
       },
@@ -198,7 +198,12 @@
   "specialty_ingredients": [],
   "garnish_and_service": [],
   "past_inventory": [],
-  "shopping_list": [],
+  "shopping_list": [
+    {
+      "item": "Fresh Pineapple Juice",
+      "rationale": "one-away recommendation"
+    }
+  ],
   "equipment": {
     "strainers": [
       "Fine Mesh"
