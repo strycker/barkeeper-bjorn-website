@@ -1069,3 +1069,197 @@ a:hover { color: var(--amber); }
 @media (max-width: 480px) {
   .equipment-strainer-grid { grid-template-columns: 1fr; }
 }
+
+/* === Phase 4: Recommender layout (D-20, D-21) === */
+.rec-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+.rec-sidebar {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 16px;
+  position: sticky;
+  top: 60px;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+}
+.rec-sidebar-section {
+  margin-bottom: 20px;
+}
+.rec-sidebar-section:last-child {
+  margin-bottom: 0;
+}
+.rec-main {
+  min-width: 0;
+}
+/* Mobile: single column, controls above cards */
+@media (max-width: 860px) {
+  .rec-layout {
+    grid-template-columns: 1fr;
+  }
+  .rec-sidebar {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+  }
+}
+
+/* === Phase 4: Mood slider panel (REC-01, D-13–D-16) === */
+.rec-mood-panel {
+  margin-bottom: 20px;
+}
+.rec-mood-heading {
+  font-size: 12px;
+  color: var(--amber-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+/* Mobile: hide sliders behind toggle; desktop: always visible */
+.mood-toggle-btn {
+  display: none;
+}
+.rec-mood-sliders-inner {
+  /* visible on desktop by default */
+}
+@media (max-width: 860px) {
+  .mood-toggle-btn {
+    display: inline-flex;
+    margin-bottom: 8px;
+  }
+  .rec-mood-sliders-inner {
+    display: none;
+  }
+}
+.rec-axis-row {
+  margin-bottom: 12px;
+}
+.rec-axis-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 2px;
+}
+.rec-axis-pole-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.axis-pole-label--left,
+.axis-pole-label--right {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.axis-pole-label--left {
+  min-width: 36px;
+  text-align: right;
+}
+.axis-pole-label--right {
+  min-width: 36px;
+}
+.rec-mood-save {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+.rec-mood-reset {
+  font-size: 12px;
+  color: var(--amber-dim);
+  text-decoration: none;
+}
+.rec-mood-reset:hover {
+  color: var(--amber);
+}
+
+/* === Phase 4: Scope toggle (REC-02, D-17) === */
+.rec-scope-toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.rec-scope-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 6px 10px;
+  font-size: 13px;
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  cursor: pointer;
+}
+.rec-scope-btn:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+.rec-scope-btn.active {
+  background: var(--amber-dim);
+  border-color: var(--amber);
+  color: #fff;
+}
+
+/* === Phase 4: Occasion filter chips (REC-03, D-19) === */
+.rec-occasion-heading {
+  font-size: 12px;
+  color: var(--amber-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+.rec-occ-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* === Phase 4: Cumulative section headings and two-away cards (D-17, D-18) === */
+.rec-section-heading {
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--text);
+  margin: 24px 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.rec-section-heading:first-child {
+  margin-top: 0;
+}
+.rec-section-heading--oneaway {
+  color: var(--amber);
+  border-left: 3px solid var(--amber);
+  padding-left: 10px;
+}
+.rec-section-heading--twoaway {
+  color: var(--blue);
+  border-left: 3px solid var(--blue);
+  padding-left: 10px;
+}
+.rec-card--twoaway {
+  border-left: 3px solid var(--blue);
+}
+.rec-twoaway-missing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  margin-top: 6px;
+}
+.rec-twoaway-link {
+  background: transparent;
+  border: none;
+  color: var(--blue);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+.rec-twoaway-link:hover {
+  color: var(--text);
+}
