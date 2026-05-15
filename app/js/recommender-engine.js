@@ -1,8 +1,11 @@
 // Recommender Engine — matches classics-db recipes against user inventory + flavor profile
 const RecommenderEngine = (() => {
 
-  // Safe lowercase — handles strings, bottle objects {name}, and null/undefined
-  const lc = s => (typeof s === 'string' ? s : (s?.name ?? String(s ?? ''))).toLowerCase();
+  // Safe lowercase — handles strings, bottle objects {style}, {name}, and null/undefined
+  const lc = s => (typeof s === 'string' ? s : (s?.style ?? s?.name ?? String(s ?? ''))).toLowerCase();
+
+  // Spirit subtype tokens — used to prevent cross-subtype false positives (BUG-02)
+  const SUBTYPE_TOKENS = ['scotch', 'bourbon', 'rye', 'japanese', 'irish', 'canadian'];
 
   // Map classics-db searchIn keys → extractor functions for actual inventory structure
   // Inventory top-level: base_spirits{whiskey,brandy,rum,agave,white_spirits,other},
@@ -52,11 +55,21 @@ const RecommenderEngine = (() => {
   // Check if a single ingredient is present (keyword match against specified sections)
   function _hasIngredient(lookup, ingredient) {
     const kws = ingredient.keywords.map(k => k.toLowerCase());
+    const ingredientSubtypes = kws.filter(k => SUBTYPE_TOKENS.includes(k));
     for (const sectionKey of ingredient.searchIn) {
       const items = lookup[sectionKey] || [];
       for (const item of items) {
         for (const kw of kws) {
-          if (item.includes(kw)) return { found: true, item };
+          if (!item.includes(kw)) continue;
+          // Subtype guard: if the ingredient lists any subtype tokens
+          // (e.g. 'scotch'), the matched item MUST contain at least one
+          // of those subtype tokens. This prevents bare 'whisky' from
+          // letting Japanese Whisky satisfy a Scotch recipe.
+          if (ingredientSubtypes.length > 0) {
+            const itemHasSubtype = ingredientSubtypes.some(st => item.includes(st));
+            if (!itemHasSubtype) continue;
+          }
+          return { found: true, item };
         }
       }
     }
@@ -97,12 +110,12 @@ const RecommenderEngine = (() => {
   }
 
   // Main recommend function
-  // Returns { buildable: [...], oneAway: [...] }
-  // Each item: { recipe, flavorScore, missingIngredient? }
+  // Returns { buildable: [...], oneAway: [...], twoAway: [...] }
+  // Each item: { recipe, flavorScore, missingIngredient?, missingIngredients? }
   function recommend(inventory, rawProfile) {
     // eslint-disable-next-line no-undef
     const db = (typeof CLASSICS_DB !== 'undefined') ? CLASSICS_DB : [];
-    if (!db.length) return { buildable: [], oneAway: [] };
+    if (!db.length) return { buildable: [], oneAway: [], twoAway: [] };
 
     const inv = inventory || {};
     const lookup = _buildLookup(inv);
@@ -110,6 +123,7 @@ const RecommenderEngine = (() => {
 
     const buildable = [];
     const oneAway = [];
+    const twoAway = [];
 
     // Collect vetoed items (vetoes is an object with sub-arrays in actual data)
     const vetoObj = inv.vetoes || {};
@@ -135,15 +149,18 @@ const RecommenderEngine = (() => {
       if (missing.length === 0) {
         buildable.push({ recipe, flavorScore: score });
       } else if (missing.length === 1) {
-        oneAway.push({ recipe, flavorScore: score, missingIngredient: missing[0] });
+        oneAway.push({ recipe, flavorScore: score, missingIngredient: missing[0], missingIngredients: missing });
+      } else if (missing.length === 2) {
+        twoAway.push({ recipe, flavorScore: score, missingIngredients: missing });
       }
     }
 
-    // Sort both lists by flavor score descending
+    // Sort all lists by flavor score descending
     buildable.sort((a, b) => b.flavorScore - a.flavorScore);
     oneAway.sort((a, b) => b.flavorScore - a.flavorScore);
+    twoAway.sort((a, b) => b.flavorScore - a.flavorScore);
 
-    return { buildable, oneAway };
+    return { buildable, oneAway, twoAway };
   }
 
   // Public API
