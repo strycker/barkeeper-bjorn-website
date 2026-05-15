@@ -232,7 +232,7 @@ const InventoryView = (() => {
       // Chip body click → open edit form (not × button)
       chip.addEventListener('click', (e) => {
         if (e.target.classList.contains('bottle-chip-remove')) return;
-        openEditForm(grid, container, sectionKey, i, State.get('inventory'));
+        openEditForm(grid, null, sectionKey, i, State.get('inventory'));
       });
 
       grid.appendChild(chip);
