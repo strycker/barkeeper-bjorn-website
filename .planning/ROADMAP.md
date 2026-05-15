@@ -124,7 +124,7 @@ Plans:
 **Requirements:**
 - INV-03: Spirits stored as objects `{ type, brand, style, tier, notes }`; display as formatted chip with tooltip
 - INV-04: Clicking a chip opens an inline edit popover — edit any field and save without delete + re-add
-- INV-05: 7-level tier system: Dirt Cheap → Well → Standard → Call → Premium → Ultra-Premium → Craft
+- INV-05: 6-level tier system: Well → Standard → Premium → Craft → Boutique → Rare/Exceptional (refined from original 7-tier spec during discuss-phase; CONTEXT.md D-05 is authoritative)
 - INV-06: Strainer field is multi-select checkbox grid (Hawthorne, Julep, Fine Mesh, Conical)
 - INV-07: `canonical-names.js` — "Did you mean: X?" inline tooltip on inventory input mismatch
 - REC-01: Mood sliders at top of Recommender — 6-axis, pre-loaded from profile, re-scores live without saving

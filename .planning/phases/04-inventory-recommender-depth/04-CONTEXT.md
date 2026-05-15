@@ -45,7 +45,7 @@ Upgrade inventory bottles from simple objects to fully structured entries with i
 - **D-16: "Save changes to profile" button** — A button on the Recommender page saves current slider positions to the user's profile (calls `State.save('profile')`).
 - **D-17: Scope toggle (cumulative)** — Three levels: "Only what I have" shows buildable only; "Allow 1 missing" adds a one-away section below; "Allow 2 missing" adds a two-away section below that. Each level adds a section cumulatively — not a tab swap.
 - **D-18: Two-away cards** — Each two-away recipe card shows both missing ingredients with individual "Add to shopping list" links for each.
-- **D-19: Occasion filter** — Multi-select chip bar above results (same pattern as existing base-spirit filter). Occasion values are derived at runtime from the classics DB `recipe.occasion` strings.
+- **D-19: Occasion filter** — Multi-select chip bar above results (same pattern as existing base-spirit filter). Occasion values are derived at runtime from `recipe.tags[]` — a fixed taxonomy array added to each classics-db recipe by plan 04-01 (Wave 1). The original spec said to parse `recipe.occasion` prose strings, but research confirmed those are long prose sentences unsuitable for chip labels; the `tags[]` array supersedes that approach.
 
 ### Recommender Page Layout
 
