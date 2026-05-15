@@ -137,4 +137,4 @@ Wave 2 plans (04-02, 04-03) are independent and can execute in parallel — they
 
 ---
 *State initialized: 2026-05-04*
-*Last activity: 2026-05-15 — Phase 4 verified and marked Shipped. All 6 success criteria confirmed: structured bottle storage + migration, inline edit form with revert, ephemeral mood slider re-ranking, cumulative scope toggle, occasion chip filter, BUG-02 subtype guard. Current focus advances to Phase 5 — AI Integration.*
+*Last activity: 2026-05-15 — Phase 4 shipped. PR #36 open: https://github.com/strycker/barkeeper-bjorn-website/pull/36 — branch claude/phase-4-inventory-recommender → main. UAT complete (12/12 tests passed, 5 bugs fixed). Validation complete (20/20 tasks green, mobile confirmed). Current focus: Phase 5 — AI Integration.*
