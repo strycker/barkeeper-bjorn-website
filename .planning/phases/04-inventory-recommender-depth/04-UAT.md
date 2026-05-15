@@ -55,7 +55,7 @@ feedback: |
 
 ### 7. Recommender Two-Column Layout
 expected: Navigate to the Recommender page. On a wide screen (>860px), the page shows a sidebar on the left (~280px) containing mood controls, and the recipe cards in a wider column on the right. On a narrow screen (<860px), the sidebar stacks above the cards in a single column.
-result: [pending]
+result: pass
 
 ### 8. Mood Sliders — Ephemeral Re-Ranking
 expected: The Recommender sidebar shows 6 sliders: Sweetness, Acid, Strength, Complexity, Season, Risk — pre-loaded from your saved profile. Drag a slider to a new position and release. The recipe cards re-rank immediately. Your saved profile is NOT changed (verified by navigating away and back — sliders reset to saved values).
