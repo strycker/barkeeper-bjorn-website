@@ -37,7 +37,13 @@ severity: minor
 
 ### 5. Equipment Tab — Strainer Grid
 expected: Navigate to the Inventory page and click the "Equipment" tab (4th tab). The tab shows a 2-column grid with 4 checkboxes: Hawthorne, Julep, Fine Mesh, Conical. Checking or unchecking one marks the inventory as dirty (save bar appears). After saving, the checked state persists on next load.
-result: [pending]
+result: pass
+feedback: |
+  Backlog captured from user:
+  1. Equipment list needs expansion beyond strainers — shakers, glassware, etc.
+  2. TYPE_OPTIONS datalist is global (all 35 types shown in every section) — no section-scoping or enforcement; user can file rum under Whiskey, etc.
+  3. UX proposal: remove section splits, use filter chips at top for Whiskey/Rum/Gin etc., OR enforce section constraints
+  4. Bitters chips should always include "bitters" in the displayed name to avoid ambiguity (e.g. "Orange" could mean Orange Bitters or Orange juice)
 
 ### 6. BUG-02 Fix — Scotch Recipes Don't Match Japanese Whisky
 expected: In Recommender, if your only whisky is a Japanese Whisky (e.g., Suntory Toki), recipes like Rob Roy and Penicillin (which require Scotch) should NOT appear in "You Can Make These". Recipes that accept any whisky (Old Fashioned, Whiskey Sour, Manhattan) should still appear. Verify by checking what shows up with only Japanese Whisky in your inventory.
