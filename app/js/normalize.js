@@ -37,18 +37,41 @@ const Normalize = (() => {
   const LIQUEUR_SECTIONS     = ['fruit_forward', 'nut_coffee', 'herbal', 'specialty_regional'];
   const BITTERS_SECTIONS     = ['anchors', 'aromatic_smoke', 'nut_earth', 'fruit_botanical', 'other'];
 
-  // Coerce a bottle entry to the canonical {name, ...} object form.
-  // Strings become {name: str}. Objects without name fall back to first stringy field.
+  const OLD_TIER_VALUES  = new Set(['industrial', 'premium-accessible', 'boutique', 'rare/exceptional']);
+  const VALID_STRAINERS  = new Set(['Hawthorne', 'Julep', 'Fine Mesh', 'Conical']);
+
+  // Coerce a bottle entry to the canonical {style, ...} object form (Phase 4 schema).
+  // Migration rules:
+  //   string         → { style: entry, created_at, updated_at }
+  //   { name }       → { style: name, ...rest } (legacy {name} format)
+  //   { style }      → preserved as-is (already migrated)
+  //   old tier vals  → cleared to '' so the select renders as unset
+  //   timestamps     → added if missing
   function coerceBottle(entry) {
-    if (typeof entry === 'string') return { name: entry };
+    const nowIso = new Date().toISOString();
+    if (typeof entry === 'string') {
+      return entry ? { style: entry, created_at: nowIso, updated_at: nowIso } : null;
+    }
     if (!entry || typeof entry !== 'object') return null;
     const out = { ...entry };
-    if (typeof out.name !== 'string' || !out.name) {
-      // Try to recover a name from common alternative keys
-      const fallback = out.brand || out.style || out.type;
-      if (typeof fallback === 'string' && fallback) out.name = fallback;
+    // Migrate {name} → {style}
+    if (!out.style && out.name) {
+      out.style = out.name;
+    }
+    delete out.name;
+    // Recover style from fallback fields if still missing
+    if (!out.style) {
+      const fallback = out.brand || out.type;
+      if (typeof fallback === 'string' && fallback) out.style = fallback;
       else return null;
     }
+    // Clear legacy tier values (D-05) — empty string so the select renders as unset
+    if (out.tier && OLD_TIER_VALUES.has(out.tier)) {
+      out.tier = '';
+    }
+    // Ensure ISO timestamps
+    if (!out.created_at || typeof out.created_at !== 'string') out.created_at = nowIso;
+    if (!out.updated_at || typeof out.updated_at !== 'string') out.updated_at = nowIso;
     return out;
   }
 
@@ -122,8 +145,12 @@ const Normalize = (() => {
     // agent_notes: optional string
     if ('agent_notes' in out) out.agent_notes = ensureString(out.agent_notes);
 
-    // equipment: optional object (Phase 4 will add equipment.strainers)
-    if ('equipment' in out) out.equipment = ensureObject(out.equipment);
+    // equipment: always emit with validated strainers (Phase 4 D-11)
+    const eq = ensureObject(out.equipment);
+    out.equipment = {
+      ...eq,
+      strainers: ensureArray(eq.strainers).filter(s => VALID_STRAINERS.has(s)),
+    };
 
     return out;
   }
