@@ -27,7 +27,7 @@ result: pass
 
 ### 3. Save Bottle & Revert Changes
 expected: With an edit form open, change the style or tier, then click "Save Bottle". The chip updates in place (no delete/re-add). Dirty indicator appears. Open the form again and change something, then click "Revert Changes". The field snaps back to its value from when you first opened the form. No dirty state is triggered on revert.
-result: [pending]
+result: pass
 
 ### 4. Canonical Name Suggestion Banner
 expected: In an inventory section's add-bottle input, type a near-miss name (e.g., "Camprai" instead of "Campari", or "Apretol" for "Aperol"). A banner appears below the input reading "Did you mean: [Canonical Name]? [Use it]". Clicking "Use it" fills the input with the canonical name. Typing the exact canonical name shows no banner.
