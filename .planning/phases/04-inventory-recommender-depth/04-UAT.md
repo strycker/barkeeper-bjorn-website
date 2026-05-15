@@ -72,7 +72,15 @@ result: pass
 
 ### 11. Save to Profile & Reset to Saved
 expected: In the Recommender, move one or more mood sliders. Click "Save to Profile". A success toast appears and the new slider values are now the saved baseline. Navigate away and back — sliders initialize to the new saved values. Alternatively, after moving sliders, click "Reset to saved" — sliders snap back to the baseline without a page reload.
-result: [pending]
+result: pass
+feedback: |
+  Major product vision item (Phase 5+ backlog):
+  - Classics-db is only 62 curated recipes — user expects 1000s of possibilities with an extensive bar
+  - Request: "Find more drinks (search the web)" button on Recommender
+  - Request: "Generate a drink using AI" button when few/no matches or filters are strict
+  - Integrate Recommender + Recipes + Chat with Bartender + AI APIs holistically
+  - When filters (e.g. Party + Tropical + Gin) yield no results, AI should find standard recipes online or generate new ones
+  → Parked as Phase 5 AI Integration scope item
 
 ### 12. Two-Away Shopping List Links
 expected: With the scope set to "Two Bottles Away", find a recipe card in that section. Each missing ingredient row has a "+ Add to shopping list" link. Clicking one appends that ingredient to your Shopping tab list (check the Shopping tab to confirm). The link works for both missing ingredient rows on the same card.
