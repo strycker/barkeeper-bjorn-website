@@ -17,7 +17,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 | 1 | Agent Instructions Polish | Shipped | 5 | 100% |
 | 2 | Web UI UX & Settings | Shipped | 5 | 100% |
 | 3 | Content Management | Shipped | 4 | 100% |
-| 4 | Inventory & Recommender Depth | Pattern-mapped | — | 0% |
+| 4 | Inventory & Recommender Depth | Planned | 3 | 0% |
 | 5 | AI Integration | Pending | — | 0% |
 | 6 | Backend & Multi-User | Pending | — | 0% |
 | 7 | Community, API & Multi-Agent | Pending | — | 0% |
@@ -65,6 +65,19 @@ Wave 2 plan (03-03) depends on both Wave 1 plans completing first (claude-api.js
 
 ---
 
+## Phase 4 Plan Index
+
+| Plan | Wave | Objective | Requirements | Files |
+|------|------|-----------|--------------|-------|
+| 04-01 | 1 | Engine & schema foundation: normalize.js coerceBottle, recommender-engine lc()+subtype guard+twoAway, classics-db tags, schema update | INV-03, INV-04, INV-05, BUG-02 | app/js/normalize.js, app/js/recommender-engine.js, app/js/classics-db.js, schema/inventory.schema.json |
+| 04-02 | 2 | Inventory UI: chip rendering for {style} shape, inline edit form, 6-tier system, Equipment tab, canonical-names module | INV-03, INV-04, INV-05, INV-06, INV-07 | app/js/views/inventory.js, app/js/canonical-names.js, app/css/app.css, app/index.html |
+| 04-03 | 2 | Recommender UI: sidebar layout, mood sliders, scope toggle (cumulative sections + two-away cards), occasion filter chips | REC-01, REC-02, REC-03 | app/js/views/recommender.js, app/css/app.css |
+
+Wave 1 plan (04-01) must complete before Wave 2.
+Wave 2 plans (04-02, 04-03) are independent and can execute in parallel — they touch different files.
+
+---
+
 ## Key Decisions (Phase 2)
 
 - **inventory.unassigned** — inventory paste items from onboarding go to `inventory.unassigned` (new top-level array), NOT `inventory.spirits` (which does not exist as a flat array in the schema)
@@ -98,6 +111,24 @@ Wave 2 plan (03-03) depends on both Wave 1 plans completing first (claude-api.js
 
 ---
 
+## Key Decisions (Phase 4)
+
+- **D-01–D-06: Bottle schema** — new shape `{style, type, brand, tier, best_for, notes, created_at, updated_at}`; migration via normalize.js coerceBottle on next State.save('inventory'); old tier values cleared; sequential save pattern required
+- **D-07–D-10: Edit form** — inline expand below chip grid (no modal); default-visible: style + type; expand toggle reveals brand/tier/best_for/notes; Save patches State + markDirty; Revert restores snapshot from form-open time
+- **D-11–D-12: Strainer field** — `inventory.equipment.strainers` array; Equipment tab (4th) in inventory; 4 canonical options: Hawthorne, Julep, Fine Mesh, Conical
+- **D-13–D-16: Mood sliders** — 6-axis (sweetness/acid/strength/complexity/season/risk) pre-loaded from profile; re-rank on onchange only; reset to saved on navigate; "Save to Profile" calls State.save('profile')
+- **D-17–D-18: Scope toggle** — cumulative (not tab swap): level 0 = buildable only; level 1 adds one-away; level 2 adds two-away; two-away cards show both missing ingredients each with shopping-list link
+- **D-19: Occasion filter** — multi-select OR logic; tags derived from CLASSICS_DB recipe.tags[] (fixed 10-tag taxonomy added by 04-01)
+- **D-20–D-21: Recommender layout** — 280px sidebar + 1fr main at ≥860px; single column <860px; mobile sliders behind "Adjust Mood ▾" toggle
+- **D-22–D-24: Canonical names** — new canonical-names.js IIFE; curated lookup + Levenshtein (≤2 for inputs ≤6 chars, ≤3 for longer); banner "Did you mean: X? [Use it]" below add-bottle input
+- **D-25: Engine compat** — lc() extracts style first, name second; SUBTYPE_TOKENS guard prevents bare 'whisky' matching scotch-specific recipes
+- **BUG-01 (hotfixed)** — lc() now extracts s?.name from objects; regression test required
+- **BUG-02 (fix in 04-01)** — subtype guard in _hasIngredient; Rob Roy + Penicillin keywords tightened; broad-whiskey recipes left unchanged
+- **BUG-03 (hotfixed)** — State.save() refreshes SHA on 409 and retries once
+- **BUG-04 (hotfixed)** — normalize.js wired into State.loadAll() and State.set(); drops unknown keys, migrates favorites→confirmed_favorites
+
+---
+
 ## Notes
 
 - `gsd-sdk` is not installed; use `git commit` directly for doc commits
@@ -106,4 +137,4 @@ Wave 2 plan (03-03) depends on both Wave 1 plans completing first (claude-api.js
 
 ---
 *State initialized: 2026-05-04*
-*Last activity: 2026-05-14 — Phase 4 pattern mapping complete. 8 files classified; 7/8 have exact or role-match analogs; `canonical-names.js` (new file) patterned from recommender-engine.js IIFE structure. Key patterns: IIFE modules, dirty-state three-step flow (patch → markDirty → re-render), sequential State.save(), Utils.escapeHtml on all user strings. Resume file: `.planning/phases/04-inventory-recommender-depth/04-PATTERNS.md`.*
+*Last activity: 2026-05-15 — Phase 4 planning complete. 3 plans written: 04-01 (Wave 1 engine/schema foundation), 04-02 (Wave 2 inventory UI), 04-03 (Wave 2 recommender UI). Wave 2 plans are parallel. Ready to execute: `/gsd-execute-phase 04`.*
