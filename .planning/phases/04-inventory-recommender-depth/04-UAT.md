@@ -31,7 +31,9 @@ result: pass
 
 ### 4. Canonical Name Suggestion Banner
 expected: In an inventory section's add-bottle input, type a near-miss name (e.g., "Camprai" instead of "Campari", or "Apretol" for "Aperol"). A banner appears below the input reading "Did you mean: [Canonical Name]? [Use it]". Clicking "Use it" fills the input with the canonical name. Typing the exact canonical name shows no banner.
-result: [pending]
+result: issue
+reported: "Typing 'Angostura' does not show 'Use it' as I'm typing — curated list has 'Angostura Bitters' but Levenshtein distance is 8, above threshold"
+severity: minor
 
 ### 5. Equipment Tab — Strainer Grid
 expected: Navigate to the Inventory page and click the "Equipment" tab (4th tab). The tab shows a 2-column grid with 4 checkboxes: Hawthorne, Julep, Fine Mesh, Conical. Checking or unchecking one marks the inventory as dirty (save bar appears). After saving, the checked state persists on next load.
