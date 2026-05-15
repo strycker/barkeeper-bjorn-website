@@ -135,25 +135,40 @@
     "agent_notes": {
       "type": "string",
       "description": "Freeform notes for the agent about this inventory (quirks, gaps, context)."
+    },
+    "equipment": {
+      "type": "object",
+      "properties": {
+        "strainers": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["Hawthorne", "Julep", "Fine Mesh", "Conical"] },
+          "description": "Bar strainers owned."
+        }
+      }
     }
   },
   "definitions": {
     "bottleEntry": {
       "type": "object",
-      "required": ["name"],
+      "required": ["style"],
       "properties": {
-        "name": { "type": "string", "description": "Brand and expression (e.g., 'Buffalo Trace Bourbon')" },
-        "category": { "type": "string" },
+        "style":      { "type": "string", "description": "Primary display + match string (e.g. 'Bourbon', 'Laphroaig 10')" },
+        "type":       { "type": "string", "description": "Spirit category (Bourbon, Rye, Scotch, Gin, Vodka, Rum, Tequila, Mezcal, etc.)" },
+        "brand":      { "type": "string", "description": "Secondary label text (producer/brand name)" },
+        "name":       { "type": "string", "description": "Legacy field — kept for backward compat during migration window; ignored once style is present" },
         "tier": {
           "type": "string",
-          "enum": ["industrial", "premium-accessible", "boutique", "rare/exceptional"],
-          "description": "Honest quality tier for recommendation calibration."
+          "enum": ["", "well", "standard", "premium", "craft", "boutique", "rare/exceptional"],
+          "description": "Quality tier (6-tier system). Empty string = unset/cleared."
         },
-        "notes": { "type": "string" },
         "best_for": {
           "type": "string",
-          "enum": ["sipping", "mixing", "both"]
-        }
+          "enum": ["", "sipping", "mixing", "both"],
+          "description": "Best use context. Empty string = unset."
+        },
+        "notes":      { "type": "string", "description": "Freeform tasting or provenance notes." },
+        "created_at": { "type": "string", "format": "date-time", "description": "ISO timestamp when entry was added." },
+        "updated_at": { "type": "string", "format": "date-time", "description": "ISO timestamp of last edit." }
       }
     },
     "spiritCategory": {

@@ -17,7 +17,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 | 1 | Agent Instructions Polish | Shipped | 5 | 100% |
 | 2 | Web UI UX & Settings | Shipped | 5 | 100% |
 | 3 | Content Management | Shipped | 4 | 100% |
-| 4 | Inventory & Recommender Depth | Planned | 3 | 0% |
+| 4 | Inventory & Recommender Depth | In Progress | 3 | 100% |
 | 5 | AI Integration | Pending | — | 0% |
 | 6 | Backend & Multi-User | Pending | — | 0% |
 | 7 | Community, API & Multi-Agent | Pending | — | 0% |
@@ -137,4 +137,4 @@ Wave 2 plans (04-02, 04-03) are independent and can execute in parallel — they
 
 ---
 *State initialized: 2026-05-04*
-*Last activity: 2026-05-15 — Phase 4 planning complete. 3 plans written: 04-01 (Wave 1 engine/schema foundation), 04-02 (Wave 2 inventory UI), 04-03 (Wave 2 recommender UI). Wave 2 plans are parallel. Ready to execute: `/gsd-execute-phase 04`.*
+*Last activity: 2026-05-15 — Phase 4 plan 04-03 complete. Recommender UI: two-column sidebar layout (280px + 1fr), 6-axis mood sliders pre-loading from profile with onchange re-ranking, cumulative scope toggle (0/1/2 missing bottles), two-away cards with dual shopping-list links, occasion chips multi-select from CLASSICS_DB tags. REC-01, REC-02, REC-03 all delivered. Phase 4 all 3 plans complete (04-01, 04-02, 04-03).*

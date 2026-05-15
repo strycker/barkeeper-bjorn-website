@@ -34,16 +34,61 @@ const InventoryView = (() => {
     { key: 'garnish_and_service',    label: 'Garnish & Service',   hint: 'Cherries, picks, glassware notes…' },
   ];
 
+  // Phase 4: 6-tier system (replaces old 4-tier)
+  const TIERS = ['well', 'standard', 'premium', 'craft', 'boutique', 'rare/exceptional'];
+  const TIER_LABEL = {
+    '': 'Unset',
+    'well': 'Well',
+    'standard': 'Standard',
+    'premium': 'Premium',
+    'craft': 'Craft',
+    'boutique': 'Boutique',
+    'rare/exceptional': 'Rare/Exceptional',
+  };
   const TIER_COLORS = {
-    'industrial': 'tier-industrial',
-    'premium-accessible': 'tier-premium-accessible',
+    '': 'tier-unset',
+    'well': 'tier-well',
+    'standard': 'tier-standard',
+    'premium': 'tier-premium',
+    'craft': 'tier-craft',
     'boutique': 'tier-boutique',
-    'rare/exceptional': 'tier-rare',
+    'rare/exceptional': 'tier-rare-exceptional',
   };
 
-  const TIERS = ['industrial', 'premium-accessible', 'boutique', 'rare/exceptional'];
+  // Type options: 35 fixed entries + user-added custom types from localStorage
+  const TYPE_OPTIONS = [
+    'Bourbon','Rye','Scotch','Irish Whiskey','Japanese Whisky','Canadian Whisky',
+    'Single Malt Scotch','Blended Scotch','Tennessee Whiskey',
+    'Cognac','Armagnac','Calvados',
+    'Rum','Dark Rum','Light Rum','Aged Rum','Rhum Agricole',
+    'Mezcal','Tequila Blanco','Tequila Reposado','Tequila Añejo',
+    'Gin','London Dry Gin','Old Tom Gin',
+    'Vodka','Pisco','Sake','Shochu','Absinthe',
+    'Triple Sec','Curaçao','Vermouth','Amaro','Aperol','Campari'
+  ];
+
+  function loadCustomTypes() {
+    try { return JSON.parse(localStorage.getItem('bb_custom_types') || '[]'); }
+    catch { return []; }
+  }
+
+  function saveCustomType(t) {
+    const list = loadCustomTypes();
+    if (t && !list.includes(t) && !TYPE_OPTIONS.includes(t)) {
+      list.push(t);
+      localStorage.setItem('bb_custom_types', JSON.stringify(list));
+    }
+  }
+
+  function allTypeOptions() { return [...TYPE_OPTIONS, ...loadCustomTypes()]; }
+
+  // Strainer options for Equipment tab (D-11)
+  const STRAINER_OPTIONS = ['Hawthorne', 'Julep', 'Fine Mesh', 'Conical'];
 
   let _dirty = false;
+
+  // One-at-a-time inline edit state
+  let _openEdit = null; // { sectionKey, index, snapshot, formEl, gridEl, container }
 
   function getNestedArr(inv, dotKey) {
     const parts = dotKey.split('.');
@@ -65,16 +110,6 @@ const InventoryView = (() => {
     obj[parts[parts.length - 1]] = value;
   }
 
-  function tierLabel(tier) {
-    const map = {
-      'industrial': 'Industrial',
-      'premium-accessible': 'Premium',
-      'boutique': 'Boutique',
-      'rare/exceptional': 'Rare',
-    };
-    return map[tier] || tier || '';
-  }
-
   function renderBottleSection(container, sectionKey, sectionLabel, hint, inv) {
     const arr = getNestedArr(inv, sectionKey);
 
@@ -82,37 +117,68 @@ const InventoryView = (() => {
     section.className = 'inventory-section';
     section.dataset.sectionKey = sectionKey;
 
+    // Safe ID for datalist
+    const safeId = sectionKey.replace(/\./g, '-');
+
     section.innerHTML = `
       <div class="inventory-section-title">${Utils.escapeHtml(sectionLabel)}</div>
-      <div class="bottle-grid" id="bottles-${sectionKey.replace(/\./g, '-')}"></div>
+      <div class="bottle-grid" id="bottles-${safeId}"></div>
       <div class="add-bottle-row" style="margin-top:12px;">
-        <input type="text" class="add-bottle-input" placeholder="${Utils.escapeHtml(hint)}" style="flex:1;">
-        <select class="add-bottle-tier" style="width:130px;">
-          ${TIERS.map(t => `<option value="${t}">${tierLabel(t)}</option>`).join('')}
-          <option value="" selected>Tier…</option>
-        </select>
-        <button class="btn btn-secondary btn-sm add-bottle-btn">+ Add</button>
-      </div>`;
+        <input type="text" class="bottle-add-input" placeholder="${Utils.escapeHtml('Add a ' + sectionLabel + ' bottle (style)')}" list="type-options-${safeId}" style="flex:1;">
+        <button class="btn btn-primary btn-sm bottle-add-btn">Add Bottle</button>
+      </div>
+      <datalist id="type-options-${safeId}">
+        ${allTypeOptions().map(t => `<option value="${Utils.escapeHtml(t)}">`).join('')}
+      </datalist>
+      <div class="canonical-suggestion" data-for="${safeId}" style="display:none;"></div>`;
 
     const grid = section.querySelector('.bottle-grid');
     renderBottleChips(grid, arr, sectionKey, inv);
 
-    const addBtn = section.querySelector('.add-bottle-btn');
-    const nameInput = section.querySelector('.add-bottle-input');
-    const tierSelect = section.querySelector('.add-bottle-tier');
+    const addBtn = section.querySelector('.bottle-add-btn');
+    const nameInput = section.querySelector('.bottle-add-input');
+    const canonicalBanner = section.querySelector('.canonical-suggestion');
 
+    // Canonical suggestion banner
+    nameInput.addEventListener('input', () => {
+      const val = nameInput.value;
+      if (!val.trim()) {
+        canonicalBanner.style.display = 'none';
+        canonicalBanner.innerHTML = '';
+        return;
+      }
+      const suggestion = (typeof CanonicalNames !== 'undefined') ? CanonicalNames.suggest(val) : null;
+      if (suggestion) {
+        canonicalBanner.innerHTML = `<span>Did you mean: <strong>${Utils.escapeHtml(suggestion.canonical)}</strong>?</span> <button class="canonical-suggestion__action btn btn-ghost btn-sm" type="button">Use it</button>`;
+        canonicalBanner.style.display = 'flex';
+        canonicalBanner.querySelector('.canonical-suggestion__action').addEventListener('click', () => {
+          nameInput.value = suggestion.canonical;
+          nameInput.dispatchEvent(new Event('input'));
+          nameInput.focus();
+        });
+      } else {
+        canonicalBanner.style.display = 'none';
+        canonicalBanner.innerHTML = '';
+      }
+    });
+
+    // Add bottle handler
     addBtn.addEventListener('click', () => {
       const name = nameInput.value.trim();
       if (!name) return;
-      const tier = tierSelect.value || undefined;
-      const bottle = { name, ...(tier ? { tier } : {}) };
+      const now = new Date().toISOString();
+      const newEntry = { style: name, type: '', brand: '', tier: '', best_for: '', notes: '', created_at: now, updated_at: now };
       const current = getNestedArr(inv, sectionKey);
-      current.push(bottle);
-      setNestedArr(inv, sectionKey, current);
+      State.patch('inventory', i2 => {
+        const arr2 = getNestedArr(i2, sectionKey);
+        arr2.push(newEntry);
+        setNestedArr(i2, sectionKey, arr2);
+      });
       markDirty();
-      renderBottleChips(grid, current, sectionKey, inv);
       nameInput.value = '';
-      tierSelect.value = '';
+      canonicalBanner.style.display = 'none';
+      canonicalBanner.innerHTML = '';
+      renderBottleChips(grid, getNestedArr(State.get('inventory'), sectionKey), sectionKey, State.get('inventory'));
     });
 
     nameInput.addEventListener('keydown', e => {
@@ -124,23 +190,51 @@ const InventoryView = (() => {
 
   function renderBottleChips(grid, arr, sectionKey, inv) {
     grid.innerHTML = '';
-    arr.forEach((bottle, idx) => {
+    arr.forEach((bottle, i) => {
+      // Backward compat: handle legacy string or {name} shapes
+      const displayName = bottle.style || bottle.name || (typeof bottle === 'string' ? bottle : '');
+      const brand = bottle.brand || '';
+      const tierClass = TIER_COLORS[bottle.tier] || 'tier-unset';
+
+      // Build tooltip from non-empty parts
+      const tooltipParts = [
+        displayName,
+        brand || null,
+        bottle.tier ? ((TIER_LABEL[bottle.tier] || bottle.tier) + ' tier') : null
+      ].filter(Boolean);
+      const tooltipText = tooltipParts.join(' — ');
+
       const chip = document.createElement('div');
       chip.className = 'bottle-chip';
-      const tierClass = TIER_COLORS[bottle.tier] || 'tier-industrial';
       chip.innerHTML = `
-        <span class="bottle-tier-dot ${tierClass}" title="${Utils.escapeHtml(bottle.tier || 'unrated')}"></span>
-        <span>${Utils.escapeHtml(bottle.name)}</span>
-        ${bottle.best_for ? `<span style="font-size:0.75rem;color:var(--text-muted);">(${Utils.escapeHtml(bottle.best_for)})</span>` : ''}
-        <button class="chip-remove" title="Remove" data-idx="${idx}">×</button>`;
-      chip.querySelector('.chip-remove').addEventListener('click', (e) => {
+        <span class="bottle-tier-dot ${tierClass}" aria-hidden="true"></span>
+        <span class="bottle-chip-name">${Utils.escapeHtml(displayName)}</span>
+        ${brand ? `<span class="bottle-chip-brand"> · ${Utils.escapeHtml(brand)}</span>` : ''}
+        <button class="bottle-chip-remove" aria-label="Remove ${Utils.escapeHtml(displayName)}">×</button>`;
+      chip.title = tooltipText;
+
+      chip.querySelector('.bottle-chip-remove').addEventListener('click', (e) => {
         e.stopPropagation();
-        const current = getNestedArr(inv, sectionKey);
-        current.splice(idx, 1);
-        setNestedArr(inv, sectionKey, current);
+        // Close open edit if it references this chip
+        if (_openEdit && _openEdit.sectionKey === sectionKey && _openEdit.index === i) {
+          closeEditForm(false);
+          return;
+        }
+        State.patch('inventory', i2 => {
+          const arr2 = getNestedArr(i2, sectionKey);
+          arr2.splice(i, 1);
+          setNestedArr(i2, sectionKey, arr2);
+        });
         markDirty();
-        renderBottleChips(grid, current, sectionKey, inv);
+        renderBottleChips(grid, getNestedArr(State.get('inventory'), sectionKey), sectionKey, State.get('inventory'));
       });
+
+      // Chip body click → open edit form (not × button)
+      chip.addEventListener('click', (e) => {
+        if (e.target.classList.contains('bottle-chip-remove')) return;
+        openEditForm(grid, container, sectionKey, i, State.get('inventory'));
+      });
+
       grid.appendChild(chip);
     });
 
@@ -150,6 +244,101 @@ const InventoryView = (() => {
       empty.textContent = 'Nothing here yet';
       grid.appendChild(empty);
     }
+  }
+
+  function openEditForm(grid, container, sectionKey, index, inv) {
+    // Close any open form first (revert behavior)
+    if (_openEdit) closeEditForm(true);
+
+    const arr = getNestedArr(inv, sectionKey);
+    const entry = arr[index];
+    if (!entry) return;
+
+    // Coerce legacy {name} for editing
+    if (!entry.style && entry.name) { entry.style = entry.name; delete entry.name; }
+
+    const snapshot = JSON.parse(JSON.stringify(entry));
+
+    // Safe datalist ID
+    const safeId = sectionKey.replace(/\./g, '-');
+
+    const formEl = document.createElement('div');
+    formEl.className = 'bottle-edit-form';
+    formEl.innerHTML = `
+      <div class="bottle-edit-fields">
+        <label>Style <input type="text" data-field="style" value="${Utils.escapeHtml(entry.style || '')}"></label>
+        <label>Type <input type="text" data-field="type" list="type-options-${safeId}" value="${Utils.escapeHtml(entry.type || '')}"></label>
+      </div>
+      <button type="button" class="bottle-edit-toggle">More fields ▾</button>
+      <div class="bottle-edit-fields--expanded" style="display:none;">
+        <div class="bottle-edit-fields">
+          <label>Brand <input type="text" data-field="brand" value="${Utils.escapeHtml(entry.brand || '')}"></label>
+          <label>Tier <select data-field="tier">
+            <option value="">Unset</option>
+            ${TIERS.map(t => `<option value="${Utils.escapeHtml(t)}" ${entry.tier === t ? 'selected' : ''}>${Utils.escapeHtml(TIER_LABEL[t])}</option>`).join('')}
+          </select></label>
+          <label>Best for <select data-field="best_for">
+            <option value="" ${!entry.best_for ? 'selected' : ''}></option>
+            <option value="sipping" ${entry.best_for === 'sipping' ? 'selected' : ''}>Sipping</option>
+            <option value="mixing" ${entry.best_for === 'mixing' ? 'selected' : ''}>Mixing</option>
+            <option value="both" ${entry.best_for === 'both' ? 'selected' : ''}>Both</option>
+          </select></label>
+          <label>Notes <textarea rows="2" data-field="notes">${Utils.escapeHtml(entry.notes || '')}</textarea></label>
+        </div>
+      </div>
+      <div class="bottle-edit-actions">
+        <button type="button" class="btn btn-ghost btn-sm bottle-edit-revert">Revert Changes</button>
+        <button type="button" class="btn btn-primary btn-sm bottle-edit-save">Save Bottle</button>
+      </div>`;
+
+    // Insert immediately after the grid
+    grid.parentNode.insertBefore(formEl, grid.nextSibling);
+    _openEdit = { sectionKey, index, snapshot, formEl, gridEl: grid, container };
+
+    // More fields toggle
+    formEl.querySelector('.bottle-edit-toggle').addEventListener('click', () => {
+      const ext = formEl.querySelector('.bottle-edit-fields--expanded');
+      const expanded = ext.style.display !== 'none';
+      ext.style.display = expanded ? 'none' : '';
+      formEl.querySelector('.bottle-edit-toggle').textContent = expanded ? 'More fields ▾' : 'Fewer fields ▴';
+    });
+
+    // Save Bottle
+    formEl.querySelector('.bottle-edit-save').addEventListener('click', () => {
+      State.patch('inventory', i2 => {
+        const a2 = getNestedArr(i2, sectionKey);
+        const e2 = a2[index];
+        if (!e2) return;
+        formEl.querySelectorAll('[data-field]').forEach(el => {
+          const f = el.dataset.field;
+          e2[f] = (el.value || '').trim();
+        });
+        // Persist custom type if novel
+        if (e2.type) saveCustomType(e2.type);
+        if (!e2.created_at) e2.created_at = new Date().toISOString();
+        e2.updated_at = new Date().toISOString();
+      });
+      markDirty();
+      closeEditForm(false);
+    });
+
+    // Revert Changes
+    formEl.querySelector('.bottle-edit-revert').addEventListener('click', () => closeEditForm(true));
+  }
+
+  function closeEditForm(doRevert) {
+    if (!_openEdit) return;
+    const { sectionKey, index, snapshot, formEl, gridEl } = _openEdit;
+    if (doRevert) {
+      State.patch('inventory', i2 => {
+        const a2 = getNestedArr(i2, sectionKey);
+        if (a2[index]) Object.assign(a2[index], snapshot);
+      });
+    }
+    formEl.remove();
+    _openEdit = null;
+    // Re-render chips for this section
+    renderBottleChips(gridEl, getNestedArr(State.get('inventory'), sectionKey), sectionKey, State.get('inventory'));
   }
 
   function renderStringSection(container, sectionKey, sectionLabel, hint, inv) {
@@ -221,6 +410,7 @@ const InventoryView = (() => {
 
   function render(container) {
     _dirty = false;
+    _openEdit = null;
     const inv = State.get('inventory');
     if (!inv) {
       Utils.showError(container, 'Inventory data not loaded.');
@@ -246,7 +436,7 @@ const InventoryView = (() => {
     document.getElementById('inv-save-btn')?.addEventListener('click', saveInventory);
     document.getElementById('inv-discard-btn')?.addEventListener('click', () => {
       _dirty = false;
-      // Reload from state (state still has original — user just edited UI arrays in-place)
+      _openEdit = null;
       Utils.showToast('Changes discarded', 'info');
       render(container);
     });
@@ -296,27 +486,33 @@ const InventoryView = (() => {
       if (!key) return;
       const section = document.querySelector(`.inventory-section[data-sectionKey="${key}"]`);
       if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      // Reset select to default after jump so user can re-select the same category
       categorySelect.value = '';
     });
 
-    // Tabs
+    // Tabs (Phase 4: added Equipment tab)
     const tabsEl = document.createElement('div');
     tabsEl.className = 'tabs';
     const tabs = [
-      { id: 'tab-spirits',  label: 'Spirits & Bottles' },
-      { id: 'tab-pantry',   label: 'Pantry & Perishables' },
-      { id: 'tab-vetoes',   label: 'Vetoes & Substitutes' },
+      { id: 'tab-spirits',   label: 'Spirits & Bottles' },
+      { id: 'tab-pantry',    label: 'Pantry & Perishables' },
+      { id: 'tab-vetoes',    label: 'Vetoes & Substitutes' },
+      { id: 'tab-equipment', label: 'Equipment' },
     ];
+
+    const contentEl = document.createElement('div');
+    contentEl.id = 'tab-content';
 
     tabs.forEach((t, i) => {
       const tab = document.createElement('div');
       tab.className = 'tab' + (i === 0 ? ' active' : '');
       tab.textContent = t.label;
       tab.dataset.tabId = t.id;
+      tab.dataset.tab = t.id;
       tab.addEventListener('click', () => {
         tabsEl.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
         tab.classList.add('active');
+        // Close any open edit form when switching tabs
+        if (_openEdit) closeEditForm(true);
         renderTabContent(t.id, inv, contentEl);
         // Reset search so stale filter from previous tab does not apply to new tab content
         if (searchInput) {
@@ -328,9 +524,6 @@ const InventoryView = (() => {
     });
 
     sectionsEl.appendChild(tabsEl);
-
-    const contentEl = document.createElement('div');
-    contentEl.id = 'tab-content';
     sectionsEl.appendChild(contentEl);
 
     renderTabContent('tab-spirits', inv, contentEl);
@@ -348,7 +541,48 @@ const InventoryView = (() => {
       });
     } else if (tabId === 'tab-vetoes') {
       renderVetoesSection(container, inv);
+    } else if (tabId === 'tab-equipment') {
+      renderEquipmentSection(container, inv);
     }
+  }
+
+  function renderEquipmentSection(contentEl, inv) {
+    const eq = inv.equipment || (inv.equipment = { strainers: [] });
+    const checked = new Set((eq.strainers || []).filter(s => STRAINER_OPTIONS.includes(s)));
+    const emptyHint = checked.size === 0
+      ? '<p class="empty-hint" style="color:var(--text-dim);">No equipment tracked yet. Check the strainers you own below.</p>'
+      : '';
+    contentEl.innerHTML = `
+      <section class="equipment-section">
+        <h3>Strainers</h3>
+        ${emptyHint}
+        <div class="equipment-strainer-grid">
+          ${STRAINER_OPTIONS.map(name => `
+            <label class="strainer-option${checked.has(name) ? ' checked' : ''}">
+              <input type="checkbox" data-strainer="${Utils.escapeHtml(name)}" ${checked.has(name) ? 'checked' : ''}>
+              <span>${Utils.escapeHtml(name)}</span>
+            </label>
+          `).join('')}
+        </div>
+      </section>`;
+
+    contentEl.querySelectorAll('input[data-strainer]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const name = cb.dataset.strainer;
+        State.patch('inventory', i2 => {
+          i2.equipment = i2.equipment || { strainers: [] };
+          i2.equipment.strainers = i2.equipment.strainers || [];
+          const list = i2.equipment.strainers;
+          const idx = list.indexOf(name);
+          if (cb.checked && idx === -1) list.push(name);
+          if (!cb.checked && idx !== -1) list.splice(idx, 1);
+        });
+        markDirty();
+        // Re-render this tab to refresh empty state + .checked classes
+        const tabBtn = document.querySelector('.tab[data-tab="tab-equipment"]');
+        if (tabBtn) tabBtn.click();
+      });
+    });
   }
 
   function renderVetoesSection(container, inv) {
