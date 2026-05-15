@@ -8,42 +8,42 @@
   "flavor_profile": {
     "axes": {
       "sweetness": {
-        "position": "Lean A",
+        "position": 0.2,
         "label": "dry leaning",
         "description": "Bone-dry leaning. Spirit-forward palate. Rejects overly sweet builds; dessert-adjacent only when the framing earns it (e.g., milk punches, after-dinner sippers).",
         "confidence": "High",
         "last_evaluated": "2026-05-03"
       },
       "acid": {
-        "position": "Middle",
+        "position": 0.75,
         "label": "situational",
-        "description": "Comfortable in both lanes — strongly enjoys stirred no-citrus drinks (Hallucination, Manhattan-family) AND citrus-forward shaken drinks (Crossover, Margarita-family). Picks based on occasion.",
+        "description": "Comfortable in both lanes â strongly enjoys stirred no-citrus drinks (Hallucination, Manhattan-family) AND citrus-forward shaken drinks (Crossover, Margarita-family). Picks based on occasion.",
         "confidence": "High",
         "last_evaluated": "2026-05-03"
       },
       "strength": {
-        "position": "Strong A",
+        "position": 0.85,
         "label": "spirit-forward",
         "description": "Spirit-forward. Self-described preference for 'spirit-forward classic cocktail traditions.' Most originals are 1.5+ oz of base spirit with small-pour modifiers.",
         "confidence": "High",
         "last_evaluated": "2026-05-03"
       },
       "complexity": {
-        "position": "Strong B",
+        "position": 1,
         "label": "layered and brooding",
-        "description": "Loves bitters stacking, split modifiers, and structural complexity. Owns 10 bitters SKUs and uses them deliberately. Originals consistently feature 2–3 bitters working in conversation.",
+        "description": "Loves bitters stacking, split modifiers, and structural complexity. Owns 10 bitters SKUs and uses them deliberately. Originals consistently feature 2â3 bitters working in conversation.",
         "confidence": "High",
         "last_evaluated": "2026-05-03"
       },
       "season": {
-        "position": "Lean B",
+        "position": 0.75,
         "label": "adapts with season",
         "description": "Has explicitly built warm-weather originals (Wild Sanibel) and contemplative cool-weather originals (The Hallucination). Active about seasonal context.",
         "confidence": "High",
         "last_evaluated": "2026-05-03"
       },
       "risk": {
-        "position": "Strong B",
+        "position": 1,
         "label": "surprise me",
         "description": "Has six originals on file, actively iterates on them, asks for 'new and different than just a margarita with a mezcal substitute.' Wants creative pushback, not safe defaults.",
         "confidence": "High",
@@ -57,7 +57,7 @@
       },
       "funk": {
         "position": "neutral",
-        "rationale": "Inferred from inventory (both white and dark Jamaican rum stocked — ester-forward category) and Smokey the Pear v2 explicitly preferring white Jamaican rum as sub-base for ester complementarity with pear."
+        "rationale": "Inferred from inventory (both white and dark Jamaican rum stocked â ester-forward category) and Smokey the Pear v2 explicitly preferring white Jamaican rum as sub-base for ester complementarity with pear."
       },
       "savory_saline": {
         "position": "interesting",
@@ -71,7 +71,7 @@
     "drinking_frequency": "Regular home cocktail-maker; treats mixology as a craft and ongoing creative project",
     "profession": "Vice President of Decision Sciences. Leads an 8-9 person team of PhDs specializing in predictive modeling (supervised and unsupervised learning). Physics PhD. Strong applied background in financial modeling for investment predictions.",
     "typical_context": "Solo evenings (contemplative, often spirit-forward); entertaining friends and family; occasional themed drinks for specific guests (e.g., habanero-loving Dave).",
-    "household_context": "Wife is Taiwanese — household has access to many Asian ingredients (yuzu, shiso, sake, mirin, matcha, Asian pear, dried plums, oolong, jasmine tea, black sesame potentially available; specifics still TBD). When designing drinks, consider whether these ingredients would unlock distinctive builds and ask if relevant.",
+    "household_context": "Wife is Taiwanese â household has access to many Asian ingredients (yuzu, shiso, sake, mirin, matcha, Asian pear, dried plums, oolong, jasmine tea, black sesame potentially available; specifics still TBD). When designing drinks, consider whether these ingredients would unlock distinctive builds and ask if relevant.",
     "vocabulary_preference": "Free use of physics, data science, predictive modeling, and financial/investment terminology is welcome and encouraged.",
     "other_notes": "Maintains an organized, well-stocked bar with particular depth in whisk(e)y (5 regional styles), bitters (10 SKUs), and an interesting fortified wine and liqueur collection. Keeps an active shopping list and is interested in highest-impact-per-dollar additions. Has a documented set of original cocktails reflecting a clear creative voice."
   },
@@ -83,7 +83,7 @@
     "strainer": "fine mesh + hawthorne",
     "citrus_press": true,
     "ice_setup": "clear ice + crushed ice",
-    "glassware": "Full coverage — coupe, rocks/Old Fashioned, highball, pint, Nick & Nora, martini"
+    "glassware": "Full coverage â coupe, rocks/Old Fashioned, highball, pint, Nick & Nora, martini"
   },
   "archetypes": [
     {
@@ -103,7 +103,7 @@
       "description": "Manhattan-and-Old-Fashioned territory at the core, with modern willingness to experiment around the edges"
     }
   ],
-  "archetype_notes": "Glenn has the discipline of a classicist with the curiosity of a modernist. Not frou-frou, not theatrical, not minimalist. Treats cocktail-making the way he probably treats predictive modeling — structural, evidence-based, iterative, and willing to reject results that don't hold up.",
+  "archetype_notes": "Glenn has the discipline of a classicist with the curiosity of a modernist. Not frou-frou, not theatrical, not minimalist. Treats cocktail-making the way he probably treats predictive modeling â structural, evidence-based, iterative, and willing to reject results that don't hold up.",
   "vetoes": {
     "disliked_ingredients": [
       {
@@ -122,7 +122,7 @@
         "missing": "Tequila",
         "substitute": "Mezcal",
         "ratio": "1:1",
-        "notes": "Glenn enjoys tequila and plans to add it eventually. For citrus-forward shaken drinks (Margarita, Sidecar variants), the mezcal sub is excellent. For refresher-style cocktails (Paloma, Tommy's Margarita), the mezcal sub changes character meaningfully — flag the trade-off when relevant."
+        "notes": "Glenn enjoys tequila and plans to add it eventually. For citrus-forward shaken drinks (Margarita, Sidecar variants), the mezcal sub is excellent. For refresher-style cocktails (Paloma, Tommy's Margarita), the mezcal sub changes character meaningfully â flag the trade-off when relevant."
       }
     ]
   },
@@ -190,14 +190,14 @@
       "preferences": "Loves habanero-infused drinks. Tolerant of significant heat.",
       "vetoes": null,
       "documented_drinks": [
-        "cocktail5 — Dave's Folly (rye + crème de poire + habanero honey syrup)",
+        "cocktail5 â Dave's Folly (rye + crÃ¨me de poire + habanero honey syrup)",
         "Naked Dave variant (mezcal version)"
       ]
     },
     {
       "name": "Stan",
       "relationship": "Brother (Glenn's youngest)",
-      "preferences": "Occasional drinker. No home bar yet. Profile not yet captured — Glenn is considering setting Stan up with his own Barkeeper Bjorn instance using the Minimalist track.",
+      "preferences": "Occasional drinker. No home bar yet. Profile not yet captured â Glenn is considering setting Stan up with his own Barkeeper Bjorn instance using the Minimalist track.",
       "vetoes": null,
       "documented_drinks": []
     }
