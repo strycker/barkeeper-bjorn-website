@@ -1,9 +1,63 @@
 {
-  "identity": {},
-  "flavor_profile": {
-    "axes": {},
-    "supplemental": {}
+  "identity": {
+    "full_name": "Ernest Grant",
+    "preferred_name": "Don the Beachcomber",
+    "location": "Hollywood, CA",
+    "timezone": "PST"
   },
-  "onboarding_complete": false,
-  "last_updated": "2026-05-15"
+  "flavor_profile": {
+    "axes": {
+      "sweetness": {
+        "position": 0.74,
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-15"
+      },
+      "acid": {
+        "position": 0.91,
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-15"
+      },
+      "strength": {
+        "position": 0.23,
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-15"
+      },
+      "complexity": {
+        "position": 0.7,
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-15"
+      },
+      "season": {
+        "position": 0.78,
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-15"
+      },
+      "risk": {
+        "position": 0.84,
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-15"
+      }
+    },
+    "supplemental": {
+      "smoke": {
+        "position": "avoids"
+      }
+    }
+  },
+  "onboarding_complete": true,
+  "last_updated": "2026-05-15",
+  "background": {
+    "profession": "Oil well driller",
+    "drinking_frequency": "weekly",
+    "typical_context": "Family and friends"
+  },
+  "equipment": {
+    "shaker": "Boston two-piece",
+    "mixing_glass": true,
+    "jigger": true,
+    "bar_spoon": true,
+    "strainer": "fine mesh",
+    "citrus_press": true,
+    "ice_setup": "standard cubes"
+  }
 }
