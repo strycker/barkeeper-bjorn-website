@@ -964,3 +964,108 @@ a:hover { color: var(--amber); }
   border: 1px solid var(--amber-dim);
   border-radius: var(--radius);
 }
+
+/* ============================================================
+   Phase 4 — Inventory & Recommender Depth
+   ============================================================ */
+
+/* Phase 4: 6-tier dot palette (D-05) — additive, legacy classes preserved above */
+.tier-well { background: #666; }
+.tier-standard { background: #4caf7d; }
+.tier-premium { background: #5b9bd5; }
+.tier-craft { background: #d4943a; }
+.tier-boutique { background: #c084fc; }
+.tier-rare-exceptional { background: #f59e42; }
+.tier-unset { background: transparent; border: 1px solid #444; }
+
+/* Phase 4: Bottle chip secondary brand text */
+.bottle-chip-brand {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* Phase 4: Inline edit form (D-07) */
+.bottle-edit-form {
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--amber);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin: 8px 0 16px;
+}
+.bottle-edit-fields,
+.bottle-edit-fields--expanded {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bottle-edit-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.bottle-edit-form input,
+.bottle-edit-form select,
+.bottle-edit-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+.bottle-edit-toggle {
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 12px;
+  cursor: pointer;
+  margin: 8px 0;
+  padding: 0;
+}
+.bottle-edit-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+
+/* Phase 4: Canonical name suggestion banner (D-24) */
+.canonical-suggestion {
+  background: rgba(212, 148, 58, 0.08);
+  border: 1px solid var(--amber-dim);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--text);
+  margin: 4px 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.canonical-suggestion strong { color: var(--amber); }
+
+/* Phase 4: Equipment tab (D-11, D-12) */
+.equipment-section h3 { font-size: 20px; margin: 0 0 16px; }
+.equipment-strainer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.strainer-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--text);
+}
+.strainer-option.checked {
+  color: var(--amber);
+  border-color: var(--amber);
+}
+@media (max-width: 480px) {
+  .equipment-strainer-grid { grid-template-columns: 1fr; }
+}
