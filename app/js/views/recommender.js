@@ -362,7 +362,7 @@ const RecommenderView = (() => {
       moodToggle.addEventListener('click', () => {
         _slidersVisible = !_slidersVisible;
         const panel = container.querySelector('.rec-mood-sliders-inner');
-        if (panel) panel.style.display = _slidersVisible ? '' : 'none';
+        if (panel) panel.style.display = _slidersVisible ? 'block' : 'none';
         moodToggle.textContent = _slidersVisible ? 'Hide Sliders ▴' : 'Adjust Mood ▾';
       });
     }
