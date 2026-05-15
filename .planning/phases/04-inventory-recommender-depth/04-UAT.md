@@ -23,7 +23,7 @@ note: chip click was broken (container ReferenceError) — fixed before pass
 
 ### 2. Inline Edit Form — Open & Fields
 expected: Click a bottle chip body (not the × button). An edit form expands below the chip grid. The form shows Style (text input) and Type (text input with datalist) by default. Clicking "More fields ▾" reveals Brand, Tier (dropdown with 6 options + Unset), Best for, and Notes textarea. The toggle label changes to "Fewer fields ▴".
-result: [pending]
+result: pass
 
 ### 3. Save Bottle & Revert Changes
 expected: With an edit form open, change the style or tier, then click "Save Bottle". The chip updates in place (no delete/re-add). Dirty indicator appears. Open the form again and change something, then click "Revert Changes". The field snaps back to its value from when you first opened the form. No dirty state is triggered on revert.
