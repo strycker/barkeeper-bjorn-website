@@ -130,6 +130,9 @@
     _dataLoaded = false;
   });
 
+  // Load static config before any view renders (lookup tables, categories, etc.)
+  try { await Config.load(); } catch (e) { console.warn('Config load failed; using defaults.', e); }
+
   // Initial route
   const { route, params } = parseHash();
 
