@@ -69,8 +69,6 @@ const Normalize = (() => {
     if (out.tier && OLD_TIER_VALUES.has(out.tier)) {
       out.tier = '';
     }
-    // Ensure type is never empty: default to style so chips always have a label
-    if (!out.type) out.type = out.style;
     // INV-09: ensure nationality defaults to empty string
     out.nationality = ensureString(out.nationality);
     // Ensure ISO timestamps
