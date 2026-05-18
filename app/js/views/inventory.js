@@ -85,14 +85,32 @@ const InventoryView = (() => {
   // Strainer options for Equipment tab (D-11)
   const STRAINER_OPTIONS = ['Hawthorne', 'Julep', 'Fine Mesh', 'Conical'];
 
-  // Default style label per inventory section key
+  // Canonical category list — drives the Category dropdown in every bottle edit form.
+  // Must stay in sync with SECTION_STYLE defaults and parseBottleEntry() logic.
+  const CATEGORIES = [
+    'Bourbon', 'Rye Whiskey', 'Scotch', 'Irish Whiskey', 'Japanese Whisky',
+    'Tennessee Whiskey', 'Whiskey',
+    'Tequila', 'Mezcal',
+    'Gin', 'Vodka', 'Aquavit', 'Genever',
+    'Rum', 'Cachaça',
+    'Cognac', 'Armagnac', 'Calvados', 'Pisco', 'Brandy',
+    'Vermouth', 'Fortified Wine', 'Amaro',
+    'Liqueur',
+    'Bitters',
+    'Syrup',
+    'Mixer',
+    'Non-Alcoholic Spirit',
+    'Other / Misc.',
+  ];
+
+  // Default category per inventory section key (all values must be in CATEGORIES)
   const SECTION_STYLE = {
     'base_spirits.whiskey':                   'Whiskey',
-    'base_spirits.agave':                     'Agave Spirit',
-    'base_spirits.white_spirits':             'Spirit',
+    'base_spirits.agave':                     'Tequila',
+    'base_spirits.white_spirits':             'Gin',
     'base_spirits.rum':                       'Rum',
     'base_spirits.brandy':                    'Brandy',
-    'base_spirits.other':                     'Spirit',
+    'base_spirits.other':                     'Other / Misc.',
     'fortified_wines_and_aperitif_wines':     'Fortified Wine',
     'liqueurs_and_cordials.herbal':           'Liqueur',
     'liqueurs_and_cordials.nut_coffee':       'Liqueur',
@@ -104,16 +122,17 @@ const InventoryView = (() => {
     'bitters.nut_earth':                      'Bitters',
     'bitters.fruit_botanical':                'Bitters',
     'bitters.other':                          'Bitters',
-    'non_alcoholic_spirits':                  'Non-Alcoholic',
+    'non_alcoholic_spirits':                  'Non-Alcoholic Spirit',
   };
 
   // Type keywords — longest first for greedy matching; each entry: [keyword, displayType]
   const TYPE_KEYWORDS = [
-    ['single malt',  'Single Malt'], ['blended malt',  'Blended Malt'],
-    ['extra añejo',  'Extra Añejo'], ['irish whiskey', 'Irish'],
-    ['irish whisky', 'Irish'],       ['tennessee',     'Tennessee'],
-    ['japanese',     'Japanese'],    ['bourbon',       'Bourbon'],
-    ['rye',          'Rye'],         ['scotch',        'Scotch'],
+    ['single malt',  'Single Malt'],  ['blended malt',  'Blended Malt'],
+    ['extra añejo',  'Extra Añejo'],  ['irish whiskey', 'Irish Whiskey'],
+    ['irish whisky', 'Irish Whiskey'],['tennessee',     'Tennessee Whiskey'],
+    ['japanese',     'Japanese Whisky'], ['bourbon',   'Bourbon'],
+    ['rye whiskey',  'Rye Whiskey'],  ['rye',          'Rye Whiskey'],
+    ['scotch',       'Scotch'],
     ['blended',      'Blended'],     ['espadin',       'Espadín'],
     ['espadín',      'Espadín'],     ['tobalá',        'Tobalá'],
     ['tobala',       'Tobalá'],      ['reposado',      'Reposado'],
@@ -332,19 +351,26 @@ const InventoryView = (() => {
       }
     }
 
-    // Derive style from type for sections where style = f(type)
-    if (sectionKey === 'base_spirits.agave') {
+    // Promote detected type to canonical category (style) for relevant sections
+    if (sectionKey === 'base_spirits.whiskey') {
+      // Specific whiskey types that are their own canonical categories
+      const WHISKEY_CATS = new Set(['Bourbon','Rye Whiskey','Scotch','Irish Whiskey','Japanese Whisky','Tennessee Whiskey']);
+      if (WHISKEY_CATS.has(type)) style = type;
+    } else if (sectionKey === 'base_spirits.agave') {
       style = ['Mezcal','Espadín','Tobalá','Cuixe','Clairin','Raicilla'].includes(type) ? 'Mezcal' : 'Tequila';
-      if (!type) style = 'Agave Spirit';
     } else if (sectionKey === 'base_spirits.white_spirits') {
-      if (['Genever','Aquavit'].includes(type)) style = type;
-      else style = type || 'Spirit';
+      // Any type that's a canonical category wins; else default Gin
+      style = CATEGORIES.includes(type) ? type : (type || 'Gin');
     } else if (sectionKey === 'base_spirits.brandy') {
-      style = type || 'Brandy';
+      // Cognac/Armagnac/Calvados/Pisco are their own canonical categories
+      style = CATEGORIES.includes(type) ? type : 'Brandy';
     }
 
     // Last resort: no match at all → use raw name as style
     if (!style) style = rawName;
+
+    // Ensure type is never empty: default to style when undetected
+    if (!type) type = style;
 
     return { style, type, brand, tier: '', best_for: '', notes: '', created_at: now, updated_at: now };
   }
@@ -562,12 +588,25 @@ const InventoryView = (() => {
     // Safe datalist ID
     const safeId = sectionKey.replace(/\./g, '-');
 
+    // Build category <select>: canonical list + preserve any custom value not in list
+    const catInList = CATEGORIES.includes(entry.style || '');
+    const customCatOption = (!catInList && entry.style)
+      ? `<option value="${Utils.escapeHtml(entry.style)}" selected>${Utils.escapeHtml(entry.style)}</option>`
+      : '';
+    const catOptions = CATEGORIES.map(c =>
+      `<option value="${Utils.escapeHtml(c)}"${entry.style === c ? ' selected' : ''}>${Utils.escapeHtml(c)}</option>`
+    ).join('');
+
     const formEl = document.createElement('div');
     formEl.className = 'bottle-edit-form';
     formEl.innerHTML = `
       <div class="bottle-edit-fields">
-        <label>Category <input type="text" data-field="style" placeholder="e.g. Bourbon, Gin, Mezcal" title="Broad category (Bourbon, Gin, Mezcal, etc.)" value="${Utils.escapeHtml(entry.style || '')}"></label>
-        <label>Specific Style/Type <input type="text" data-field="type" list="type-options-${safeId}" placeholder="e.g. Single Barrel, Cask Strength, Espadin" title="The specific bottle&#39;s style/type (e.g. Single Barrel, Espadin)" value="${Utils.escapeHtml(entry.type || '')}"></label>
+        <label>Category <select data-field="style" required title="Standardized spirit category (required)">
+          <option value="">— select category —</option>
+          ${customCatOption}
+          ${catOptions}
+        </select></label>
+        <label>Specific Style/Type <input type="text" data-field="type" list="type-options-${safeId}" placeholder="e.g. Single Barrel, Cask Strength, Espadín" title="Specific style or sub-type of this bottle" value="${Utils.escapeHtml(entry.type || '')}"></label>
       </div>
       <button type="button" class="bottle-edit-toggle">More fields ▾</button>
       <div class="bottle-edit-fields--expanded" style="display:none;">
@@ -606,6 +645,13 @@ const InventoryView = (() => {
 
     // Save Bottle
     formEl.querySelector('.bottle-edit-save').addEventListener('click', () => {
+      const styleEl = formEl.querySelector('[data-field="style"]');
+      const newStyle = (styleEl ? styleEl.value : '').trim();
+      if (!newStyle) {
+        Utils.toast('Category is required — please select one.', 'error');
+        if (styleEl) styleEl.focus();
+        return;
+      }
       State.patch('inventory', i2 => {
         const a2 = getNestedArr(i2, sectionKey);
         const e2 = a2[index];
@@ -614,6 +660,8 @@ const InventoryView = (() => {
           const f = el.dataset.field;
           e2[f] = (el.value || '').trim();
         });
+        // Ensure type is never empty: fall back to category
+        if (!e2.type) e2.type = e2.style;
         // Persist custom type if novel
         if (e2.type) saveCustomType(e2.type);
         if (!e2.created_at) e2.created_at = new Date().toISOString();

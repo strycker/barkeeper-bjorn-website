@@ -1,80 +1,124 @@
 {
-  "last_updated": "2026-05-15",
+  "last_updated": "2026-05-18",
   "base_spirits": {
     "whiskey": [
       {
         "style": "Bourbon",
-        "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:15:09.649Z",
-        "type": "",
+        "type": "Bourbon",
         "brand": "",
         "tier": "",
         "best_for": "",
-        "notes": ""
-      },
-      {
-        "style": "Whisky",
+        "notes": "",
+        "nationality": "",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-18T00:00:00.000Z"
       },
       {
         "style": "Whiskey",
+        "type": "Whiskey",
+        "brand": "",
+        "tier": "",
+        "best_for": "",
+        "notes": "",
+        "nationality": "",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-18T00:00:00.000Z"
       },
       {
-        "style": "Irish",
+        "style": "Whiskey",
+        "type": "Whiskey",
+        "brand": "",
+        "tier": "",
+        "best_for": "",
+        "notes": "",
+        "nationality": "",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:58.148Z",
+        "updated_at": "2026-05-18T00:00:00.000Z"
+      },
+      {
+        "style": "Irish Whiskey",
         "type": "Irish Whiskey",
         "brand": "Jameson",
         "tier": "well",
         "best_for": "",
-        "notes": ""
+        "notes": "",
+        "nationality": "Ireland",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-18T00:00:00.000Z"
       },
       {
         "style": "Japanese Whisky",
-        "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:32.284Z",
         "type": "Japanese Whisky",
         "brand": "",
         "tier": "well",
         "best_for": "",
-        "notes": ""
+        "notes": "",
+        "nationality": "Japan",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-18T00:00:00.000Z"
       }
     ],
     "brandy": [
       {
-        "tier": "",
         "style": "Cognac",
+        "type": "Cognac",
+        "brand": "",
+        "tier": "",
+        "best_for": "",
+        "notes": "",
+        "nationality": "France",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-18T00:00:00.000Z"
       }
     ],
     "rum": [
       {
-        "style": "White Jamaican Rum",
+        "style": "Rum",
+        "type": "White Jamaican",
+        "brand": "",
+        "tier": "",
+        "best_for": "",
+        "notes": "",
+        "nationality": "Jamaica",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-18T00:00:00.000Z"
       },
       {
-        "style": "Dark Jamaican Rum",
+        "style": "Rum",
+        "type": "Dark Jamaican",
+        "brand": "",
+        "tier": "",
+        "best_for": "",
+        "notes": "",
+        "nationality": "Jamaica",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-18T00:00:00.000Z"
       }
     ],
     "agave": [
       {
-        "style": "mezcal",
+        "style": "Mezcal",
+        "type": "Mezcal",
+        "brand": "",
+        "tier": "",
+        "best_for": "",
+        "notes": "",
+        "nationality": "Mexico",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-18T00:00:00.000Z"
       }
     ],
     "white_spirits": [
       {
         "style": "Gin",
+        "type": "Gin",
+        "brand": "",
+        "tier": "",
+        "best_for": "",
+        "notes": "",
+        "nationality": "",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-18T00:00:00.000Z"
       }
     ],
     "other": []
@@ -84,75 +128,135 @@
   ],
   "fortified_wines_and_aperitif_wines": [
     {
-      "style": "Cocchi",
+      "style": "Fortified Wine",
+      "type": "Americano",
+      "brand": "Cocchi",
+      "tier": "",
+      "best_for": "",
+      "notes": "",
+      "nationality": "Italy",
       "created_at": "2026-05-15T20:13:12.041Z",
-      "updated_at": "2026-05-15T20:13:12.041Z"
+      "updated_at": "2026-05-18T00:00:00.000Z"
     },
     {
-      "style": "Sweet Vermouth",
+      "style": "Vermouth",
+      "type": "Sweet",
+      "brand": "",
+      "tier": "",
+      "best_for": "",
+      "notes": "",
+      "nationality": "",
       "created_at": "2026-05-15T20:13:12.041Z",
-      "updated_at": "2026-05-15T20:13:12.041Z"
+      "updated_at": "2026-05-18T00:00:00.000Z"
     },
     {
-      "style": "Lillet",
+      "style": "Fortified Wine",
+      "type": "Aromatized Wine",
+      "brand": "Lillet",
+      "tier": "",
+      "best_for": "",
+      "notes": "",
+      "nationality": "France",
       "created_at": "2026-05-15T20:13:12.041Z",
-      "updated_at": "2026-05-15T20:13:12.041Z"
+      "updated_at": "2026-05-18T00:00:00.000Z"
     }
   ],
   "liqueurs_and_cordials": {
     "fruit_forward": [
       {
-        "style": "Cointreau",
+        "style": "Liqueur",
+        "type": "Triple Sec",
+        "brand": "Cointreau",
+        "tier": "",
+        "best_for": "",
+        "notes": "",
+        "nationality": "France",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-18T00:00:00.000Z"
       }
     ],
     "nut_coffee": [
       {
-        "style": "Coffee Liqueur",
+        "style": "Liqueur",
+        "type": "Coffee",
+        "brand": "",
+        "tier": "",
+        "best_for": "",
+        "notes": "",
+        "nationality": "",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-18T00:00:00.000Z"
       }
     ],
     "herbal": [
       {
-        "style": "Campari",
+        "style": "Amaro",
+        "type": "Bitter Liqueur",
+        "brand": "Campari",
+        "tier": "",
+        "best_for": "",
+        "notes": "",
+        "nationality": "Italy",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-18T00:00:00.000Z"
       }
     ],
     "specialty_regional": [
       {
-        "style": "Aperol",
+        "style": "Amaro",
+        "type": "Aperitivo",
+        "brand": "Aperol",
+        "tier": "",
+        "best_for": "",
+        "notes": "",
+        "nationality": "Italy",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-18T00:00:00.000Z"
       }
     ]
   },
   "bitters": {
     "anchors": [
       {
-        "style": "Angostura",
+        "style": "Bitters",
+        "type": "Aromatic",
+        "brand": "Angostura",
+        "tier": "",
+        "best_for": "",
+        "notes": "",
+        "nationality": "Trinidad",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-18T00:00:00.000Z"
       }
     ],
     "aromatic_smoke": [],
     "nut_earth": [],
     "fruit_botanical": [
       {
-        "style": "Orange Bitters",
+        "style": "Bitters",
+        "type": "Orange",
+        "brand": "",
+        "tier": "",
+        "best_for": "",
+        "notes": "",
+        "nationality": "",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-18T00:00:00.000Z"
       }
     ],
     "other": []
   },
   "syrups": [
     {
-      "style": "Cardamom Syrup",
+      "style": "Syrup",
+      "type": "Cardamom",
+      "brand": "",
+      "tier": "",
+      "best_for": "",
+      "notes": "",
+      "nationality": "",
       "created_at": "2026-05-15T20:13:12.041Z",
-      "updated_at": "2026-05-15T20:13:12.041Z"
+      "updated_at": "2026-05-18T00:00:00.000Z"
     }
   ],
   "mixers": [
@@ -190,9 +294,15 @@
   },
   "non_alcoholic_spirits": [
     {
-      "style": "Seedlip",
+      "style": "Non-Alcoholic Spirit",
+      "type": "Non-Alcoholic Spirit",
+      "brand": "Seedlip",
+      "tier": "",
+      "best_for": "",
+      "notes": "",
+      "nationality": "UK",
       "created_at": "2026-05-15T20:13:12.041Z",
-      "updated_at": "2026-05-15T20:13:12.041Z"
+      "updated_at": "2026-05-18T00:00:00.000Z"
     }
   ],
   "specialty_ingredients": [],
