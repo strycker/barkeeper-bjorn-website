@@ -322,15 +322,24 @@ Duplicate guard logic (D-11) — check `recipes.confirmed_favorites[].name` and 
 | A2 | Equipment fields beyond `strainers` should be dropped (not extended) per DATA-01 | DATA-01 finding | If user wants shaker/jigger/etc. preserved, plan needs schema extension. CONTEXT.md is silent — flag in plan |
 | A3 | `barkeeper.avatar_url` is a new field (not present today) | Avatar upload | Verified absent in data/barkeeper.json — LOW risk |
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **DATA-01 onboarding equipment scope** — Currently onboarding writes 7 equipment fields to profile. Phase 5 strips this from profile. Do we (a) drop those 6 non-strainer fields entirely, or (b) extend inventory.equipment schema to hold them? CONTEXT.md doesn't specify. Recommend (a) for minimal scope; resurface as future enhancement.
+1. **DATA-01 onboarding equipment scope** — RESOLVED by D-33 (yolo lock during plan-phase): extend `inventory.equipment` schema to hold all 7 fields (shaker, mixing_glass, jigger, bar_spoon, strainer, citrus_press, ice_setup + existing strainers). No data dropped. Strip-on-load from profile + barkeeper still applies.
 
-2. **REC-09 derivation target sections** — Need to confirm by scanning `classics-db.js` which `searchIn` keys are used for lime juice, simple syrup, etc. Quick grep during planning.
+2. **REC-09 derivation target sections** — RESOLVED by grep of `classics-db.js` during plan-checker pass. Confirmed `searchIn` values:
+   - lime → lime juice → `['produce', 'perishables']` ✓
+   - lemon → lemon juice → `['produce', 'perishables']` ✓
+   - sugar → simple syrup → `['syrups', 'pantry']` ✓
+   - egg → egg white → `['perishables']` ✓
+   - mint → muddled mint → `['produce', 'pantry']` (CORRECTION: RESEARCH.md had only `produce`; `pantry` also required)
+   - cream → heavy cream → `['perishables']` ✓
+   - honey → honey syrup → `['syrups', 'pantry', 'perishables']` (CORRECTION: RESEARCH.md had only `pantry`, `syrups`; `perishables` also required)
 
-3. **Avatar URL precedence** — Per D-30, "URL takes precedence" but both write the same field. Recommend single-field design (upload populates URL field). Confirm with planner.
+   DERIVATIONS array in plan 05-01 must use these corrected targets for mint and honey.
 
-4. **Quick-action button placement vs. score block** — Top-right is occupied. CSS restructure choice deferred to implementer.
+3. **Avatar URL precedence** — RESOLVED by planner (05-04): single-field design — upload sets `barkeeper.avatar_url` directly; URL paste field shows current value. No conflict.
+
+4. **Quick-action button placement vs. score block** — RESOLVED: deferred to implementer per CONTEXT.md "Claude's Discretion". CSS restructure choice made at build time.
 
 ## Environment Availability
 
