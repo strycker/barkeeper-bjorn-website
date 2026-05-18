@@ -3,26 +3,26 @@
   "base_spirits": {
     "whiskey": [
       {
-        "style": "Bourbon",
+        "style": "Whiskey",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-18T19:23:35.808Z",
         "type": "Bourbon",
         "brand": "",
         "tier": "",
         "best_for": "",
         "notes": "",
-        "nationality": "",
-        "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-18T00:00:00.000Z"
+        "nationality": ""
       },
       {
         "style": "Whiskey",
-        "type": "Whiskey",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-18T19:23:14.841Z",
+        "nationality": "",
+        "type": "Japanese Whisky",
         "brand": "",
         "tier": "",
         "best_for": "",
-        "notes": "",
-        "nationality": "",
-        "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-18T00:00:00.000Z"
+        "notes": ""
       },
       {
         "style": "Whiskey",
@@ -42,20 +42,18 @@
         "tier": "well",
         "best_for": "",
         "notes": "",
-        "nationality": "Ireland",
-        "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-18T00:00:00.000Z"
+        "nationality": "Ireland"
       },
       {
-        "style": "Japanese Whisky",
+        "style": "Whiskey",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-18T19:22:51.145Z",
         "type": "Japanese Whisky",
         "brand": "",
         "tier": "well",
         "best_for": "",
         "notes": "",
-        "nationality": "Japan",
-        "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-18T00:00:00.000Z"
+        "nationality": ""
       }
     ],
     "brandy": [
@@ -68,44 +66,60 @@
         "notes": "",
         "nationality": "France",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-18T00:00:00.000Z"
+        "updated_at": "2026-05-18T19:39:11.294Z",
+        "nationality": "",
+        "type": "Cognac",
+        "brand": "",
+        "best_for": "",
+        "notes": ""
+      },
+      {
+        "style": "Armagnac",
+        "type": "Armagnac",
+        "brand": "",
+        "tier": "",
+        "best_for": "",
+        "notes": "",
+        "created_at": "2026-05-18T19:39:39.025Z",
+        "updated_at": "2026-05-18T19:39:39.025Z",
+        "nationality": ""
       }
     ],
     "rum": [
       {
         "style": "Rum",
-        "type": "White Jamaican",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-18T19:39:51.575Z",
+        "nationality": "Jamaica",
+        "type": "White Jamaican Rum",
         "brand": "",
         "tier": "",
         "best_for": "",
-        "notes": "",
-        "nationality": "Jamaica",
-        "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-18T00:00:00.000Z"
+        "notes": ""
       },
       {
         "style": "Rum",
-        "type": "Dark Jamaican",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-18T19:40:00.578Z",
+        "nationality": "Jamaica",
+        "type": "Dark Jamaican Rum",
         "brand": "",
         "tier": "",
         "best_for": "",
-        "notes": "",
-        "nationality": "Jamaica",
-        "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-18T00:00:00.000Z"
+        "notes": ""
       }
     ],
     "agave": [
       {
-        "style": "Mezcal",
+        "style": "Agave",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-18T19:40:19.941Z",
+        "nationality": "Mexico",
         "type": "Mezcal",
         "brand": "",
         "tier": "",
         "best_for": "",
-        "notes": "",
-        "nationality": "Mexico",
-        "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-18T00:00:00.000Z"
+        "notes": ""
       }
     ],
     "white_spirits": [
@@ -118,7 +132,9 @@
         "notes": "",
         "nationality": "",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-18T00:00:00.000Z"
+        "updated_at": "2026-05-15T20:13:12.041Z",
+        "nationality": "",
+        "type": "Gin"
       }
     ],
     "other": []
@@ -129,36 +145,36 @@
   "fortified_wines_and_aperitif_wines": [
     {
       "style": "Fortified Wine",
-      "type": "Americano",
-      "brand": "Cocchi",
-      "tier": "",
-      "best_for": "",
-      "notes": "",
-      "nationality": "Italy",
       "created_at": "2026-05-15T20:13:12.041Z",
-      "updated_at": "2026-05-18T00:00:00.000Z"
-    },
-    {
-      "style": "Vermouth",
-      "type": "Sweet",
+      "updated_at": "2026-05-18T19:53:42.693Z",
+      "nationality": "",
+      "type": "Cocchi",
       "brand": "",
       "tier": "",
       "best_for": "",
-      "notes": "",
-      "nationality": "",
-      "created_at": "2026-05-15T20:13:12.041Z",
-      "updated_at": "2026-05-18T00:00:00.000Z"
+      "notes": ""
     },
     {
       "style": "Fortified Wine",
-      "type": "Aromatized Wine",
-      "brand": "Lillet",
+      "created_at": "2026-05-15T20:13:12.041Z",
+      "updated_at": "2026-05-18T19:53:52.360Z",
+      "nationality": "",
+      "type": "Sweet Vermouth",
+      "brand": "",
       "tier": "",
       "best_for": "",
-      "notes": "",
-      "nationality": "France",
+      "notes": ""
+    },
+    {
+      "style": "Fortified Wine",
       "created_at": "2026-05-15T20:13:12.041Z",
-      "updated_at": "2026-05-18T00:00:00.000Z"
+      "updated_at": "2026-05-18T19:53:59.376Z",
+      "nationality": "",
+      "type": "Lillet",
+      "brand": "",
+      "tier": "",
+      "best_for": "",
+      "notes": ""
     }
   ],
   "liqueurs_and_cordials": {
