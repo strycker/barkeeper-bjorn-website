@@ -26,11 +26,12 @@ const RecommenderView = (() => {
   let _results = null;
 
   // New module-level state (wave 2)
-  let _scopeLevel = 0;           // 0 | 1 | 2
+  let _scopeLevel = 0;           // 0 | 1 | 2 | 3 (3 = Unconstrained)
   let _activeOccasions = new Set(); // tag strings; empty = show all
   let _sliderValues = {};        // { sweetness: 0.5, acid: 0.5, ... } — ephemeral, reset on render()
   let _savedSliderValues = {};   // snapshot of profile values at render() time, for Reset to saved
   let _slidersVisible = false;   // mobile toggle state
+  let _vetoOverrides = new Set(); // session-only; veto strings bypassed for this session
 
   function _matchesFilter(recipe, filter) {
     if (!filter) return true;
@@ -59,6 +60,10 @@ const RecommenderView = (() => {
     const diff = _difficultyLabel(recipe.difficulty);
     return `
       <div class="rec-card ${isOneAway ? 'rec-card--oneaway' : ''}">
+        <div class="rec-card-actions">
+          <button class="rec-fav-btn" data-name="${Utils.escapeHtml(recipe.name)}" title="Add to Favorites">&#9829;</button>
+          <button class="rec-wish-btn" data-name="${Utils.escapeHtml(recipe.name)}" title="Add to Wishlist">&#9734;</button>
+        </div>
         <div class="rec-card-header">
           <div>
             <div class="rec-card-name">${Utils.escapeHtml(recipe.name)}</div>
@@ -100,6 +105,10 @@ const RecommenderView = (() => {
     const missing1 = missingIngredients[1];
     return `
       <div class="rec-card rec-card--twoaway">
+        <div class="rec-card-actions">
+          <button class="rec-fav-btn" data-name="${Utils.escapeHtml(recipe.name)}" title="Add to Favorites">&#9829;</button>
+          <button class="rec-wish-btn" data-name="${Utils.escapeHtml(recipe.name)}" title="Add to Wishlist">&#9734;</button>
+        </div>
         <div class="rec-card-header">
           <div>
             <div class="rec-card-name">${Utils.escapeHtml(recipe.name)}</div>
@@ -195,9 +204,9 @@ const RecommenderView = (() => {
       c.classList.toggle('active', c.dataset.filter === _activeFilter);
     });
 
-    // Update scope buttons
+    // Update scope buttons (cumulative: all buttons <= current level are active)
     container.querySelectorAll('.rec-scope-btn').forEach(btn => {
-      btn.classList.toggle('active', Number(btn.dataset.scope) === _scopeLevel);
+      btn.classList.toggle('active', Number(btn.dataset.scope) <= _scopeLevel);
     });
 
     // Update occasion chips
@@ -269,6 +278,48 @@ const RecommenderView = (() => {
         _rerender(container);
       });
     });
+
+    // Wire ♥ Favorites quick-action buttons (REC-08, D-09–D-11)
+    cardsEl.querySelectorAll('.rec-fav-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const recipeName = btn.dataset.name;
+        const item = _results && [
+          ...(_results.buildable || []),
+          ...(_results.oneAway  || []),
+          ...(_results.twoAway  || []),
+        ].find(r => r.recipe.name === recipeName);
+        if (!item) return;
+        const recipes = State.get('recipes') || {};
+        const existing = (recipes.confirmed_favorites || []).some(r => r.name === recipeName);
+        if (existing) { Utils.showToast('Already in Favorites', 'info'); return; }
+        State.patch('recipes', r => {
+          r.confirmed_favorites = r.confirmed_favorites || [];
+          r.confirmed_favorites.push({ ...item.recipe });
+        });
+        State.save('recipes').then(() => Utils.showToast('Added to Favorites'));
+      });
+    });
+
+    // Wire ☆ Wishlist quick-action buttons (REC-08, D-09–D-11)
+    cardsEl.querySelectorAll('.rec-wish-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const recipeName = btn.dataset.name;
+        const item = _results && [
+          ...(_results.buildable || []),
+          ...(_results.oneAway  || []),
+          ...(_results.twoAway  || []),
+        ].find(r => r.recipe.name === recipeName);
+        if (!item) return;
+        const recipes = State.get('recipes') || {};
+        const existing = (recipes.wishlist || []).some(r => r.name === recipeName);
+        if (existing) { Utils.showToast('Already in Wishlist', 'info'); return; }
+        State.patch('recipes', r => {
+          r.wishlist = r.wishlist || [];
+          r.wishlist.push({ ...item.recipe });
+        });
+        State.save('recipes').then(() => Utils.showToast('Added to Wishlist'));
+      });
+    });
   }
 
   function _attach(container) {
@@ -282,11 +333,28 @@ const RecommenderView = (() => {
       });
     });
 
-    // Scope buttons
+    // Scope buttons — change level, re-run engine, re-render
     container.querySelectorAll('.rec-scope-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         _scopeLevel = Number(btn.dataset.scope);
+        const inv = State.get('inventory') || {};
+        const overrideProfile = _buildOverrideProfile(profile);
+        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides });
         _rerender(container);
+      });
+    });
+
+    // Veto override chips — toggle per-session bypass, re-run engine
+    container.querySelectorAll('.rec-veto-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const v = btn.dataset.veto;
+        if (_vetoOverrides.has(v)) _vetoOverrides.delete(v); else _vetoOverrides.add(v);
+        const inv = State.get('inventory') || {};
+        const overrideProfile = _buildOverrideProfile(profile);
+        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides });
+        _rerender(container);
+        // Update chip visual state
+        btn.classList.toggle('bypassed', _vetoOverrides.has(v));
       });
     });
 
@@ -313,7 +381,7 @@ const RecommenderView = (() => {
         _sliderValues[input.dataset.axis] = parseFloat(input.value);
         const inv = State.get('inventory') || {};
         const overrideProfile = _buildOverrideProfile(profile);
-        _results = RecommenderEngine.recommend(inv, overrideProfile);
+        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides });
         _rerender(container);
       });
     });
@@ -351,7 +419,7 @@ const RecommenderView = (() => {
         });
         const inv = State.get('inventory') || {};
         const overrideProfile = _buildOverrideProfile(profile);
-        _results = RecommenderEngine.recommend(inv, overrideProfile);
+        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides });
         _rerender(container);
       });
     }
@@ -389,11 +457,12 @@ const RecommenderView = (() => {
     _sliderValues = _getInitialSliderValues(profile);
     _savedSliderValues = { ..._sliderValues };
     _slidersVisible = false;
+    _vetoOverrides = new Set(); // D-05: silent reset on navigation — vetoes fully enforced on re-entry
     // Do NOT reset _scopeLevel, _activeFilter, or _activeOccasions —
     // these are user-interaction state that persist within the session.
 
     // Run engine with saved profile
-    _results = RecommenderEngine.recommend(inventory, profile);
+    _results = RecommenderEngine.recommend(inventory, profile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides });
 
     const occasionTags = _getOccasionTags();
 
@@ -425,6 +494,27 @@ const RecommenderView = (() => {
         </div>
       </div>`;
 
+    // Build vetoes panel HTML (REC-07, D-03–D-06)
+    const vetoList = (State.get('inventory')?.vetoes?.disliked_ingredients || []);
+    let vetoesHtml = '';
+    if (vetoList.length === 0) {
+      vetoesHtml = `
+        <div class="rec-sidebar-section">
+          <p class="rec-empty-hint" style="font-size:0.82rem;color:var(--text-muted);margin:0;">No vetoes configured &mdash; add them in Inventory &rarr; Vetoes.</p>
+        </div>`;
+    } else {
+      vetoesHtml = `
+        <div class="rec-sidebar-section">
+          <div class="rec-sidebar-heading rec-occasion-heading">Vetoes</div>
+          <div class="rec-veto-chips">
+            ${vetoList.map(v => {
+              const bypassed = _vetoOverrides.has(v);
+              return `<button class="rec-filter-chip rec-veto-chip${bypassed ? ' bypassed' : ''}" data-veto="${Utils.escapeHtml(v)}">${Utils.escapeHtml(v)}</button>`;
+            }).join('')}
+          </div>
+        </div>`;
+    }
+
     // Build base-spirit chips HTML
     const baseSpiritChipsHtml = `
       <div class="rec-sidebar-section">
@@ -437,14 +527,15 @@ const RecommenderView = (() => {
         </div>
       </div>`;
 
-    // Build scope toggle HTML (D-17)
+    // Build scope toggle HTML (REC-05, REC-06, D-07, D-08)
     const scopeHtml = `
       <div class="rec-sidebar-section">
         <div class="rec-occasion-heading">Scope</div>
         <div class="rec-scope-toggle">
-          <button class="rec-scope-btn ${_scopeLevel === 0 ? 'active' : ''}" data-scope="0">Only what I have</button>
-          <button class="rec-scope-btn ${_scopeLevel === 1 ? 'active' : ''}" data-scope="1">Allow 1 missing</button>
-          <button class="rec-scope-btn ${_scopeLevel === 2 ? 'active' : ''}" data-scope="2">Allow 2 missing</button>
+          <button class="rec-scope-btn ${_scopeLevel >= 0 ? 'active' : ''}" data-scope="0">Only what I have</button>
+          <button class="rec-scope-btn ${_scopeLevel >= 1 ? 'active' : ''}" data-scope="1">Allow 1 missing</button>
+          <button class="rec-scope-btn ${_scopeLevel >= 2 ? 'active' : ''}" data-scope="2">Allow 2 missing</button>
+          <button class="rec-scope-btn rec-scope-btn--unconstrained ${_scopeLevel === 3 ? 'active' : ''}" data-scope="3">Unconstrained</button>
         </div>
       </div>`;
 
@@ -473,6 +564,7 @@ const RecommenderView = (() => {
             ${scopeHtml}
             ${baseSpiritChipsHtml}
             ${occasionChipsHtml}
+            ${vetoesHtml}
           </aside>
           <main class="rec-cards rec-main">
             <!-- Populated by _rerender -->

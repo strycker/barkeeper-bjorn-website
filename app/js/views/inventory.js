@@ -85,6 +85,333 @@ const InventoryView = (() => {
   // Strainer options for Equipment tab (D-11)
   const STRAINER_OPTIONS = ['Hawthorne', 'Julep', 'Fine Mesh', 'Conical'];
 
+  // Canonical category list — drives the Category dropdown in every bottle edit form.
+  // Must stay in sync with SECTION_STYLE defaults and parseBottleEntry() logic.
+  const CATEGORIES = [
+    'Bourbon', 'Rye Whiskey', 'Scotch', 'Irish Whiskey', 'Japanese Whisky',
+    'Tennessee Whiskey', 'Whiskey',
+    'Tequila', 'Mezcal',
+    'Gin', 'Vodka', 'Aquavit', 'Genever',
+    'Rum', 'Cachaça',
+    'Cognac', 'Armagnac', 'Calvados', 'Pisco', 'Brandy',
+    'Vermouth', 'Fortified Wine', 'Amaro',
+    'Liqueur',
+    'Bitters',
+    'Syrup',
+    'Mixer',
+    'Non-Alcoholic Spirit',
+    'Other / Misc.',
+  ];
+
+  // Default category per inventory section key (all values must be in CATEGORIES)
+  const SECTION_STYLE = {
+    'base_spirits.whiskey':                   'Whiskey',
+    'base_spirits.agave':                     'Tequila',
+    'base_spirits.white_spirits':             'Gin',
+    'base_spirits.rum':                       'Rum',
+    'base_spirits.brandy':                    'Brandy',
+    'base_spirits.other':                     'Other / Misc.',
+    'fortified_wines_and_aperitif_wines':     'Fortified Wine',
+    'liqueurs_and_cordials.herbal':           'Liqueur',
+    'liqueurs_and_cordials.nut_coffee':       'Liqueur',
+    'liqueurs_and_cordials.fruit_forward':    'Liqueur',
+    'liqueurs_and_cordials.specialty_regional': 'Liqueur',
+    'syrups':                                 'Syrup',
+    'bitters.anchors':                        'Bitters',
+    'bitters.aromatic_smoke':                 'Bitters',
+    'bitters.nut_earth':                      'Bitters',
+    'bitters.fruit_botanical':                'Bitters',
+    'bitters.other':                          'Bitters',
+    'non_alcoholic_spirits':                  'Non-Alcoholic Spirit',
+  };
+
+  // Type keywords — longest first for greedy matching; each entry: [keyword, displayType]
+  const TYPE_KEYWORDS = [
+    ['single malt',  'Single Malt'],  ['blended malt',  'Blended Malt'],
+    ['extra añejo',  'Extra Añejo'],  ['irish whiskey', 'Irish Whiskey'],
+    ['irish whisky', 'Irish Whiskey'],['tennessee',     'Tennessee Whiskey'],
+    ['japanese',     'Japanese Whisky'], ['bourbon',   'Bourbon'],
+    ['rye whiskey',  'Rye Whiskey'],  ['rye',          'Rye Whiskey'],
+    ['scotch',       'Scotch'],
+    ['blended',      'Blended'],     ['espadin',       'Espadín'],
+    ['espadín',      'Espadín'],     ['tobalá',        'Tobalá'],
+    ['tobala',       'Tobalá'],      ['reposado',      'Reposado'],
+    ['añejo',        'Añejo'],       ['anejo',         'Añejo'],
+    ['blanco',       'Blanco'],      ['cristalino',    'Cristalino'],
+    ['mezcal',       'Mezcal'],      ['tequila',       'Tequila'],
+    ['aquavit',      'Aquavit'],     ['akvavit',       'Aquavit'],
+    ['genever',      'Genever'],     ['gin',           'Gin'],
+    ['vodka',        'Vodka'],       ['agricole',      'Agricole'],
+    ['rhum',         'Agricole'],    ['cachaça',       'Cachaça'],
+    ['cachaca',      'Cachaça'],     ['clairin',       'Clairin'],
+    ['overproof',    'Overproof'],   ['cognac',        'Cognac'],
+    ['armagnac',     'Armagnac'],    ['calvados',      'Calvados'],
+    ['pisco',        'Pisco'],       ['grappa',        'Grappa'],
+    ['sake',         'Sake'],        ['shochu',        'Shochu'],
+    ['soju',         'Soju'],        ['baijiu',        'Baijiu'],
+  ];
+
+  // Brand catalog — longest keyword first for greedy matching; each entry: [keyword, {brand, typeHint}]
+  // typeHint sets type when no TYPE_KEYWORDS match wins first
+  const BRAND_CATALOG = [
+    // Bourbon
+    ['woodford reserve', { brand: 'Woodford Reserve', typeHint: 'Bourbon' }],
+    ['buffalo trace',    { brand: 'Buffalo Trace',    typeHint: 'Bourbon' }],
+    ['knob creek',       { brand: 'Knob Creek',       typeHint: 'Bourbon' }],
+    ['four roses',       { brand: 'Four Roses',       typeHint: 'Bourbon' }],
+    ['wild turkey',      { brand: 'Wild Turkey',      typeHint: 'Bourbon' }],
+    ["angel's envy",     { brand: "Angel's Envy",     typeHint: 'Bourbon' }],
+    ['angels envy',      { brand: "Angel's Envy",     typeHint: 'Bourbon' }],
+    ['eagle rare',       { brand: 'Eagle Rare',       typeHint: 'Bourbon' }],
+    ["blanton's",        { brand: "Blanton's",        typeHint: 'Bourbon' }],
+    ['blantons',         { brand: "Blanton's",        typeHint: 'Bourbon' }],
+    ['w.l. weller',      { brand: 'W.L. Weller',      typeHint: 'Bourbon' }],
+    ['pappy van winkle', { brand: 'Pappy Van Winkle', typeHint: 'Bourbon' }],
+    ['elijah craig',     { brand: 'Elijah Craig',     typeHint: 'Bourbon' }],
+    ['evan williams',    { brand: 'Evan Williams',    typeHint: 'Bourbon' }],
+    ['old forester',     { brand: 'Old Forester',     typeHint: 'Bourbon' }],
+    ["heaven's door",    { brand: "Heaven's Door",    typeHint: 'Bourbon' }],
+    ['heaven hill',      { brand: 'Heaven Hill',      typeHint: 'Bourbon' }],
+    ['jim beam',         { brand: 'Jim Beam',         typeHint: 'Bourbon' }],
+    ["maker's mark",     { brand: "Maker's Mark",     typeHint: 'Bourbon' }],
+    ['makers mark',      { brand: "Maker's Mark",     typeHint: 'Bourbon' }],
+    ["maker's",          { brand: "Maker's Mark",     typeHint: 'Bourbon' }],
+    ['larceny',          { brand: 'Larceny',          typeHint: 'Bourbon' }],
+    ['bulleit',          { brand: 'Bulleit',          typeHint: 'Bourbon' }],
+    ['weller',           { brand: 'W.L. Weller',      typeHint: 'Bourbon' }],
+    // Rye
+    ['whistlepig',       { brand: 'WhistlePig',       typeHint: 'Rye' }],
+    ['whistle pig',      { brand: 'WhistlePig',       typeHint: 'Rye' }],
+    ['rittenhouse',      { brand: 'Rittenhouse',      typeHint: 'Rye' }],
+    ['old overholt',     { brand: 'Old Overholt',     typeHint: 'Rye' }],
+    ["michter's",        { brand: "Michter's",        typeHint: 'Rye' }],
+    ['michters',         { brand: "Michter's",        typeHint: 'Rye' }],
+    ['redemption',       { brand: 'Redemption',       typeHint: 'Rye' }],
+    ['sazerac',          { brand: 'Sazerac',          typeHint: 'Rye' }],
+    // Tennessee
+    ["jack daniel's",    { brand: "Jack Daniel's",    typeHint: 'Tennessee' }],
+    ['jack daniels',     { brand: "Jack Daniel's",    typeHint: 'Tennessee' }],
+    ['george dickel',    { brand: 'George Dickel',    typeHint: 'Tennessee' }],
+    // Scotch
+    ['monkey shoulder',  { brand: 'Monkey Shoulder',  typeHint: 'Blended' }],
+    ['johnnie walker',   { brand: 'Johnnie Walker',   typeHint: 'Blended' }],
+    ['highland park',    { brand: 'Highland Park',    typeHint: 'Scotch' }],
+    ['the macallan',     { brand: 'The Macallan',     typeHint: 'Scotch' }],
+    ['the glenlivet',    { brand: 'The Glenlivet',    typeHint: 'Scotch' }],
+    ['the dalmore',      { brand: 'The Dalmore',      typeHint: 'Scotch' }],
+    ['the balvenie',     { brand: 'The Balvenie',     typeHint: 'Scotch' }],
+    ['glenfiddich',      { brand: 'Glenfiddich',      typeHint: 'Scotch' }],
+    ['glenmorangie',     { brand: 'Glenmorangie',     typeHint: 'Scotch' }],
+    ['glenfarclas',      { brand: 'Glenfarclas',      typeHint: 'Scotch' }],
+    ['glenlivet',        { brand: 'The Glenlivet',    typeHint: 'Scotch' }],
+    ['laphroaig',        { brand: 'Laphroaig',        typeHint: 'Scotch' }],
+    ['springbank',       { brand: 'Springbank',       typeHint: 'Scotch' }],
+    ['bruichladdich',    { brand: 'Bruichladdich',    typeHint: 'Scotch' }],
+    ['bunnahabhain',     { brand: 'Bunnahabhain',     typeHint: 'Scotch' }],
+    ['lagavulin',        { brand: 'Lagavulin',        typeHint: 'Scotch' }],
+    ['balvenie',         { brand: 'The Balvenie',     typeHint: 'Scotch' }],
+    ['talisker',         { brand: 'Talisker',         typeHint: 'Scotch' }],
+    ['bowmore',          { brand: 'Bowmore',          typeHint: 'Scotch' }],
+    ['ardbeg',           { brand: 'Ardbeg',           typeHint: 'Scotch' }],
+    ['macallan',         { brand: 'The Macallan',     typeHint: 'Scotch' }],
+    ['dalmore',          { brand: 'The Dalmore',      typeHint: 'Scotch' }],
+    ["dewar's",          { brand: "Dewar's",          typeHint: 'Blended' }],
+    ['dewars',           { brand: "Dewar's",          typeHint: 'Blended' }],
+    ['chivas',           { brand: 'Chivas Regal',     typeHint: 'Blended' }],
+    ['oban',             { brand: 'Oban',             typeHint: 'Scotch' }],
+    // Irish
+    ["writer's tears",   { brand: "Writer's Tears",   typeHint: 'Irish' }],
+    ['tullamore',        { brand: 'Tullamore D.E.W.', typeHint: 'Irish' }],
+    ['green spot',       { brand: 'Green Spot',       typeHint: 'Irish' }],
+    ['yellow spot',      { brand: 'Yellow Spot',      typeHint: 'Irish' }],
+    ['redbreast',        { brand: 'Redbreast',        typeHint: 'Irish' }],
+    ['bushmills',        { brand: 'Bushmills',        typeHint: 'Irish' }],
+    ['jameson',          { brand: 'Jameson',          typeHint: 'Irish' }],
+    ['teeling',          { brand: 'Teeling',          typeHint: 'Irish' }],
+    ['powers',           { brand: 'Powers',           typeHint: 'Irish' }],
+    // Japanese
+    ['suntory toki',     { brand: 'Suntory Toki',     typeHint: 'Japanese' }],
+    ['yamazaki',         { brand: 'Yamazaki',         typeHint: 'Japanese' }],
+    ['hakushū',          { brand: 'Hakushū',          typeHint: 'Japanese' }],
+    ['hakushu',          { brand: 'Hakushū',          typeHint: 'Japanese' }],
+    ['hibiki',           { brand: 'Hibiki',           typeHint: 'Japanese' }],
+    ['nikka',            { brand: 'Nikka',            typeHint: 'Japanese' }],
+    ['toki',             { brand: 'Suntory Toki',     typeHint: 'Japanese' }],
+    ['iwai',             { brand: 'Iwai',             typeHint: 'Japanese' }],
+    // Agave / Tequila
+    ['don julio',        { brand: 'Don Julio',        typeHint: 'Tequila' }],
+    ['clase azul',       { brand: 'Clase Azul',       typeHint: 'Tequila' }],
+    ['olmeca altos',     { brand: 'Olmeca Altos',     typeHint: 'Tequila' }],
+    ['el tesoro',        { brand: 'El Tesoro',        typeHint: 'Tequila' }],
+    ['casamigos',        { brand: 'Casamigos',        typeHint: 'Tequila' }],
+    ['herradura',        { brand: 'Herradura',        typeHint: 'Tequila' }],
+    ['fortaleza',        { brand: 'Fortaleza',        typeHint: 'Tequila' }],
+    ['espolòn',          { brand: 'Espolòn',          typeHint: 'Tequila' }],
+    ['espolon',          { brand: 'Espolòn',          typeHint: 'Tequila' }],
+    ['patrón',           { brand: 'Patrón',           typeHint: 'Tequila' }],
+    ['patron',           { brand: 'Patrón',           typeHint: 'Tequila' }],
+    ['milagro',          { brand: 'Milagro',          typeHint: 'Tequila' }],
+    ['1800',             { brand: '1800 Tequila',     typeHint: 'Tequila' }],
+    // Agave / Mezcal
+    ['del maguey',       { brand: 'Del Maguey',       typeHint: 'Mezcal' }],
+    ['mezcal vago',      { brand: 'Mezcal Vago',      typeHint: 'Mezcal' }],
+    ['montelobos',       { brand: 'Montelobos',       typeHint: 'Mezcal' }],
+    ['banhez',           { brand: 'Banhez',           typeHint: 'Mezcal' }],
+    ['wahaka',           { brand: 'Wahaka',           typeHint: 'Mezcal' }],
+    ['ilegal',           { brand: 'Ilegal',           typeHint: 'Mezcal' }],
+    ['alipús',           { brand: 'Alipús',           typeHint: 'Mezcal' }],
+    ['alipus',           { brand: 'Alipús',           typeHint: 'Mezcal' }],
+    // Gin
+    ["hendrick's",       { brand: "Hendrick's",       typeHint: 'Gin' }],
+    ['hendricks',        { brand: "Hendrick's",       typeHint: 'Gin' }],
+    ['bombay sapphire',  { brand: 'Bombay Sapphire',  typeHint: 'Gin' }],
+    ['the botanist',     { brand: 'The Botanist',     typeHint: 'Gin' }],
+    ['monkey 47',        { brand: 'Monkey 47',        typeHint: 'Gin' }],
+    ['bols genever',     { brand: 'Bols Genever',     typeHint: 'Genever' }],
+    ['st. george',       { brand: 'St. George',       typeHint: 'Gin' }],
+    ["nolet's",          { brand: "Nolet's",          typeHint: 'Gin' }],
+    ['nolets',           { brand: "Nolet's",          typeHint: 'Gin' }],
+    ["broker's",         { brand: "Broker's",         typeHint: 'Gin' }],
+    ['brokers',          { brand: "Broker's",         typeHint: 'Gin' }],
+    ["ford's",           { brand: "Ford's",           typeHint: 'Gin' }],
+    ['fords',            { brand: "Ford's",           typeHint: 'Gin' }],
+    ['tanqueray',        { brand: 'Tanqueray',        typeHint: 'Gin' }],
+    ['beefeater',        { brand: 'Beefeater',        typeHint: 'Gin' }],
+    ['sipsmith',         { brand: 'Sipsmith',         typeHint: 'Gin' }],
+    ['aviation',         { brand: 'Aviation',         typeHint: 'Gin' }],
+    ['plymouth',         { brand: 'Plymouth',         typeHint: 'Gin' }],
+    ['botanist',         { brand: 'The Botanist',     typeHint: 'Gin' }],
+    ['malfy',            { brand: 'Malfy',            typeHint: 'Gin' }],
+    ['roku',             { brand: 'Roku',             typeHint: 'Gin' }],
+    // Vodka
+    ['grey goose',       { brand: 'Grey Goose',       typeHint: 'Vodka' }],
+    ['ketel one',        { brand: 'Ketel One',        typeHint: 'Vodka' }],
+    ['kettle one',       { brand: 'Ketel One',        typeHint: 'Vodka' }],
+    ['belvedere',        { brand: 'Belvedere',        typeHint: 'Vodka' }],
+    ['absolut',          { brand: 'Absolut',          typeHint: 'Vodka' }],
+    ["tito's",           { brand: "Tito's",           typeHint: 'Vodka' }],
+    ['titos',            { brand: "Tito's",           typeHint: 'Vodka' }],
+    ['stoli',            { brand: 'Stolichnaya',      typeHint: 'Vodka' }],
+    ['chopin',           { brand: 'Chopin',           typeHint: 'Vodka' }],
+    ['ciroc',            { brand: 'Cîroc',            typeHint: 'Vodka' }],
+    // Rum
+    ['flor de caña',     { brand: 'Flor de Caña',    typeHint: 'Rum' }],
+    ['flor de cana',     { brand: 'Flor de Caña',    typeHint: 'Rum' }],
+    ['appleton estate',  { brand: 'Appleton Estate',  typeHint: 'Rum' }],
+    ['mount gay',        { brand: 'Mount Gay',        typeHint: 'Rum' }],
+    ['smith & cross',    { brand: 'Smith & Cross',    typeHint: 'Rum' }],
+    ['ron zacapa',       { brand: 'Ron Zacapa',       typeHint: 'Rum' }],
+    ['wray & nephew',    { brand: 'Wray & Nephew',    typeHint: 'Rum' }],
+    ['rhum clément',     { brand: 'Rhum Clément',     typeHint: 'Agricole' }],
+    ['clairin sajous',   { brand: 'Clairin Sajous',   typeHint: 'Clairin' }],
+    ['diplomatico',      { brand: 'Diplomático',      typeHint: 'Rum' }],
+    ['diplomático',      { brand: 'Diplomático',      typeHint: 'Rum' }],
+    ['el dorado',        { brand: 'El Dorado',        typeHint: 'Rum' }],
+    ['plantation',       { brand: 'Plantation',       typeHint: 'Rum' }],
+    ['barbancourt',      { brand: 'Barbancourt',      typeHint: 'Rum' }],
+    ["gosling's",        { brand: "Gosling's",        typeHint: 'Rum' }],
+    ['goslings',         { brand: "Gosling's",        typeHint: 'Rum' }],
+    ['hamilton',         { brand: 'Hamilton',         typeHint: 'Rum' }],
+    ['appleton',         { brand: 'Appleton Estate',  typeHint: 'Rum' }],
+    ['bacardi',          { brand: 'Bacardi',          typeHint: 'Rum' }],
+    ['clement',          { brand: 'Rhum Clément',     typeHint: 'Agricole' }],
+    ['zacapa',           { brand: 'Ron Zacapa',       typeHint: 'Rum' }],
+    ['banks',            { brand: 'Banks',            typeHint: 'Rum' }],
+    // Brandy / Cognac
+    ['pierre ferrand',   { brand: 'Pierre Ferrand',   typeHint: 'Cognac' }],
+    ['rémy martin',      { brand: 'Rémy Martin',      typeHint: 'Cognac' }],
+    ['remy martin',      { brand: 'Rémy Martin',      typeHint: 'Cognac' }],
+    ['courvoisier',      { brand: 'Courvoisier',      typeHint: 'Cognac' }],
+    ['hennessy',         { brand: 'Hennessy',         typeHint: 'Cognac' }],
+    ['hine',             { brand: 'Hine',             typeHint: 'Cognac' }],
+  ];
+
+  // Parse a free-text bottle name into { style, type, brand } using the catalog
+  function parseBottleEntry(rawName, sectionKey) {
+    const lower = rawName.toLowerCase();
+    const now = new Date().toISOString();
+    let style = SECTION_STYLE[sectionKey] || '';
+    let type  = '';
+    let brand = '';
+
+    // Brand catalog — longest-first for greedy match (sorted at call time)
+    for (const [kw, info] of BRAND_CATALOG) {
+      if (lower.includes(kw)) {
+        brand = info.brand;
+        if (!type && info.typeHint) type = info.typeHint;
+        break;
+      }
+    }
+
+    // Type keywords — override brand hint when a more-specific keyword is found
+    for (const [kw, typeName] of TYPE_KEYWORDS) {
+      if (lower.includes(kw)) {
+        type = typeName;
+        break;
+      }
+    }
+
+    // Promote detected type to canonical category (style) for relevant sections
+    if (sectionKey === 'base_spirits.whiskey') {
+      // Specific whiskey types that are their own canonical categories
+      const WHISKEY_CATS = new Set(['Bourbon','Rye Whiskey','Scotch','Irish Whiskey','Japanese Whisky','Tennessee Whiskey']);
+      if (WHISKEY_CATS.has(type)) style = type;
+    } else if (sectionKey === 'base_spirits.agave') {
+      style = ['Mezcal','Espadín','Tobalá','Cuixe','Clairin','Raicilla'].includes(type) ? 'Mezcal' : 'Tequila';
+    } else if (sectionKey === 'base_spirits.white_spirits') {
+      // Any type that's a canonical category wins; else default Gin
+      style = CATEGORIES.includes(type) ? type : (type || 'Gin');
+    } else if (sectionKey === 'base_spirits.brandy') {
+      // Cognac/Armagnac/Calvados/Pisco are their own canonical categories
+      style = CATEGORIES.includes(type) ? type : 'Brandy';
+    }
+
+    // Last resort: no match at all → use raw name as style
+    if (!style) style = rawName;
+
+    // Ensure type is never empty: default to style when undetected
+    if (!type) type = style;
+
+    return { style, type, brand, tier: '', best_for: '', notes: '', created_at: now, updated_at: now };
+  }
+
+  // Keyword → section key mapping for the quick-add parser (most-specific first)
+  const QUICK_ADD_RULES = [
+    { key: 'bitters.anchors',          words: ['angostura','peychaud'] },
+    { key: 'bitters.aromatic_smoke',   words: ['bittermens','woodford bitters','smoke bitters'] },
+    { key: 'bitters.nut_earth',        words: ['mole bitters','walnut bitters','black walnut bitters'] },
+    { key: 'bitters.fruit_botanical',  words: ['orange bitters','lemon bitters','celery bitters','grapefruit bitters','cherry bitters'] },
+    { key: 'bitters.other',            words: ['bitters'] },
+    { key: 'syrups',                   words: ['syrup','orgeat','shrub','honey mix','ginger mix'] },
+    { key: 'fortified_wines_and_aperitif_wines', words: ['vermouth','sherry','lillet','cocchi','port','madeira','marsala','dubonnet','pineau'] },
+    { key: 'liqueurs_and_cordials.herbal', words: ['amaro','campari','aperol','suze','fernet','chartreuse','benedictine','drambuie','strega','galliano','jägermeister','jagermeister','averna','montenegro','ramazzotti','nonino','braulio','sfumato','meletti','cynar','absinthe'] },
+    { key: 'liqueurs_and_cordials.nut_coffee', words: ['kahlúa','kahlua','frangelico','baileys','amaretto','nocello','tia maria','disaronno','coffee liqueur'] },
+    { key: 'liqueurs_and_cordials.fruit_forward', words: ['triple sec','curaçao','curacao','cointreau','chambord','st-germain','st germain','elderflower','limoncello','midori','maraschino','luxardo','crème de','creme de','cassis','chambord'] },
+    { key: 'liqueurs_and_cordials.specialty_regional', words: ['velvet falernum','allspice dram','pimento dram','licor 43','glayva','pastis','pernod','sambuca','ouzo','arak','falernum'] },
+    { key: 'non_alcoholic_spirits',    words: ['seedlip','lyre\'s','lyres','ritual zero','monday whiskey','spiritless','aplós','aplos'] },
+    { key: 'base_spirits.agave',       words: ['tequila','mezcal','blanco','reposado','añejo','anejo','raicilla','bacanora','sotol'] },
+    { key: 'base_spirits.white_spirits', words: ['gin','vodka','aquavit','akvavit','genever'] },
+    { key: 'base_spirits.rum',         words: ['rum','cachaça','cachaca','agricole','rhum','clairin'] },
+    { key: 'base_spirits.brandy',      words: ['cognac','armagnac','calvados','pisco','brandy','grappa','marc','eau de vie'] },
+    { key: 'base_spirits.whiskey',     words: ['bourbon','rye','scotch','whiskey','whisky','irish whiskey','irish whisky','tennessee','single malt','blended malt'] },
+    { key: 'base_spirits.other',       words: ['sake','shochu','soju','baijiu'] },
+  ];
+
+  function parseBottleSection(name) {
+    const lower = name.toLowerCase();
+    for (const { key, words } of QUICK_ADD_RULES) {
+      for (const w of words) {
+        if (lower.includes(w)) return key;
+      }
+    }
+    return null;
+  }
+
+  function sectionLabelByKey(key) {
+    const found = BOTTLE_SECTIONS.find(s => s.key === key);
+    return found ? found.label : key;
+  }
+
   let _dirty = false;
 
   // One-at-a-time inline edit state
@@ -166,8 +493,7 @@ const InventoryView = (() => {
     addBtn.addEventListener('click', () => {
       const name = nameInput.value.trim();
       if (!name) return;
-      const now = new Date().toISOString();
-      const newEntry = { style: name, type: '', brand: '', tier: '', best_for: '', notes: '', created_at: now, updated_at: now };
+      const newEntry = parseBottleEntry(name, sectionKey);
       const current = getNestedArr(inv, sectionKey);
       State.patch('inventory', i2 => {
         const arr2 = getNestedArr(i2, sectionKey);
@@ -192,7 +518,7 @@ const InventoryView = (() => {
     grid.innerHTML = '';
     arr.forEach((bottle, i) => {
       // Backward compat: handle legacy string or {name} shapes
-      const displayName = bottle.style || bottle.name || (typeof bottle === 'string' ? bottle : '');
+      const displayName = bottle.type || bottle.style || bottle.name || (typeof bottle === 'string' ? bottle : '');
       const brand = bottle.brand || '';
       const tierClass = TIER_COLORS[bottle.tier] || 'tier-unset';
 
@@ -262,17 +588,31 @@ const InventoryView = (() => {
     // Safe datalist ID
     const safeId = sectionKey.replace(/\./g, '-');
 
+    // Build category <select>: canonical list + preserve any custom value not in list
+    const catInList = CATEGORIES.includes(entry.style || '');
+    const customCatOption = (!catInList && entry.style)
+      ? `<option value="${Utils.escapeHtml(entry.style)}" selected>${Utils.escapeHtml(entry.style)}</option>`
+      : '';
+    const catOptions = CATEGORIES.map(c =>
+      `<option value="${Utils.escapeHtml(c)}"${entry.style === c ? ' selected' : ''}>${Utils.escapeHtml(c)}</option>`
+    ).join('');
+
     const formEl = document.createElement('div');
     formEl.className = 'bottle-edit-form';
     formEl.innerHTML = `
       <div class="bottle-edit-fields">
-        <label>Style <input type="text" data-field="style" value="${Utils.escapeHtml(entry.style || '')}"></label>
-        <label>Type <input type="text" data-field="type" list="type-options-${safeId}" value="${Utils.escapeHtml(entry.type || '')}"></label>
+        <label>Category <select data-field="style" required title="Standardized spirit category (required)">
+          <option value="">— select category —</option>
+          ${customCatOption}
+          ${catOptions}
+        </select></label>
+        <label>Specific Style/Type <input type="text" data-field="type" list="type-options-${safeId}" placeholder="e.g. Single Barrel, Cask Strength, Espadín" title="Specific style or sub-type of this bottle" value="${Utils.escapeHtml(entry.type || '')}"></label>
       </div>
       <button type="button" class="bottle-edit-toggle">More fields ▾</button>
       <div class="bottle-edit-fields--expanded" style="display:none;">
         <div class="bottle-edit-fields">
           <label>Brand <input type="text" data-field="brand" value="${Utils.escapeHtml(entry.brand || '')}"></label>
+          <label>Nationality <input type="text" data-field="nationality" placeholder="e.g. Scotland, Mexico, Kentucky USA" value="${Utils.escapeHtml(entry.nationality || '')}"></label>
           <label>Tier <select data-field="tier">
             <option value="">Unset</option>
             ${TIERS.map(t => `<option value="${Utils.escapeHtml(t)}" ${entry.tier === t ? 'selected' : ''}>${Utils.escapeHtml(TIER_LABEL[t])}</option>`).join('')}
@@ -305,6 +645,13 @@ const InventoryView = (() => {
 
     // Save Bottle
     formEl.querySelector('.bottle-edit-save').addEventListener('click', () => {
+      const styleEl = formEl.querySelector('[data-field="style"]');
+      const newStyle = (styleEl ? styleEl.value : '').trim();
+      if (!newStyle) {
+        Utils.toast('Category is required — please select one.', 'error');
+        if (styleEl) styleEl.focus();
+        return;
+      }
       State.patch('inventory', i2 => {
         const a2 = getNestedArr(i2, sectionKey);
         const e2 = a2[index];
@@ -313,6 +660,8 @@ const InventoryView = (() => {
           const f = el.dataset.field;
           e2[f] = (el.value || '').trim();
         });
+        // Ensure type is never empty: fall back to category
+        if (!e2.type) e2.type = e2.style;
         // Persist custom type if novel
         if (e2.type) saveCustomType(e2.type);
         if (!e2.created_at) e2.created_at = new Date().toISOString();
@@ -386,6 +735,93 @@ const InventoryView = (() => {
       });
       list.appendChild(li);
     });
+  }
+
+  function renderQuickAddBar(parentEl, inv) {
+    const bar = document.createElement('div');
+    bar.className = 'inv-quick-add';
+    bar.innerHTML = `
+      <input type="text" class="inv-quick-add-input" placeholder="Quick add a bottle — e.g. Bulleit Bourbon" aria-label="Quick add a bottle">
+      <button class="btn btn-primary btn-sm inv-quick-add-btn">Add</button>
+      <span class="inv-quick-add-hint">Type a bottle, press Enter</span>`;
+
+    const input   = bar.querySelector('.inv-quick-add-input');
+    const addBtn  = bar.querySelector('.inv-quick-add-btn');
+
+    function attemptAdd() {
+      const name = input.value.trim();
+      if (!name) return;
+
+      const sectionKey = parseBottleSection(name);
+
+      if (sectionKey) {
+        commitQuickAdd(name, sectionKey, inv);
+        input.value = '';
+        removePicker();
+      } else {
+        showPicker(name);
+      }
+    }
+
+    function showPicker(name) {
+      removePicker();
+      const picker = document.createElement('div');
+      picker.className = 'inv-quick-add-picker';
+      picker.innerHTML = `
+        <label for="qab-section-select">Add to:</label>
+        <select id="qab-section-select">
+          ${BOTTLE_SECTIONS.map(s => `<option value="${Utils.escapeHtml(s.key)}">${Utils.escapeHtml(s.label)}</option>`).join('')}
+        </select>
+        <button class="btn btn-primary btn-sm" id="qab-confirm-btn">Confirm</button>
+        <button class="btn btn-ghost btn-sm" id="qab-cancel-btn">Cancel</button>`;
+      bar.appendChild(picker);
+
+      picker.querySelector('#qab-confirm-btn').addEventListener('click', () => {
+        const sel = picker.querySelector('#qab-section-select').value;
+        commitQuickAdd(name, sel, inv);
+        input.value = '';
+        removePicker();
+      });
+      picker.querySelector('#qab-cancel-btn').addEventListener('click', () => {
+        removePicker();
+        input.focus();
+      });
+      picker.querySelector('#qab-section-select').focus();
+    }
+
+    function removePicker() {
+      const existing = bar.querySelector('.inv-quick-add-picker');
+      if (existing) existing.remove();
+    }
+
+    function commitQuickAdd(name, sectionKey, inv) {
+      const newEntry = parseBottleEntry(name, sectionKey);
+      State.patch('inventory', i2 => {
+        const arr2 = getNestedArr(i2, sectionKey);
+        arr2.push(newEntry);
+        setNestedArr(i2, sectionKey, arr2);
+      });
+      markDirty();
+      // Switch to Spirits tab and re-render if needed
+      const spiritsTab = document.querySelector('.tab[data-tab="tab-spirits"]');
+      if (spiritsTab && !spiritsTab.classList.contains('active')) {
+        spiritsTab.click();
+      } else {
+        // Tab already active — refresh the section's chip grid
+        const safeId = sectionKey.replace(/\./g, '-');
+        const grid = document.getElementById(`bottles-${safeId}`);
+        if (grid) renderBottleChips(grid, getNestedArr(State.get('inventory'), sectionKey), sectionKey, State.get('inventory'));
+      }
+      Utils.showToast(`Added "${name}" to ${sectionLabelByKey(sectionKey)}`);
+    }
+
+    addBtn.addEventListener('click', attemptAdd);
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') attemptAdd();
+      if (e.key === 'Escape') removePicker();
+    });
+
+    parentEl.appendChild(bar);
   }
 
   function markDirty() {
@@ -488,6 +924,9 @@ const InventoryView = (() => {
       if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
       categorySelect.value = '';
     });
+
+    // Quick-add bar (Phase 5)
+    renderQuickAddBar(sectionsEl, inv);
 
     // Tabs (Phase 4: added Equipment tab)
     const tabsEl = document.createElement('div');

@@ -652,6 +652,7 @@ a:hover { color: var(--amber); }
 .rec-card {
   background: var(--bg2); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 16px 18px;
+  position: relative;
 }
 .rec-card--oneaway { border-color: var(--amber-dim); }
 
@@ -920,6 +921,72 @@ a:hover { color: var(--amber); }
   }
   .inv-category-select {
     width: 100%;
+  }
+}
+
+/* ── Phase 5: Quick-Add Bar ──────────────────────────────────────────── */
+
+.inv-quick-add {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+}
+
+.inv-quick-add-input {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 7px 10px;
+  font-size: 0.9rem;
+}
+
+.inv-quick-add-input:focus {
+  outline: none;
+  border-color: var(--amber);
+}
+
+.inv-quick-add-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.inv-quick-add-picker {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border2);
+  width: 100%;
+}
+
+.inv-quick-add-picker label {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.inv-quick-add-picker select {
+  flex: 1;
+  min-width: 160px;
+}
+
+@media (max-width: 480px) {
+  .inv-quick-add {
+    flex-wrap: wrap;
+  }
+  .inv-quick-add-hint {
+    display: none;
   }
 }
 
@@ -1277,3 +1344,36 @@ a:hover { color: var(--amber); }
 .rec-twoaway-link:hover {
   color: var(--text);
 }
+
+/* === Phase 5: Recommender UX depth (REC-05–09) === */
+
+/* Unconstrained scope button (REC-06, D-08) — dashed border signals inventory gating is off */
+.rec-scope-btn--unconstrained { border-style: dashed; }
+
+/* Veto chips — bypassed veto shows strikethrough + muted opacity (D-04) */
+.rec-veto-chip.bypassed { text-decoration: line-through; opacity: 0.5; }
+
+/* Favorites / Wishlist quick-action buttons on recipe cards (REC-08, D-09) */
+.rec-card-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+  z-index: 2;
+}
+.rec-fav-btn, .rec-wish-btn {
+  background: transparent;
+  border: 1px solid var(--amber-dim);
+  color: var(--amber);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.rec-fav-btn:hover, .rec-wish-btn:hover { background: var(--amber-dim); }
