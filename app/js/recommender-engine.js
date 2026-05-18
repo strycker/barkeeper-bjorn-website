@@ -43,12 +43,39 @@ const RecommenderEngine = (() => {
     produce:            inv => (inv.fresh_produce        || []).map(lc),
   };
 
+  // Derivation pairs: [sourceKeyword, derivedKeyword, ...targetSectionKeys]
+  // Having the base ingredient implies the derived product is available.
+  // Target section keys verified against classics-db.js searchIn values.
+  const DERIVATIONS = [
+    ['lime',  'lime juice',   'produce',     'perishables'],
+    ['lemon', 'lemon juice',  'produce',     'perishables'],
+    ['sugar', 'simple syrup', 'pantry',      'syrups'],
+    ['egg',   'egg white',    'perishables'],
+    ['mint',  'muddled mint', 'produce',     'pantry'],
+    ['cream', 'heavy cream',  'perishables'],
+    ['honey', 'honey syrup',  'syrups',      'pantry',      'perishables'],
+  ];
+
   // Build a flat inventory lookup from all sections (cached per call)
   function _buildLookup(inv) {
     const lookup = {};
     Object.entries(SECTION_MAP).forEach(([key, fn]) => {
       lookup[key] = fn(inv);
     });
+    return lookup;
+  }
+
+  // Expand lookup with derived ingredients (e.g. limes → lime juice).
+  // Mutates lookup in place; called after _buildLookup, before _hasIngredient.
+  function _expandLookup(lookup) {
+    for (const [src, derived, ...targets] of DERIVATIONS) {
+      const present = Object.values(lookup).some(arr => arr.some(item => item.includes(src)));
+      if (!present) continue;
+      for (const sec of targets) {
+        if (!lookup[sec]) lookup[sec] = [];
+        if (!lookup[sec].some(i => i.includes(derived))) lookup[sec].push(derived);
+      }
+    }
     return lookup;
   }
 
@@ -112,13 +139,16 @@ const RecommenderEngine = (() => {
   // Main recommend function
   // Returns { buildable: [...], oneAway: [...], twoAway: [...] }
   // Each item: { recipe, flavorScore, missingIngredient?, missingIngredients? }
-  function recommend(inventory, rawProfile) {
+  // opts.scope: 0|1|2|3  (3 = Unconstrained — skip inventory gating)
+  // opts.ignoreVetoes: Set<string>  (veto strings to bypass for this call)
+  function recommend(inventory, rawProfile, opts = {}) {
     // eslint-disable-next-line no-undef
     const db = (typeof CLASSICS_DB !== 'undefined') ? CLASSICS_DB : [];
     if (!db.length) return { buildable: [], oneAway: [], twoAway: [] };
 
     const inv = inventory || {};
     const lookup = _buildLookup(inv);
+    _expandLookup(lookup);
     const profile = _normalizeProfile(rawProfile);
 
     const buildable = [];
@@ -126,27 +156,31 @@ const RecommenderEngine = (() => {
     const twoAway = [];
 
     // Collect vetoed items (vetoes is an object with sub-arrays in actual data)
+    // Apply ignoreVetoes Set to allow per-session bypass of specific vetoes.
     const vetoObj = inv.vetoes || {};
-    const vetoes = [
+    const rawVetoes = [
       ...(Array.isArray(vetoObj) ? vetoObj : []),
       ...(vetoObj.disliked_ingredients || []),
-      ...(vetoObj.substitute_for_now   || []),
     ].map(v => String(v).toLowerCase());
+    const activeVetoes = rawVetoes.filter(v => !(opts.ignoreVetoes && opts.ignoreVetoes.has(v)));
+
+    const unconstrained = opts.scope === 3;
 
     for (const recipe of db) {
-      // Check veto — skip any recipe whose base matches a vetoed spirit
+      // Check veto — skip any recipe whose base matches an active vetoed string
       const baseStr = (recipe.base || '').toLowerCase();
-      if (vetoes.some(v => baseStr.includes(v))) continue;
+      if (activeVetoes.some(v => baseStr.includes(v))) continue;
 
       const missing = [];
       for (const ing of recipe.ingredients) {
+        if (ing.optional) continue;
         const result = _hasIngredient(lookup, ing);
         if (!result.found) missing.push(ing);
       }
 
       const score = _flavorScore(recipe, profile);
 
-      if (missing.length === 0) {
+      if (unconstrained || missing.length === 0) {
         buildable.push({ recipe, flavorScore: score });
       } else if (missing.length === 1) {
         oneAway.push({ recipe, flavorScore: score, missingIngredient: missing[0], missingIngredients: missing });

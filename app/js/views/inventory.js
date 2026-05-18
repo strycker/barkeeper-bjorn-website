@@ -303,13 +303,14 @@ const InventoryView = (() => {
     formEl.className = 'bottle-edit-form';
     formEl.innerHTML = `
       <div class="bottle-edit-fields">
-        <label>Style <input type="text" data-field="style" value="${Utils.escapeHtml(entry.style || '')}"></label>
-        <label>Type <input type="text" data-field="type" list="type-options-${safeId}" value="${Utils.escapeHtml(entry.type || '')}"></label>
+        <label>Category <input type="text" data-field="style" placeholder="e.g. Bourbon, Gin, Mezcal" title="Broad category (Bourbon, Gin, Mezcal, etc.)" value="${Utils.escapeHtml(entry.style || '')}"></label>
+        <label>Specific Style/Type <input type="text" data-field="type" list="type-options-${safeId}" placeholder="e.g. Single Barrel, Cask Strength, Espadin" title="The specific bottle&#39;s style/type (e.g. Single Barrel, Espadin)" value="${Utils.escapeHtml(entry.type || '')}"></label>
       </div>
       <button type="button" class="bottle-edit-toggle">More fields ▾</button>
       <div class="bottle-edit-fields--expanded" style="display:none;">
         <div class="bottle-edit-fields">
           <label>Brand <input type="text" data-field="brand" value="${Utils.escapeHtml(entry.brand || '')}"></label>
+          <label>Nationality <input type="text" data-field="nationality" placeholder="e.g. Scotland, Mexico, Kentucky USA" value="${Utils.escapeHtml(entry.nationality || '')}"></label>
           <label>Tier <select data-field="tier">
             <option value="">Unset</option>
             ${TIERS.map(t => `<option value="${Utils.escapeHtml(t)}" ${entry.tier === t ? 'selected' : ''}>${Utils.escapeHtml(TIER_LABEL[t])}</option>`).join('')}

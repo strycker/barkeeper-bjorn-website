@@ -69,6 +69,8 @@ const Normalize = (() => {
     if (out.tier && OLD_TIER_VALUES.has(out.tier)) {
       out.tier = '';
     }
+    // INV-09: ensure nationality defaults to empty string
+    out.nationality = ensureString(out.nationality);
     // Ensure ISO timestamps
     if (!out.created_at || typeof out.created_at !== 'string') out.created_at = nowIso;
     if (!out.updated_at || typeof out.updated_at !== 'string') out.updated_at = nowIso;

@@ -166,7 +166,12 @@
           "enum": ["", "sipping", "mixing", "both"],
           "description": "Best use context. Empty string = unset."
         },
-        "notes":      { "type": "string", "description": "Freeform tasting or provenance notes." },
+        "notes":       { "type": "string", "description": "Freeform tasting or provenance notes." },
+        "nationality": {
+          "type": "string",
+          "default": "",
+          "description": "Country/region of origin (e.g. Scotland, Mexico, Kentucky USA)."
+        },
         "created_at": { "type": "string", "format": "date-time", "description": "ISO timestamp when entry was added." },
         "updated_at": { "type": "string", "format": "date-time", "description": "ISO timestamp of last edit." }
       }
