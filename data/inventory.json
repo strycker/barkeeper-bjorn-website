@@ -124,11 +124,11 @@
         "style": "Gins / Vodkas / White Spirits",
         "type": "Vodka",
         "brand": "Reyka",
-        "tier": "",
+        "tier": "premium",
         "best_for": "",
         "notes": "",
         "created_at": "2026-05-18T20:27:25.156Z",
-        "updated_at": "2026-05-18T20:27:42.039Z",
+        "updated_at": "2026-05-18T20:29:36.343Z",
         "nationality": "Iceland"
       }
     ],
