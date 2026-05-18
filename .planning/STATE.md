@@ -6,7 +6,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 
 **Core value:** The user's real-world bar inventory and flavor profile should power both AI-driven conversation and rule-based recommendations — seamlessly, whether in a chat session or the web app.
 
-**Current focus:** Phase 5 — AI Integration
+**Current focus:** Phase 5 — Polish, Depth & UX Tidy
 
 ---
 
@@ -18,21 +18,46 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 | 2 | Web UI UX & Settings | Shipped | 5 | 100% |
 | 3 | Content Management | Shipped | 4 | 100% |
 | 4 | Inventory & Recommender Depth | Shipped | 3 | 100% |
-| 5 | AI Integration | Pending | — | 0% |
-| 6 | Backend & Multi-User | Pending | — | 0% |
-| 7 | Community, API & Multi-Agent | Pending | — | 0% |
+| 5 | Polish, Depth & UX Tidy | Pending | — | 0% |
+| 6 | AI Integration | Pending | — | 0% |
+| 7 | Portability | Pending | — | 0% |
+| 8 | Backend & Multi-User | Pending | — | 0% |
+| 9 | Community, API & Multi-Agent | Pending | — | 0% |
 
 ---
 
 ## What's Already Shipped
 
-The following capabilities exist in the codebase as of initialization and are tracked as Validated requirements in PROJECT.md:
+The following capabilities exist in the codebase as of Phase 4 completion:
 
 - Full vanilla JS SPA (`app/`): Setup, Dashboard, Onboarding, Inventory, Recipes, Profile, Shopping, Recommender views
 - GitHub Pages deployment (auto on push to `main`)
-- 75-recipe classics DB with inventory matching and flavor scoring
+- 75-recipe classics DB with inventory matching, flavor scoring, cumulative scope sections, mood sliders, occasion filters
+- Structured bottle objects `{style, type, brand, tier, best_for, notes}` with inline edit form and 6-tier system
+- Equipment tab (Strainers) with multi-select checkboxes
+- Canonical name suggestions (`canonical-names.js`) on inventory input
 - JSON schemas (`schema/`) and modular agent prompts (`instructions/`)
 - Session-state template and analytics mode
+- `claude-api.js` (Phase 3) — basic Anthropic API call wrapper; key stored in `bb_anthropic_key`
+- ZIP export/import with drag-and-drop; AI-context text export
+- Recipe add/edit form; image upload to GitHub
+
+---
+
+## Phase 5 Plan Index
+
+*(Plans to be created during plan-phase)*
+
+| Plan | Wave | Objective | Requirements |
+|------|------|-----------|--------------|
+| 05-00 | 0 | Test checklist | All Phase 5 |
+| 05-01 | 1 | Recommender UX — cumulative highlight, Unconstrained, Vetoes panel, Favorites/Wishlist, derivation map | REC-05–09 |
+| 05-02 | 1 | Inventory depth — field rename + tooltips, nationality field, paste-a-line parser | INV-08–10 |
+| 05-03 | 2 | Data model tidy — equipment consolidation, axis migration, rich profile fields | DATA-01–03 |
+| 05-04 | 2 | Bartender Customization Wizard | CUST-01–02 |
+
+Wave 1 plans (05-01, 05-02) are independent and can execute in parallel.
+Wave 2 plans (05-03, 05-04) can also run in parallel with each other; 05-03 should follow 05-02 (schema settled first).
 
 ---
 
@@ -46,9 +71,6 @@ The following capabilities exist in the codebase as of initialization and are tr
 | 02-03 | 2 | Settings page (4 sections, logout, reset) | SETTINGS-01–04, NAV-05 | app/js/views/settings.js |
 | 02-04 | 2 | Inventory search + category filter | INV-01–02 | app/js/views/inventory.js, app/css/app.css |
 
-Wave 1 plans (02-01, 02-02) are independent and can execute in parallel.
-Wave 2 plans (02-03, 02-04) depend on Wave 1 completing first.
-
 ---
 
 ## Phase 3 Plan Index
@@ -60,9 +82,6 @@ Wave 2 plans (02-03, 02-04) depend on Wave 1 completing first.
 | 03-02 | 1 | Recipe form: Utils.toast fixes, New Recipe button, D-02 validation, AI prompt scaffold | RECIPE-01–05 | app/js/views/recipes.js |
 | 03-03 | 2 | AI integration: claude-api.js, AI Integration settings section, live Generate wiring | RECIPE-05 | app/js/claude-api.js, app/js/views/settings.js, app/js/views/recipes.js |
 
-Wave 1 plans (03-01, 03-02) are independent and can execute in parallel.
-Wave 2 plan (03-03) depends on both Wave 1 plans completing first (claude-api.js must exist; recipe form AI scaffold must be in place).
-
 ---
 
 ## Phase 4 Plan Index
@@ -72,9 +91,6 @@ Wave 2 plan (03-03) depends on both Wave 1 plans completing first (claude-api.js
 | 04-01 | 1 | Engine & schema foundation: normalize.js coerceBottle, recommender-engine lc()+subtype guard+twoAway, classics-db tags, schema update | INV-03, INV-04, INV-05, BUG-02 | app/js/normalize.js, app/js/recommender-engine.js, app/js/classics-db.js, schema/inventory.schema.json |
 | 04-02 | 2 | Inventory UI: chip rendering for {style} shape, inline edit form, 6-tier system, Equipment tab, canonical-names module | INV-03, INV-04, INV-05, INV-06, INV-07 | app/js/views/inventory.js, app/js/canonical-names.js, app/css/app.css, app/index.html |
 | 04-03 | 2 | Recommender UI: sidebar layout, mood sliders, scope toggle (cumulative sections + two-away cards), occasion filter chips | REC-01, REC-02, REC-03 | app/js/views/recommender.js, app/css/app.css |
-
-Wave 1 plan (04-01) must complete before Wave 2.
-Wave 2 plans (04-02, 04-03) are independent and can execute in parallel — they touch different files.
 
 ---
 
@@ -129,12 +145,25 @@ Wave 2 plans (04-02, 04-03) are independent and can execute in parallel — they
 
 ---
 
+## Key Decisions (Roadmap Restructure — 2026-05-18)
+
+- **Phase split** — original Phase 5 "AI Integration" split into: Phase 5 "Polish, Depth & UX Tidy" (no AI dependency), Phase 6 "AI Integration" (expanded), Phase 7 "Portability" (new); old Phases 6/7 become 8/9
+- **Library ≠ Classroom** — Library (`#library`) is user-curated external links (videos, sites, Wikipedia); Classroom (`#classroom`) is Bjorn's hosted tutorials. Two distinct views introduced together in Phase 6
+- **Export strict, import loose** — Markdown export follows a canonical field map with no ambiguity; import accepts JSON (any version), MD files, or mixed ZIP, with AI-assisted natural language parsing as fallback when parse/version errors occur and `bb_anthropic_key` is present
+- **Vetoes as session filter** — Vetoes are exposed in the Recommender sidebar as a filter panel (like mood sliders), enforced by default, but each veto individually toggleable per-session without modifying saved data
+- **Bartender Customization Wizard** — new `#bartender-wizard` view for full-depth persona editing; Settings → Bartender keeps Name + Preset dropdown and adds a link to the Wizard; Wizard gains AI-assist button in Phase 6
+- **Append vs overwrite per-section** — on import: barkeeper/persona always overwrites; inventory + recipes user chooses; profile sliders overwrite, background fields merge
+- **Scope button highlighting** — cumulative: selecting scope level N highlights all buttons 0..N; "Unconstrained" (level 3) ignores inventory entirely but still respects vetoes by default
+- **Paste-a-line parser** — Phase 5 delivers regex-based parser (no AI); Phase 6 upgrades with Claude fallback for ambiguous entries; unknown tokens land in a REVIEW bucket for user correction
+
+---
+
 ## Notes
 
 - `gsd-sdk` is not installed; use `git commit` directly for doc commits
 - CLAUDE.md preserved as-is (existing developer guidance)
-- Phases 1–5 are sequential by preference but can overlap; Phases 6–7 are hard-sequenced
+- Phases 5–7 are sequential by preference but 5 has no hard dependencies; Phase 8 depends on Phases 3–5 being stable; Phase 9 depends on Phase 8
 
 ---
 *State initialized: 2026-05-04*
-*Last activity: 2026-05-15 — Phase 4 shipped. PR #36 open: https://github.com/strycker/barkeeper-bjorn-website/pull/36 — branch claude/phase-4-inventory-recommender → main. UAT complete (12/12 tests passed, 5 bugs fixed). Validation complete (20/20 tasks green, mobile confirmed). Current focus: Phase 5 — AI Integration.*
+*Last activity: 2026-05-18 — Roadmap restructured (Phases 5–9). Phase 4 shipped (PR #36 merged). Current focus: Phase 5 — Polish, Depth & UX Tidy. Ready to begin discuss/plan phase.*

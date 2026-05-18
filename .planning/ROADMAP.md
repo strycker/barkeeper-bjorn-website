@@ -1,7 +1,7 @@
 # Roadmap: Barkeeper Bjorn
 
 **Created:** 2026-05-04
-**Phases:** 7 | **Requirements:** 57 | **Granularity:** Coarse
+**Phases:** 10 | **Requirements:** 80+ | **Granularity:** Coarse
 
 ---
 
@@ -11,11 +11,13 @@
 |---|-------|------|--------------|--------|
 | 1 | Agent Instructions Polish | Fix all open Tier 1 agent instruction issues | AGENT-01–06 | Complete |
 | 2 | Web UI UX & Settings | Onboarding overhaul, dashboard images, settings page, inventory search | ONB-01–04, NAV-01–05, SETTINGS-01–04, INV-01–02 | Complete |
-| 3 | Content Management | Recipe add/edit, image upload, export/import | RECIPE-01–05, EXPORT-01–04 | Pending |
-| 4 | Inventory & Recommender Depth | Structured bottle objects, in-place editing, mood sliders, scope toggle, name standardization | INV-03–07, REC-01–03 | Pending |
-| 5 | AI Integration | Claude API, Ask Bjorn chat, AI cocktail design, Classroom | AI-01–07 | Pending |
-| 6 | Backend & Multi-User | Supabase, auth, per-user isolation, account settings | BACKEND-01–08 | Pending |
-| 7 | Community, API & Multi-Agent | Community feed, forum, REST API, Bjorn sub-agents | COMMUNITY-01–08, API-01–06, AGENT-SYS-01–04 | Pending |
+| 3 | Content Management | Recipe add/edit, image upload, export/import | RECIPE-01–05, EXPORT-01–04 | Complete |
+| 4 | Inventory & Recommender Depth | Structured bottle objects, in-place editing, mood sliders, scope toggle, name standardization | INV-03–07, REC-01–03 | Complete |
+| 5 | Polish, Depth & UX Tidy | Recommender UX fixes, vetoes filter panel, ingredient derivation, inventory field depth, data model tidy, Bartender Customization Wizard | REC-05–09, INV-08–10, DATA-01–03, CUST-01–02 | Pending |
+| 6 | AI Integration | Claude API chat, classroom, AI design, AI recommendations, AI import, Library | AI-01–13, LIB-01, REC-04, SET-05, CHAT-01–09 | Pending |
+| 7 | Portability | Markdown round-trip, per-page export/import, append/overwrite import mode | PORT-01–05 | Pending |
+| 8 | Backend & Multi-User | Supabase, auth, per-user isolation, account settings | BACKEND-01–08 | Pending |
+| 9 | Community, API & Multi-Agent | Community feed, forum, REST API, Bjorn sub-agents | COMMUNITY-01–08, API-01–06, AGENT-SYS-01–04 | Pending |
 
 ---
 
@@ -33,12 +35,7 @@
 
 **Files touched:** `barkeeper-instructions.md`, `instructions/onboarding.md`, `instructions/communication.md`, `recipes.md`, `INSTALL.md`
 
-**Success criteria:**
-1. Starting a fresh session produces INIT_PROMPT flow — not an options menu — on the first user message
-2. Onboarding never presents more than one question per agent turn
-3. After confirming a new original, agent offers two image-generation prompt variants unprompted
-4. The `recipes.md` recipe template uses `<img>` tag with raw GitHub URL as the default
-5. Session-start menu for a returning user is ≤7 numbered items with a single greeting line — no preamble
+**Status: Complete**
 
 ---
 
@@ -63,23 +60,7 @@
 - INV-01: Real-time inventory search input
 - INV-02: Category filter dropdown with jump-scroll
 
-**Files touched:** `app/js/views/onboarding.js`, `app/js/views/dashboard.js`, `app/js/views/settings.js` (new), `app/js/views/inventory.js`, `app/index.html`, `app/css/app.css`
-
-**Plans:** 5 plans
-
-Plans:
-- [ ] 02-00-PLAN.md — Create manual smoke-test checklist for all 5 success criteria
-- [ ] 02-01-PLAN.md — Onboarding overhaul: 17-step wizard, sliders, skip logic, inventory paste, Bjorn welcome avatar
-- [ ] 02-02-PLAN.md — Dashboard hero image, progress banner, 7-item grid, header avatar, nav gating
-- [ ] 02-03-PLAN.md — Settings page: bartender identity, GitHub connection, logout, reset all data
-- [ ] 02-04-PLAN.md — Inventory real-time search and category jump-scroll filter
-
-**Success criteria:**
-1. A new user can skip any onboarding step and return later via "Revisit Onboarding" on the Dashboard
-2. Flavor axes show as sliders with "Middle" center label; saved values pre-fill correctly
-3. Bjorn avatar appears in the header and on the onboarding welcome step
-4. Settings page accessible from nav gear icon; logout clears all `bb_*` localStorage and redirects to Setup
-5. Typing in the inventory search box filters chips in real-time with no page reload
+**Status: Complete**
 
 ---
 
@@ -93,27 +74,12 @@ Plans:
 - RECIPE-03: Image upload on recipe detail — file picker → base64 → GitHub API PUT to `images/`
 - RECIPE-04: "Submit New Recipe" button in Recipe Book header
 - RECIPE-05: "Generate with AI" button in Recipe Book (live with API key / copyable prompt without)
-- EXPORT-01: "Export All Data" JSON bundle — triggers browser download, includes version header
+- EXPORT-01: "Export All Data" ZIP bundle — triggers browser download
 - EXPORT-02: AI-context text export — markdown/text summary for pasting into any AI session
 - EXPORT-03: "Import Data" — file picker, diff preview, batch write to GitHub
 - EXPORT-04: Selective import — per-section checkboxes (inventory, recipes, profile, barkeeper)
 
-**Files touched:** `app/js/views/recipes.js`, `app/js/export.js`, `app/js/claude-api.js` (new), `app/js/views/settings.js`, `app/css/app.css`, `app/index.html`
-
-**Plans:** 4 plans
-
-Plans:
-- [ ] 03-00-PLAN.md — Create manual smoke-test checklist
-- [ ] 03-01-PLAN.md — Export/Import ZIP upgrade: drop zone, drag-and-drop, sequential writes, AI-context text export
-- [x] 03-02-PLAN.md — Recipe form: Utils.toast fixes, New Recipe button, D-02 validation, AI prompt block scaffold
-- [ ] 03-03-PLAN.md — AI integration: claude-api.js, AI Integration settings section, live Generate wiring
-
-**Success criteria:**
-1. User can create a new original recipe from within the web app and it persists to GitHub
-2. User can edit an existing recipe without deleting and re-adding it
-3. Uploading an image via the browser writes it to `images/` and displays the raw GitHub URL
-4. "Export All Data (ZIP)" downloads a ZIP bundle containing all 4 data files
-5. Importing a previously exported ZIP shows a 4-file preview before any writes; Confirm Import writes all four sequentially
+**Status: Complete**
 
 ---
 
@@ -122,52 +88,158 @@ Plans:
 **Goal:** Upgrade inventory from flat strings to structured objects with in-place editing and an expanded tier system; make the recommender session-aware via per-session mood sliders, a configurable missing-ingredient scope, and occasion tag filters; add canonical name suggestions to prevent inventory drift.
 
 **Requirements:**
-- INV-03: Spirits stored as objects `{ type, brand, style, tier, notes }`; display as formatted chip with tooltip
-- INV-04: Clicking a chip opens an inline edit popover — edit any field and save without delete + re-add
-- INV-05: 6-level tier system: Well → Standard → Premium → Craft → Boutique → Rare/Exceptional (refined from original 7-tier spec during discuss-phase; CONTEXT.md D-05 is authoritative)
+- INV-03: Spirits stored as objects `{ style, type, brand, tier, best_for, notes }`; display as formatted chip with tooltip
+- INV-04: Clicking a chip opens an inline edit form — edit any field and save without delete + re-add
+- INV-05: 6-level tier system: Well → Standard → Premium → Craft → Boutique → Rare/Exceptional
 - INV-06: Strainer field is multi-select checkbox grid (Hawthorne, Julep, Fine Mesh, Conical)
-- INV-07: `canonical-names.js` — "Did you mean: X?" inline tooltip on inventory input mismatch
+- INV-07: `canonical-names.js` — "Did you mean: X?" inline banner on inventory input mismatch
 - REC-01: Mood sliders at top of Recommender — 6-axis, pre-loaded from profile, re-scores live without saving
 - REC-02: Scope toggle: "Only what I have" → "Allow 1 missing" → "Allow 2 missing"; missing items link to shopping list
 - REC-03: Occasion tag filter chips on Recommender
 
-**Files touched:** `app/js/views/inventory.js`, `app/js/views/recommender.js`, `app/js/recommender-engine.js`, `app/js/canonical-names.js` (new), `app/css/app.css`, `schema/inventory.json`
-
-**Success criteria:**
-1. Adding a new bottle via the structured form stores it as a JSON object; existing string entries display without breaking
-2. Clicking a bottle chip opens an edit popover; changes save without deleting and re-adding the entry
-3. Recommender mood sliders re-rank recipes live as axes are adjusted — saved profile is unchanged
-4. Scope toggle changes results without page reload; one-away items link to shopping list
-5. Typing "angostura" in an inventory input shows "Did you mean: Angostura Bitters?" inline tooltip
+**Status: Complete**
 
 ---
 
-## Phase 5: AI Integration
+## Phase 5: Polish, Depth & UX Tidy
 
-**Goal:** Connect the web UI to the Claude API (bring-your-own Anthropic key) to unlock "Ask Bjorn" natural-language chat, AI cocktail design, AI-powered recommendations, and inventory advice — all browser-side with no backend. Add the Classroom static reference section, interactive with Claude API when a key is present.
+**Goal:** Sharpen what's already shipped with no new AI dependency — data model hygiene, recommender UX correctness, inventory usability improvements, and the new Bartender Customization Wizard. Clean data model before AI sees it in Phase 6.
 
 **Requirements:**
-- AI-01: Anthropic API key field in Settings (localStorage `bb_anthropic_key`; masked with Reveal toggle)
-- AI-02: "Ask Bjorn" chat panel — unlocked with API key; full system prompt + inventory + profile injected
-- AI-03: AI cocktail design — generate new original with rationale and attribution
-- AI-04: AI-powered recommendations — Bjorn explains fit and suggests variations
-- AI-05: AI inventory advice — "best single bottle to add" with explanation
-- AI-06: Classroom view (`#classroom`) — static reference: Techniques, Glassware, Ratios, Ingredients
-- AI-07: Classroom becomes interactive with Claude API key — ask Bjorn questions in lesson context
-- AI-08: AI-powered legacy import — user pastes or uploads a legacy markdown file (e.g. old chat session notes) and Claude parses it into structured JSON fields (inventory, profile, recipes, barkeeper), presenting a preview before confirming the write to GitHub. Bridges the gap between freeform markdown notes and the structured data store.
 
-**Files touched:** `app/js/claude-api.js` (new), `app/js/views/chat.js` (new), `app/js/views/classroom.js` (new), `app/js/data/classroom-content.js` (new), `app/js/views/settings.js`, `app/index.html`, `app/css/app.css`
+*Recommender UX:*
+- REC-05: Scope buttons use **cumulative highlighting** — active state applies to all buttons at or below the current scope level (scope=2 highlights all three inventory-gating buttons; scope=3 highlights all four)
+- REC-06: 4th scope button: **"Unconstrained"** — mood + occasion scoring only, zero inventory gating; vetoes still respected by default
+- REC-07: **Vetoes filter panel** in Recommender sidebar — shown alongside mood sliders; each veto individually toggleable per-session (bypassing it for that session only, like a mood override); enforced by default
+- REC-08: **Add-to-Favorites / Add-to-Wishlist** quick-action buttons on all recommender recipe cards; appends to `recipes.favorites` / `recipes.wishlist` and calls `State.save('recipes')`
+- REC-09: **Ingredient derivation static map** in `recommender-engine.js` — lookup-expansion pass before matching; covers: limes→lime juice, lemons→lemon juice, sugar→simple syrup, eggs→egg white, mint→muddled mint, cream→heavy cream, honey→honey syrup
+
+*Inventory Depth:*
+- INV-08: **Field label rename in UI** — `style` field displays as "Category" (e.g. Bourbon, Gin, Mezcal); `type` field displays as "Specific Style/Type" (e.g. Single Barrel, Cask Strength, Espadin); add example placeholders and tooltip; underlying JSON keys unchanged
+- INV-09: **Nationality** as optional `bottleEntry` field — schema update + edit form field (e.g. "Scotland", "Mexico", "Kentucky, USA")
+- INV-10: **Free-text paste-a-line** input at top of Inventory — regex parser (no AI dependency; PAR series resurrected); parses a single descriptive line ("Montelobos Espadin Mezcal, Oaxaca, artesanal, premium-accessible") into a pre-populated chip editor for review before saving
+
+*Data Model Tidy:*
+- DATA-01: **Equipment consolidation** — `inventory.json` becomes sole source of truth for equipment; `normalize.js` strips equipment fields from `bar-owner-profile.json` / `barkeeper.json` on load; onboarding writes equipment to inventory only
+- DATA-02: **Numeric axis migration** — profile flavor axes stored as `0.0–1.0` floats; `normalize.js` migrates legacy string labels ("Lean A", "Strong A", etc.) on load; Profile tab shows numeric slider bars only, no label headings
+- DATA-03: **Rich profile fields surfaced** — onboarding and Profile tab expose `background.drinking_frequency`, `background.household_context`, `background.vocabulary_preference`, and `archetypes[]` (`{name, description}` objects)
+
+*Bartender Customization:*
+- CUST-01: **Bartender Customization Wizard** (`#bartender-wizard`) — new full-depth view: name, avatar image URL, voice preset, long-form personality description (textarea), behavioral rules list (add/remove), cocktail naming style, image generation style preferences, signature signoff text. Accessible from Dashboard quick-actions and from Settings → Bartender
+- CUST-02: Settings → Bartender section keeps Name + Preset dropdown; adds **"Full Customization →"** link/button that navigates to the wizard
+
+**Files touched:** `app/js/views/recommender.js`, `app/js/recommender-engine.js`, `app/js/views/inventory.js`, `app/js/normalize.js`, `app/js/views/profile.js`, `app/js/views/onboarding.js`, `app/js/views/settings.js`, `app/js/views/dashboard.js`, `app/js/views/bartender-wizard.js` (new), `schema/inventory.schema.json`, `app/index.html`, `app/css/app.css`
+
+**Plans:**
+- [ ] 05-00-PLAN.md — Test checklist
+- [ ] 05-01-PLAN.md — Recommender UX (cumulative highlight, Unconstrained, Vetoes panel, Favorites/Wishlist, derivation map)
+- [ ] 05-02-PLAN.md — Inventory depth (field rename + tooltips, nationality, paste-a-line parser)
+- [ ] 05-03-PLAN.md — Data model tidy (equipment consolidation, axis migration, rich profile fields)
+- [ ] 05-04-PLAN.md — Bartender Customization Wizard
 
 **Success criteria:**
-1. Entering an Anthropic API key in Settings unlocks the "Chat with Bjorn" nav item (no longer grayed-out)
-2. "Ask Bjorn" chat panel sends a message with inventory + profile context and returns a response in Bjorn's voice
-3. Classroom view loads statically (Techniques, Glassware, Ratios, Ingredients) with no API key required
-4. With API key, submitting a question in Classroom receives an AI response in the current lesson's context
+1. Selecting "Allow 2 missing" in the Recommender shows all three inventory-gating buttons highlighted; selecting "Unconstrained" shows results ranked purely by mood/occasion with no inventory filtering
+2. Vetoes appear in the Recommender sidebar; toggling one off temporarily includes that spirit in results for the session without modifying saved data
+3. Typing "Montelobos Espadin Mezcal, Oaxaca" in the paste-a-line field opens a chip editor pre-filled with Category=Mezcal, Specific Style=Espadin, Nationality=Mexico
+4. Profile flavor axes display as 0.0–1.0 numeric sliders only; old string-label data is migrated on load
+5. Saving a recipe from the Bartender Customization Wizard persists to `barkeeper.json` and is reflected in the Settings → Bartender name/preset display
+
+---
+
+## Phase 6: AI Integration
+
+**Goal:** Connect the web UI to the Claude API (bring-your-own Anthropic key) to unlock "Ask Bjorn" natural-language chat, AI cocktail design, AI-powered recommendations, inventory advice, the Classroom tutorial view, and the Library link collection — all browser-side with no backend. Also upgrades Phase 5's rule-based features (paste-a-line parser, ingredient derivation) with Claude fallbacks.
+
+**Requirements:**
+
+*Settings & Infrastructure:*
+- AI-01: Anthropic API key field in Settings (`bb_anthropic_key` localStorage; masked with Reveal toggle); unlocks all AI features
+- SET-05: Model selector (Haiku / Sonnet / Opus) stored in `bb_chat_model` localStorage
+- AI-09: **Anthropic API log** — every call recorded in `bb_api_log` (50-entry cap, localStorage); Settings panel shows timestamp/type/model/token usage; copy raw JSON; clear log
+
+*Chat:*
+- AI-02: "Ask Bjorn" chat panel (`#chat`) — unlocked with API key
+- CHAT-01: `#chat` route renders chat panel accessible from nav and dashboard
+- CHAT-02: `claude-api.js` IIFE wraps all Anthropic calls with `anthropic-dangerous-direct-browser-access: true` header
+- CHAT-03: Chat panel shows "No API key" message with Settings link when key absent
+- CHAT-04: System prompt built from bartender persona + flavor profile + compact inventory + vetoes (target 1500–2500 tokens)
+- CHAT-05: Responses stream token-by-token using `fetch` + `ReadableStream` + `TextDecoder` SSE parser
+- CHAT-06: AbortController tied to view lifecycle; `cleanup()` aborts in-flight stream on navigation
+- CHAT-07: Conversation history held in-memory as 10-turn sliding window (not persisted to GitHub)
+- CHAT-08: Mid-stream SSE error events caught and displayed as user-readable messages
+- CHAT-09: Rate-limit responses (429) surface the `retry-after` value to the user
+
+*AI-Powered Features:*
+- AI-03: AI cocktail design — generate new original with rationale and attribution; integrates with Recipe Book
+- AI-04: AI-powered recommendations — Bjorn explains fit and suggests variations for Recommender results
+- REC-04: "Ask Bjorn about this" button on every recipe card → opens chat with pre-seeded prompt
+- AI-05: AI inventory advice — "best single bottle to add" with explanation; entry point on Inventory + Dashboard
+
+*Views:*
+- AI-06: **Classroom** view (`#classroom`) — static reference: Techniques, Glassware, Ratios, Ingredients; loads without API key
+- AI-07: Classroom becomes AI-interactive when API key present — ask Bjorn questions in lesson context; responses scoped to current lesson
+- LIB-01: **Library** view (`#library`) — user-curated collection of external links (URL, title, description, tags); distinct from Classroom (Classroom = Bjorn's hosted tutorials; Library = user's external bookmarks/videos/sites); "Ask Bjorn about this" available with key
+
+*AI-Enhanced Data:*
+- AI-08: **Legacy markdown import** — paste or upload old `.md` session notes → Claude parses into structured JSON fields (inventory, profile, recipes, barkeeper) → diff preview → confirm write to GitHub
+- AI-10: **AI-assisted JSON error correction** — on save/import failure, offer to send broken section to Claude; Claude proposes corrected version; diff preview before any write; user confirms
+- AI-11: **Paste-a-line AI upgrade** — Phase 5 regex parser gains Claude as fallback for ambiguous or complex entries the regex cannot classify
+- AI-12: **Bartender Wizard AI assist** — "Help me write this with Claude" button in the Bartender Customization Wizard drafts long-form persona text from user's short preference inputs
+- AI-13: **Ingredient derivation AI inference** — Claude suggests derivations for ingredients not covered by the Phase 5 static map; results cached to avoid repeated API calls
+
+**Files touched:** `app/js/claude-api.js`, `app/js/views/chat.js` (new), `app/js/views/classroom.js` (new), `app/js/data/classroom-content.js` (new), `app/js/views/library.js` (new), `app/js/views/settings.js`, `app/js/views/bartender-wizard.js`, `app/js/views/inventory.js`, `app/js/views/recommender.js`, `app/js/views/recipes.js`, `app/index.html`, `app/css/app.css`
+
+**Plans:**
+- [ ] 06-00-PLAN.md — Test checklist
+- [ ] 06-01-PLAN.md — Settings: API key, model selector, Anthropic log UI
+- [ ] 06-02-PLAN.md — Chat panel (streaming SSE, system prompt, error/rate-limit handling)
+- [ ] 06-03-PLAN.md — Classroom + Library views
+- [ ] 06-04-PLAN.md — AI cocktail design, AI recommendations, AI inventory advice, REC-04
+- [ ] 06-05-PLAN.md — AI-enhanced import (legacy MD, JSON repair, paste-a-line upgrade, Bartender Wizard AI assist, derivation inference)
+
+**Success criteria:**
+1. Entering an Anthropic API key in Settings unlocks Chat, AI design, and AI advice features across the app
+2. "Ask Bjorn" chat panel streams a response in Bjorn's voice with full inventory + profile context injected
+3. Classroom loads statically without an API key; with a key, submitting a question returns a lesson-scoped AI response
+4. Library view allows adding, tagging, and browsing external links independently of Classroom
 5. "Generate with AI" in Recipe Book produces a new original recipe with full attribution string
 
 ---
 
-## Phase 6: Backend & Multi-User
+## Phase 7: Portability
+
+**Goal:** Full round-trip data portability — strict Markdown export (canonical, human-readable), AI-assisted flexible import (accepts JSON bundles, older versions, or `.md` files), per-page single-file operations, and append-vs-overwrite import control per section. Uses Phase 6's Claude API as the import backstop for unrecognized formats.
+
+**Key decisions:**
+- **Export is strict:** Each JSON file maps to a canonical `.md` template with defined section headings; no ambiguity
+- **Import is loose:** Accepts JSON (any version), ZIP bundle, or `.md` files; version mismatches and parse errors fall back to AI-assisted natural language interpretation; AI fallback requires `bb_anthropic_key`
+- **Append vs overwrite is per-section:** barkeeper/persona always overwrites (no merge semantics); inventory + recipes user chooses append or overwrite; profile sliders overwrite, background fields merge
+
+**Requirements:**
+- PORT-01: **Markdown export** — strict field map; each of the 4 data files exports to a canonical `.md`; ZIP bundle includes both `.json` and `.md` versions of each file
+- PORT-02: **Flexible import** — accepts JSON bundle (any version), individual `.md` files, or mixed ZIP; on version mismatch or parse error, falls back to Claude-assisted natural language parse if `bb_anthropic_key` is present; else shows detailed error
+- PORT-03: **Append vs overwrite toggle** per section on import — barkeeper: always overwrite; inventory + recipes: user selects; profile: sliders overwrite, background fields merge
+- PORT-04: **Per-page single-file export/import** — Inventory page: export/import inventory as `.json` or `.md`; Recipes page: same for recipes; Profile page: same for profile; each shows diff preview before any write
+- PORT-05: **AI import error recovery** — if any field fails schema validation mid-import, offer to send the broken section to Claude for repair/interpretation; diff preview before write
+
+**Files touched:** `app/js/export.js`, `app/js/views/settings.js`, `app/js/views/inventory.js`, `app/js/views/recipes.js`, `app/js/views/profile.js`, `app/js/md-converter.js` (new), `app/css/app.css`
+
+**Plans:**
+- [ ] 07-00-PLAN.md — Test checklist
+- [ ] 07-01-PLAN.md — Markdown export engine + strict field map (`md-converter.js`)
+- [ ] 07-02-PLAN.md — Flexible import parser (JSON + MD, version tolerance, AI fallback)
+- [ ] 07-03-PLAN.md — Per-page export/import UI + append/overwrite controls
+
+**Success criteria:**
+1. "Export All Data (ZIP)" produces a ZIP with both `.json` and `.md` versions of all 4 data files
+2. Importing the exported `.md` files on a fresh install produces identical data to importing the `.json` files
+3. Importing an older-version JSON bundle either auto-migrates fields or offers an AI-assisted repair flow
+4. Inventory page "Export Inventory" downloads just `inventory.json` (and optionally `inventory.md`); re-importing it appends or overwrites per user selection
+5. Attempting to import a malformed file surfaces an AI repair offer when a key is present, or a clear error when not
+
+---
+
+## Phase 8: Backend & Multi-User
 
 **Goal:** Introduce an optional Supabase-backed "hosted mode" alongside the preserved solo PAT-based mode, adding email/GitHub OAuth auth, per-user data isolation, and account settings — without breaking any existing single-user workflows.
 
@@ -192,7 +264,7 @@ Plans:
 
 ---
 
-## Phase 7: Community, API & Multi-Agent
+## Phase 9: Community, API & Multi-Agent
 
 **Goal:** Build the social layer — a community recipe feed, recipe ratings, and a discussion forum — alongside a public REST API (FastAPI) and the Bjorn multi-agent system (Sommelier, Analytics Brain, Archivist, Shopper).
 
@@ -228,21 +300,6 @@ Plans:
 
 ---
 
-## Backlog / Future Enhancements
-
-These items were captured during UAT and planning sessions but are not yet scheduled to a specific phase. They should be triaged into the appropriate phase during discuss-phase.
-
-- **Anthropic API request/response log** — Every call to the Anthropic API should be recorded in localStorage (`bb_api_log`, capped at 50 entries). Each entry stores: timestamp, type (request/response/error), model, prompt, system prompt, raw response text, token usage, and HTTP status. A "View API Log" panel in Settings (or a dedicated `#api-log` route) lets the developer inspect entries, copy raw JSON, and clear the log. Useful for debugging AI prompts, verifying model outputs, and iterating on system prompts during development. Basic implementation (localStorage log) added to `claude-api.js` in Phase 3 gap-fix; UI panel is the remaining backlog item. (Captured 2026-05-14)
-- **Page-level imports** — In addition to the all-data ZIP import in Settings, each data view should have its own targeted import: Recipes page accepts a multi-recipe JSON/ZIP file with a per-recipe select-or-save-all preview; Inventory page accepts an inventory JSON file; Profile page accepts a bar-owner-profile JSON. Each shows a diff preview before writing. (Captured 2026-05-14 during Phase 3 UAT)
-- **AI-powered legacy import (AI-08)** — User pastes or uploads a legacy markdown file (e.g. old chat session notes) and Claude parses it into structured JSON fields, presenting a preview before writing. Scheduled under Phase 5 as AI-08. (Captured 2026-05-14)
-- **Ingredient hierarchy / automatic derivations** — The recommender should treat base ingredients as implying their common derivatives: limes → lime juice, lemons → lemon juice, sugar → simple syrup, mint → muddled mint, eggs → egg white/yolk, etc. Currently the engine matches strictly by keyword, so having "limes" in produce does NOT satisfy a recipe calling for "lime juice." Needs a derivation map (base → set of derivable products) and a lookup-expansion pass in `recommender-engine.js` before matching. Target Phase 5+ or later — discuss design (static map vs. AI-assisted inference, user-overridable substitutions, transitive derivations) before implementing. (Captured 2026-05-14 during Phase 4 discussion)
-- **Library tab** — A new top-level view (`#library`) for links, references, saved articles, technique videos, and other curated/saved items that don't fit Recipes, Inventory, or Classroom. Acts as the user's bookmarks / curation surface. Schema and view scope TBD — could include external URLs, internal recipe references, embedded notes. Discuss whether this overlaps with Classroom (Phase 5) or replaces it before scoping. (Captured 2026-05-14)
-- **AI-assisted JSON error correction** — When a save or import fails due to a malformed or conflicting JSON file, the app should offer to send the broken data to the Anthropic API for automated repair suggestions. Claude diagnoses the issue (corrupt field, schema mismatch, SHA conflict, etc.), proposes a corrected version, presents a diff preview to the user, and only writes to GitHub after explicit confirmation. Requires Phase 5 Claude API integration (`bb_anthropic_key` in localStorage). Design questions for discuss-phase: which error types trigger the offer (parse errors, schema validation failures, SHA conflicts, import mismatches); whether the AI sees the full file or only the error context; how the diff preview is rendered. (Captured 2026-05-14)
-- **"Add to Favorites" / "Add to Wishlist" buttons on Recommender cards** — Each recipe card in the Recommender (buildable, one-away, two-away sections) should have two quick-action buttons that copy the recipe into the user's Recipes → Favorites tab or Recipes → Wishlist tab, so the user can find it again later from the Recipes view. Currently a recommender card is read-only — there is no path from "I saw this recommendation" → "save it for later." Small scope: append the recipe (or its id reference) to `recipes.favorites` / `recipes.wishlist` and call `State.save('recipes')`. Could be folded into Phase 4 if scope allows, otherwise Phase 5. (Captured 2026-05-14)
-- **Rich profile fields + equipment consolidation + numeric axis values** — Three related items to address together in Phase 5+ (captured 2026-05-14): (1) Surface rich `bar-owner-profile.json` fields in onboarding and Profile tab UI: `background.drinking_frequency`, `background.household_context`, `background.vocabulary_preference`, and `archetypes` array (`{name, description}` objects); (2) Consolidate equipment into `inventory.json` as the sole source of truth — remove from `bar-owner-profile.json` and `barkeeper.json`, update onboarding writes, update `normalize.js` to strip on load; (3) Replace string axis labels ("Lean A", "Strong A", etc.) in `bar-owner-profile.json` with `0.0–1.0` float values matching slider position — remove label headings from Profile tab UI, show numeric slider bars only. Migrate legacy strings in `normalize.js`.
-
----
-
 ## Dependencies
 
 ```
@@ -250,11 +307,26 @@ Phase 1 — no dependencies (standalone agent files)
 Phase 2 — no hard dependencies (web UI; builds on existing app/)
 Phase 3 — recommends Phase 2 (Settings page needed for export/import entry point)
 Phase 4 — recommends Phase 2 (inventory view refactor; recommender view exists)
-Phase 5 — recommends Phase 2 (Settings page needed for API key storage)
-Phase 6 — depends on Phases 3 + 4 being stable (data model must be settled before migration)
-Phase 7 — depends on Phase 6 (community requires multi-user accounts)
+Phase 5 — depends on Phases 1–4 being stable (data model tidy requires settled schema)
+Phase 6 — recommends Phase 5 (clean data model improves AI context quality; Settings page needed for API key)
+Phase 7 — recommends Phase 6 (AI import fallback requires claude-api.js; MD export format should be stable before building importer)
+Phase 8 — depends on Phases 3–5 being stable (data model must be settled before Supabase migration)
+Phase 9 — depends on Phase 8 (community requires multi-user accounts)
 ```
 
 ---
+
+## Backlog / Future Enhancements
+
+Items still unscheduled — triage at next milestone boundary.
+
+- **AI-assisted onboarding** — With an API key present, onboarding steps could offer AI-generated suggestions based on partial answers ("based on your love of smoky spirits, here are common pairings to consider for your veto list"). Low-priority polish for Phase 6+.
+- **Recommender user-overridable substitution rules** — Allow users to define their own derivation/substitution rules (e.g. "I always have fresh citrus so treat limes as lime juice"). Extends Phase 5 static map + Phase 6 AI inference. Design TBD.
+- **Transitive derivations** — Multi-hop inference: lemons → lemon juice → sour mix; sugar + water → simple syrup. Extend Phase 5/6 derivation map. Design: static DAG vs. AI-inferred graph.
+- **Recommender card detail expansion** — Click a card in the recommender to expand full recipe inline (ingredients, method, glassware) without navigating away. Phase 5 or 6 quality-of-life.
+- **Ingredient hierarchy UX** — Show the user which ingredients were matched via derivation (e.g. "✓ lime juice (from fresh limes)") so they understand why a recipe is included.
+
+---
+
 *Roadmap created: 2026-05-04*
-*Source: to-do.md v0.7 + codebase map*
+*Restructured: 2026-05-18 — Phases 5–9 reorganized; Phases 5 (Polish), 7 (Portability) added; backlog items triaged into phases; Library and Classroom clarified as distinct views; import/export decisions locked*
