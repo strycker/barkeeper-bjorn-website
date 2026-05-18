@@ -1,46 +1,56 @@
 {
-  "last_updated": "2026-05-15",
+  "last_updated": "2026-05-18",
   "base_spirits": {
     "whiskey": [
       {
-        "style": "Bourbon",
+        "style": "Whiskey",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:15:09.649Z",
-        "type": "",
+        "updated_at": "2026-05-18T19:23:35.808Z",
+        "type": "Bourbon",
+        "brand": "",
+        "tier": "",
+        "best_for": "",
+        "notes": "",
+        "nationality": ""
+      },
+      {
+        "style": "Whiskey",
+        "created_at": "2026-05-15T20:13:12.041Z",
+        "updated_at": "2026-05-18T19:23:14.841Z",
+        "nationality": "",
+        "type": "Japanese Whisky",
         "brand": "",
         "tier": "",
         "best_for": "",
         "notes": ""
       },
       {
-        "style": "Whisky",
-        "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
-      },
-      {
         "style": "Whiskey",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-15T20:13:12.041Z",
+        "nationality": ""
       },
       {
         "style": "Irish",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:58.148Z",
+        "updated_at": "2026-05-18T19:25:17.724Z",
         "type": "Irish Whiskey",
         "brand": "Jameson",
         "tier": "well",
         "best_for": "",
-        "notes": ""
+        "notes": "",
+        "nationality": "Ireland"
       },
       {
-        "style": "Japanese Whisky",
+        "style": "Whiskey",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:32.284Z",
+        "updated_at": "2026-05-18T19:22:51.145Z",
         "type": "Japanese Whisky",
         "brand": "",
         "tier": "well",
         "best_for": "",
-        "notes": ""
+        "notes": "",
+        "nationality": ""
       }
     ],
     "brandy": [
@@ -48,33 +58,48 @@
         "tier": "",
         "style": "Cognac",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-15T20:13:12.041Z",
+        "nationality": ""
       }
     ],
     "rum": [
       {
         "style": "White Jamaican Rum",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-18T19:25:27.090Z",
+        "nationality": "Jamaica",
+        "type": "",
+        "brand": "",
+        "tier": "",
+        "best_for": "",
+        "notes": ""
       },
       {
         "style": "Dark Jamaican Rum",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-18T19:25:40.524Z",
+        "nationality": "Jamaica",
+        "type": "",
+        "brand": "",
+        "tier": "",
+        "best_for": "",
+        "notes": ""
       }
     ],
     "agave": [
       {
         "style": "mezcal",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-15T20:13:12.041Z",
+        "nationality": ""
       }
     ],
     "white_spirits": [
       {
         "style": "Gin",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-15T20:13:12.041Z",
+        "nationality": ""
       }
     ],
     "other": []
@@ -86,17 +111,20 @@
     {
       "style": "Cocchi",
       "created_at": "2026-05-15T20:13:12.041Z",
-      "updated_at": "2026-05-15T20:13:12.041Z"
+      "updated_at": "2026-05-15T20:13:12.041Z",
+      "nationality": ""
     },
     {
       "style": "Sweet Vermouth",
       "created_at": "2026-05-15T20:13:12.041Z",
-      "updated_at": "2026-05-15T20:13:12.041Z"
+      "updated_at": "2026-05-15T20:13:12.041Z",
+      "nationality": ""
     },
     {
       "style": "Lillet",
       "created_at": "2026-05-15T20:13:12.041Z",
-      "updated_at": "2026-05-15T20:13:12.041Z"
+      "updated_at": "2026-05-15T20:13:12.041Z",
+      "nationality": ""
     }
   ],
   "liqueurs_and_cordials": {
@@ -104,28 +132,32 @@
       {
         "style": "Cointreau",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-15T20:13:12.041Z",
+        "nationality": ""
       }
     ],
     "nut_coffee": [
       {
         "style": "Coffee Liqueur",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-15T20:13:12.041Z",
+        "nationality": ""
       }
     ],
     "herbal": [
       {
         "style": "Campari",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-15T20:13:12.041Z",
+        "nationality": ""
       }
     ],
     "specialty_regional": [
       {
         "style": "Aperol",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-15T20:13:12.041Z",
+        "nationality": ""
       }
     ]
   },
@@ -134,7 +166,8 @@
       {
         "style": "Angostura",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-15T20:13:12.041Z",
+        "nationality": ""
       }
     ],
     "aromatic_smoke": [],
@@ -143,7 +176,8 @@
       {
         "style": "Orange Bitters",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-15T20:13:12.041Z"
+        "updated_at": "2026-05-15T20:13:12.041Z",
+        "nationality": ""
       }
     ],
     "other": []
@@ -152,7 +186,8 @@
     {
       "style": "Cardamom Syrup",
       "created_at": "2026-05-15T20:13:12.041Z",
-      "updated_at": "2026-05-15T20:13:12.041Z"
+      "updated_at": "2026-05-15T20:13:12.041Z",
+      "nationality": ""
     }
   ],
   "mixers": [
@@ -192,7 +227,8 @@
     {
       "style": "Seedlip",
       "created_at": "2026-05-15T20:13:12.041Z",
-      "updated_at": "2026-05-15T20:13:12.041Z"
+      "updated_at": "2026-05-15T20:13:12.041Z",
+      "nationality": ""
     }
   ],
   "specialty_ingredients": [],
