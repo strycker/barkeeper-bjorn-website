@@ -923,6 +923,72 @@ a:hover { color: var(--amber); }
   }
 }
 
+/* ── Phase 5: Quick-Add Bar ──────────────────────────────────────────── */
+
+.inv-quick-add {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+}
+
+.inv-quick-add-input {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 7px 10px;
+  font-size: 0.9rem;
+}
+
+.inv-quick-add-input:focus {
+  outline: none;
+  border-color: var(--amber);
+}
+
+.inv-quick-add-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.inv-quick-add-picker {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border2);
+  width: 100%;
+}
+
+.inv-quick-add-picker label {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.inv-quick-add-picker select {
+  flex: 1;
+  min-width: 160px;
+}
+
+@media (max-width: 480px) {
+  .inv-quick-add {
+    flex-wrap: wrap;
+  }
+  .inv-quick-add-hint {
+    display: none;
+  }
+}
+
 /* ── Phase 3: Import Drop Zone ────────────────────────────────────────── */
 
 .import-drop-zone {

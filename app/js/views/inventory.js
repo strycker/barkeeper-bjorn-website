@@ -85,6 +85,43 @@ const InventoryView = (() => {
   // Strainer options for Equipment tab (D-11)
   const STRAINER_OPTIONS = ['Hawthorne', 'Julep', 'Fine Mesh', 'Conical'];
 
+  // Keyword → section key mapping for the quick-add parser (most-specific first)
+  const QUICK_ADD_RULES = [
+    { key: 'bitters.anchors',          words: ['angostura','peychaud'] },
+    { key: 'bitters.aromatic_smoke',   words: ['bittermens','woodford bitters','smoke bitters'] },
+    { key: 'bitters.nut_earth',        words: ['mole bitters','walnut bitters','black walnut bitters'] },
+    { key: 'bitters.fruit_botanical',  words: ['orange bitters','lemon bitters','celery bitters','grapefruit bitters','cherry bitters'] },
+    { key: 'bitters.other',            words: ['bitters'] },
+    { key: 'syrups',                   words: ['syrup','orgeat','shrub','honey mix','ginger mix'] },
+    { key: 'fortified_wines_and_aperitif_wines', words: ['vermouth','sherry','lillet','cocchi','port','madeira','marsala','dubonnet','pineau'] },
+    { key: 'liqueurs_and_cordials.herbal', words: ['amaro','campari','aperol','suze','fernet','chartreuse','benedictine','drambuie','strega','galliano','jägermeister','jagermeister','averna','montenegro','ramazzotti','nonino','braulio','sfumato','meletti','cynar','absinthe'] },
+    { key: 'liqueurs_and_cordials.nut_coffee', words: ['kahlúa','kahlua','frangelico','baileys','amaretto','nocello','tia maria','disaronno','coffee liqueur'] },
+    { key: 'liqueurs_and_cordials.fruit_forward', words: ['triple sec','curaçao','curacao','cointreau','chambord','st-germain','st germain','elderflower','limoncello','midori','maraschino','luxardo','crème de','creme de','cassis','chambord'] },
+    { key: 'liqueurs_and_cordials.specialty_regional', words: ['velvet falernum','allspice dram','pimento dram','licor 43','glayva','pastis','pernod','sambuca','ouzo','arak','falernum'] },
+    { key: 'non_alcoholic_spirits',    words: ['seedlip','lyre\'s','lyres','ritual zero','monday whiskey','spiritless','aplós','aplos'] },
+    { key: 'base_spirits.agave',       words: ['tequila','mezcal','blanco','reposado','añejo','anejo','raicilla','bacanora','sotol'] },
+    { key: 'base_spirits.white_spirits', words: ['gin','vodka','aquavit','akvavit','genever'] },
+    { key: 'base_spirits.rum',         words: ['rum','cachaça','cachaca','agricole','rhum','clairin'] },
+    { key: 'base_spirits.brandy',      words: ['cognac','armagnac','calvados','pisco','brandy','grappa','marc','eau de vie'] },
+    { key: 'base_spirits.whiskey',     words: ['bourbon','rye','scotch','whiskey','whisky','irish whiskey','irish whisky','tennessee','single malt','blended malt'] },
+    { key: 'base_spirits.other',       words: ['sake','shochu','soju','baijiu'] },
+  ];
+
+  function parseBottleSection(name) {
+    const lower = name.toLowerCase();
+    for (const { key, words } of QUICK_ADD_RULES) {
+      for (const w of words) {
+        if (lower.includes(w)) return key;
+      }
+    }
+    return null;
+  }
+
+  function sectionLabelByKey(key) {
+    const found = BOTTLE_SECTIONS.find(s => s.key === key);
+    return found ? found.label : key;
+  }
+
   let _dirty = false;
 
   // One-at-a-time inline edit state
@@ -388,6 +425,94 @@ const InventoryView = (() => {
     });
   }
 
+  function renderQuickAddBar(parentEl, inv) {
+    const bar = document.createElement('div');
+    bar.className = 'inv-quick-add';
+    bar.innerHTML = `
+      <input type="text" class="inv-quick-add-input" placeholder="Quick add a bottle — e.g. Bulleit Bourbon" aria-label="Quick add a bottle">
+      <button class="btn btn-primary btn-sm inv-quick-add-btn">Add</button>
+      <span class="inv-quick-add-hint">Type a bottle, press Enter</span>`;
+
+    const input   = bar.querySelector('.inv-quick-add-input');
+    const addBtn  = bar.querySelector('.inv-quick-add-btn');
+
+    function attemptAdd() {
+      const name = input.value.trim();
+      if (!name) return;
+
+      const sectionKey = parseBottleSection(name);
+
+      if (sectionKey) {
+        commitQuickAdd(name, sectionKey, inv);
+        input.value = '';
+        removePicker();
+      } else {
+        showPicker(name);
+      }
+    }
+
+    function showPicker(name) {
+      removePicker();
+      const picker = document.createElement('div');
+      picker.className = 'inv-quick-add-picker';
+      picker.innerHTML = `
+        <label for="qab-section-select">Add to:</label>
+        <select id="qab-section-select">
+          ${BOTTLE_SECTIONS.map(s => `<option value="${Utils.escapeHtml(s.key)}">${Utils.escapeHtml(s.label)}</option>`).join('')}
+        </select>
+        <button class="btn btn-primary btn-sm" id="qab-confirm-btn">Confirm</button>
+        <button class="btn btn-ghost btn-sm" id="qab-cancel-btn">Cancel</button>`;
+      bar.appendChild(picker);
+
+      picker.querySelector('#qab-confirm-btn').addEventListener('click', () => {
+        const sel = picker.querySelector('#qab-section-select').value;
+        commitQuickAdd(name, sel, inv);
+        input.value = '';
+        removePicker();
+      });
+      picker.querySelector('#qab-cancel-btn').addEventListener('click', () => {
+        removePicker();
+        input.focus();
+      });
+      picker.querySelector('#qab-section-select').focus();
+    }
+
+    function removePicker() {
+      const existing = bar.querySelector('.inv-quick-add-picker');
+      if (existing) existing.remove();
+    }
+
+    function commitQuickAdd(name, sectionKey, inv) {
+      const now = new Date().toISOString();
+      const newEntry = { style: name, type: '', brand: '', tier: '', best_for: '', notes: '', created_at: now, updated_at: now };
+      State.patch('inventory', i2 => {
+        const arr2 = getNestedArr(i2, sectionKey);
+        arr2.push(newEntry);
+        setNestedArr(i2, sectionKey, arr2);
+      });
+      markDirty();
+      // Switch to Spirits tab and re-render if needed
+      const spiritsTab = document.querySelector('.tab[data-tab="tab-spirits"]');
+      if (spiritsTab && !spiritsTab.classList.contains('active')) {
+        spiritsTab.click();
+      } else {
+        // Tab already active — refresh the section's chip grid
+        const safeId = sectionKey.replace(/\./g, '-');
+        const grid = document.getElementById(`bottles-${safeId}`);
+        if (grid) renderBottleChips(grid, getNestedArr(State.get('inventory'), sectionKey), sectionKey, State.get('inventory'));
+      }
+      Utils.showToast(`Added "${name}" to ${sectionLabelByKey(sectionKey)}`);
+    }
+
+    addBtn.addEventListener('click', attemptAdd);
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') attemptAdd();
+      if (e.key === 'Escape') removePicker();
+    });
+
+    parentEl.appendChild(bar);
+  }
+
   function markDirty() {
     _dirty = true;
     const saveBar = document.getElementById('inv-save-bar');
@@ -488,6 +613,9 @@ const InventoryView = (() => {
       if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
       categorySelect.value = '';
     });
+
+    // Quick-add bar (Phase 5)
+    renderQuickAddBar(sectionsEl, inv);
 
     // Tabs (Phase 4: added Equipment tab)
     const tabsEl = document.createElement('div');
