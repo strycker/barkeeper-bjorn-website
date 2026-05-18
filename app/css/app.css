@@ -652,6 +652,7 @@ a:hover { color: var(--amber); }
 .rec-card {
   background: var(--bg2); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 16px 18px;
+  position: relative;
 }
 .rec-card--oneaway { border-color: var(--amber-dim); }
 
@@ -1343,3 +1344,36 @@ a:hover { color: var(--amber); }
 .rec-twoaway-link:hover {
   color: var(--text);
 }
+
+/* === Phase 5: Recommender UX depth (REC-05–09) === */
+
+/* Unconstrained scope button (REC-06, D-08) — dashed border signals inventory gating is off */
+.rec-scope-btn--unconstrained { border-style: dashed; }
+
+/* Veto chips — bypassed veto shows strikethrough + muted opacity (D-04) */
+.rec-veto-chip.bypassed { text-decoration: line-through; opacity: 0.5; }
+
+/* Favorites / Wishlist quick-action buttons on recipe cards (REC-08, D-09) */
+.rec-card-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+  z-index: 2;
+}
+.rec-fav-btn, .rec-wish-btn {
+  background: transparent;
+  border: 1px solid var(--amber-dim);
+  color: var(--amber);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.rec-fav-btn:hover, .rec-wish-btn:hover { background: var(--amber-dim); }
