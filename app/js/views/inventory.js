@@ -85,44 +85,64 @@ const InventoryView = (() => {
   // Strainer options for Equipment tab (D-11)
   const STRAINER_OPTIONS = ['Hawthorne', 'Julep', 'Fine Mesh', 'Conical'];
 
-  // Canonical category list — drives the Category dropdown in every bottle edit form.
+  // Canonical category list — plural group names drive the Category dropdown.
   // Must stay in sync with SECTION_STYLE defaults and parseBottleEntry() logic.
   const CATEGORIES = [
-    'Bourbon', 'Rye Whiskey', 'Scotch', 'Irish Whiskey', 'Japanese Whisky',
-    'Tennessee Whiskey', 'Whiskey',
-    'Tequila', 'Mezcal',
-    'Gin', 'Vodka', 'Aquavit', 'Genever',
-    'Rum', 'Cachaça',
-    'Cognac', 'Armagnac', 'Calvados', 'Pisco', 'Brandy',
-    'Vermouth', 'Fortified Wine', 'Amaro',
-    'Liqueur',
+    'Whiskeys & Brown Spirits',
+    'Agave Spirits',
+    'Gins / Vodkas / White Spirits',
+    'Rums & Cane Spirits',
+    'Brandies & Cognacs',
+    'Vermouths & Fortified Wines',
+    'Liqueurs & Cordials',
     'Bitters',
-    'Syrup',
-    'Mixer',
-    'Non-Alcoholic Spirit',
+    'Syrups',
+    'Non-Alcoholic Spirits',
     'Other / Misc.',
   ];
 
-  // Default category per inventory section key (all values must be in CATEGORIES)
+  // Default category (style) per section key — all values must be in CATEGORIES
   const SECTION_STYLE = {
-    'base_spirits.whiskey':                   'Whiskey',
-    'base_spirits.agave':                     'Tequila',
-    'base_spirits.white_spirits':             'Gin',
-    'base_spirits.rum':                       'Rum',
-    'base_spirits.brandy':                    'Brandy',
+    'base_spirits.whiskey':                   'Whiskeys & Brown Spirits',
+    'base_spirits.agave':                     'Agave Spirits',
+    'base_spirits.white_spirits':             'Gins / Vodkas / White Spirits',
+    'base_spirits.rum':                       'Rums & Cane Spirits',
+    'base_spirits.brandy':                    'Brandies & Cognacs',
     'base_spirits.other':                     'Other / Misc.',
-    'fortified_wines_and_aperitif_wines':     'Fortified Wine',
-    'liqueurs_and_cordials.herbal':           'Liqueur',
-    'liqueurs_and_cordials.nut_coffee':       'Liqueur',
-    'liqueurs_and_cordials.fruit_forward':    'Liqueur',
-    'liqueurs_and_cordials.specialty_regional': 'Liqueur',
-    'syrups':                                 'Syrup',
+    'fortified_wines_and_aperitif_wines':     'Vermouths & Fortified Wines',
+    'liqueurs_and_cordials.herbal':           'Liqueurs & Cordials',
+    'liqueurs_and_cordials.nut_coffee':       'Liqueurs & Cordials',
+    'liqueurs_and_cordials.fruit_forward':    'Liqueurs & Cordials',
+    'liqueurs_and_cordials.specialty_regional': 'Liqueurs & Cordials',
+    'syrups':                                 'Syrups',
     'bitters.anchors':                        'Bitters',
     'bitters.aromatic_smoke':                 'Bitters',
     'bitters.nut_earth':                      'Bitters',
     'bitters.fruit_botanical':                'Bitters',
     'bitters.other':                          'Bitters',
-    'non_alcoholic_spirits':                  'Non-Alcoholic Spirit',
+    'non_alcoholic_spirits':                  'Non-Alcoholic Spirits',
+  };
+
+  // Sensible short type default per section, used when no keyword match is found
+  const SECTION_TYPE_DEFAULT = {
+    'base_spirits.whiskey':                   'Whiskey',
+    'base_spirits.agave':                     'Agave Spirit',
+    'base_spirits.white_spirits':             'White Spirit',
+    'base_spirits.rum':                       'Rum',
+    'base_spirits.brandy':                    'Brandy',
+    'base_spirits.other':                     'Spirit',
+    'fortified_wines_and_aperitif_wines':     'Fortified Wine',
+    'liqueurs_and_cordials.herbal':           'Herbal Liqueur',
+    'liqueurs_and_cordials.nut_coffee':       'Nut / Coffee Liqueur',
+    'liqueurs_and_cordials.fruit_forward':    'Fruit Liqueur',
+    'liqueurs_and_cordials.specialty_regional': 'Specialty Liqueur',
+    'syrups':                                 'Syrup',
+    'bitters.anchors':                        'Aromatic Bitters',
+    'bitters.aromatic_smoke':                 'Smoky Bitters',
+    'bitters.nut_earth':                      'Nut / Earth Bitters',
+    'bitters.fruit_botanical':                'Fruit Bitters',
+    'bitters.other':                          'Bitters',
+    'non_alcoholic_spirits':                  'Non-Alcoholic',
   };
 
   // Type keywords — longest first for greedy matching; each entry: [keyword, displayType]
@@ -180,21 +200,21 @@ const InventoryView = (() => {
     ['bulleit',          { brand: 'Bulleit',          typeHint: 'Bourbon' }],
     ['weller',           { brand: 'W.L. Weller',      typeHint: 'Bourbon' }],
     // Rye
-    ['whistlepig',       { brand: 'WhistlePig',       typeHint: 'Rye' }],
-    ['whistle pig',      { brand: 'WhistlePig',       typeHint: 'Rye' }],
-    ['rittenhouse',      { brand: 'Rittenhouse',      typeHint: 'Rye' }],
-    ['old overholt',     { brand: 'Old Overholt',     typeHint: 'Rye' }],
-    ["michter's",        { brand: "Michter's",        typeHint: 'Rye' }],
-    ['michters',         { brand: "Michter's",        typeHint: 'Rye' }],
-    ['redemption',       { brand: 'Redemption',       typeHint: 'Rye' }],
-    ['sazerac',          { brand: 'Sazerac',          typeHint: 'Rye' }],
+    ['whistlepig',       { brand: 'WhistlePig',       typeHint: 'Rye Whiskey' }],
+    ['whistle pig',      { brand: 'WhistlePig',       typeHint: 'Rye Whiskey' }],
+    ['rittenhouse',      { brand: 'Rittenhouse',      typeHint: 'Rye Whiskey' }],
+    ['old overholt',     { brand: 'Old Overholt',     typeHint: 'Rye Whiskey' }],
+    ["michter's",        { brand: "Michter's",        typeHint: 'Rye Whiskey' }],
+    ['michters',         { brand: "Michter's",        typeHint: 'Rye Whiskey' }],
+    ['redemption',       { brand: 'Redemption',       typeHint: 'Rye Whiskey' }],
+    ['sazerac',          { brand: 'Sazerac',          typeHint: 'Rye Whiskey' }],
     // Tennessee
-    ["jack daniel's",    { brand: "Jack Daniel's",    typeHint: 'Tennessee' }],
-    ['jack daniels',     { brand: "Jack Daniel's",    typeHint: 'Tennessee' }],
-    ['george dickel',    { brand: 'George Dickel',    typeHint: 'Tennessee' }],
+    ["jack daniel's",    { brand: "Jack Daniel's",    typeHint: 'Tennessee Whiskey' }],
+    ['jack daniels',     { brand: "Jack Daniel's",    typeHint: 'Tennessee Whiskey' }],
+    ['george dickel',    { brand: 'George Dickel',    typeHint: 'Tennessee Whiskey' }],
     // Scotch
-    ['monkey shoulder',  { brand: 'Monkey Shoulder',  typeHint: 'Blended' }],
-    ['johnnie walker',   { brand: 'Johnnie Walker',   typeHint: 'Blended' }],
+    ['monkey shoulder',  { brand: 'Monkey Shoulder',  typeHint: 'Blended Scotch' }],
+    ['johnnie walker',   { brand: 'Johnnie Walker',   typeHint: 'Blended Scotch' }],
     ['highland park',    { brand: 'Highland Park',    typeHint: 'Scotch' }],
     ['the macallan',     { brand: 'The Macallan',     typeHint: 'Scotch' }],
     ['the glenlivet',    { brand: 'The Glenlivet',    typeHint: 'Scotch' }],
@@ -215,29 +235,29 @@ const InventoryView = (() => {
     ['ardbeg',           { brand: 'Ardbeg',           typeHint: 'Scotch' }],
     ['macallan',         { brand: 'The Macallan',     typeHint: 'Scotch' }],
     ['dalmore',          { brand: 'The Dalmore',      typeHint: 'Scotch' }],
-    ["dewar's",          { brand: "Dewar's",          typeHint: 'Blended' }],
-    ['dewars',           { brand: "Dewar's",          typeHint: 'Blended' }],
-    ['chivas',           { brand: 'Chivas Regal',     typeHint: 'Blended' }],
+    ["dewar's",          { brand: "Dewar's",          typeHint: 'Blended Scotch' }],
+    ['dewars',           { brand: "Dewar's",          typeHint: 'Blended Scotch' }],
+    ['chivas',           { brand: 'Chivas Regal',     typeHint: 'Blended Scotch' }],
     ['oban',             { brand: 'Oban',             typeHint: 'Scotch' }],
     // Irish
-    ["writer's tears",   { brand: "Writer's Tears",   typeHint: 'Irish' }],
-    ['tullamore',        { brand: 'Tullamore D.E.W.', typeHint: 'Irish' }],
-    ['green spot',       { brand: 'Green Spot',       typeHint: 'Irish' }],
-    ['yellow spot',      { brand: 'Yellow Spot',      typeHint: 'Irish' }],
-    ['redbreast',        { brand: 'Redbreast',        typeHint: 'Irish' }],
-    ['bushmills',        { brand: 'Bushmills',        typeHint: 'Irish' }],
-    ['jameson',          { brand: 'Jameson',          typeHint: 'Irish' }],
-    ['teeling',          { brand: 'Teeling',          typeHint: 'Irish' }],
-    ['powers',           { brand: 'Powers',           typeHint: 'Irish' }],
+    ["writer's tears",   { brand: "Writer's Tears",   typeHint: 'Irish Whiskey' }],
+    ['tullamore',        { brand: 'Tullamore D.E.W.', typeHint: 'Irish Whiskey' }],
+    ['green spot',       { brand: 'Green Spot',       typeHint: 'Irish Whiskey' }],
+    ['yellow spot',      { brand: 'Yellow Spot',      typeHint: 'Irish Whiskey' }],
+    ['redbreast',        { brand: 'Redbreast',        typeHint: 'Irish Whiskey' }],
+    ['bushmills',        { brand: 'Bushmills',        typeHint: 'Irish Whiskey' }],
+    ['jameson',          { brand: 'Jameson',          typeHint: 'Irish Whiskey' }],
+    ['teeling',          { brand: 'Teeling',          typeHint: 'Irish Whiskey' }],
+    ['powers',           { brand: 'Powers',           typeHint: 'Irish Whiskey' }],
     // Japanese
-    ['suntory toki',     { brand: 'Suntory Toki',     typeHint: 'Japanese' }],
-    ['yamazaki',         { brand: 'Yamazaki',         typeHint: 'Japanese' }],
-    ['hakushū',          { brand: 'Hakushū',          typeHint: 'Japanese' }],
-    ['hakushu',          { brand: 'Hakushū',          typeHint: 'Japanese' }],
-    ['hibiki',           { brand: 'Hibiki',           typeHint: 'Japanese' }],
-    ['nikka',            { brand: 'Nikka',            typeHint: 'Japanese' }],
-    ['toki',             { brand: 'Suntory Toki',     typeHint: 'Japanese' }],
-    ['iwai',             { brand: 'Iwai',             typeHint: 'Japanese' }],
+    ['suntory toki',     { brand: 'Suntory Toki',     typeHint: 'Japanese Whisky' }],
+    ['yamazaki',         { brand: 'Yamazaki',         typeHint: 'Japanese Whisky' }],
+    ['hakushū',          { brand: 'Hakushū',          typeHint: 'Japanese Whisky' }],
+    ['hakushu',          { brand: 'Hakushū',          typeHint: 'Japanese Whisky' }],
+    ['hibiki',           { brand: 'Hibiki',           typeHint: 'Japanese Whisky' }],
+    ['nikka',            { brand: 'Nikka',            typeHint: 'Japanese Whisky' }],
+    ['toki',             { brand: 'Suntory Toki',     typeHint: 'Japanese Whisky' }],
+    ['iwai',             { brand: 'Iwai',             typeHint: 'Japanese Whisky' }],
     // Agave / Tequila
     ['don julio',        { brand: 'Don Julio',        typeHint: 'Tequila' }],
     ['clase azul',       { brand: 'Clase Azul',       typeHint: 'Tequila' }],
@@ -351,26 +371,11 @@ const InventoryView = (() => {
       }
     }
 
-    // Promote detected type to canonical category (style) for relevant sections
-    if (sectionKey === 'base_spirits.whiskey') {
-      // Specific whiskey types that are their own canonical categories
-      const WHISKEY_CATS = new Set(['Bourbon','Rye Whiskey','Scotch','Irish Whiskey','Japanese Whisky','Tennessee Whiskey']);
-      if (WHISKEY_CATS.has(type)) style = type;
-    } else if (sectionKey === 'base_spirits.agave') {
-      style = ['Mezcal','Espadín','Tobalá','Cuixe','Clairin','Raicilla'].includes(type) ? 'Mezcal' : 'Tequila';
-    } else if (sectionKey === 'base_spirits.white_spirits') {
-      // Any type that's a canonical category wins; else default Gin
-      style = CATEGORIES.includes(type) ? type : (type || 'Gin');
-    } else if (sectionKey === 'base_spirits.brandy') {
-      // Cognac/Armagnac/Calvados/Pisco are their own canonical categories
-      style = CATEGORIES.includes(type) ? type : 'Brandy';
-    }
+    // style is always the plural group name from SECTION_STYLE; type carries the specific spirit
+    if (!style) style = 'Other / Misc.';
 
-    // Last resort: no match at all → use raw name as style
-    if (!style) style = rawName;
-
-    // Ensure type is never empty: default to style when undetected
-    if (!type) type = style;
+    // Ensure type is never empty: use section-specific short default rather than group name
+    if (!type) type = SECTION_TYPE_DEFAULT[sectionKey] || rawName;
 
     return { style, type, brand, tier: '', best_for: '', notes: '', created_at: now, updated_at: now };
   }
@@ -660,8 +665,8 @@ const InventoryView = (() => {
           const f = el.dataset.field;
           e2[f] = (el.value || '').trim();
         });
-        // Ensure type is never empty: fall back to category
-        if (!e2.type) e2.type = e2.style;
+        // Ensure type is never empty: use section short default, not the verbose group name
+        if (!e2.type) e2.type = SECTION_TYPE_DEFAULT[sectionKey] || e2.style;
         // Persist custom type if novel
         if (e2.type) saveCustomType(e2.type);
         if (!e2.created_at) e2.created_at = new Date().toISOString();
