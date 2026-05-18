@@ -34,17 +34,15 @@ const InventoryView = (() => {
     { key: 'garnish_and_service',    label: 'Garnish & Service',   hint: 'Cherries, picks, glassware notes…' },
   ];
 
-  // Phase 4: 6-tier system (replaces old 4-tier)
-  const TIERS = ['well', 'standard', 'premium', 'craft', 'boutique', 'rare/exceptional'];
-  const TIER_LABEL = {
-    '': 'Unset',
-    'well': 'Well',
-    'standard': 'Standard',
-    'premium': 'Premium',
-    'craft': 'Craft',
-    'boutique': 'Boutique',
-    'rare/exceptional': 'Rare/Exceptional',
-  };
+  // Lookup tables loaded from app/config/*.json — edit those files, not this code
+  const CATEGORIES           = Config.categories();
+  const SECTION_STYLE        = Config.sectionStyle();
+  const SECTION_TYPE_DEFAULT = Config.sectionTypeDefault();
+  const QUICK_ADD_RULES      = Config.quickAddRules();
+  const TYPE_KEYWORDS        = Config.typeKeywords();
+  const BRAND_CATALOG        = Config.brandCatalog();
+  const TIERS                = Config.tiers();
+  const TIER_LABEL           = Config.tierLabels();
   const TIER_COLORS = {
     '': 'tier-unset',
     'well': 'tier-well',
@@ -55,17 +53,8 @@ const InventoryView = (() => {
     'rare/exceptional': 'tier-rare-exceptional',
   };
 
-  // Type options: 35 fixed entries + user-added custom types from localStorage
-  const TYPE_OPTIONS = [
-    'Bourbon','Rye','Scotch','Irish Whiskey','Japanese Whisky','Canadian Whisky',
-    'Single Malt Scotch','Blended Scotch','Tennessee Whiskey',
-    'Cognac','Armagnac','Calvados',
-    'Rum','Dark Rum','Light Rum','Aged Rum','Rhum Agricole',
-    'Mezcal','Tequila Blanco','Tequila Reposado','Tequila Añejo',
-    'Gin','London Dry Gin','Old Tom Gin',
-    'Vodka','Pisco','Sake','Shochu','Absinthe',
-    'Triple Sec','Curaçao','Vermouth','Amaro','Aperol','Campari'
-  ];
+  // Type options for datalist autocomplete (base list from config, extended by custom localStorage entries)
+  const TYPE_OPTIONS = Config.typeOptions();
 
   function loadCustomTypes() {
     try { return JSON.parse(localStorage.getItem('bb_custom_types') || '[]'); }
@@ -82,269 +71,9 @@ const InventoryView = (() => {
 
   function allTypeOptions() { return [...TYPE_OPTIONS, ...loadCustomTypes()]; }
 
-  // Strainer options for Equipment tab (D-11)
-  const STRAINER_OPTIONS = ['Hawthorne', 'Julep', 'Fine Mesh', 'Conical'];
+  const STRAINER_OPTIONS = Config.strainerOptions();
 
-  // Canonical category list — plural group names drive the Category dropdown.
-  // Must stay in sync with SECTION_STYLE defaults and parseBottleEntry() logic.
-  const CATEGORIES = [
-    'Whiskeys & Brown Spirits',
-    'Agave Spirits',
-    'Gins / Vodkas / White Spirits',
-    'Rums & Cane Spirits',
-    'Brandies & Cognacs',
-    'Vermouths & Fortified Wines',
-    'Liqueurs & Cordials',
-    'Bitters',
-    'Syrups',
-    'Non-Alcoholic Spirits',
-    'Other / Misc.',
-  ];
 
-  // Default category (style) per section key — all values must be in CATEGORIES
-  const SECTION_STYLE = {
-    'base_spirits.whiskey':                   'Whiskeys & Brown Spirits',
-    'base_spirits.agave':                     'Agave Spirits',
-    'base_spirits.white_spirits':             'Gins / Vodkas / White Spirits',
-    'base_spirits.rum':                       'Rums & Cane Spirits',
-    'base_spirits.brandy':                    'Brandies & Cognacs',
-    'base_spirits.other':                     'Other / Misc.',
-    'fortified_wines_and_aperitif_wines':     'Vermouths & Fortified Wines',
-    'liqueurs_and_cordials.herbal':           'Liqueurs & Cordials',
-    'liqueurs_and_cordials.nut_coffee':       'Liqueurs & Cordials',
-    'liqueurs_and_cordials.fruit_forward':    'Liqueurs & Cordials',
-    'liqueurs_and_cordials.specialty_regional': 'Liqueurs & Cordials',
-    'syrups':                                 'Syrups',
-    'bitters.anchors':                        'Bitters',
-    'bitters.aromatic_smoke':                 'Bitters',
-    'bitters.nut_earth':                      'Bitters',
-    'bitters.fruit_botanical':                'Bitters',
-    'bitters.other':                          'Bitters',
-    'non_alcoholic_spirits':                  'Non-Alcoholic Spirits',
-  };
-
-  // Sensible short type default per section, used when no keyword match is found
-  const SECTION_TYPE_DEFAULT = {
-    'base_spirits.whiskey':                   'Whiskey',
-    'base_spirits.agave':                     'Agave Spirit',
-    'base_spirits.white_spirits':             'White Spirit',
-    'base_spirits.rum':                       'Rum',
-    'base_spirits.brandy':                    'Brandy',
-    'base_spirits.other':                     'Spirit',
-    'fortified_wines_and_aperitif_wines':     'Fortified Wine',
-    'liqueurs_and_cordials.herbal':           'Herbal Liqueur',
-    'liqueurs_and_cordials.nut_coffee':       'Nut / Coffee Liqueur',
-    'liqueurs_and_cordials.fruit_forward':    'Fruit Liqueur',
-    'liqueurs_and_cordials.specialty_regional': 'Specialty Liqueur',
-    'syrups':                                 'Syrup',
-    'bitters.anchors':                        'Aromatic Bitters',
-    'bitters.aromatic_smoke':                 'Smoky Bitters',
-    'bitters.nut_earth':                      'Nut / Earth Bitters',
-    'bitters.fruit_botanical':                'Fruit Bitters',
-    'bitters.other':                          'Bitters',
-    'non_alcoholic_spirits':                  'Non-Alcoholic',
-  };
-
-  // Type keywords — longest first for greedy matching; each entry: [keyword, displayType]
-  const TYPE_KEYWORDS = [
-    ['single malt',  'Single Malt'],  ['blended malt',  'Blended Malt'],
-    ['extra añejo',  'Extra Añejo'],  ['irish whiskey', 'Irish Whiskey'],
-    ['irish whisky', 'Irish Whiskey'],['tennessee',     'Tennessee Whiskey'],
-    ['japanese',     'Japanese Whisky'], ['bourbon',   'Bourbon'],
-    ['rye whiskey',  'Rye Whiskey'],  ['rye',          'Rye Whiskey'],
-    ['scotch',       'Scotch'],
-    ['blended',      'Blended'],     ['espadin',       'Espadín'],
-    ['espadín',      'Espadín'],     ['tobalá',        'Tobalá'],
-    ['tobala',       'Tobalá'],      ['reposado',      'Reposado'],
-    ['añejo',        'Añejo'],       ['anejo',         'Añejo'],
-    ['blanco',       'Blanco'],      ['cristalino',    'Cristalino'],
-    ['mezcal',       'Mezcal'],      ['tequila',       'Tequila'],
-    ['aquavit',      'Aquavit'],     ['akvavit',       'Aquavit'],
-    ['genever',      'Genever'],     ['gin',           'Gin'],
-    ['vodka',        'Vodka'],       ['agricole',      'Agricole'],
-    ['rhum',         'Agricole'],    ['cachaça',       'Cachaça'],
-    ['cachaca',      'Cachaça'],     ['clairin',       'Clairin'],
-    ['overproof',    'Overproof'],   ['cognac',        'Cognac'],
-    ['armagnac',     'Armagnac'],    ['calvados',      'Calvados'],
-    ['pisco',        'Pisco'],       ['grappa',        'Grappa'],
-    ['sake',         'Sake'],        ['shochu',        'Shochu'],
-    ['soju',         'Soju'],        ['baijiu',        'Baijiu'],
-  ];
-
-  // Brand catalog — longest keyword first for greedy matching; each entry: [keyword, {brand, typeHint}]
-  // typeHint sets type when no TYPE_KEYWORDS match wins first
-  const BRAND_CATALOG = [
-    // Bourbon
-    ['woodford reserve', { brand: 'Woodford Reserve', typeHint: 'Bourbon' }],
-    ['buffalo trace',    { brand: 'Buffalo Trace',    typeHint: 'Bourbon' }],
-    ['knob creek',       { brand: 'Knob Creek',       typeHint: 'Bourbon' }],
-    ['four roses',       { brand: 'Four Roses',       typeHint: 'Bourbon' }],
-    ['wild turkey',      { brand: 'Wild Turkey',      typeHint: 'Bourbon' }],
-    ["angel's envy",     { brand: "Angel's Envy",     typeHint: 'Bourbon' }],
-    ['angels envy',      { brand: "Angel's Envy",     typeHint: 'Bourbon' }],
-    ['eagle rare',       { brand: 'Eagle Rare',       typeHint: 'Bourbon' }],
-    ["blanton's",        { brand: "Blanton's",        typeHint: 'Bourbon' }],
-    ['blantons',         { brand: "Blanton's",        typeHint: 'Bourbon' }],
-    ['w.l. weller',      { brand: 'W.L. Weller',      typeHint: 'Bourbon' }],
-    ['pappy van winkle', { brand: 'Pappy Van Winkle', typeHint: 'Bourbon' }],
-    ['elijah craig',     { brand: 'Elijah Craig',     typeHint: 'Bourbon' }],
-    ['evan williams',    { brand: 'Evan Williams',    typeHint: 'Bourbon' }],
-    ['old forester',     { brand: 'Old Forester',     typeHint: 'Bourbon' }],
-    ["heaven's door",    { brand: "Heaven's Door",    typeHint: 'Bourbon' }],
-    ['heaven hill',      { brand: 'Heaven Hill',      typeHint: 'Bourbon' }],
-    ['jim beam',         { brand: 'Jim Beam',         typeHint: 'Bourbon' }],
-    ["maker's mark",     { brand: "Maker's Mark",     typeHint: 'Bourbon' }],
-    ['makers mark',      { brand: "Maker's Mark",     typeHint: 'Bourbon' }],
-    ["maker's",          { brand: "Maker's Mark",     typeHint: 'Bourbon' }],
-    ['larceny',          { brand: 'Larceny',          typeHint: 'Bourbon' }],
-    ['bulleit',          { brand: 'Bulleit',          typeHint: 'Bourbon' }],
-    ['weller',           { brand: 'W.L. Weller',      typeHint: 'Bourbon' }],
-    // Rye
-    ['whistlepig',       { brand: 'WhistlePig',       typeHint: 'Rye Whiskey' }],
-    ['whistle pig',      { brand: 'WhistlePig',       typeHint: 'Rye Whiskey' }],
-    ['rittenhouse',      { brand: 'Rittenhouse',      typeHint: 'Rye Whiskey' }],
-    ['old overholt',     { brand: 'Old Overholt',     typeHint: 'Rye Whiskey' }],
-    ["michter's",        { brand: "Michter's",        typeHint: 'Rye Whiskey' }],
-    ['michters',         { brand: "Michter's",        typeHint: 'Rye Whiskey' }],
-    ['redemption',       { brand: 'Redemption',       typeHint: 'Rye Whiskey' }],
-    ['sazerac',          { brand: 'Sazerac',          typeHint: 'Rye Whiskey' }],
-    // Tennessee
-    ["jack daniel's",    { brand: "Jack Daniel's",    typeHint: 'Tennessee Whiskey' }],
-    ['jack daniels',     { brand: "Jack Daniel's",    typeHint: 'Tennessee Whiskey' }],
-    ['george dickel',    { brand: 'George Dickel',    typeHint: 'Tennessee Whiskey' }],
-    // Scotch
-    ['monkey shoulder',  { brand: 'Monkey Shoulder',  typeHint: 'Blended Scotch' }],
-    ['johnnie walker',   { brand: 'Johnnie Walker',   typeHint: 'Blended Scotch' }],
-    ['highland park',    { brand: 'Highland Park',    typeHint: 'Scotch' }],
-    ['the macallan',     { brand: 'The Macallan',     typeHint: 'Scotch' }],
-    ['the glenlivet',    { brand: 'The Glenlivet',    typeHint: 'Scotch' }],
-    ['the dalmore',      { brand: 'The Dalmore',      typeHint: 'Scotch' }],
-    ['the balvenie',     { brand: 'The Balvenie',     typeHint: 'Scotch' }],
-    ['glenfiddich',      { brand: 'Glenfiddich',      typeHint: 'Scotch' }],
-    ['glenmorangie',     { brand: 'Glenmorangie',     typeHint: 'Scotch' }],
-    ['glenfarclas',      { brand: 'Glenfarclas',      typeHint: 'Scotch' }],
-    ['glenlivet',        { brand: 'The Glenlivet',    typeHint: 'Scotch' }],
-    ['laphroaig',        { brand: 'Laphroaig',        typeHint: 'Scotch' }],
-    ['springbank',       { brand: 'Springbank',       typeHint: 'Scotch' }],
-    ['bruichladdich',    { brand: 'Bruichladdich',    typeHint: 'Scotch' }],
-    ['bunnahabhain',     { brand: 'Bunnahabhain',     typeHint: 'Scotch' }],
-    ['lagavulin',        { brand: 'Lagavulin',        typeHint: 'Scotch' }],
-    ['balvenie',         { brand: 'The Balvenie',     typeHint: 'Scotch' }],
-    ['talisker',         { brand: 'Talisker',         typeHint: 'Scotch' }],
-    ['bowmore',          { brand: 'Bowmore',          typeHint: 'Scotch' }],
-    ['ardbeg',           { brand: 'Ardbeg',           typeHint: 'Scotch' }],
-    ['macallan',         { brand: 'The Macallan',     typeHint: 'Scotch' }],
-    ['dalmore',          { brand: 'The Dalmore',      typeHint: 'Scotch' }],
-    ["dewar's",          { brand: "Dewar's",          typeHint: 'Blended Scotch' }],
-    ['dewars',           { brand: "Dewar's",          typeHint: 'Blended Scotch' }],
-    ['chivas',           { brand: 'Chivas Regal',     typeHint: 'Blended Scotch' }],
-    ['oban',             { brand: 'Oban',             typeHint: 'Scotch' }],
-    // Irish
-    ["writer's tears",   { brand: "Writer's Tears",   typeHint: 'Irish Whiskey' }],
-    ['tullamore',        { brand: 'Tullamore D.E.W.', typeHint: 'Irish Whiskey' }],
-    ['green spot',       { brand: 'Green Spot',       typeHint: 'Irish Whiskey' }],
-    ['yellow spot',      { brand: 'Yellow Spot',      typeHint: 'Irish Whiskey' }],
-    ['redbreast',        { brand: 'Redbreast',        typeHint: 'Irish Whiskey' }],
-    ['bushmills',        { brand: 'Bushmills',        typeHint: 'Irish Whiskey' }],
-    ['jameson',          { brand: 'Jameson',          typeHint: 'Irish Whiskey' }],
-    ['teeling',          { brand: 'Teeling',          typeHint: 'Irish Whiskey' }],
-    ['powers',           { brand: 'Powers',           typeHint: 'Irish Whiskey' }],
-    // Japanese
-    ['suntory toki',     { brand: 'Suntory Toki',     typeHint: 'Japanese Whisky' }],
-    ['yamazaki',         { brand: 'Yamazaki',         typeHint: 'Japanese Whisky' }],
-    ['hakushū',          { brand: 'Hakushū',          typeHint: 'Japanese Whisky' }],
-    ['hakushu',          { brand: 'Hakushū',          typeHint: 'Japanese Whisky' }],
-    ['hibiki',           { brand: 'Hibiki',           typeHint: 'Japanese Whisky' }],
-    ['nikka',            { brand: 'Nikka',            typeHint: 'Japanese Whisky' }],
-    ['toki',             { brand: 'Suntory Toki',     typeHint: 'Japanese Whisky' }],
-    ['iwai',             { brand: 'Iwai',             typeHint: 'Japanese Whisky' }],
-    // Agave / Tequila
-    ['don julio',        { brand: 'Don Julio',        typeHint: 'Tequila' }],
-    ['clase azul',       { brand: 'Clase Azul',       typeHint: 'Tequila' }],
-    ['olmeca altos',     { brand: 'Olmeca Altos',     typeHint: 'Tequila' }],
-    ['el tesoro',        { brand: 'El Tesoro',        typeHint: 'Tequila' }],
-    ['casamigos',        { brand: 'Casamigos',        typeHint: 'Tequila' }],
-    ['herradura',        { brand: 'Herradura',        typeHint: 'Tequila' }],
-    ['fortaleza',        { brand: 'Fortaleza',        typeHint: 'Tequila' }],
-    ['espolòn',          { brand: 'Espolòn',          typeHint: 'Tequila' }],
-    ['espolon',          { brand: 'Espolòn',          typeHint: 'Tequila' }],
-    ['patrón',           { brand: 'Patrón',           typeHint: 'Tequila' }],
-    ['patron',           { brand: 'Patrón',           typeHint: 'Tequila' }],
-    ['milagro',          { brand: 'Milagro',          typeHint: 'Tequila' }],
-    ['1800',             { brand: '1800 Tequila',     typeHint: 'Tequila' }],
-    // Agave / Mezcal
-    ['del maguey',       { brand: 'Del Maguey',       typeHint: 'Mezcal' }],
-    ['mezcal vago',      { brand: 'Mezcal Vago',      typeHint: 'Mezcal' }],
-    ['montelobos',       { brand: 'Montelobos',       typeHint: 'Mezcal' }],
-    ['banhez',           { brand: 'Banhez',           typeHint: 'Mezcal' }],
-    ['wahaka',           { brand: 'Wahaka',           typeHint: 'Mezcal' }],
-    ['ilegal',           { brand: 'Ilegal',           typeHint: 'Mezcal' }],
-    ['alipús',           { brand: 'Alipús',           typeHint: 'Mezcal' }],
-    ['alipus',           { brand: 'Alipús',           typeHint: 'Mezcal' }],
-    // Gin
-    ["hendrick's",       { brand: "Hendrick's",       typeHint: 'Gin' }],
-    ['hendricks',        { brand: "Hendrick's",       typeHint: 'Gin' }],
-    ['bombay sapphire',  { brand: 'Bombay Sapphire',  typeHint: 'Gin' }],
-    ['the botanist',     { brand: 'The Botanist',     typeHint: 'Gin' }],
-    ['monkey 47',        { brand: 'Monkey 47',        typeHint: 'Gin' }],
-    ['bols genever',     { brand: 'Bols Genever',     typeHint: 'Genever' }],
-    ['st. george',       { brand: 'St. George',       typeHint: 'Gin' }],
-    ["nolet's",          { brand: "Nolet's",          typeHint: 'Gin' }],
-    ['nolets',           { brand: "Nolet's",          typeHint: 'Gin' }],
-    ["broker's",         { brand: "Broker's",         typeHint: 'Gin' }],
-    ['brokers',          { brand: "Broker's",         typeHint: 'Gin' }],
-    ["ford's",           { brand: "Ford's",           typeHint: 'Gin' }],
-    ['fords',            { brand: "Ford's",           typeHint: 'Gin' }],
-    ['tanqueray',        { brand: 'Tanqueray',        typeHint: 'Gin' }],
-    ['beefeater',        { brand: 'Beefeater',        typeHint: 'Gin' }],
-    ['sipsmith',         { brand: 'Sipsmith',         typeHint: 'Gin' }],
-    ['aviation',         { brand: 'Aviation',         typeHint: 'Gin' }],
-    ['plymouth',         { brand: 'Plymouth',         typeHint: 'Gin' }],
-    ['botanist',         { brand: 'The Botanist',     typeHint: 'Gin' }],
-    ['malfy',            { brand: 'Malfy',            typeHint: 'Gin' }],
-    ['roku',             { brand: 'Roku',             typeHint: 'Gin' }],
-    // Vodka
-    ['grey goose',       { brand: 'Grey Goose',       typeHint: 'Vodka' }],
-    ['ketel one',        { brand: 'Ketel One',        typeHint: 'Vodka' }],
-    ['kettle one',       { brand: 'Ketel One',        typeHint: 'Vodka' }],
-    ['belvedere',        { brand: 'Belvedere',        typeHint: 'Vodka' }],
-    ['absolut',          { brand: 'Absolut',          typeHint: 'Vodka' }],
-    ["tito's",           { brand: "Tito's",           typeHint: 'Vodka' }],
-    ['titos',            { brand: "Tito's",           typeHint: 'Vodka' }],
-    ['stoli',            { brand: 'Stolichnaya',      typeHint: 'Vodka' }],
-    ['chopin',           { brand: 'Chopin',           typeHint: 'Vodka' }],
-    ['ciroc',            { brand: 'Cîroc',            typeHint: 'Vodka' }],
-    // Rum
-    ['flor de caña',     { brand: 'Flor de Caña',    typeHint: 'Rum' }],
-    ['flor de cana',     { brand: 'Flor de Caña',    typeHint: 'Rum' }],
-    ['appleton estate',  { brand: 'Appleton Estate',  typeHint: 'Rum' }],
-    ['mount gay',        { brand: 'Mount Gay',        typeHint: 'Rum' }],
-    ['smith & cross',    { brand: 'Smith & Cross',    typeHint: 'Rum' }],
-    ['ron zacapa',       { brand: 'Ron Zacapa',       typeHint: 'Rum' }],
-    ['wray & nephew',    { brand: 'Wray & Nephew',    typeHint: 'Rum' }],
-    ['rhum clément',     { brand: 'Rhum Clément',     typeHint: 'Agricole' }],
-    ['clairin sajous',   { brand: 'Clairin Sajous',   typeHint: 'Clairin' }],
-    ['diplomatico',      { brand: 'Diplomático',      typeHint: 'Rum' }],
-    ['diplomático',      { brand: 'Diplomático',      typeHint: 'Rum' }],
-    ['el dorado',        { brand: 'El Dorado',        typeHint: 'Rum' }],
-    ['plantation',       { brand: 'Plantation',       typeHint: 'Rum' }],
-    ['barbancourt',      { brand: 'Barbancourt',      typeHint: 'Rum' }],
-    ["gosling's",        { brand: "Gosling's",        typeHint: 'Rum' }],
-    ['goslings',         { brand: "Gosling's",        typeHint: 'Rum' }],
-    ['hamilton',         { brand: 'Hamilton',         typeHint: 'Rum' }],
-    ['appleton',         { brand: 'Appleton Estate',  typeHint: 'Rum' }],
-    ['bacardi',          { brand: 'Bacardi',          typeHint: 'Rum' }],
-    ['clement',          { brand: 'Rhum Clément',     typeHint: 'Agricole' }],
-    ['zacapa',           { brand: 'Ron Zacapa',       typeHint: 'Rum' }],
-    ['banks',            { brand: 'Banks',            typeHint: 'Rum' }],
-    // Brandy / Cognac
-    ['pierre ferrand',   { brand: 'Pierre Ferrand',   typeHint: 'Cognac' }],
-    ['rémy martin',      { brand: 'Rémy Martin',      typeHint: 'Cognac' }],
-    ['remy martin',      { brand: 'Rémy Martin',      typeHint: 'Cognac' }],
-    ['courvoisier',      { brand: 'Courvoisier',      typeHint: 'Cognac' }],
-    ['hennessy',         { brand: 'Hennessy',         typeHint: 'Cognac' }],
-    ['hine',             { brand: 'Hine',             typeHint: 'Cognac' }],
-  ];
 
   // Parse a free-text bottle name into { style, type, brand } using the catalog
   function parseBottleEntry(rawName, sectionKey) {
@@ -379,28 +108,6 @@ const InventoryView = (() => {
 
     return { style, type, brand, tier: '', best_for: '', notes: '', created_at: now, updated_at: now };
   }
-
-  // Keyword → section key mapping for the quick-add parser (most-specific first)
-  const QUICK_ADD_RULES = [
-    { key: 'bitters.anchors',          words: ['angostura','peychaud'] },
-    { key: 'bitters.aromatic_smoke',   words: ['bittermens','woodford bitters','smoke bitters'] },
-    { key: 'bitters.nut_earth',        words: ['mole bitters','walnut bitters','black walnut bitters'] },
-    { key: 'bitters.fruit_botanical',  words: ['orange bitters','lemon bitters','celery bitters','grapefruit bitters','cherry bitters'] },
-    { key: 'bitters.other',            words: ['bitters'] },
-    { key: 'syrups',                   words: ['syrup','orgeat','shrub','honey mix','ginger mix'] },
-    { key: 'fortified_wines_and_aperitif_wines', words: ['vermouth','sherry','lillet','cocchi','port','madeira','marsala','dubonnet','pineau'] },
-    { key: 'liqueurs_and_cordials.herbal', words: ['amaro','campari','aperol','suze','fernet','chartreuse','benedictine','drambuie','strega','galliano','jägermeister','jagermeister','averna','montenegro','ramazzotti','nonino','braulio','sfumato','meletti','cynar','absinthe'] },
-    { key: 'liqueurs_and_cordials.nut_coffee', words: ['kahlúa','kahlua','frangelico','baileys','amaretto','nocello','tia maria','disaronno','coffee liqueur'] },
-    { key: 'liqueurs_and_cordials.fruit_forward', words: ['triple sec','curaçao','curacao','cointreau','chambord','st-germain','st germain','elderflower','limoncello','midori','maraschino','luxardo','crème de','creme de','cassis','chambord'] },
-    { key: 'liqueurs_and_cordials.specialty_regional', words: ['velvet falernum','allspice dram','pimento dram','licor 43','glayva','pastis','pernod','sambuca','ouzo','arak','falernum'] },
-    { key: 'non_alcoholic_spirits',    words: ['seedlip','lyre\'s','lyres','ritual zero','monday whiskey','spiritless','aplós','aplos'] },
-    { key: 'base_spirits.agave',       words: ['tequila','mezcal','blanco','reposado','añejo','anejo','raicilla','bacanora','sotol'] },
-    { key: 'base_spirits.white_spirits', words: ['gin','vodka','aquavit','akvavit','genever'] },
-    { key: 'base_spirits.rum',         words: ['rum','cachaça','cachaca','agricole','rhum','clairin'] },
-    { key: 'base_spirits.brandy',      words: ['cognac','armagnac','calvados','pisco','brandy','grappa','marc','eau de vie'] },
-    { key: 'base_spirits.whiskey',     words: ['bourbon','rye','scotch','whiskey','whisky','irish whiskey','irish whisky','tennessee','single malt','blended malt'] },
-    { key: 'base_spirits.other',       words: ['sake','shochu','soju','baijiu'] },
-  ];
 
   function parseBottleSection(name) {
     const lower = name.toLowerCase();

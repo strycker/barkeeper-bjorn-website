@@ -1,0 +1,109 @@
+{
+  "_comment": "Edit this file to add/change Categories, tiers, type suggestions, equipment options, and section routing rules. No code changes needed.",
+
+  "categories": [
+    "Whiskeys & Brown Spirits",
+    "Agave Spirits",
+    "Gins / Vodkas / White Spirits",
+    "Rums & Cane Spirits",
+    "Brandies & Cognacs",
+    "Vermouths & Fortified Wines",
+    "Liqueurs & Cordials",
+    "Bitters",
+    "Syrups",
+    "Non-Alcoholic Spirits",
+    "Other / Misc."
+  ],
+
+  "sectionStyle": {
+    "base_spirits.whiskey":                    "Whiskeys & Brown Spirits",
+    "base_spirits.agave":                      "Agave Spirits",
+    "base_spirits.white_spirits":              "Gins / Vodkas / White Spirits",
+    "base_spirits.rum":                        "Rums & Cane Spirits",
+    "base_spirits.brandy":                     "Brandies & Cognacs",
+    "base_spirits.other":                      "Other / Misc.",
+    "fortified_wines_and_aperitif_wines":      "Vermouths & Fortified Wines",
+    "liqueurs_and_cordials.herbal":            "Liqueurs & Cordials",
+    "liqueurs_and_cordials.nut_coffee":        "Liqueurs & Cordials",
+    "liqueurs_and_cordials.fruit_forward":     "Liqueurs & Cordials",
+    "liqueurs_and_cordials.specialty_regional":"Liqueurs & Cordials",
+    "syrups":                                  "Syrups",
+    "bitters.anchors":                         "Bitters",
+    "bitters.aromatic_smoke":                  "Bitters",
+    "bitters.nut_earth":                       "Bitters",
+    "bitters.fruit_botanical":                 "Bitters",
+    "bitters.other":                           "Bitters",
+    "non_alcoholic_spirits":                   "Non-Alcoholic Spirits"
+  },
+
+  "sectionTypeDefault": {
+    "base_spirits.whiskey":                    "Whiskey",
+    "base_spirits.agave":                      "Agave Spirit",
+    "base_spirits.white_spirits":              "White Spirit",
+    "base_spirits.rum":                        "Rum",
+    "base_spirits.brandy":                     "Brandy",
+    "base_spirits.other":                      "Spirit",
+    "fortified_wines_and_aperitif_wines":      "Fortified Wine",
+    "liqueurs_and_cordials.herbal":            "Herbal Liqueur",
+    "liqueurs_and_cordials.nut_coffee":        "Nut / Coffee Liqueur",
+    "liqueurs_and_cordials.fruit_forward":     "Fruit Liqueur",
+    "liqueurs_and_cordials.specialty_regional":"Specialty Liqueur",
+    "syrups":                                  "Syrup",
+    "bitters.anchors":                         "Aromatic Bitters",
+    "bitters.aromatic_smoke":                  "Smoky Bitters",
+    "bitters.nut_earth":                       "Nut / Earth Bitters",
+    "bitters.fruit_botanical":                 "Fruit Bitters",
+    "bitters.other":                           "Bitters",
+    "non_alcoholic_spirits":                   "Non-Alcoholic"
+  },
+
+  "quickAddRules": [
+    { "key": "bitters.anchors",          "words": ["angostura","peychaud"] },
+    { "key": "bitters.aromatic_smoke",   "words": ["bittermens","woodford bitters","smoke bitters"] },
+    { "key": "bitters.nut_earth",        "words": ["mole bitters","walnut bitters","black walnut bitters"] },
+    { "key": "bitters.fruit_botanical",  "words": ["orange bitters","lemon bitters","celery bitters","grapefruit bitters","cherry bitters"] },
+    { "key": "bitters.other",            "words": ["bitters"] },
+    { "key": "syrups",                   "words": ["syrup","orgeat","shrub","honey mix","ginger mix"] },
+    { "key": "fortified_wines_and_aperitif_wines", "words": ["vermouth","sherry","lillet","cocchi","port","madeira","marsala","dubonnet","pineau"] },
+    { "key": "liqueurs_and_cordials.herbal", "words": ["amaro","campari","aperol","suze","fernet","chartreuse","benedictine","drambuie","strega","galliano","jägermeister","jagermeister","averna","montenegro","ramazzotti","nonino","braulio","sfumato","meletti","cynar","absinthe"] },
+    { "key": "liqueurs_and_cordials.nut_coffee", "words": ["kahlúa","kahlua","frangelico","baileys","amaretto","nocello","tia maria","disaronno","coffee liqueur"] },
+    { "key": "liqueurs_and_cordials.fruit_forward", "words": ["triple sec","curaçao","curacao","cointreau","chambord","st-germain","st germain","elderflower","limoncello","midori","maraschino","luxardo","crème de","creme de","cassis"] },
+    { "key": "liqueurs_and_cordials.specialty_regional", "words": ["velvet falernum","allspice dram","pimento dram","licor 43","glayva","pastis","pernod","sambuca","ouzo","arak","falernum"] },
+    { "key": "non_alcoholic_spirits",    "words": ["seedlip","lyre's","lyres","ritual zero","monday whiskey","spiritless","aplós","aplos"] },
+    { "key": "base_spirits.agave",       "words": ["tequila","mezcal","blanco","reposado","añejo","anejo","raicilla","bacanora","sotol"] },
+    { "key": "base_spirits.white_spirits", "words": ["gin","vodka","aquavit","akvavit","genever"] },
+    { "key": "base_spirits.rum",         "words": ["rum","cachaça","cachaca","agricole","rhum","clairin"] },
+    { "key": "base_spirits.brandy",      "words": ["cognac","armagnac","calvados","pisco","brandy","grappa","marc","eau de vie"] },
+    { "key": "base_spirits.whiskey",     "words": ["bourbon","rye","scotch","whiskey","whisky","irish whiskey","irish whisky","tennessee","single malt","blended malt"] },
+    { "key": "base_spirits.other",       "words": ["sake","shochu","soju","baijiu"] }
+  ],
+
+  "tiers": ["well", "standard", "premium", "craft", "boutique", "rare/exceptional"],
+
+  "tierLabels": {
+    "":                 "Unset",
+    "well":             "Well",
+    "standard":         "Standard",
+    "premium":          "Premium",
+    "craft":            "Craft",
+    "boutique":         "Boutique",
+    "rare/exceptional": "Rare/Exceptional"
+  },
+
+  "typeOptions": [
+    "Bourbon", "Rye Whiskey", "Scotch", "Irish Whiskey", "Japanese Whisky",
+    "Canadian Whisky", "Taiwanese Whisky", "Single Malt Scotch", "Blended Scotch",
+    "Tennessee Whiskey", "Cognac", "Armagnac", "Calvados", "Pisco", "Brandy",
+    "Rum", "Dark Rum", "Light Rum", "Aged Rum", "Rhum Agricole", "Cachaça",
+    "Mezcal", "Tequila", "Tequila Blanco", "Tequila Reposado", "Tequila Añejo",
+    "Gin", "London Dry Gin", "Old Tom Gin", "Vodka",
+    "Sweet Vermouth", "Dry Vermouth", "Blanc Vermouth", "Vermouth / Fortified Wine",
+    "Amaro", "Aperitivo", "Triple Sec", "Coffee Liqueur", "Herbal Liqueur",
+    "Aromatic Bitters", "Orange Bitters", "Fruit Bitters",
+    "Syrup", "Cardamom Syrup", "Simple Syrup", "Orgeat", "Honey Syrup",
+    "Non-Alcoholic Spirit",
+    "Sake", "Shochu", "Absinthe", "Aquavit", "Genever"
+  ],
+
+  "strainerOptions": ["Hawthorne", "Julep", "Fine Mesh", "Conical"]
+}
