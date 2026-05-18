@@ -18,7 +18,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 | 2 | Web UI UX & Settings | Shipped | 5 | 100% |
 | 3 | Content Management | Shipped | 4 | 100% |
 | 4 | Inventory & Recommender Depth | Shipped | 3 | 100% |
-| 5 | Polish, Depth & UX Tidy | In Progress | — | 0% |
+| 5 | Polish, Depth & UX Tidy | In Progress | 05-00 done | 20% |
 | 6 | AI Integration | Pending | — | 0% |
 | 7 | Portability | Pending | — | 0% |
 | 8 | Backend & Multi-User | Pending | — | 0% |
@@ -166,4 +166,4 @@ Wave 2 plans (05-03, 05-04) can also run in parallel with each other; 05-03 shou
 
 ---
 *State initialized: 2026-05-04*
-*Last activity: 2026-05-18 — Phase 5 plans complete (05-00 through 05-04). Research + pattern map + plan-checker all passed. 3 checker issues resolved inline (DERIVATIONS targets corrected, archetype chip-grid added to Profile tab, normalize.js barkeeper() defaults added). Ready to execute.*
+*Last activity: 2026-05-18 — Phase 5 plan 05-00 executed. TEST-CHECKLIST.md created and committed (996a371). All 13 REQ IDs covered. Wave 1 plans (05-01, 05-02) ready to execute.*
