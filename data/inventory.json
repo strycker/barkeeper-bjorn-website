@@ -518,7 +518,12 @@
   "specialty_ingredients": [],
   "garnish_and_service": [],
   "past_inventory": [],
-  "shopping_list": [],
+  "shopping_list": [
+    {
+      "item": "Orgeat",
+      "rationale": "one-away recommendation"
+    }
+  ],
   "equipment": {
     "strainers": [
       "Fine Mesh"
