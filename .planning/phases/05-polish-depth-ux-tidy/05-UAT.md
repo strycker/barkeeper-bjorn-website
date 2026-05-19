@@ -9,12 +9,11 @@ updated: 2026-05-19T00:00:00Z
 ## Current Test
 <!-- OVERWRITE each test - shows where we are -->
 
-number: 2
-name: Tier Dropdown Shows All Tiers
+number: 3
+name: Subtype and Region Fields Appear
 expected: |
-  In the bottle edit form, click "More fields ▾".
-  The Tier dropdown should show 7 options:
-  Unset, Well, Standard, Premium, Craft, Boutique, Rare/Exceptional.
+  In the bottle edit form (top section), a "Sub-type" text input should appear.
+  In the expanded "More fields" section, both "Country" and "Region" inputs should appear.
 awaiting: user response
 
 ## Tests
@@ -25,7 +24,7 @@ result: pass
 
 ### 2. Tier Dropdown Shows All Tiers
 expected: In the same bottle edit form, click "More fields ▾". The Tier dropdown should show: Unset, Well, Standard, Premium, Craft, Boutique, Rare/Exceptional — 7 options total. No more empty tier dropdown.
-result: [pending]
+result: pass
 
 ### 3. Subtype and Region Fields Appear
 expected: In the bottle edit form (top section), a "Sub-type" text input should appear (e.g. placeholder "Terroir, Navy Strength, Barrel-Aged"). In the expanded "More fields" section, both "Country" and "Region" inputs should appear (e.g. Country: "Scotland", Region: "Speyside"). These are separate fields.
