@@ -9,13 +9,13 @@ updated: 2026-05-19T00:00:00Z
 ## Current Test
 <!-- OVERWRITE each test - shows where we are -->
 
-number: 12
-name: Bottle Edit Form Labels — Category and Specific Style/Type
+number: 13
+name: Profile Tab — Drinking Style Section
 expected: |
-  When editing any bottle, the first field label should read "Category" (not "Style")
-  and the second should read "Specific Style/Type" (not "Type").
-  Category has placeholder "Broad category…" and Specific Style/Type has
-  placeholder "e.g. Single Barrel, Cask Strength, Espadín".
+  The Profile tab should have a collapsible "Drinking Style" section at the bottom.
+  Expanding it shows: Drinking Frequency (select), Household Context (text input),
+  Vocabulary Preference (select), and Archetypes (chip grid, pick 1-3).
+  Editing and saving persists to GitHub.
 awaiting: user response
 
 ## Tests
@@ -66,7 +66,7 @@ result: pass
 
 ### 12. Bottle Edit Form Labels — Category and Specific Style/Type
 expected: When editing any bottle, the first field label should read "Category" (not "Style") and the second should read "Specific Style/Type" (not "Type"). Category has placeholder "Broad category…" and Specific Style/Type has placeholder "e.g. Single Barrel, Cask Strength, Espadín".
-result: [pending]
+result: pass
 
 ### 13. Profile Tab — Drinking Style Section
 expected: The Profile tab should have a collapsible "Drinking Style" section at the bottom. Expanding it shows: Drinking Frequency (select), Household Context (text input), Vocabulary Preference (select), and Archetypes (chip grid, pick 1-3). Editing and saving persists to GitHub.
