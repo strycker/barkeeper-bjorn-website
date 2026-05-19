@@ -1,5 +1,5 @@
 ---
-status: testing
+status: complete
 phase: 05-polish-depth-ux-tidy
 source: [05-01-SUMMARY.md, 05-02-SUMMARY.md, 05-03-SUMMARY.md, 05-04-SUMMARY.md]
 started: 2026-05-19T00:00:00Z
@@ -7,15 +7,8 @@ updated: 2026-05-19T00:00:00Z
 ---
 
 ## Current Test
-<!-- OVERWRITE each test - shows where we are -->
 
-number: 15
-name: Onboarding — Drinking Style Step
-expected: |
-  Running through Onboarding should include an "About Your Drinking Style" step
-  with Drinking Frequency, Household Context, Vocabulary Preference, and Archetype
-  chip selections. A "Skip" button should be available to bypass this step.
-awaiting: user response
+[testing complete]
 
 ## Tests
 
