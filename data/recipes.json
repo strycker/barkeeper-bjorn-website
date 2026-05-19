@@ -66,16 +66,105 @@
       "method": "shaken",
       "glassware": "Coupe",
       "difficulty": 2,
-      "profile": { "sweetness": 0.35, "acid": 0.6, "strength": 0.25, "complexity": 0.5, "season": 0.25, "risk": 0.3 },
+      "profile": {
+        "sweetness": 0.35,
+        "acid": 0.6,
+        "strength": 0.25,
+        "complexity": 0.5,
+        "season": 0.25,
+        "risk": 0.3
+      },
       "occasion": "Prohibition-era gem. Orgeat rounds the gin's botanicals while lemon keeps it lively.",
-      "tags": ["sour", "classic", "refreshing"],
+      "tags": [
+        "sour",
+        "classic",
+        "refreshing"
+      ],
       "ingredients": [
-        { "name": "Gin", "amount": "2 oz" },
-        { "name": "Fresh Lemon Juice", "amount": "¾ oz" },
-        { "name": "Orgeat", "amount": "½ oz" }
+        {
+          "name": "Gin",
+          "amount": "2 oz"
+        },
+        {
+          "name": "Fresh Lemon Juice",
+          "amount": "¾ oz"
+        },
+        {
+          "name": "Orgeat",
+          "amount": "½ oz"
+        }
       ],
       "garnish": "Lemon twist or cherry",
       "from_classics_db": true
+    },
+    {
+      "id": "aviation",
+      "name": "Aviation",
+      "base": "Gin",
+      "method": "shaken",
+      "glassware": "Coupe",
+      "difficulty": 2,
+      "profile": {
+        "sweetness": 0.35,
+        "acid": 0.5,
+        "strength": 0.3,
+        "complexity": 0.65,
+        "season": 0.3,
+        "risk": 0.5
+      },
+      "occasion": "Floral, mysterious, otherworldly purple. The violet liqueur is non-negotiable.",
+      "tags": [
+        "sour",
+        "classic"
+      ],
+      "ingredients": [
+        {
+          "name": "Gin",
+          "amount": "2 oz",
+          "keywords": [
+            "gin"
+          ],
+          "searchIn": [
+            "white_spirits"
+          ]
+        },
+        {
+          "name": "Maraschino Liqueur",
+          "amount": "½ oz",
+          "keywords": [
+            "maraschino",
+            "luxardo"
+          ],
+          "searchIn": [
+            "liqueurs_fruit",
+            "liqueurs_specialty"
+          ]
+        },
+        {
+          "name": "Crème de Violette",
+          "amount": "¼ oz",
+          "keywords": [
+            "violette",
+            "crème de violette"
+          ],
+          "searchIn": [
+            "liqueurs_specialty",
+            "liqueurs_fruit"
+          ]
+        },
+        {
+          "name": "Fresh Lemon Juice",
+          "amount": "¾ oz",
+          "keywords": [
+            "lemon"
+          ],
+          "searchIn": [
+            "produce",
+            "perishables"
+          ]
+        }
+      ],
+      "garnish": "Brandied cherry"
     }
   ],
   "wishlist": [],
