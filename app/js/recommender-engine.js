@@ -194,9 +194,10 @@ const RecommenderEngine = (() => {
     const specialty = opts.specialty || '';
 
     for (const recipe of db) {
-      // Check veto — skip any recipe whose base matches an active vetoed string
+      // Check veto — skip any recipe whose base or any ingredient matches an active vetoed string
       const baseStr = (recipe.base || '').toLowerCase();
-      if (activeVetoes.some(v => baseStr.includes(v))) continue;
+      const ingredientStrs = recipe.ingredients.map(i => (i.name || '').toLowerCase());
+      if (activeVetoes.some(v => baseStr.includes(v) || ingredientStrs.some(n => n.includes(v)))) continue;
 
       const missing = [];
       for (const ing of recipe.ingredients) {
@@ -209,7 +210,7 @@ const RecommenderEngine = (() => {
       const score = Math.min(1, flavorScore * 0.85 + _specialtyBoost(recipe, specialty));
 
       if (unconstrained || missing.length === 0) {
-        buildable.push({ recipe, flavorScore: score });
+        buildable.push({ recipe, flavorScore: score, missingIngredients: missing.length > 0 ? missing : undefined });
       } else if (missing.length === 1) {
         oneAway.push({ recipe, flavorScore: score, missingIngredient: missing[0], missingIngredients: missing });
       } else if (missing.length === 2) {

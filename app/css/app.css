@@ -1344,6 +1344,23 @@ a:hover { color: var(--amber); }
 .rec-twoaway-link:hover {
   color: var(--text);
 }
+.rec-missing-info {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 13px;
+  margin-top: 6px;
+  color: var(--text-muted);
+}
+.rec-missing-label { font-style: italic; }
+.rec-missing-item {
+  background: rgba(255,255,255,0.06);
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 12px;
+}
 
 /* === Phase 5: Recommender UX depth (REC-05–09) === */
 
@@ -1353,19 +1370,17 @@ a:hover { color: var(--amber); }
 /* Veto chips — bypassed veto shows strikethrough + muted opacity (D-04) */
 .rec-veto-chip.bypassed { text-decoration: line-through; opacity: 0.5; }
 
-/* Favorites / Wishlist quick-action buttons on recipe cards (REC-08, D-09) */
+/* Favorites / Wishlist quick-action buttons on recipe cards */
 .rec-card-actions {
-  position: absolute;
-  top: 8px;
-  right: 8px;
   display: flex;
   gap: 4px;
-  z-index: 2;
+  flex-shrink: 0;
+  align-self: flex-start;
 }
 .rec-fav-btn, .rec-wish-btn {
   background: transparent;
-  border: 1px solid var(--amber-dim);
-  color: var(--amber);
+  border: 1px solid var(--border2);
+  color: var(--text-muted);
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -1375,5 +1390,9 @@ a:hover { color: var(--amber); }
   align-items: center;
   justify-content: center;
   line-height: 1;
+  transition: all var(--transition);
 }
-.rec-fav-btn:hover, .rec-wish-btn:hover { background: var(--amber-dim); }
+.rec-fav-btn:hover { border-color: var(--red); color: var(--red); background: rgba(224,85,85,0.08); }
+.rec-wish-btn:hover { border-color: var(--amber); color: var(--amber); background: var(--amber-dim); }
+.rec-fav-btn.active { border-color: var(--red); color: var(--red); background: rgba(224,85,85,0.12); }
+.rec-wish-btn.active { border-color: var(--amber); color: var(--amber); background: rgba(212,148,58,0.12); }

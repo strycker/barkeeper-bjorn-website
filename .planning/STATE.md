@@ -6,7 +6,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 
 **Core value:** The user's real-world bar inventory and flavor profile should power both AI-driven conversation and rule-based recommendations — seamlessly, whether in a chat session or the web app.
 
-**Current focus:** Phase 5 — Polish, Depth & UX Tidy
+**Current focus:** Phase 6 — Recipe & Recommender UX
 
 ---
 
@@ -18,11 +18,12 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 | 2 | Web UI UX & Settings | Shipped | 5 | 100% |
 | 3 | Content Management | Shipped | 4 | 100% |
 | 4 | Inventory & Recommender Depth | Shipped | 3 | 100% |
-| 5 | Polish, Depth & UX Tidy | Shipped | 05-04 done, 05-03 done | 100% |
-| 6 | AI Integration | Pending | — | 0% |
-| 7 | Portability | Pending | — | 0% |
-| 8 | Backend & Multi-User | Pending | — | 0% |
-| 9 | Community, API & Multi-Agent | Pending | — | 0% |
+| 5 | Polish, Depth & UX Tidy | Shipped | 4 plans, 17/17 UAT, VALIDATION.md | 100% |
+| 6 | Recipe & Recommender UX | In Progress | REC-10+11+BUG-01-03 shipped; features pending | 35% |
+| 7 | AI Integration | Pending | — | 0% |
+| 8 | Portability | Pending | — | 0% |
+| 9 | Backend & Multi-User | Pending | — | 0% |
+| 10 | Community, API & Multi-Agent | Pending | — | 0% |
 
 ---
 
@@ -174,4 +175,4 @@ Wave 2 plans (05-03, 05-04) can also run in parallel with each other; 05-03 shou
 
 ---
 *State initialized: 2026-05-04*
-*Last activity: 2026-05-19 — Phase 5 plan 05-03 executed. Drinking Style UI added to profile.js, equipment routed to inventory in onboarding.js. Commits: 1481fec (normalize+schemas), 5d08a7d (profile+onboarding).*
+*Last activity: 2026-05-19 — Phase 5 UAT complete (17/17 pass). Phase 6 opened: REC-10 (card layout fix) and REC-11 (heart/star toggle state) shipped. Three Phase 6 bugs fixed: REC-BUG-01 (unconstrained mode now shows missing-ingredient info rows with shopping-list links), REC-BUG-02 (veto filter now checks all ingredient names, not just recipe.base — fixes egg white appearing in results), INV-BUG-01 (Got-it dialog auto-detects correct inventory section via keyword matching — fixes vermouth defaulting to Whiskeys). ROADMAP renumbered to 10 phases. 168-recipe DB. Favicon. Archetype selection fixed.*

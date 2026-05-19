@@ -13,11 +13,12 @@
 | 2 | Web UI UX & Settings | Onboarding overhaul, dashboard images, settings page, inventory search | ONB-01–04, NAV-01–05, SETTINGS-01–04, INV-01–02 | Complete |
 | 3 | Content Management | Recipe add/edit, image upload, export/import | RECIPE-01–05, EXPORT-01–04 | Complete |
 | 4 | Inventory & Recommender Depth | Structured bottle objects, in-place editing, mood sliders, scope toggle, name standardization | INV-03–07, REC-01–03 | Complete |
-| 5 | Polish, Depth & UX Tidy | Recommender UX fixes, vetoes filter panel, ingredient derivation, inventory field depth, data model tidy, Bartender Customization Wizard | REC-05–09, INV-08–10, DATA-01–03, CUST-01–02 | Pending |
-| 6 | AI Integration | Claude API chat, classroom, AI design, AI recommendations, AI import, Library | AI-01–13, LIB-01, REC-04, SET-05, CHAT-01–09 | Pending |
-| 7 | Portability | Markdown round-trip, per-page export/import, append/overwrite import mode | PORT-01–05 | Pending |
-| 8 | Backend & Multi-User | Supabase, auth, per-user isolation, account settings | BACKEND-01–08 | Pending |
-| 9 | Community, API & Multi-Agent | Community feed, forum, REST API, Bjorn sub-agents | COMMUNITY-01–08, API-01–06, AGENT-SYS-01–04 | Pending |
+| 5 | Polish, Depth & UX Tidy | Recommender UX fixes, vetoes filter panel, ingredient derivation, inventory field depth, data model tidy, Bartender Customization Wizard | REC-05–09, INV-08–10, DATA-01–03, CUST-01–02 | Complete |
+| 6 | Recipe & Recommender UX | "I Made This" tracking, chip-style Favorites/Wishlist/Made tabs, text search on Recipes + Recommender, card layout polish | REC-10–11, RECIPE-MADE-01–02, RECIPE-VIEW-01–02, RECIPE-SEARCH-01, REC-SEARCH-01 | Pending |
+| 7 | AI Integration | Claude API chat, classroom, AI design, AI recommendations, AI import, Library | AI-01–13, LIB-01, REC-04, SET-05, CHAT-01–09 | Pending |
+| 8 | Portability | Markdown round-trip, per-page export/import, append/overwrite import mode | PORT-01–05 | Pending |
+| 9 | Backend & Multi-User | Supabase, auth, per-user isolation, account settings | BACKEND-01–08 | Pending |
+| 10 | Community, API & Multi-Agent | Community feed, forum, REST API, Bjorn sub-agents | COMMUNITY-01–08, API-01–06, AGENT-SYS-01–04 | Pending |
 
 ---
 
@@ -146,7 +147,46 @@
 
 ---
 
-## Phase 6: AI Integration
+## Phase 6: Recipe & Recommender UX
+
+**Goal:** Elevate the Recipes and Recommender views from read-only display to a fully interactive experience — chip-style cards everywhere, "I Made This" tracking, text search on both pages, and action-button polish discovered during Phase 5 UAT.
+
+**Requirements:**
+
+*Card Layout & Toggle State (shipped as Phase 5 close bugfixes):*
+- REC-10: Recipe card action buttons (♥ ☆) moved into the `rec-card-header` flex row — no longer `position:absolute`, no longer overlap the Match score bar
+- REC-11: Heart and star buttons show filled (♥ ★) when the recipe is in Favorites / Wishlist, open (♡ ☆) when not; clicking a filled button removes it (toggle, not "already in" guard)
+
+*"I Made This" Tracking:*
+- RECIPE-MADE-01: ✓ / ○ "I Made This" third action button on every Recommender card — adds to `recipes.made_log[]` (`{name, date_made, notes?}`); toggle removes. Icon fills when made.
+- RECIPE-MADE-02: New "Made" tab in Recipes view — shows `made_log` as rec-card chips, most-recent first, each with a remove (×) button
+
+*Recipe Tab Chip Upgrade:*
+- RECIPE-VIEW-01: Favorites and Wishlist tabs render entries as `rec-card` style chips (identical to Recommender layout); each card has a remove (×) button; replaces current plain `.card` list
+- RECIPE-VIEW-02: Favorites/Wishlist rec-card chips are clickable to show full classics-db detail (ingredients, method, glassware)
+
+*Text Search:*
+- RECIPE-SEARCH-01: Search input above Recipes page tabs — instant filter across active tab by name, ingredient, or base spirit; clears on tab switch
+- REC-SEARCH-01: Search input on Recommendations page (below scope/filter row) — instant filter across all sections by name, base spirit, or ingredient keyword
+
+**Files touched:** `app/js/views/recommender.js`, `app/js/views/recipes.js`, `app/css/app.css`, `data/recipes.json` (schema: `made_log[]`)
+
+**Plans:**
+- [ ] 06-00-PLAN.md — Test checklist
+- [ ] 06-01-PLAN.md — "I Made This" button + made_log schema + Made tab
+- [ ] 06-02-PLAN.md — Favorites/Wishlist/Made tabs → rec-card chips with remove
+- [ ] 06-03-PLAN.md — Text search on Recipes and Recommendations pages
+
+**Success criteria:**
+1. On a Recommender card, ♡ heart fills to ♥ on click and the recipe appears in Recipes → Favorites; clicking ♥ again removes it from both
+2. Clicking ✓ on a Recommender card adds it to Recipes → Made tab with today's date; clicking again removes it
+3. Favorites and Wishlist tabs show full rec-card chips (name, base, method, ingredients) with a × to remove
+4. Typing "honey" in the Recipes search box filters to only recipes containing that word in name or ingredients
+5. Typing "Negroni" in the Recommender search box hides all non-matching cards while preserving section headers
+
+---
+
+## Phase 7: AI Integration
 
 **Goal:** Connect the web UI to the Claude API (bring-your-own Anthropic key) to unlock "Ask Bjorn" natural-language chat, AI cocktail design, AI-powered recommendations, inventory advice, the Classroom tutorial view, and the Library link collection — all browser-side with no backend. Also upgrades Phase 5's rule-based features (paste-a-line parser, ingredient derivation) with Claude fallbacks.
 
@@ -206,7 +246,7 @@
 
 ---
 
-## Phase 7: Portability
+## Phase 8: Portability
 
 **Goal:** Full round-trip data portability — strict Markdown export (canonical, human-readable), AI-assisted flexible import (accepts JSON bundles, older versions, or `.md` files), per-page single-file operations, and append-vs-overwrite import control per section. Uses Phase 6's Claude API as the import backstop for unrecognized formats.
 
@@ -239,7 +279,7 @@
 
 ---
 
-## Phase 8: Backend & Multi-User
+## Phase 9: Backend & Multi-User
 
 **Goal:** Introduce an optional Supabase-backed "hosted mode" alongside the preserved solo PAT-based mode, adding email/GitHub OAuth auth, per-user data isolation, and account settings — without breaking any existing single-user workflows.
 
@@ -264,7 +304,7 @@
 
 ---
 
-## Phase 9: Community, API & Multi-Agent
+## Phase 10: Community, API & Multi-Agent
 
 **Goal:** Build the social layer — a community recipe feed, recipe ratings, and a discussion forum — alongside a public REST API (FastAPI) and the Bjorn multi-agent system (Sommelier, Analytics Brain, Archivist, Shopper).
 
@@ -303,15 +343,16 @@
 ## Dependencies
 
 ```
-Phase 1 — no dependencies (standalone agent files)
-Phase 2 — no hard dependencies (web UI; builds on existing app/)
-Phase 3 — recommends Phase 2 (Settings page needed for export/import entry point)
-Phase 4 — recommends Phase 2 (inventory view refactor; recommender view exists)
-Phase 5 — depends on Phases 1–4 being stable (data model tidy requires settled schema)
-Phase 6 — recommends Phase 5 (clean data model improves AI context quality; Settings page needed for API key)
-Phase 7 — recommends Phase 6 (AI import fallback requires claude-api.js; MD export format should be stable before building importer)
-Phase 8 — depends on Phases 3–5 being stable (data model must be settled before Supabase migration)
-Phase 9 — depends on Phase 8 (community requires multi-user accounts)
+Phase 1  — no dependencies (standalone agent files)
+Phase 2  — no hard dependencies (web UI; builds on existing app/)
+Phase 3  — recommends Phase 2 (Settings page needed for export/import entry point)
+Phase 4  — recommends Phase 2 (inventory view refactor; recommender view exists)
+Phase 5  — depends on Phases 1–4 being stable (data model tidy requires settled schema)
+Phase 6  — depends on Phase 5 (recipe card structure + favorites/wishlist schema must be settled)
+Phase 7  — recommends Phase 6 (clean data model + rec-card chips improve AI context quality; Settings page needed for API key)
+Phase 8  — recommends Phase 7 (AI import fallback requires claude-api.js; MD export format should be stable before building importer)
+Phase 9  — depends on Phases 3–5 being stable (data model must be settled before Supabase migration)
+Phase 10 — depends on Phase 9 (community requires multi-user accounts)
 ```
 
 ---

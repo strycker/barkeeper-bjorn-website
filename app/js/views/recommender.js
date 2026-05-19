@@ -56,16 +56,15 @@ const RecommenderView = (() => {
   }
 
   function _renderCard(item, isOneAway) {
-    const { recipe, flavorScore, missingIngredient } = item;
+    const { recipe, flavorScore, missingIngredient, missingIngredients } = item;
     const diff = _difficultyLabel(recipe.difficulty);
+    const savedRecipes = State.get('recipes') || {};
+    const isFav  = (savedRecipes.confirmed_favorites || []).some(r => r.name === recipe.name);
+    const isWish = (savedRecipes.wishlist || []).some(r => r.name === recipe.name);
     return `
       <div class="rec-card ${isOneAway ? 'rec-card--oneaway' : ''}">
-        <div class="rec-card-actions">
-          <button class="rec-fav-btn" data-name="${Utils.escapeHtml(recipe.name)}" title="Add to Favorites">&#9829;</button>
-          <button class="rec-wish-btn" data-name="${Utils.escapeHtml(recipe.name)}" title="Add to Wishlist">&#9734;</button>
-        </div>
         <div class="rec-card-header">
-          <div>
+          <div style="flex:1;min-width:0;">
             <div class="rec-card-name">${Utils.escapeHtml(recipe.name)}</div>
             <div class="rec-card-meta">
               <span class="rec-base">${Utils.escapeHtml(recipe.base)}</span>
@@ -80,6 +79,10 @@ const RecommenderView = (() => {
             ${_scoreBar(flavorScore)}
             <div class="rec-score-pct">${Math.round(flavorScore * 100)}%</div>
           </div>
+          <div class="rec-card-actions">
+            <button class="rec-fav-btn${isFav ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" title="${isFav ? 'Remove from Favorites' : 'Add to Favorites'}">${isFav ? '&#9829;' : '&#9825;'}</button>
+            <button class="rec-wish-btn${isWish ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" title="${isWish ? 'Remove from Wishlist' : 'Add to Wishlist'}">${isWish ? '&#9733;' : '&#9734;'}</button>
+          </div>
         </div>
         ${recipe.occasion ? `<p class="rec-occasion">${Utils.escapeHtml(recipe.occasion)}</p>` : ''}
         <div class="rec-ingredients">
@@ -88,11 +91,19 @@ const RecommenderView = (() => {
           ).join('')}
           ${recipe.garnish ? `<span class="rec-ing-chip rec-garnish">+ ${Utils.escapeHtml(recipe.garnish)}</span>` : ''}
         </div>
-        ${isOneAway ? `
+        ${isOneAway && missingIngredient ? `
           <div class="rec-twoaway-missing">
             <span class="rec-twoaway-label">One bottle away:</span>
             <strong>${Utils.escapeHtml(missingIngredient.name)}</strong>
             <button class="rec-twoaway-link" data-item="${Utils.escapeHtml(missingIngredient.name)}">Add to shopping list &#8594;</button>
+          </div>` : ''}
+        ${!isOneAway && missingIngredients && missingIngredients.length > 0 ? `
+          <div class="rec-missing-info">
+            <span class="rec-missing-label">Not in your bar:</span>
+            ${missingIngredients.map(m => `
+              <span class="rec-missing-item">${Utils.escapeHtml(m.name)}</span>
+              <button class="rec-twoaway-link" data-item="${Utils.escapeHtml(m.name)}">Add &#8594;</button>
+            `).join('')}
           </div>` : ''}
         <div class="rec-glass">Glass: ${Utils.escapeHtml(recipe.glassware)}</div>
       </div>`;
@@ -103,14 +114,13 @@ const RecommenderView = (() => {
     const diff = _difficultyLabel(recipe.difficulty);
     const missing0 = missingIngredients[0];
     const missing1 = missingIngredients[1];
+    const savedRecipes = State.get('recipes') || {};
+    const isFav  = (savedRecipes.confirmed_favorites || []).some(r => r.name === recipe.name);
+    const isWish = (savedRecipes.wishlist || []).some(r => r.name === recipe.name);
     return `
       <div class="rec-card rec-card--twoaway">
-        <div class="rec-card-actions">
-          <button class="rec-fav-btn" data-name="${Utils.escapeHtml(recipe.name)}" title="Add to Favorites">&#9829;</button>
-          <button class="rec-wish-btn" data-name="${Utils.escapeHtml(recipe.name)}" title="Add to Wishlist">&#9734;</button>
-        </div>
         <div class="rec-card-header">
-          <div>
+          <div style="flex:1;min-width:0;">
             <div class="rec-card-name">${Utils.escapeHtml(recipe.name)}</div>
             <div class="rec-card-meta">
               <span class="rec-base">${Utils.escapeHtml(recipe.base)}</span>
@@ -124,6 +134,10 @@ const RecommenderView = (() => {
             <div class="rec-score-label">Match</div>
             ${_scoreBar(flavorScore)}
             <div class="rec-score-pct">${Math.round(flavorScore * 100)}%</div>
+          </div>
+          <div class="rec-card-actions">
+            <button class="rec-fav-btn${isFav ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" title="${isFav ? 'Remove from Favorites' : 'Add to Favorites'}">${isFav ? '&#9829;' : '&#9825;'}</button>
+            <button class="rec-wish-btn${isWish ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" title="${isWish ? 'Remove from Wishlist' : 'Add to Wishlist'}">${isWish ? '&#9733;' : '&#9734;'}</button>
           </div>
         </div>
         ${recipe.occasion ? `<p class="rec-occasion">${Utils.escapeHtml(recipe.occasion)}</p>` : ''}
@@ -279,45 +293,47 @@ const RecommenderView = (() => {
       });
     });
 
-    // Wire ♥ Favorites quick-action buttons (REC-08, D-09–D-11)
+    // Wire ♥ Favorites toggle buttons — click toggles add/remove
     cardsEl.querySelectorAll('.rec-fav-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const recipeName = btn.dataset.name;
-        const item = _results && [
-          ...(_results.buildable || []),
-          ...(_results.oneAway  || []),
-          ...(_results.twoAway  || []),
-        ].find(r => r.recipe.name === recipeName);
-        if (!item) return;
-        const recipes = State.get('recipes') || {};
-        const existing = (recipes.confirmed_favorites || []).some(r => r.name === recipeName);
-        if (existing) { Utils.showToast('Already in Favorites', 'info'); return; }
-        State.patch('recipes', r => {
-          r.confirmed_favorites = r.confirmed_favorites || [];
-          r.confirmed_favorites.push({ ...item.recipe });
-        });
-        State.save('recipes').then(() => Utils.showToast('Added to Favorites'));
+        const allItems = [
+          ...(_results?.buildable || []),
+          ...(_results?.oneAway  || []),
+          ...(_results?.twoAway  || []),
+        ];
+        const item = allItems.find(r => r.recipe.name === recipeName);
+        const isFav = (State.get('recipes')?.confirmed_favorites || []).some(r => r.name === recipeName);
+        if (isFav) {
+          State.patch('recipes', r => { r.confirmed_favorites = (r.confirmed_favorites || []).filter(f => f.name !== recipeName); });
+          State.save('recipes').then(() => { Utils.showToast('Removed from Favorites'); _rerender(container); });
+        } else {
+          if (!item) return;
+          State.patch('recipes', r => { r.confirmed_favorites = r.confirmed_favorites || []; r.confirmed_favorites.push({ ...item.recipe }); });
+          State.save('recipes').then(() => { Utils.showToast('Added to Favorites ♥'); _rerender(container); });
+        }
       });
     });
 
-    // Wire ☆ Wishlist quick-action buttons (REC-08, D-09–D-11)
+    // Wire ☆ Wishlist toggle buttons — click toggles add/remove
     cardsEl.querySelectorAll('.rec-wish-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const recipeName = btn.dataset.name;
-        const item = _results && [
-          ...(_results.buildable || []),
-          ...(_results.oneAway  || []),
-          ...(_results.twoAway  || []),
-        ].find(r => r.recipe.name === recipeName);
-        if (!item) return;
-        const recipes = State.get('recipes') || {};
-        const existing = (recipes.wishlist || []).some(r => r.name === recipeName);
-        if (existing) { Utils.showToast('Already in Wishlist', 'info'); return; }
-        State.patch('recipes', r => {
-          r.wishlist = r.wishlist || [];
-          r.wishlist.push({ ...item.recipe });
-        });
-        State.save('recipes').then(() => Utils.showToast('Added to Wishlist'));
+        const allItems = [
+          ...(_results?.buildable || []),
+          ...(_results?.oneAway  || []),
+          ...(_results?.twoAway  || []),
+        ];
+        const item = allItems.find(r => r.recipe.name === recipeName);
+        const isWish = (State.get('recipes')?.wishlist || []).some(r => r.name === recipeName);
+        if (isWish) {
+          State.patch('recipes', r => { r.wishlist = (r.wishlist || []).filter(w => w.name !== recipeName); });
+          State.save('recipes').then(() => { Utils.showToast('Removed from Wishlist'); _rerender(container); });
+        } else {
+          if (!item) return;
+          State.patch('recipes', r => { r.wishlist = r.wishlist || []; r.wishlist.push({ ...item.recipe }); });
+          State.save('recipes').then(() => { Utils.showToast('Added to Wishlist ★'); _rerender(container); });
+        }
       });
     });
   }
