@@ -9,11 +9,12 @@ updated: 2026-05-19T00:00:00Z
 ## Current Test
 <!-- OVERWRITE each test - shows where we are -->
 
-number: 3
-name: Subtype and Region Fields Appear
+number: 4
+name: Category Change Moves Chip
 expected: |
-  In the bottle edit form (top section), a "Sub-type" text input should appear.
-  In the expanded "More fields" section, both "Country" and "Region" inputs should appear.
+  Edit a bottle. Change its Category to a different one. Click Save.
+  The chip should disappear from its original section and appear in the new section
+  without requiring a page reload.
 awaiting: user response
 
 ## Tests
@@ -28,7 +29,7 @@ result: pass
 
 ### 3. Subtype and Region Fields Appear
 expected: In the bottle edit form (top section), a "Sub-type" text input should appear (e.g. placeholder "Terroir, Navy Strength, Barrel-Aged"). In the expanded "More fields" section, both "Country" and "Region" inputs should appear (e.g. Country: "Scotland", Region: "Speyside"). These are separate fields.
-result: [pending]
+result: pass
 
 ### 4. Category Change Moves Chip
 expected: Edit a bottle. Change its Category to a different one (e.g. change a vermouth from "Vermouths & Fortified Wines" to "Whiskeys & Brown Spirits"). Click Save. The chip should disappear from its original section and appear in the new section without requiring a page reload.
