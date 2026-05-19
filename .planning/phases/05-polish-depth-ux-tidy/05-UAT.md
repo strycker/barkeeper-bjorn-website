@@ -9,11 +9,13 @@ updated: 2026-05-19T00:00:00Z
 ## Current Test
 <!-- OVERWRITE each test - shows where we are -->
 
-number: 6
-name: Mixers & Soft Drinks Section on Spirits Tab
+number: 13
+name: Profile Tab — Drinking Style Section
 expected: |
-  In Inventory → Spirits & Bottles tab, a "Mixers & Soft Drinks" section should appear.
-  Adding "Tonic Water" or "Ginger Beer" via the quick-add bar should route them there automatically.
+  The Profile tab should have a collapsible "Drinking Style" section at the bottom.
+  Expanding it shows: Drinking Frequency (select), Household Context (text input),
+  Vocabulary Preference (select), and Archetypes (chip grid, pick 1-3).
+  Editing and saving persists to GitHub.
 awaiting: user response
 
 ## Tests
@@ -40,31 +42,31 @@ result: pass
 
 ### 6. Mixers & Soft Drinks Section on Spirits Tab
 expected: In Inventory → Spirits & Bottles tab, a new section "Mixers & Soft Drinks" should appear. Adding "Tonic Water" or "Ginger Beer" via the quick-add bar should route them there automatically. Bottles in this section have the full edit form (Category, Specific Style/Type, Brand, Tier, etc.).
-result: [pending]
+result: pass
 
 ### 7. Recommender Scope Buttons — Cumulative Highlight
 expected: On the Recommender page, scope buttons (0 = Buildable, 1 = One Away, 2 = Two Away) should highlight cumulatively. Clicking "One Away" should keep button 0 also highlighted/active. Clicking "Two Away" should keep buttons 0 and 1 also active.
-result: [pending]
+result: pass
 
 ### 8. Unconstrained Scope Button
 expected: A 4th scope button "Unconstrained" should appear with a dashed border. Clicking it returns recipes ranked by mood/occasion regardless of what's in your inventory — all recipes show in the buildable bucket. Vetoes are still respected.
-result: [pending]
+result: pass
 
 ### 9. Vetoes Panel in Recommender Sidebar
 expected: The Recommender sidebar should have a "Vetoes" section showing your vetoed ingredients as chips. Clicking a veto chip toggles it (bypassed vetoes show with strikethrough). Bypassing a veto re-runs the recommendations for that session. Navigating away and back resets all vetoes to enforced.
-result: [pending]
+result: pass
 
 ### 10. Favorites and Wishlist Buttons on Recipe Cards
 expected: Each recipe card in the Recommender should have ♥ and ☆ icon buttons (top-right area of card). Clicking ♥ saves the recipe to Favorites; clicking ☆ adds to Wishlist. Clicking ♥ on a recipe already in Favorites shows "Already in Favorites" toast. The saved recipe should appear in Recipes → Favorites.
-result: [pending]
+result: pass
 
 ### 11. Army & Navy in Recommender
 expected: If you have Gin, fresh lemon juice (or lemons), and Orgeat in inventory, "Army & Navy" should appear as a buildable recipe in the Recommender. It should also appear in your Favorites (♥) in the Recipes view.
-result: [pending]
+result: pass
 
 ### 12. Bottle Edit Form Labels — Category and Specific Style/Type
 expected: When editing any bottle, the first field label should read "Category" (not "Style") and the second should read "Specific Style/Type" (not "Type"). Category has placeholder "Broad category…" and Specific Style/Type has placeholder "e.g. Single Barrel, Cask Strength, Espadín".
-result: [pending]
+result: pass
 
 ### 13. Profile Tab — Drinking Style Section
 expected: The Profile tab should have a collapsible "Drinking Style" section at the bottom. Expanding it shows: Drinking Frequency (select), Household Context (text input), Vocabulary Preference (select), and Archetypes (chip grid, pick 1-3). Editing and saving persists to GitHub.
