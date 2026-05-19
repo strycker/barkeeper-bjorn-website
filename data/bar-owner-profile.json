@@ -8,7 +8,7 @@
   "flavor_profile": {
     "axes": {
       "sweetness": {
-        "position": 0.22,
+        "position": 0.09,
         "confidence": "Tentative",
         "last_evaluated": "2026-05-19"
       },
