@@ -9,12 +9,13 @@ updated: 2026-05-19T00:00:00Z
 ## Current Test
 <!-- OVERWRITE each test - shows where we are -->
 
-number: 9
-name: Vetoes Panel in Recommender Sidebar
+number: 10
+name: Favorites and Wishlist Buttons on Recipe Cards
 expected: |
-  The Recommender sidebar should have a "Vetoes" section showing vetoed ingredients as chips.
-  Clicking a veto chip toggles it (bypassed vetoes show with strikethrough).
-  Navigating away and back resets all vetoes to enforced.
+  Each recipe card in the Recommender should have ♥ and ☆ icon buttons.
+  Clicking ♥ saves to Favorites; clicking ☆ adds to Wishlist.
+  Clicking ♥ on an already-favorited recipe shows "Already in Favorites" toast.
+  The saved recipe should appear in Recipes → Favorites.
 awaiting: user response
 
 ## Tests
@@ -53,7 +54,7 @@ result: pass
 
 ### 9. Vetoes Panel in Recommender Sidebar
 expected: The Recommender sidebar should have a "Vetoes" section showing your vetoed ingredients as chips. Clicking a veto chip toggles it (bypassed vetoes show with strikethrough). Bypassing a veto re-runs the recommendations for that session. Navigating away and back resets all vetoes to enforced.
-result: [pending]
+result: pass
 
 ### 10. Favorites and Wishlist Buttons on Recipe Cards
 expected: Each recipe card in the Recommender should have ♥ and ☆ icon buttons (top-right area of card). Clicking ♥ saves the recipe to Favorites; clicking ☆ adds to Wishlist. Clicking ♥ on a recipe already in Favorites shows "Already in Favorites" toast. The saved recipe should appear in Recipes → Favorites.
