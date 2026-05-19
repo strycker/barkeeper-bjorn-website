@@ -14,6 +14,7 @@ const ProfileView = (() => {
   // Axis values for radar: array of 0..1 indexed same as AXES
   let _values = AXES.map(() => null);
   let _dirty = false;
+  let _inventoryDirty = false;
 
   function render(container) {
     const profile  = State.get('profile') || {};
@@ -345,7 +346,7 @@ const ProfileView = (() => {
         <div style="margin-bottom:14px;">
           <div style="font-size:0.78rem;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;">Archetypes</div>
           <div style="display:flex;flex-wrap:wrap;gap:6px;">
-            ${archetypes.map(a => `<span class="badge badge-amber">${Utils.escapeHtml(a)}</span>`).join('')}
+            ${archetypes.map(a => `<span class="badge badge-amber">${Utils.escapeHtml(a.name || a)}</span>`).join('')}
           </div>
         </div>` : ''}
 
@@ -366,16 +367,60 @@ const ProfileView = (() => {
         </div>
       </div>
 
-      ${profile.vetoes?.disliked_ingredients?.length ? `
-        <div>
-          <div style="font-size:0.78rem;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;">Vetoes</div>
-          <div style="display:flex;flex-wrap:wrap;gap:4px;">
-            ${profile.vetoes.disliked_ingredients.map(v => `
-              <span style="font-size:0.82rem;background:rgba(224,85,85,0.1);border:1px solid rgba(224,85,85,0.2);color:var(--red);padding:2px 8px;border-radius:3px;">
-                ${Utils.escapeHtml(v)}
-              </span>`).join('')}
-          </div>
-        </div>` : ''}`;
+      <div id="profile-vetoes-section"></div>`;
+
+    renderVetoesSection(container);
+  }
+
+  function renderVetoesSection(container) {
+    const el = container.querySelector('#profile-vetoes-section');
+    if (!el) return;
+    const vetoes = State.get('inventory')?.vetoes?.disliked_ingredients || [];
+    el.innerHTML = `
+      <div style="margin-top:2px;">
+        <div style="font-size:0.78rem;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px;">Vetoes</div>
+        <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px;" id="veto-chips">
+          ${vetoes.map((v, i) => `
+            <span style="display:inline-flex;align-items:center;gap:4px;font-size:0.82rem;background:rgba(224,85,85,0.1);border:1px solid rgba(224,85,85,0.2);color:var(--red);padding:2px 6px 2px 8px;border-radius:3px;">
+              ${Utils.escapeHtml(v)}
+              <button data-veto-index="${i}" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:1rem;line-height:1;padding:0;" aria-label="Remove ${Utils.escapeHtml(v)}">×</button>
+            </span>`).join('')}
+          ${vetoes.length === 0 ? '<span style="font-size:0.82rem;color:var(--text-muted);font-style:italic;">None</span>' : ''}
+        </div>
+        <div style="display:flex;gap:6px;">
+          <input type="text" id="veto-input" placeholder="Add veto (e.g. Blue Curaçao, Milk)" style="flex:1;font-size:0.85rem;">
+          <button class="btn btn-secondary btn-sm" id="veto-add-btn">+ Add</button>
+        </div>
+      </div>`;
+
+    el.querySelectorAll('[data-veto-index]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.vetoIndex, 10);
+        State.patch('inventory', inv => {
+          inv.vetoes = inv.vetoes || {};
+          inv.vetoes.disliked_ingredients = (inv.vetoes.disliked_ingredients || []).filter((_, i) => i !== idx);
+        });
+        _inventoryDirty = true;
+        markDirty();
+        renderVetoesSection(container);
+      });
+    });
+
+    const input = el.querySelector('#veto-input');
+    const addVeto = () => {
+      const val = input.value.trim();
+      if (!val) return;
+      State.patch('inventory', inv => {
+        inv.vetoes = inv.vetoes || {};
+        inv.vetoes.disliked_ingredients = inv.vetoes.disliked_ingredients || [];
+        if (!inv.vetoes.disliked_ingredients.includes(val)) inv.vetoes.disliked_ingredients.push(val);
+      });
+      _inventoryDirty = true;
+      input.value = '';
+      renderVetoesSection(container);
+    };
+    el.querySelector('#veto-add-btn').addEventListener('click', addVeto);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addVeto(); } });
   }
 
   // ─── Identity Section ────────────────────────────────────────────
@@ -524,8 +569,11 @@ const ProfileView = (() => {
     const p = State.get('profile');
     p.last_updated = Utils.today();
     try {
-      await State.save('profile', 'Update flavor profile via Barkeeper Bjorn web UI');
+      const saves = [State.save('profile', 'Update flavor profile via Barkeeper Bjorn web UI')];
+      if (_inventoryDirty) saves.push(State.save('inventory', 'Update vetoes via Barkeeper Bjorn profile'));
+      await Promise.all(saves);
       _dirty = false;
+      _inventoryDirty = false;
       const bar = document.getElementById('profile-save-bar');
       if (bar) bar.style.display = 'none';
       Utils.showToast('Profile saved to GitHub ✓');

@@ -134,6 +134,7 @@ Requirements for these phases are defined in ROADMAP.md. They are not yet broken
 - **REC-DB-01**: Expand classics-db.js to 1000+ cocktail recipes so that users with extensive bars still see meaningful "One Away" and "Two Away" results. Current DB is too small relative to a well-stocked bar. New recipes should span all major spirit categories and include obscure/craft classics, tiki, contemporary sours, highballs, stirred spirit-forward drinks, low-ABV, and non-alcoholic. Captured 2026-05-19.
 - **RECIPE-FAV-01**: Remove buttons on Favorites and Wishlist tabs — user should be able to remove a recipe directly from the Favorites tab (without going back to Recommender), and similarly remove from Wishlist tab. Each chip/card should have an accessible remove/delete control inline. Captured 2026-05-19.
 - **RECIPE-DETAIL-01**: Recipe chips should be clickable to open a full recipe detail view — showing name, background/description, full ingredient list with measurements, instructions, glassware, garnish, and any notes. Currently chips are not interactive and only show main ingredients. Should work for both Originals and Favorites tabs. Captured 2026-05-19.
+- **VETO-UX-01**: Improve vetoes UX across the app — (1) autocomplete suggestions for common disliked ingredients and allergens (gluten, dairy, nuts, sulfites, etc.) when typing in the veto input; (2) veto management accessible from Settings page in addition to Profile and Inventory; (3) consistent veto UI (chips with remove buttons) wherever vetoes appear. Captured 2026-05-19.
 
 ---
 
