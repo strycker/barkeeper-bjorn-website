@@ -9,11 +9,11 @@ updated: 2026-05-19T00:00:00Z
 ## Current Test
 <!-- OVERWRITE each test - shows where we are -->
 
-number: 3
-name: Subtype and Region Fields Appear
+number: 6
+name: Mixers & Soft Drinks Section on Spirits Tab
 expected: |
-  In the bottle edit form (top section), a "Sub-type" text input should appear.
-  In the expanded "More fields" section, both "Country" and "Region" inputs should appear.
+  In Inventory → Spirits & Bottles tab, a "Mixers & Soft Drinks" section should appear.
+  Adding "Tonic Water" or "Ginger Beer" via the quick-add bar should route them there automatically.
 awaiting: user response
 
 ## Tests
@@ -28,15 +28,15 @@ result: pass
 
 ### 3. Subtype and Region Fields Appear
 expected: In the bottle edit form (top section), a "Sub-type" text input should appear (e.g. placeholder "Terroir, Navy Strength, Barrel-Aged"). In the expanded "More fields" section, both "Country" and "Region" inputs should appear (e.g. Country: "Scotland", Region: "Speyside"). These are separate fields.
-result: [pending]
+result: pass
 
 ### 4. Category Change Moves Chip
 expected: Edit a bottle. Change its Category to a different one (e.g. change a vermouth from "Vermouths & Fortified Wines" to "Whiskeys & Brown Spirits"). Click Save. The chip should disappear from its original section and appear in the new section without requiring a page reload.
-result: [pending]
+result: pass
 
 ### 5. UTF-8 Characters Save Correctly
 expected: Add a bottle in the Rum section called "Cachaça". Save to GitHub. Reload the page. The bottle should display as "Cachaça" — not "CachaÃ§a" or any other garbled form.
-result: [pending]
+result: pass
 
 ### 6. Mixers & Soft Drinks Section on Spirits Tab
 expected: In Inventory → Spirits & Bottles tab, a new section "Mixers & Soft Drinks" should appear. Adding "Tonic Water" or "Ginger Beer" via the quick-add bar should route them there automatically. Bottles in this section have the full edit form (Category, Specific Style/Type, Brand, Tier, etc.).
