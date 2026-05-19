@@ -21,7 +21,7 @@ const OnboardingView = (() => {
     'your_name', 'location', 'background', 'equipment',
     'inventory_paste',
     ...AXES.map(a => `axis_${a.key}`),
-    'smoke', 'done',
+    'smoke', 'about_drinking_style', 'done',
   ];
 
   function render(container) {
@@ -76,6 +76,7 @@ const OnboardingView = (() => {
     if (stepId === 'equipment')           return renderEquipment(body, container);
     if (stepId === 'inventory_paste')     return renderInventoryPaste(body, container);
     if (stepId === 'smoke')               return renderSmoke(body, container);
+    if (stepId === 'about_drinking_style') return renderAboutDrinkingStyle(body, container);
     if (stepId === 'done')                return renderDone(body, container);
     if (stepId.startsWith('axis_')) {
       const axisKey = stepId.replace('axis_', '');
@@ -475,6 +476,81 @@ const OnboardingView = (() => {
     });
   }
 
+  function renderAboutDrinkingStyle(body, container) {
+    body.innerHTML = `
+      <h3>About Your Drinking Style — optional</h3>
+      <p class="muted">Helps your bartender tune suggestions. Skip if you'd rather not.</p>
+      <div class="form-group">
+        <label>How often do you make cocktails at home?</label>
+        <select id="wiz-ds-freq">
+          ${['','daily','several times a week','weekly','occasionally','rarely']
+            .map(o => `<option value="${Utils.escapeHtml(o)}" ${_answers.drinking_frequency === o ? 'selected' : ''}>${o || '—'}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Household context</label>
+        <input type="text" id="wiz-ds-house" placeholder="e.g. Couple, hosting often"
+          value="${Utils.escapeHtml(_answers.household_context || '')}">
+      </div>
+      <div class="form-group">
+        <label>How do you like your bartender to talk?</label>
+        <select id="wiz-ds-vocab">
+          ${['','casual','balanced','technical']
+            .map(o => `<option value="${Utils.escapeHtml(o)}" ${_answers.vocabulary_preference === o ? 'selected' : ''}>${o || '—'}</option>`).join('')}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Pick 1–3 archetypes that describe you</label>
+        <div id="wiz-ds-archetypes" class="archetype-grid"></div>
+      </div>`;
+
+    const ARCHETYPES = [
+      { name: 'The Minimalist',   description: 'Three-ingredient classics, clean execution, no fuss.' },
+      { name: 'The Experimenter', description: 'New ingredients, unusual techniques, willing to risk a miss.' },
+      { name: 'The Host',         description: 'Crowd-pleasers, batched builds, easy to serve at scale.' },
+      { name: 'The Purist',       description: 'Traditional recipes, exact proportions, respect for the canon.' },
+      { name: 'The Adventurer',   description: 'Bold flavors, smoke, bitter, unusual spirits.' },
+      { name: 'The Classicist',   description: 'Pre-Prohibition spec, vintage glassware, period-correct.' },
+    ];
+
+    const selected = new Set((_answers.archetypes || []).map(a => a.name));
+    const grid = body.querySelector('#wiz-ds-archetypes');
+    grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;';
+    ARCHETYPES.forEach(a => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'rec-filter-chip' + (selected.has(a.name) ? ' active' : '');
+      chip.title = a.description;
+      chip.textContent = a.name;
+      chip.addEventListener('click', () => {
+        if (selected.has(a.name)) selected.delete(a.name);
+        else if (selected.size < 3) selected.add(a.name);
+        else return; // cap at 3
+        _answers.archetypes = ARCHETYPES.filter(x => selected.has(x.name));
+        chip.classList.toggle('active');
+      });
+      grid.appendChild(chip);
+    });
+
+    navButtons(body, container, {
+      nextFn: () => {
+        _answers.drinking_frequency    = body.querySelector('#wiz-ds-freq').value;
+        _answers.household_context     = body.querySelector('#wiz-ds-house').value.trim();
+        _answers.vocabulary_preference = body.querySelector('#wiz-ds-vocab').value;
+        // archetypes already maintained on chip click
+        _step++; renderStep(container);
+      },
+      skipFn: () => {
+        State.patch('profile', p => {
+          if (!p.identity) p.identity = {};
+          p.identity._skipped_about_drinking_style = true;
+        });
+        State.save('profile', 'Skip onboarding step: about_drinking_style');
+        _step++; renderStep(container);
+      }
+    });
+  }
+
   function renderSmoke(body, container) {
     body.innerHTML = `<div class="wizard-question">A few bonus preferences — what's your relationship with smoke in cocktails?</div>`;
 
@@ -559,9 +635,24 @@ const OnboardingView = (() => {
     if (_answers.profession)         profile.background.profession        = _answers.profession;
     if (_answers.drinking_frequency) profile.background.drinking_frequency = _answers.drinking_frequency;
     if (_answers.typical_context)    profile.background.typical_context   = _answers.typical_context;
+    if (_answers.household_context != null)     profile.background.household_context     = _answers.household_context;
+    if (_answers.vocabulary_preference != null) profile.background.vocabulary_preference = _answers.vocabulary_preference;
 
-    // Equipment
-    if (_answers.equipment) profile.equipment = _answers.equipment;
+    // Rich profile fields from Step 7
+    if (_answers.archetypes)                    profile.archetypes = _answers.archetypes;
+
+    // Equipment — DATA-01: write to inventory.json only (not profile)
+    if (_answers.equipment) {
+      State.patch('inventory', inv => {
+        inv.equipment = inv.equipment || {};
+        // Preserve any existing strainers array
+        const existingStrainers = inv.equipment.strainers || [];
+        Object.assign(inv.equipment, _answers.equipment);
+        if (!inv.equipment.strainers || !Array.isArray(inv.equipment.strainers)) {
+          inv.equipment.strainers = existingStrainers;
+        }
+      });
+    }
 
     // Flavor axes
     if (!profile.flavor_profile) profile.flavor_profile = {};
@@ -614,7 +705,10 @@ const OnboardingView = (() => {
       inv.unassigned = (inv.unassigned || []).concat(_answers.inventory_paste);
       inv.last_updated = Utils.today();
       State.set('inventory', inv);
-      await State.save('inventory', 'Add inventory from onboarding via Barkeeper Bjorn');
+    }
+    // Save inventory if equipment or inventory_paste was collected
+    if (_answers.equipment || (_answers.inventory_paste && _answers.inventory_paste.length > 0)) {
+      await State.save('inventory', 'Update inventory from onboarding via Barkeeper Bjorn');
     }
   }
 

@@ -83,7 +83,10 @@ const ProfileView = (() => {
       ${profile.evolution_log?.length ? `
         <div class="divider"></div>
         <h2>Evolution Log</h2>
-        <div id="evo-log"></div>` : ''}`;
+        <div id="evo-log"></div>` : ''}
+
+      <div class="divider"></div>
+      <div id="drinking-style-section"></div>`;
 
     document.getElementById('profile-save-btn')?.addEventListener('click', saveProfile);
     document.getElementById('profile-discard-btn')?.addEventListener('click', () => {
@@ -97,7 +100,17 @@ const ProfileView = (() => {
     renderProfileSummary(identity, archetypes, profile, container);
     renderIdentitySection(identity, profile, container);
     if (profile.evolution_log?.length) renderEvoLog(profile.evolution_log, container);
+    renderDrinkingStyle(profile, container);
   }
+
+  const ARCHETYPES = [
+    { name: 'The Minimalist',   description: 'Clean, simple, essential' },
+    { name: 'The Experimenter', description: 'Loves to try new things' },
+    { name: 'The Host',        description: 'Drinks for the crowd' },
+    { name: 'The Purist',      description: 'Respects tradition and craft' },
+    { name: 'The Adventurer',  description: 'Bold, unexpected combinations' },
+    { name: 'The Classicist',  description: 'Sticks to the canon' },
+  ];
 
   // ─── Radar Chart (SVG hexagon) ───────────────────────────────────
 
@@ -413,6 +426,90 @@ const ProfileView = (() => {
           ${entry.reason ? `<div style="font-size:0.82rem;color:var(--text-dim);margin-top:3px;">${Utils.escapeHtml(entry.reason)}</div>` : ''}
         </div>
       </div>`).join('');
+  }
+
+  // ─── Drinking Style ──────────────────────────────────────────────
+
+  function renderDsArchetypes(container) {
+    const grid = container.querySelector('#ds-archetypes');
+    if (!grid) return;
+    const selected = (State.get('profile').archetypes || []).map(a => a.name);
+    grid.innerHTML = ARCHETYPES.map(a => `
+      <button class="archetype-chip${selected.includes(a.name) ? ' active' : ''}"
+              data-name="${Utils.escapeHtml(a.name)}" title="${Utils.escapeHtml(a.description)}">${Utils.escapeHtml(a.name)}</button>
+    `).join('');
+    grid.querySelectorAll('.archetype-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        State.patch('profile', p => {
+          const cur = (p.archetypes || []).map(a => a.name);
+          const arch = ARCHETYPES.find(a => a.name === btn.dataset.name);
+          if (!arch) return;
+          if (cur.includes(arch.name)) {
+            p.archetypes = (p.archetypes || []).filter(a => a.name !== arch.name);
+          } else if (cur.length < 3) {
+            p.archetypes = [...(p.archetypes || []), arch];
+          }
+        });
+        markDirty();
+        renderDsArchetypes(container);
+      });
+    });
+  }
+
+  function renderDrinkingStyle(profile, container) {
+    const el = container.querySelector('#drinking-style-section');
+    if (!el) return;
+    const bg = profile.background || {};
+    const freq = bg.drinking_frequency || '';
+    const household = bg.household_context || '';
+    const vocab = bg.vocabulary_preference || '';
+
+    el.innerHTML = `
+      <details class="profile-drinking-style">
+        <summary>Drinking Style</summary>
+        <div class="form-group" style="margin-top:14px;">
+          <label for="ds-freq">Drinking frequency</label>
+          <select id="ds-freq">
+            <option value="">—</option>
+            ${['daily','several times a week','weekly','occasionally','rarely'].map(o =>
+              `<option value="${Utils.escapeHtml(o)}" ${freq === o ? 'selected' : ''}>${Utils.escapeHtml(o)}</option>`
+            ).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="ds-household">Household context</label>
+          <input type="text" id="ds-household" placeholder="e.g. Couple, hosting often"
+            value="${Utils.escapeHtml(household)}">
+        </div>
+        <div class="form-group">
+          <label for="ds-vocab">Vocabulary preference</label>
+          <select id="ds-vocab">
+            <option value="">—</option>
+            ${['casual','balanced','technical'].map(o =>
+              `<option value="${Utils.escapeHtml(o)}" ${vocab === o ? 'selected' : ''}>${Utils.escapeHtml(o)}</option>`
+            ).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Archetypes (pick 1–3)</label>
+          <div id="ds-archetypes" class="archetype-grid"></div>
+        </div>
+      </details>`;
+
+    renderDsArchetypes(container);
+
+    el.querySelector('#ds-freq')?.addEventListener('change', e => {
+      State.patch('profile', p => { p.background = p.background || {}; p.background.drinking_frequency = e.target.value; });
+      markDirty();
+    });
+    el.querySelector('#ds-household')?.addEventListener('input', e => {
+      State.patch('profile', p => { p.background = p.background || {}; p.background.household_context = e.target.value; });
+      markDirty();
+    });
+    el.querySelector('#ds-vocab')?.addEventListener('change', e => {
+      State.patch('profile', p => { p.background = p.background || {}; p.background.vocabulary_preference = e.target.value; });
+      markDirty();
+    });
   }
 
   // ─── Save ────────────────────────────────────────────────────────
