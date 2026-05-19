@@ -9,12 +9,12 @@ updated: 2026-05-19T00:00:00Z
 ## Current Test
 <!-- OVERWRITE each test - shows where we are -->
 
-number: 8
-name: Unconstrained Scope Button
+number: 9
+name: Vetoes Panel in Recommender Sidebar
 expected: |
-  A 4th scope button "Unconstrained" should appear with a dashed border.
-  Clicking it returns recipes ranked by mood/occasion regardless of inventory.
-  Vetoes are still respected.
+  The Recommender sidebar should have a "Vetoes" section showing vetoed ingredients as chips.
+  Clicking a veto chip toggles it (bypassed vetoes show with strikethrough).
+  Navigating away and back resets all vetoes to enforced.
 awaiting: user response
 
 ## Tests
@@ -49,7 +49,7 @@ result: pass
 
 ### 8. Unconstrained Scope Button
 expected: A 4th scope button "Unconstrained" should appear with a dashed border. Clicking it returns recipes ranked by mood/occasion regardless of what's in your inventory — all recipes show in the buildable bucket. Vetoes are still respected.
-result: [pending]
+result: pass
 
 ### 9. Vetoes Panel in Recommender Sidebar
 expected: The Recommender sidebar should have a "Vetoes" section showing your vetoed ingredients as chips. Clicking a veto chip toggles it (bypassed vetoes show with strikethrough). Bypassing a veto re-runs the recommendations for that session. Navigating away and back resets all vetoes to enforced.
