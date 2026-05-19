@@ -523,19 +523,5 @@
       "Fine Mesh"
     ]
   },
-  "mixers_bottles": [
-    {
-      "style": "Mixers & Soft Drinks",
-      "type": "Tonic Water",
-      "brand": "",
-      "tier": "",
-      "best_for": "",
-      "notes": "",
-      "created_at": "2026-05-19T03:11:25.504Z",
-      "updated_at": "2026-05-19T03:13:01.678Z",
-      "subtype": "",
-      "nationality": "",
-      "region": ""
-    }
-  ]
+  "mixers_bottles": []
 }
