@@ -64,20 +64,28 @@
   },
   "archetypes": [
     {
+      "name": "The Experimenter",
+      "description": "New ingredients, unusual techniques, willing to risk a miss."
+    },
+    {
+      "name": "The Host",
+      "description": "Crowd-pleasers, batched builds, easy to serve at scale."
+    },
+    {
       "name": "Sophisticated",
-      "description": "Well-developed palate; rules out specific ingredients (Chartreuse, egg) based on taste rather than unfamiliarity"
+      "description": "Refined palate, premium spirits, elevated presentation."
     },
     {
       "name": "Curious / Studious",
-      "description": "Wants to know why a drink works, engages with structural rationale, asks for 'ingredient logic' not just recipes"
+      "description": "Deep dive into history, technique, and ingredient provenance."
     },
     {
-      "name": "Bartender's bartender",
-      "description": "Designs originals, maintains a documented archive, treats this as an ongoing creative discipline"
+      "name": "Bartender's Bartender",
+      "description": "Industry respect, precise technique, knows all the classics."
     },
     {
-      "name": "Spirit-forward / Old-school",
-      "description": "Manhattan-and-Old-Fashioned territory at the core, with modern willingness to experiment around the edges"
+      "name": "Spirit-forward / Old-School",
+      "description": "Spirit does the talking — minimal dilution, strong builds."
     }
   ],
   "archetype_notes": "Glenn has the discipline of a classicist with the curiosity of a modernist. Not frou-frou, not theatrical, not minimalist. Treats cocktail-making the way he probably treats predictive modeling Ã¢ÂÂ structural, evidence-based, iterative, and willing to reject results that don't hold up.",
