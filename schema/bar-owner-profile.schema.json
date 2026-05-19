@@ -20,16 +20,17 @@
         "profession": { "type": "string" },
         "academic_background": { "type": "string" },
         "vocabulary_preference": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Domains where technical language is welcome (physics, finance, medicine, etc.)"
+          "type": "string",
+          "default": "",
+          "description": "Preferred vocabulary level: casual, balanced, or technical."
         },
         "drinking_frequency": {
           "type": "string",
-          "enum": ["occasional", "weekly", "regular", "most evenings", "other"]
+          "default": "",
+          "description": "How often drinks are made at home: daily, several times a week, weekly, occasionally, rarely."
         },
         "typical_context": { "type": "string", "description": "Solo evenings, dinner parties, hosting guests, etc." },
-        "household_context": { "type": "string" },
+        "household_context": { "type": "string", "default": "" },
         "serving_context": {
           "type": "object",
           "properties": {
@@ -120,8 +121,16 @@
     },
     "archetypes": {
       "type": "array",
-      "items": { "type": "string" },
-      "description": "2-4 drinker-archetype descriptors assigned by the agent."
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name":        { "type": "string" },
+          "description": { "type": "string" }
+        }
+      },
+      "default": [],
+      "description": "Drinker archetypes selected during onboarding or Profile tab (1–3 items)."
     },
     "vetoes": {
       "type": "object",
@@ -198,8 +207,8 @@
       "type": "object",
       "properties": {
         "position": {
-          "type": "string",
-          "description": "e.g., 'Strong A', 'Lean A', 'Middle', 'Lean B', 'Strong B', or nuanced description"
+          "type": ["number", "string"],
+          "description": "Float 0.0–1.0 (canonical). Legacy string labels ('Strong A','Lean A','Middle','Lean B','Strong B') are migrated to floats by normalize.js on load."
         },
         "confidence": { "type": "string", "enum": ["High", "Medium", "Tentative", "—"] },
         "last_evaluated": { "type": ["string", "null"], "format": "date" }

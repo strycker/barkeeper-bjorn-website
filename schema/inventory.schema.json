@@ -144,11 +144,14 @@
     "equipment": {
       "type": "object",
       "properties": {
-        "strainers": {
-          "type": "array",
-          "items": { "type": "string", "enum": ["Hawthorne", "Julep", "Fine Mesh", "Conical"] },
-          "description": "Bar strainers owned."
-        }
+        "strainers":    { "type": "array", "items": { "type": "string" }, "description": "Bar strainers owned." },
+        "shaker":       { "type": "string", "description": "Shaker type owned (Boston two-piece, cobbler, none)." },
+        "mixing_glass": { "type": "boolean" },
+        "jigger":       { "type": "boolean" },
+        "bar_spoon":    { "type": "boolean" },
+        "strainer":     { "type": "string", "description": "Primary strainer style (Hawthorne, Julep, fine mesh, multiple, none)." },
+        "citrus_press": { "type": "boolean" },
+        "ice_setup":    { "type": "string", "description": "Ice setup (standard cubes, large format, crushed, combination, none)." }
       }
     }
   },

@@ -164,7 +164,7 @@ const Normalize = (() => {
   function barkeeper(data) {
     const src = ensureObject(data);
     const id = ensureObject(src.identity);
-    return {
+    const out = {
       ...src,
       identity: {
         name:             ensureString(id.name) || 'Barkeeper Bjorn',
@@ -174,12 +174,37 @@ const Normalize = (() => {
       },
       last_updated: ensureString(src.last_updated) || isoToday(),
     };
+    // DATA-01: strip equipment from barkeeper — inventory.json is the sole source of truth
+    delete out.equipment;
+    out.avatar_url              = ensureString(out.avatar_url);
+    out.personality_description = ensureString(out.personality_description);
+    out.cocktail_naming_style   = ensureString(out.cocktail_naming_style);
+    out.image_gen_style         = ensureString(out.image_gen_style);
+    out.signoff                 = ensureString(out.signoff);
+    out.behavioral_rules        = ensureArray(out.behavioral_rules).filter(r => typeof r === 'string' && r.length);
+    return out;
   }
+
+  // DATA-02: axis string→float position map
+  const POS_MAP = { 'Strong A': 0, 'Lean A': 0.25, 'Middle': 0.5, 'Lean B': 0.75, 'Strong B': 1 };
+  const AXIS_KEYS = ['sweetness', 'acid', 'strength', 'complexity', 'season', 'risk'];
 
   function profile(data) {
     const src = ensureObject(data);
-    const fp  = ensureObject(src.flavor_profile);
-    return {
+
+    // DATA-02: migrate string axis positions to floats
+    const fp   = ensureObject(src.flavor_profile);
+    const axes = ensureObject(fp.axes);
+    for (const k of AXIS_KEYS) {
+      const a = ensureObject(axes[k]);
+      if (typeof a.position === 'string' && POS_MAP[a.position] != null) {
+        a.position = POS_MAP[a.position];
+      }
+      axes[k] = a;
+    }
+    fp.axes = axes;
+
+    const out = {
       ...src,
       identity:       ensureObject(src.identity),
       flavor_profile: {
@@ -189,6 +214,20 @@ const Normalize = (() => {
       },
       last_updated: ensureString(src.last_updated) || isoToday(),
     };
+
+    // DATA-01: strip equipment from profile — inventory.json is the sole source of truth
+    delete out.equipment;
+
+    // DATA-03: default rich profile fields
+    const bg = ensureObject(out.background);
+    bg.drinking_frequency    = ensureString(bg.drinking_frequency);
+    bg.household_context     = ensureString(bg.household_context);
+    bg.vocabulary_preference = ensureString(bg.vocabulary_preference);
+    out.background = bg;
+
+    out.archetypes = ensureArray(out.archetypes).filter(a => a && typeof a === 'object' && typeof a.name === 'string' && a.name.length);
+
+    return out;
   }
 
   function recipes(data) {
