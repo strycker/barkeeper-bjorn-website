@@ -9,13 +9,12 @@ updated: 2026-05-19T00:00:00Z
 ## Current Test
 <!-- OVERWRITE each test - shows where we are -->
 
-number: 10
-name: Favorites and Wishlist Buttons on Recipe Cards
+number: 11
+name: Army & Navy in Recommender
 expected: |
-  Each recipe card in the Recommender should have ♥ and ☆ icon buttons.
-  Clicking ♥ saves to Favorites; clicking ☆ adds to Wishlist.
-  Clicking ♥ on an already-favorited recipe shows "Already in Favorites" toast.
-  The saved recipe should appear in Recipes → Favorites.
+  If you have Gin, fresh lemon juice (or lemons), and Orgeat in inventory,
+  "Army & Navy" should appear as a buildable recipe in the Recommender.
+  It should also appear in Recipes → Favorites.
 awaiting: user response
 
 ## Tests
@@ -58,7 +57,7 @@ result: pass
 
 ### 10. Favorites and Wishlist Buttons on Recipe Cards
 expected: Each recipe card in the Recommender should have ♥ and ☆ icon buttons (top-right area of card). Clicking ♥ saves the recipe to Favorites; clicking ☆ adds to Wishlist. Clicking ♥ on a recipe already in Favorites shows "Already in Favorites" toast. The saved recipe should appear in Recipes → Favorites.
-result: [pending]
+result: pass
 
 ### 11. Army & Navy in Recommender
 expected: If you have Gin, fresh lemon juice (or lemons), and Orgeat in inventory, "Army & Navy" should appear as a buildable recipe in the Recommender. It should also appear in your Favorites (♥) in the Recipes view.
