@@ -9,11 +9,11 @@ updated: 2026-05-19T00:00:00Z
 ## Current Test
 <!-- OVERWRITE each test - shows where we are -->
 
-number: 5
-name: UTF-8 Characters Save Correctly
+number: 6
+name: Mixers & Soft Drinks Section on Spirits Tab
 expected: |
-  Add a bottle in the Rum section called "Cachaça". Save to GitHub. Reload the page.
-  The bottle should display as "Cachaça" — not "CachaÃ§a" or any other garbled form.
+  In Inventory → Spirits & Bottles tab, a "Mixers & Soft Drinks" section should appear.
+  Adding "Tonic Water" or "Ginger Beer" via the quick-add bar should route them there automatically.
 awaiting: user response
 
 ## Tests
@@ -36,7 +36,7 @@ result: pass
 
 ### 5. UTF-8 Characters Save Correctly
 expected: Add a bottle in the Rum section called "Cachaça". Save to GitHub. Reload the page. The bottle should display as "Cachaça" — not "CachaÃ§a" or any other garbled form.
-result: [pending]
+result: pass
 
 ### 6. Mixers & Soft Drinks Section on Spirits Tab
 expected: In Inventory → Spirits & Bottles tab, a new section "Mixers & Soft Drinks" should appear. Adding "Tonic Water" or "Ginger Beer" via the quick-add bar should route them there automatically. Bottles in this section have the full edit form (Category, Specific Style/Type, Brand, Tier, etc.).
