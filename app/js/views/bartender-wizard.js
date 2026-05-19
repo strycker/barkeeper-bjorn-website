@@ -1,7 +1,7 @@
 // Bartender Customization Wizard — full persona editor at #bartender-wizard.
 // Accessible via Settings → Bartender section "Full Customization →" link (D-32).
-// Saves to barkeeper.json via State.save('barkeeper').
-// Avatar upload uses GitHubAPI.getFileSHA + GitHubAPI.writeFile (NOT uploadImage).
+// Saves to barkeeper.json via State (key: barkeeper).
+// Avatar upload: FileReader → base64 → getFileSHA → writeFile via GitHubAPI (NOT uploadImage).
 
 const BartenderWizardView = (() => {
 
@@ -101,7 +101,7 @@ const BartenderWizardView = (() => {
   }
 
   // ─── Avatar file upload ───────────────────────────────────────────────────
-  // Uses GitHubAPI.getFileSHA + GitHubAPI.writeFile — NOT the non-existent uploadImage.
+  // Uses getFileSHA + writeFile from GitHubAPI — NOT the non-existent uploadImage method.
 
   async function handleAvatarUpload() {
     if (!_selectedAvatarFile) {
