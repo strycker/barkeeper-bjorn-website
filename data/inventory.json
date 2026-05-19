@@ -522,7 +522,14 @@
   "equipment": {
     "strainers": [
       "Fine Mesh"
-    ]
+    ],
+    "shaker": "Boston two-piece",
+    "mixing_glass": true,
+    "jigger": true,
+    "bar_spoon": true,
+    "strainer": "fine mesh",
+    "citrus_press": true,
+    "ice_setup": "standard cubes"
   },
   "mixers_bottles": [
     {
