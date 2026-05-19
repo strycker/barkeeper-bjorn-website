@@ -18,7 +18,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 | 2 | Web UI UX & Settings | Shipped | 5 | 100% |
 | 3 | Content Management | Shipped | 4 | 100% |
 | 4 | Inventory & Recommender Depth | Shipped | 3 | 100% |
-| 5 | Polish, Depth & UX Tidy | In Progress | 05-04 done | 100% |
+| 5 | Polish, Depth & UX Tidy | Shipped | 05-04 done, 05-03 done | 100% |
 | 6 | AI Integration | Pending | — | 0% |
 | 7 | Portability | Pending | — | 0% |
 | 8 | Backend & Multi-User | Pending | — | 0% |
@@ -164,6 +164,14 @@ Wave 2 plans (05-03, 05-04) can also run in parallel with each other; 05-03 shou
 - CLAUDE.md preserved as-is (existing developer guidance)
 - Phases 5–7 are sequential by preference but 5 has no hard dependencies; Phase 8 depends on Phases 3–5 being stable; Phase 9 depends on Phase 8
 
+## Key Decisions (Phase 5 — 05-03)
+
+- **DATA-01: Equipment to inventory only** — onboarding routes equipment write via `State.patch('inventory')` + `State.save('inventory')`; normalize.js strips `equipment` from both profile and barkeeper on load; inventory.schema.json extended to accept all 7 onboarding fields
+- **DATA-02: Float write site** — profile.js slider handler writes `newVal` (raw float 0–1) directly; normalize.js migrates legacy string labels ('Strong A' → 0, 'Lean A' → 0.25, 'Middle' → 0.5, 'Lean B' → 0.75, 'Strong B' → 1) on load
+- **DATA-03: Step 7 placement** — `about_drinking_style` inserted after `smoke` and before `done` in STEPS array; has Skip button; archetypes cap at 3 via Set size guard
+- **DATA-03: Profile Drinking Style** — collapsible `<details>` section at bottom of Profile tab; uses `State.patch` + existing sticky save bar; no new save flow
+- **Strainers preservation** — equipment Object.assign captures existing strainers array before merge and restores it if incoming data lacks a valid array
+
 ---
 *State initialized: 2026-05-04*
-*Last activity: 2026-05-18 — Phase 5 plan 05-00 executed. TEST-CHECKLIST.md created and committed (996a371). All 13 REQ IDs covered. Wave 1 plans (05-01, 05-02) ready to execute.*
+*Last activity: 2026-05-19 — Phase 5 plan 05-03 executed. Drinking Style UI added to profile.js, equipment routed to inventory in onboarding.js. Commits: 1481fec (normalize+schemas), 5d08a7d (profile+onboarding).*
