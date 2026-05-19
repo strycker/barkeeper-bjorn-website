@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-05-18",
+  "last_updated": "2026-05-19",
   "base_spirits": {
     "whiskey": [
       {
@@ -11,7 +11,9 @@
         "notes": "",
         "nationality": "",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-18T19:23:35.808Z"
+        "updated_at": "2026-05-18T19:23:35.808Z",
+        "region": "",
+        "subtype": ""
       },
       {
         "style": "Whiskeys & Brown Spirits",
@@ -22,7 +24,9 @@
         "notes": "",
         "nationality": "Taiwan",
         "created_at": "2026-05-18T20:08:47.923Z",
-        "updated_at": "2026-05-18T20:08:47.923Z"
+        "updated_at": "2026-05-18T20:08:47.923Z",
+        "region": "",
+        "subtype": ""
       },
       {
         "style": "Whiskeys & Brown Spirits",
@@ -33,7 +37,9 @@
         "notes": "",
         "nationality": "Ireland",
         "created_at": "2026-05-18T20:08:23.098Z",
-        "updated_at": "2026-05-18T20:08:23.098Z"
+        "updated_at": "2026-05-18T20:08:23.098Z",
+        "region": "",
+        "subtype": ""
       },
       {
         "style": "Whiskeys & Brown Spirits",
@@ -44,7 +50,9 @@
         "notes": "",
         "nationality": "",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-18T20:08:56.100Z"
+        "updated_at": "2026-05-18T20:08:56.100Z",
+        "region": "",
+        "subtype": ""
       },
       {
         "style": "Dry Vermouth",
@@ -55,7 +63,9 @@
         "notes": "",
         "created_at": "2026-05-18T21:24:07.692Z",
         "updated_at": "2026-05-18T21:24:29.041Z",
-        "nationality": ""
+        "nationality": "",
+        "region": "",
+        "subtype": ""
       },
       {
         "style": "Scotch",
@@ -65,7 +75,10 @@
         "best_for": "",
         "notes": "",
         "created_at": "2026-05-18T21:24:16.508Z",
-        "updated_at": "2026-05-18T21:24:16.508Z"
+        "updated_at": "2026-05-18T21:24:16.508Z",
+        "nationality": "",
+        "region": "",
+        "subtype": ""
       }
     ],
     "brandy": [
@@ -78,7 +91,9 @@
         "notes": "",
         "nationality": "France",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-18T19:39:11.294Z"
+        "updated_at": "2026-05-18T19:39:11.294Z",
+        "region": "",
+        "subtype": ""
       },
       {
         "style": "Brandies & Cognacs",
@@ -89,7 +104,9 @@
         "notes": "",
         "nationality": "",
         "created_at": "2026-05-18T19:39:39.025Z",
-        "updated_at": "2026-05-18T19:39:39.025Z"
+        "updated_at": "2026-05-18T19:39:39.025Z",
+        "region": "",
+        "subtype": ""
       }
     ],
     "rum": [
@@ -102,7 +119,9 @@
         "notes": "",
         "nationality": "Jamaica",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-18T19:39:51.575Z"
+        "updated_at": "2026-05-18T19:39:51.575Z",
+        "region": "",
+        "subtype": ""
       },
       {
         "style": "Rums & Cane Spirits",
@@ -113,7 +132,9 @@
         "notes": "",
         "nationality": "Jamaica",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-18T19:40:00.578Z"
+        "updated_at": "2026-05-18T19:40:00.578Z",
+        "region": "",
+        "subtype": ""
       },
       {
         "style": "Rums & Cane Spirits",
@@ -124,7 +145,9 @@
         "notes": "",
         "created_at": "2026-05-18T21:15:38.951Z",
         "updated_at": "2026-05-18T21:23:16.109Z",
-        "nationality": "Brazil"
+        "nationality": "Brazil",
+        "region": "",
+        "subtype": ""
       }
     ],
     "agave": [
@@ -137,7 +160,9 @@
         "notes": "",
         "nationality": "Oaxaca, Mexico",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-18T19:40:19.941Z"
+        "updated_at": "2026-05-18T19:40:19.941Z",
+        "region": "",
+        "subtype": ""
       }
     ],
     "white_spirits": [
@@ -150,7 +175,9 @@
         "notes": "Terroir is the subtype",
         "nationality": "California, USA",
         "created_at": "2026-05-18T20:11:25.503Z",
-        "updated_at": "2026-05-18T20:29:17.529Z"
+        "updated_at": "2026-05-18T20:29:17.529Z",
+        "region": "",
+        "subtype": ""
       },
       {
         "style": "Gins / Vodkas / White Spirits",
@@ -161,7 +188,9 @@
         "notes": "",
         "created_at": "2026-05-18T20:27:25.156Z",
         "updated_at": "2026-05-18T20:29:36.343Z",
-        "nationality": "Iceland"
+        "nationality": "Iceland",
+        "region": "",
+        "subtype": ""
       }
     ],
     "other": []
@@ -177,7 +206,9 @@
       "notes": "",
       "nationality": "Italy",
       "created_at": "2026-05-15T20:13:12.041Z",
-      "updated_at": "2026-05-18T19:53:42.693Z"
+      "updated_at": "2026-05-18T19:53:42.693Z",
+      "region": "",
+      "subtype": ""
     },
     {
       "style": "Vermouths & Fortified Wines",
@@ -188,7 +219,9 @@
       "notes": "",
       "nationality": "",
       "created_at": "2026-05-15T20:13:12.041Z",
-      "updated_at": "2026-05-18T19:53:52.360Z"
+      "updated_at": "2026-05-18T19:53:52.360Z",
+      "region": "",
+      "subtype": ""
     },
     {
       "style": "Vermouths & Fortified Wines",
@@ -199,7 +232,9 @@
       "notes": "",
       "nationality": "France",
       "created_at": "2026-05-15T20:13:12.041Z",
-      "updated_at": "2026-05-18T19:53:59.360Z"
+      "updated_at": "2026-05-18T19:53:59.360Z",
+      "region": "",
+      "subtype": ""
     },
     {
       "style": "Other / Misc.",
@@ -210,7 +245,9 @@
       "notes": "",
       "created_at": "2026-05-18T21:23:40.910Z",
       "updated_at": "2026-05-18T21:23:48.825Z",
-      "nationality": ""
+      "nationality": "",
+      "region": "",
+      "subtype": ""
     }
   ],
   "liqueurs_and_cordials": {
@@ -224,18 +261,9 @@
         "notes": "",
         "nationality": "France",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-18T00:00:00.000Z"
-      },
-      {
-        "style": "Other / Misc.",
-        "type": "Crème de Cassis",
-        "brand": "",
-        "tier": "",
-        "best_for": "",
-        "notes": "",
-        "created_at": "2026-05-18T21:26:21.979Z",
-        "updated_at": "2026-05-18T21:26:27.395Z",
-        "nationality": ""
+        "updated_at": "2026-05-18T00:00:00.000Z",
+        "region": "",
+        "subtype": ""
       },
       {
         "style": "Other / Misc.",
@@ -245,7 +273,10 @@
         "best_for": "",
         "notes": "",
         "created_at": "2026-05-18T21:26:36.177Z",
-        "updated_at": "2026-05-18T21:26:36.177Z"
+        "updated_at": "2026-05-18T21:26:36.177Z",
+        "nationality": "",
+        "region": "",
+        "subtype": ""
       },
       {
         "style": "Other / Misc.",
@@ -256,7 +287,9 @@
         "notes": "",
         "created_at": "2026-05-18T21:27:18.262Z",
         "updated_at": "2026-05-18T21:27:25.027Z",
-        "nationality": ""
+        "nationality": "",
+        "region": "",
+        "subtype": ""
       },
       {
         "style": "Other / Misc.",
@@ -267,7 +300,9 @@
         "notes": "",
         "created_at": "2026-05-18T21:27:40.795Z",
         "updated_at": "2026-05-18T21:27:55.110Z",
-        "nationality": "Japan"
+        "nationality": "Japan",
+        "region": "",
+        "subtype": ""
       },
       {
         "style": "Other / Misc.",
@@ -278,7 +313,9 @@
         "notes": "",
         "created_at": "2026-05-18T21:28:41.262Z",
         "updated_at": "2026-05-18T21:28:52.429Z",
-        "nationality": "Taiwan"
+        "nationality": "Taiwan",
+        "region": "",
+        "subtype": ""
       }
     ],
     "nut_coffee": [
@@ -291,7 +328,9 @@
         "notes": "",
         "nationality": "",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-18T00:00:00.000Z"
+        "updated_at": "2026-05-18T00:00:00.000Z",
+        "region": "",
+        "subtype": ""
       },
       {
         "style": "Other / Misc.",
@@ -302,7 +341,9 @@
         "notes": "",
         "created_at": "2026-05-18T21:29:15.247Z",
         "updated_at": "2026-05-18T21:29:29.062Z",
-        "nationality": ""
+        "nationality": "",
+        "region": "",
+        "subtype": ""
       }
     ],
     "herbal": [
@@ -315,7 +356,22 @@
         "notes": "",
         "nationality": "Italy",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-18T00:00:00.000Z"
+        "updated_at": "2026-05-18T00:00:00.000Z",
+        "region": "",
+        "subtype": ""
+      },
+      {
+        "style": "Liqueurs & Cordials",
+        "type": "Crème de Cassis",
+        "brand": "",
+        "tier": "",
+        "best_for": "",
+        "notes": "",
+        "created_at": "2026-05-18T21:26:21.979Z",
+        "updated_at": "2026-05-19T01:58:56.565Z",
+        "nationality": "",
+        "region": "",
+        "subtype": ""
       }
     ],
     "specialty_regional": [
@@ -328,7 +384,9 @@
         "notes": "",
         "nationality": "Italy",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-18T00:00:00.000Z"
+        "updated_at": "2026-05-18T00:00:00.000Z",
+        "region": "",
+        "subtype": ""
       },
       {
         "style": "Other / Misc.",
@@ -338,7 +396,10 @@
         "best_for": "",
         "notes": "",
         "created_at": "2026-05-18T21:29:45.234Z",
-        "updated_at": "2026-05-18T21:29:45.234Z"
+        "updated_at": "2026-05-18T21:29:45.234Z",
+        "nationality": "",
+        "region": "",
+        "subtype": ""
       },
       {
         "style": "Other / Misc.",
@@ -349,7 +410,9 @@
         "notes": "Quebec ice cider",
         "created_at": "2026-05-18T21:29:53.721Z",
         "updated_at": "2026-05-18T21:30:10.135Z",
-        "nationality": "Montreal, Canada"
+        "nationality": "Montreal, Canada",
+        "region": "",
+        "subtype": ""
       }
     ]
   },
@@ -364,7 +427,9 @@
         "notes": "",
         "nationality": "Trinidad",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-18T00:00:00.000Z"
+        "updated_at": "2026-05-18T00:00:00.000Z",
+        "region": "",
+        "subtype": ""
       }
     ],
     "aromatic_smoke": [],
@@ -379,7 +444,9 @@
         "notes": "",
         "nationality": "",
         "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-18T20:09:44.552Z"
+        "updated_at": "2026-05-18T20:09:44.552Z",
+        "region": "",
+        "subtype": ""
       }
     ],
     "other": []
@@ -394,7 +461,9 @@
       "notes": "",
       "nationality": "",
       "created_at": "2026-05-15T20:13:12.041Z",
-      "updated_at": "2026-05-18T00:00:00.000Z"
+      "updated_at": "2026-05-18T00:00:00.000Z",
+      "region": "",
+      "subtype": ""
     }
   ],
   "mixers": [
@@ -440,7 +509,9 @@
       "notes": "",
       "nationality": "UK",
       "created_at": "2026-05-15T20:13:12.041Z",
-      "updated_at": "2026-05-18T00:00:00.000Z"
+      "updated_at": "2026-05-18T00:00:00.000Z",
+      "region": "",
+      "subtype": ""
     }
   ],
   "specialty_ingredients": [],
@@ -451,5 +522,6 @@
     "strainers": [
       "Fine Mesh"
     ]
-  }
+  },
+  "mixers_bottles": []
 }
