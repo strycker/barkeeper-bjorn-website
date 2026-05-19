@@ -9,51 +9,38 @@
     "axes": {
       "sweetness": {
         "position": 0.22,
-        "label": "dry leaning",
-        "description": "Bone-dry leaning. Spirit-forward palate. Rejects overly sweet builds; dessert-adjacent only when the framing earns it (e.g., milk punches, after-dinner sippers).",
-        "confidence": "High",
+        "confidence": "Tentative",
         "last_evaluated": "2026-05-19"
       },
       "acid": {
         "position": 0.75,
-        "label": "situational",
-        "description": "Comfortable in both lanes Ã¢ÂÂ strongly enjoys stirred no-citrus drinks (Hallucination, Manhattan-family) AND citrus-forward shaken drinks (Crossover, Margarita-family). Picks based on occasion.",
-        "confidence": "High",
-        "last_evaluated": "2026-05-03"
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-19"
       },
       "strength": {
         "position": 0.85,
-        "label": "spirit-forward",
-        "description": "Spirit-forward. Self-described preference for 'spirit-forward classic cocktail traditions.' Most originals are 1.5+ oz of base spirit with small-pour modifiers.",
-        "confidence": "High",
-        "last_evaluated": "2026-05-03"
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-19"
       },
       "complexity": {
         "position": 0.82,
-        "label": "layered and brooding",
-        "description": "Loves bitters stacking, split modifiers, and structural complexity. Owns 10 bitters SKUs and uses them deliberately. Originals consistently feature 2Ã¢ÂÂ3 bitters working in conversation.",
-        "confidence": "High",
+        "confidence": "Tentative",
         "last_evaluated": "2026-05-19"
       },
       "season": {
         "position": 0.75,
-        "label": "adapts with season",
-        "description": "Has explicitly built warm-weather originals (Wild Sanibel) and contemplative cool-weather originals (The Hallucination). Active about seasonal context.",
-        "confidence": "High",
-        "last_evaluated": "2026-05-03"
+        "confidence": "Tentative",
+        "last_evaluated": "2026-05-19"
       },
       "risk": {
         "position": 0.94,
-        "label": "surprise me",
-        "description": "Has six originals on file, actively iterates on them, asks for 'new and different than just a margarita with a mezcal substitute.' Wants creative pushback, not safe defaults.",
-        "confidence": "High",
+        "confidence": "Tentative",
         "last_evaluated": "2026-05-19"
       }
     },
     "supplemental": {
       "smoke": {
-        "position": "neutral",
-        "rationale": "Inferred from inventory (Turkish Tobacco bitters, Cherry Maple Smoked bitters, Montelobos Espadin mezcal) and originals (Crossover, Smokey the Pear, Dave's Folly all incorporate smoke meaningfully)."
+        "position": "neutral"
       },
       "funk": {
         "position": "neutral",
