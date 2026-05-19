@@ -339,7 +339,7 @@ const RecommenderView = (() => {
         _scopeLevel = Number(btn.dataset.scope);
         const inv = State.get('inventory') || {};
         const overrideProfile = _buildOverrideProfile(profile);
-        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides });
+        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '' });
         _rerender(container);
       });
     });
@@ -351,7 +351,7 @@ const RecommenderView = (() => {
         if (_vetoOverrides.has(v)) _vetoOverrides.delete(v); else _vetoOverrides.add(v);
         const inv = State.get('inventory') || {};
         const overrideProfile = _buildOverrideProfile(profile);
-        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides });
+        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '' });
         _rerender(container);
         // Update chip visual state
         btn.classList.toggle('bypassed', _vetoOverrides.has(v));
@@ -381,7 +381,7 @@ const RecommenderView = (() => {
         _sliderValues[input.dataset.axis] = parseFloat(input.value);
         const inv = State.get('inventory') || {};
         const overrideProfile = _buildOverrideProfile(profile);
-        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides });
+        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '' });
         _rerender(container);
       });
     });
@@ -419,7 +419,7 @@ const RecommenderView = (() => {
         });
         const inv = State.get('inventory') || {};
         const overrideProfile = _buildOverrideProfile(profile);
-        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides });
+        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '' });
         _rerender(container);
       });
     }
@@ -462,7 +462,7 @@ const RecommenderView = (() => {
     // these are user-interaction state that persist within the session.
 
     // Run engine with saved profile
-    _results = RecommenderEngine.recommend(inventory, profile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides });
+    _results = RecommenderEngine.recommend(inventory, profile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '' });
 
     const occasionTags = _getOccasionTags();
 

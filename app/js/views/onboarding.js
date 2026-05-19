@@ -244,8 +244,16 @@ const OnboardingView = (() => {
 
   function renderBartenderSpecialty(body, container) {
     const specialties = [
-      'No preference (broad and balanced)', 'Classic cocktails',
-      'Craft & artisanal', 'Beer & cider', 'Wine & spirits education'
+      'No preference (broad and balanced)',
+      'Classic cocktails',
+      'Craft & artisanal',
+      'Tropical & tiki drinks',
+      'Avant-garde / experimental',
+      'Contemporary & trendy',
+      'Low-ABV & wellness',
+      'Whiskey & brown spirits',
+      'Brandy & cognac',
+      'Wine & spirits education',
     ];
     const current = _answers.bartender_specialty || '';
     body.innerHTML = `
