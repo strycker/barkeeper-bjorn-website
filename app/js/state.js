@@ -72,17 +72,24 @@ const State = (() => {
       _shas[key] = result.content.sha;
       notify({ type: 'saved', key });
     } catch (err) {
-      // BUG-03 mitigation: on stale-SHA conflict, refetch the current SHA and retry once.
-      // Stale SHAs occur after partial imports, multi-tab edits, or external file changes.
+      // On stale-SHA conflict, refetch the current SHA and retry once.
+      // Falls back to readJSON if getFileSHA fails (e.g. transient network hiccup).
       if (_isShaConflict(err)) {
-        const freshSha = await GitHubAPI.getFileSHA(path);
-        if (freshSha && freshSha !== _shas[key]) {
+        try {
+          let freshSha = await GitHubAPI.getFileSHA(path);
+          if (!freshSha) {
+            const fresh = await GitHubAPI.readJSON(path);
+            freshSha = fresh.sha;
+          }
           _shas[key] = freshSha;
-          const retry = await GitHubAPI.writeJSON(path, _data[key], _shas[key], message);
+          const retry = await GitHubAPI.writeJSON(path, _data[key], freshSha, message);
           _shas[key] = retry.content.sha;
           notify({ type: 'saved', key });
           return;
+        } catch {
+          // retry failed — fall through to throw with helpful hint
         }
+        throw new Error(`${err.message} — reload the page to refresh file state, then try again.`);
       }
       throw err;
     }
