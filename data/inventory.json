@@ -55,19 +55,6 @@
         "subtype": ""
       },
       {
-        "style": "Dry Vermouth",
-        "brand": "Dolin",
-        "type": "Dry Vermouth",
-        "tier": "",
-        "best_for": "",
-        "notes": "",
-        "created_at": "2026-05-18T21:24:07.692Z",
-        "updated_at": "2026-05-18T21:24:29.041Z",
-        "nationality": "",
-        "region": "",
-        "subtype": ""
-      },
-      {
         "style": "Scotch",
         "brand": "Oban",
         "type": "",
@@ -246,6 +233,39 @@
       "nationality": "Italy",
       "created_at": "2026-05-15T20:13:12.041Z",
       "updated_at": "2026-05-19T03:09:03.038Z",
+      "region": "",
+      "subtype": ""
+    },
+    {
+      "style": "Lillet Blanc",
+      "brand": "",
+      "type": "",
+      "tier": "",
+      "best_for": "",
+      "notes": "",
+      "created_at": "2026-05-19T19:20:04.704Z",
+      "updated_at": "2026-05-19T19:20:04.704Z"
+    },
+    {
+      "style": "Sweet Vermouth",
+      "brand": "",
+      "type": "",
+      "tier": "",
+      "best_for": "",
+      "notes": "",
+      "created_at": "2026-05-19T19:20:13.771Z",
+      "updated_at": "2026-05-19T19:20:13.771Z"
+    },
+    {
+      "style": "Vermouths & Fortified Wines",
+      "brand": "Dolin",
+      "type": "Dry Vermouth",
+      "tier": "",
+      "best_for": "",
+      "notes": "",
+      "created_at": "2026-05-18T21:24:07.692Z",
+      "updated_at": "2026-05-19T19:20:31.056Z",
+      "nationality": "",
       "region": "",
       "subtype": ""
     }
@@ -464,6 +484,16 @@
       "updated_at": "2026-05-18T00:00:00.000Z",
       "region": "",
       "subtype": ""
+    },
+    {
+      "style": "Orgeat",
+      "brand": "",
+      "type": "",
+      "tier": "",
+      "best_for": "",
+      "notes": "",
+      "created_at": "2026-05-19T19:19:31.069Z",
+      "updated_at": "2026-05-19T19:19:31.069Z"
     }
   ],
   "mixers": [
@@ -518,20 +548,7 @@
   "specialty_ingredients": [],
   "garnish_and_service": [],
   "past_inventory": [],
-  "shopping_list": [
-    {
-      "item": "Orgeat",
-      "rationale": "one-away recommendation"
-    },
-    {
-      "item": "Lillet Blanc or Dry Vermouth",
-      "rationale": "one-away recommendation"
-    },
-    {
-      "item": "Sweet Vermouth",
-      "rationale": "one-away recommendation"
-    }
-  ],
+  "shopping_list": [],
   "equipment": {
     "strainers": [
       "Fine Mesh"
