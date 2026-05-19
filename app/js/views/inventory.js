@@ -63,15 +63,13 @@ const InventoryView = (() => {
 
   function saveCustomType(t) {
     const list = loadCustomTypes();
-    if (t && !list.includes(t) && !TYPE_OPTIONS.includes(t)) {
+    if (t && !list.includes(t) && !Config.typeOptions().includes(t)) {
       list.push(t);
       localStorage.setItem('bb_custom_types', JSON.stringify(list));
     }
   }
 
   function allTypeOptions() { return [...Config.typeOptions(), ...loadCustomTypes()]; }
-
-  const STRAINER_OPTIONS = Config.strainerOptions();
 
 
 
