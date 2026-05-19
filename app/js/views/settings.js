@@ -100,6 +100,7 @@ const SettingsView = (() => {
           </div>
           <button class="btn btn-primary btn-sm" id="st-save-identity">Update bartender settings</button>
           <a href="#bartender-wizard" class="btn btn-secondary btn-sm" style="margin-left:8px;">Full Customization →</a>
+          <a href="#setup" class="btn btn-ghost btn-sm" style="margin-left:8px;">Review Setup →</a>
           <p id="st-identity-status" style="min-height:1.2em;margin-top:8px;font-size:0.82rem;"></p>
         </div>
 
