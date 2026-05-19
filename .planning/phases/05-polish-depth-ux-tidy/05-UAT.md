@@ -9,13 +9,12 @@ updated: 2026-05-19T00:00:00Z
 ## Current Test
 <!-- OVERWRITE each test - shows where we are -->
 
-number: 13
-name: Profile Tab — Drinking Style Section
+number: 15
+name: Onboarding — Drinking Style Step
 expected: |
-  The Profile tab should have a collapsible "Drinking Style" section at the bottom.
-  Expanding it shows: Drinking Frequency (select), Household Context (text input),
-  Vocabulary Preference (select), and Archetypes (chip grid, pick 1-3).
-  Editing and saving persists to GitHub.
+  Running through Onboarding should include an "About Your Drinking Style" step
+  with Drinking Frequency, Household Context, Vocabulary Preference, and Archetype
+  chip selections. A "Skip" button should be available to bypass this step.
 awaiting: user response
 
 ## Tests
@@ -70,11 +69,11 @@ result: pass
 
 ### 13. Profile Tab — Drinking Style Section
 expected: The Profile tab should have a collapsible "Drinking Style" section at the bottom. Expanding it shows: Drinking Frequency (select), Household Context (text input), Vocabulary Preference (select), and Archetypes (chip grid, pick 1-3). Editing and saving persists to GitHub.
-result: [pending]
+result: pass
 
 ### 14. Profile Tab — No String Axis Labels
 expected: On the Profile tab flavor axis sliders, there should be NO "Strong A / Lean B" position labels above each slider. Only the pole labels at each end (e.g. "Dry" ←→ "Sweet") should remain.
-result: [pending]
+result: pass
 
 ### 15. Onboarding — Drinking Style Step
 expected: Running through Onboarding (or starting fresh) should include a "About Your Drinking Style" step (after the smoke/peat preference step) with Drinking Frequency, Household Context, Vocabulary Preference, and Archetype chip selections. A "Skip" button should be available to bypass this step.

@@ -14,6 +14,7 @@ const OnboardingView = (() => {
 
   let _step = 0;
   let _answers = {};
+  let _isRerun = false;
 
   const STEPS = [
     'welcome',
@@ -25,26 +26,58 @@ const OnboardingView = (() => {
   ];
 
   function render(container) {
-    _answers = {};
     const profile   = State.get('profile')   || {};
     const barkeeper = State.get('barkeeper') || {};
+    const inventory = State.get('inventory') || {};
     const axes      = profile.flavor_profile?.axes    || {};
     const identity  = profile.identity                || {};
+    const bg        = profile.background              || {};
     const bkSkipped = barkeeper._skipped              || {};
 
-    const skippedMap = {};
-    Object.entries(axes).forEach(([key, val]) => {
-      if (val && val._skipped) skippedMap[`axis_${key}`] = true;
+    _isRerun = !!profile.onboarding_complete;
+
+    // Pre-populate _answers from current State so forms show current values
+    // and skipping a step keeps the existing value rather than blanking it.
+    _answers = {
+      bartender_name:        barkeeper.identity?.name             || '',
+      bartender_voice:       barkeeper.active_preset              || '',
+      bartender_specialty:   barkeeper.personality?.specialty     || '',
+      full_name:             identity.full_name                   || '',
+      preferred_name:        identity.preferred_name              || '',
+      location:              identity.location                    || '',
+      timezone:              identity.timezone                    || '',
+      profession:            bg.profession                        || '',
+      drinking_frequency:    bg.drinking_frequency                || '',
+      typical_context:       bg.typical_context                   || '',
+      household_context:     bg.household_context                 || '',
+      vocabulary_preference: bg.vocabulary_preference             || '',
+      archetypes:            profile.archetypes                   || [],
+      equipment:             inventory.equipment                  || {},
+      smoke:                 profile.flavor_profile?.supplemental?.smoke?.position || '',
+    };
+    AXES.forEach(a => {
+      const axis = axes[a.key];
+      if (axis && typeof axis.position === 'number') _answers[`axis_${a.key}`] = axis.position;
     });
+
+    if (_isRerun) {
+      // Re-run: start at welcome so user can review every step
+      _step = 0;
+    } else {
+      // Initial run: jump to first incomplete/skipped step
+      const skippedMap = {};
+      Object.entries(axes).forEach(([key, val]) => {
+        if (val && val._skipped) skippedMap[`axis_${key}`] = true;
+      });
     ['your_name', 'location', 'background', 'equipment'].forEach(key => {
       if (identity[`_skipped_${key}`]) skippedMap[key] = true;
     });
     ['bartender_name', 'bartender_voice', 'bartender_specialty'].forEach(key => {
       if (bkSkipped[key]) skippedMap[key] = true;
     });
-
-    const firstSkippedIdx = STEPS.findIndex(s => skippedMap[s]);
-    _step = firstSkippedIdx >= 0 ? firstSkippedIdx : 0;
+      const firstSkippedIdx = STEPS.findIndex(s => skippedMap[s]);
+      _step = firstSkippedIdx >= 0 ? firstSkippedIdx : 0;
+    }
     renderStep(container);
   }
 
@@ -103,9 +136,14 @@ const OnboardingView = (() => {
     if (skipFn) {
       const skip = document.createElement('button');
       skip.className = 'btn btn-ghost btn-sm';
-      skip.textContent = 'Skip for now →';
       skip.style.marginLeft = 'auto';
-      skip.addEventListener('click', skipFn);
+      if (_isRerun) {
+        skip.textContent = 'Keep current →';
+        skip.addEventListener('click', () => { _step++; renderStep(container); });
+      } else {
+        skip.textContent = 'Skip for now →';
+        skip.addEventListener('click', skipFn);
+      }
       wrap.appendChild(skip);
     }
     body.appendChild(wrap);
@@ -125,11 +163,21 @@ const OnboardingView = (() => {
           onerror="this.style.display='none'">` : ''}
         <p class="wizard-avatar-caption">I'm ${Utils.escapeHtml(bkName)}. Let's make your bar legendary.</p>
       </div>
-      <h2 class="wizard-question">Welcome.</h2>
-      <p style="color:var(--text-dim);margin-bottom:28px;">
-        I'm your personal mixologist and bar collaborator. Let's spend a few minutes setting up your profile — one question at a time.
-      </p>`;
-    navButtons(body, container, { nextLabel: "Let's begin →" });
+      ${_isRerun ? `
+        <div style="background:rgba(191,143,63,0.12);border:1px solid var(--amber);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:16px;font-size:0.9rem;">
+          <strong style="color:var(--amber);">Reviewing your setup</strong> — your current settings are pre-filled on each step.
+          Use <em>Keep current →</em> to leave a step unchanged, or edit and continue to update it.
+          Nothing is saved until the final step.
+        </div>
+        <h2 class="wizard-question">Review Your Setup</h2>
+        <p style="color:var(--text-dim);margin-bottom:28px;">
+          Step through your profile at your own pace. Any step you skip keeps its current value.
+        </p>` : `
+        <h2 class="wizard-question">Welcome.</h2>
+        <p style="color:var(--text-dim);margin-bottom:28px;">
+          I'm your personal mixologist and bar collaborator. Let's spend a few minutes setting up your profile — one question at a time.
+        </p>`}`;
+    navButtons(body, container, { nextLabel: _isRerun ? 'Review setup →' : "Let's begin →" });
   }
 
   function renderBartenderName(body, container) {
