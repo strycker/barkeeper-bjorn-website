@@ -9,12 +9,11 @@ updated: 2026-05-19T00:00:00Z
 ## Current Test
 <!-- OVERWRITE each test - shows where we are -->
 
-number: 4
-name: Category Change Moves Chip
+number: 5
+name: UTF-8 Characters Save Correctly
 expected: |
-  Edit a bottle. Change its Category to a different one. Click Save.
-  The chip should disappear from its original section and appear in the new section
-  without requiring a page reload.
+  Add a bottle in the Rum section called "Cachaça". Save to GitHub. Reload the page.
+  The bottle should display as "Cachaça" — not "CachaÃ§a" or any other garbled form.
 awaiting: user response
 
 ## Tests
@@ -33,7 +32,7 @@ result: pass
 
 ### 4. Category Change Moves Chip
 expected: Edit a bottle. Change its Category to a different one (e.g. change a vermouth from "Vermouths & Fortified Wines" to "Whiskeys & Brown Spirits"). Click Save. The chip should disappear from its original section and appear in the new section without requiring a page reload.
-result: [pending]
+result: pass
 
 ### 5. UTF-8 Characters Save Correctly
 expected: Add a bottle in the Rum section called "Cachaça". Save to GitHub. Reload the page. The bottle should display as "Cachaça" — not "CachaÃ§a" or any other garbled form.
