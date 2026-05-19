@@ -57,6 +57,12 @@
       "description": "Template string for AI-created cocktail attribution.",
       "default": "Created by {name} (Bartender AI Agent using {foundation_model})"
     },
-    "last_updated": { "type": "string", "format": "date" }
+    "last_updated": { "type": "string", "format": "date" },
+    "behavioral_rules":        { "type": "array", "items": { "type": "string" }, "default": [] },
+    "personality_description": { "type": "string", "default": "" },
+    "cocktail_naming_style":   { "type": "string", "default": "" },
+    "image_gen_style":         { "type": "string", "default": "" },
+    "signoff":                 { "type": "string", "default": "" },
+    "avatar_url":              { "type": "string", "default": "" }
   }
 }

@@ -216,7 +216,6 @@ const ProfileView = (() => {
     AXES.forEach((a, i) => {
       const axisData = axes[a.key] || {};
       const val = _values[i] ?? 0.5;
-      const posLabel = axisData.position || Utils.valueToAxisLabel(val);
       const confidence = axisData.confidence || '—';
       const lastEval   = axisData.last_evaluated || null;
 
@@ -250,7 +249,7 @@ const ProfileView = (() => {
         if (!p.flavor_profile) p.flavor_profile = {};
         if (!p.flavor_profile.axes) p.flavor_profile.axes = {};
         if (!p.flavor_profile.axes[a.key]) p.flavor_profile.axes[a.key] = {};
-        p.flavor_profile.axes[a.key].position = Utils.valueToAxisLabel(newVal);
+        p.flavor_profile.axes[a.key].position = newVal;  // raw float — matches recommender.js:333
         p.flavor_profile.axes[a.key].last_evaluated = Utils.today();
         markDirty();
       });

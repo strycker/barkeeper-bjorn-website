@@ -96,6 +96,9 @@
       case 'settings':
         SettingsView.render(content);
         break;
+      case 'bartender-wizard':
+        BartenderWizardView.render(content);
+        break;
       default:
         DashboardView.render(content);
     }
