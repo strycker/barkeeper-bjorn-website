@@ -46,6 +46,11 @@
       "items": { "$ref": "#/definitions/bottleEntry" },
       "description": "Simple syrup, orgeat, honey syrup, ginger syrup, falernum, etc."
     },
+    "mixers_bottles": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/bottleEntry" },
+      "description": "Tracked mixers with brand/tier metadata: tonic water, ginger beer, cola, soda water, juices, coconut cream, etc."
+    },
     "non_alcoholic_spirits": {
       "type": "array",
       "items": { "$ref": "#/definitions/bottleEntry" },
@@ -166,11 +171,17 @@
           "enum": ["", "sipping", "mixing", "both"],
           "description": "Best use context. Empty string = unset."
         },
+        "subtype":     { "type": "string", "default": "", "description": "Further specialization of type (e.g. Terroir, Navy Strength, Barrel-Aged)." },
         "notes":       { "type": "string", "description": "Freeform tasting or provenance notes." },
         "nationality": {
           "type": "string",
           "default": "",
-          "description": "Country/region of origin (e.g. Scotland, Mexico, Kentucky USA)."
+          "description": "Country of origin (e.g. Scotland, Mexico, USA)."
+        },
+        "region": {
+          "type": "string",
+          "default": "",
+          "description": "Region within the country (e.g. Oaxaca, Speyside, Islay, Kentucky)."
         },
         "created_at": { "type": "string", "format": "date-time", "description": "ISO timestamp when entry was added." },
         "updated_at": { "type": "string", "format": "date-time", "description": "ISO timestamp of last edit." }

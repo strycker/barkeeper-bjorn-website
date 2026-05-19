@@ -18,6 +18,7 @@ const Normalize = (() => {
     'liqueurs_and_cordials',
     'bitters',
     'syrups',
+    'mixers_bottles',
     'non_alcoholic_spirits',
     'mixers',
     'refrigerator_perishables',
@@ -69,8 +70,10 @@ const Normalize = (() => {
     if (out.tier && OLD_TIER_VALUES.has(out.tier)) {
       out.tier = '';
     }
-    // INV-09: ensure nationality defaults to empty string
+    // Ensure string fields default to empty string
     out.nationality = ensureString(out.nationality);
+    out.region      = ensureString(out.region);
+    out.subtype     = ensureString(out.subtype);
     // Ensure ISO timestamps
     if (!out.created_at || typeof out.created_at !== 'string') out.created_at = nowIso;
     if (!out.updated_at || typeof out.updated_at !== 'string') out.updated_at = nowIso;
@@ -102,6 +105,7 @@ const Normalize = (() => {
     // Bottle-array sections at top level
     out.fortified_wines_and_aperitif_wines = coerceBottleArray(out.fortified_wines_and_aperitif_wines);
     out.syrups                = coerceBottleArray(out.syrups);
+    out.mixers_bottles        = coerceBottleArray(out.mixers_bottles);
     out.non_alcoholic_spirits = coerceBottleArray(out.non_alcoholic_spirits);
 
     // liqueurs_and_cordials: object of bottle arrays

@@ -19,7 +19,7 @@
         },
         {
           "amount": "1 oz",
-          "name": "CrÃ¨me de Poire"
+          "name": "Crème de Poire"
         },
         {
           "amount": "0.5 oz",
@@ -58,7 +58,26 @@
       }
     }
   ],
-  "confirmed_favorites": [],
+  "confirmed_favorites": [
+    {
+      "id": "army-and-navy",
+      "name": "Army & Navy",
+      "base": "Gin",
+      "method": "shaken",
+      "glassware": "Coupe",
+      "difficulty": 2,
+      "profile": { "sweetness": 0.35, "acid": 0.6, "strength": 0.25, "complexity": 0.5, "season": 0.25, "risk": 0.3 },
+      "occasion": "Prohibition-era gem. Orgeat rounds the gin's botanicals while lemon keeps it lively.",
+      "tags": ["sour", "classic", "refreshing"],
+      "ingredients": [
+        { "name": "Gin", "amount": "2 oz" },
+        { "name": "Fresh Lemon Juice", "amount": "¾ oz" },
+        { "name": "Orgeat", "amount": "½ oz" }
+      ],
+      "garnish": "Lemon twist or cherry",
+      "from_classics_db": true
+    }
+  ],
   "wishlist": [],
   "last_updated": "2026-05-14"
 }
