@@ -154,7 +154,7 @@ const OnboardingView = (() => {
     const barkeeper = State.get('barkeeper') || {};
     const bkName = barkeeper.identity?.name || 'Barkeeper Bjorn';
     const avatarUrl = (cfg.owner && cfg.repo)
-      ? `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/main/images/barkeeper_bjorn_001.png`
+      ? `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/main/images/barkeeper_bjorn_002.png`
       : null;
     body.innerHTML = `
       <div class="wizard-avatar-wrap">
