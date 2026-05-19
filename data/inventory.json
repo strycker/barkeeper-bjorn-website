@@ -79,19 +79,6 @@
         "nationality": "",
         "region": "",
         "subtype": ""
-      },
-      {
-        "style": "Whiskeys & Brown Spirits",
-        "type": "Vermouth / Fortified Wine",
-        "brand": "Cocchi",
-        "tier": "",
-        "best_for": "",
-        "notes": "",
-        "nationality": "Italy",
-        "created_at": "2026-05-15T20:13:12.041Z",
-        "updated_at": "2026-05-19T03:08:31.765Z",
-        "region": "",
-        "subtype": ""
       }
     ],
     "brandy": [
@@ -246,6 +233,19 @@
       "created_at": "2026-05-18T21:23:40.910Z",
       "updated_at": "2026-05-18T21:23:48.825Z",
       "nationality": "",
+      "region": "",
+      "subtype": ""
+    },
+    {
+      "style": "Vermouths & Fortified Wines",
+      "type": "Vermouth",
+      "brand": "Cocchi",
+      "tier": "standard",
+      "best_for": "",
+      "notes": "",
+      "nationality": "Italy",
+      "created_at": "2026-05-15T20:13:12.041Z",
+      "updated_at": "2026-05-19T03:09:03.038Z",
       "region": "",
       "subtype": ""
     }
