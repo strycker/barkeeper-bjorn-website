@@ -130,6 +130,7 @@ Requirements for these phases are defined in ROADMAP.md. They are not yet broken
 > Items captured during UAT / user sessions. Not yet assigned to a phase.
 
 - **REC-MUST-01**: Recommender sidebar "Must Have" text field — user types an ingredient (e.g. "crème de cacao", "pisco") and results filter to only recipes that call for that specific ingredient. Works alongside mood sliders and scope; complements the existing class-level occasion/base-spirit filters with ingredient-level precision. Captured 2026-05-19.
+- **UI-FAV-01**: Add a favicon to the browser tab — a small icon representing Barkeeper Bjorn (e.g. a cocktail glass or amber/bourbon-themed icon) shown in Chrome and other browser tabs. Captured 2026-05-19.
 
 ---
 
