@@ -1344,6 +1344,23 @@ a:hover { color: var(--amber); }
 .rec-twoaway-link:hover {
   color: var(--text);
 }
+.rec-missing-info {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 13px;
+  margin-top: 6px;
+  color: var(--text-muted);
+}
+.rec-missing-label { font-style: italic; }
+.rec-missing-item {
+  background: rgba(255,255,255,0.06);
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 12px;
+}
 
 /* === Phase 5: Recommender UX depth (REC-05–09) === */
 

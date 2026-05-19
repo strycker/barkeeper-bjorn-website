@@ -33,6 +33,36 @@ const ShoppingView = (() => {
   const TIER_OPTS = ['', 'well', 'standard', 'premium', 'craft', 'boutique', 'rare/exceptional'];
   const TIER_LBL  = { '': 'Unset', 'well': 'Well', 'standard': 'Standard', 'premium': 'Premium', 'craft': 'Craft', 'boutique': 'Boutique', 'rare/exceptional': 'Rare/Exceptional' };
 
+  const SECTION_KEYWORDS = [
+    { key: 'fortified_wines_and_aperitif_wines', words: ['vermouth', 'port', 'sherry', 'madeira', 'marsala', 'lillet', 'aperol', 'campari', 'dubonnet', 'fortified', 'aperitif'] },
+    { key: 'base_spirits.agave',       words: ['tequila', 'mezcal', 'agave', 'sotol', 'raicilla', 'bacanora'] },
+    { key: 'base_spirits.rum',         words: ['rum', 'rhum', 'cachaça', 'cachaca', 'ron', 'clairin'] },
+    { key: 'base_spirits.brandy',      words: ['brandy', 'cognac', 'armagnac', 'calvados', 'pisco', 'grappa', 'eau de vie'] },
+    { key: 'base_spirits.white_spirits', words: ['gin', 'vodka', 'aquavit', 'genever', 'shochu', 'soju'] },
+    { key: 'base_spirits.whiskey',     words: ['whiskey', 'whisky', 'bourbon', 'scotch', 'rye', 'tennessee', 'irish whiskey', 'japanese whisky'] },
+    { key: 'liqueurs_and_cordials.fruit_forward', words: ['triple sec', 'cointreau', 'grand marnier', 'limoncello', 'chambord', 'maraschino', 'passion fruit', 'peach schnapps', 'crème de cassis', 'raspberry'] },
+    { key: 'liqueurs_and_cordials.nut_coffee',    words: ['kahlúa', 'kahlua', 'tia maria', 'coffee liqueur', 'amaretto', 'frangelico', 'disaronno', 'hazelnut', 'orgeat'] },
+    { key: 'liqueurs_and_cordials.herbal',        words: ['chartreuse', 'strega', 'benedictine', 'cynar', 'averna', 'amaro', 'fernet', 'jägermeister', 'jagermeister', 'absinthe', 'pastis', 'anise', 'herbal'] },
+    { key: 'liqueurs_and_cordials.specialty_regional', words: ['st germain', 'elderflower', 'crème de violette', 'creme de violette', 'blue curaçao', 'blue curacao', 'pimm', 'midori', 'cream liqueur', 'baileys', 'drambuie', 'glayva', 'licor 43'] },
+    { key: 'bitters.anchors',          words: ['angostura', 'peychaud', 'orange bitters'] },
+    { key: 'bitters.aromatic_smoke',   words: ['aromatic bitters', 'smoke bitters', 'smoked bitters'] },
+    { key: 'bitters.fruit_botanical',  words: ['grapefruit bitters', 'cherry bitters', 'lavender bitters', 'lemon bitters'] },
+    { key: 'syrups',                   words: ['syrup', 'grenadine', 'falernum', 'honey', 'agave nectar', 'simple syrup', 'gomme'] },
+    { key: 'mixers',                   words: ['tonic', 'soda', 'ginger beer', 'ginger ale', 'cola', 'lemonade', 'juice', 'cider', 'sparkling water', 'club soda'] },
+    { key: 'refrigerator_perishables', words: ['egg white', 'egg yolk', 'cream', 'milk', 'coconut cream', 'yogurt', 'butter'] },
+    { key: 'fresh_produce',            words: ['lemon', 'lime', 'orange', 'grapefruit', 'mint', 'cucumber', 'pineapple', 'strawberry', 'berry', 'apple', 'pear', 'cherry', 'fresh'] },
+    { key: 'pantry_spice_rack',        words: ['salt', 'sugar', 'cinnamon', 'nutmeg', 'clove', 'cardamom', 'cayenne', 'pepper', 'vanilla', 'celery', 'tabasco', 'worcestershire'] },
+    { key: 'garnish_and_service',      words: ['olive', 'cherry', 'cocktail onion', 'garnish', 'straw', 'umbrella'] },
+  ];
+
+  function _detectSection(itemName) {
+    const lower = (itemName || '').toLowerCase();
+    for (const { key, words } of SECTION_KEYWORDS) {
+      if (words.some(w => lower.includes(w))) return key;
+    }
+    return null;
+  }
+
   let _dirty = false;
 
   function _showPlacementDialog(bought, boughtIdx, container) {
@@ -46,7 +76,10 @@ const ShoppingView = (() => {
           <label style="display:flex;flex-direction:column;gap:4px;font-size:0.88rem;">
             Section
             <select id="pd-section">
-              ${PLACEMENT_SECTIONS.map(s => `<option value="${Utils.escapeHtml(s.key)}">${Utils.escapeHtml(s.label)}</option>`).join('')}
+              ${(() => {
+                const detected = _detectSection(bought.item || bought);
+                return PLACEMENT_SECTIONS.map(s => `<option value="${Utils.escapeHtml(s.key)}"${s.key === detected ? ' selected' : ''}>${Utils.escapeHtml(s.label)}</option>`).join('');
+              })()}
             </select>
           </label>
           <div id="pd-bottle-fields" style="display:flex;flex-direction:column;gap:8px;">

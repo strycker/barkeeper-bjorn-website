@@ -56,7 +56,7 @@ const RecommenderView = (() => {
   }
 
   function _renderCard(item, isOneAway) {
-    const { recipe, flavorScore, missingIngredient } = item;
+    const { recipe, flavorScore, missingIngredient, missingIngredients } = item;
     const diff = _difficultyLabel(recipe.difficulty);
     const savedRecipes = State.get('recipes') || {};
     const isFav  = (savedRecipes.confirmed_favorites || []).some(r => r.name === recipe.name);
@@ -91,11 +91,19 @@ const RecommenderView = (() => {
           ).join('')}
           ${recipe.garnish ? `<span class="rec-ing-chip rec-garnish">+ ${Utils.escapeHtml(recipe.garnish)}</span>` : ''}
         </div>
-        ${isOneAway ? `
+        ${isOneAway && missingIngredient ? `
           <div class="rec-twoaway-missing">
             <span class="rec-twoaway-label">One bottle away:</span>
             <strong>${Utils.escapeHtml(missingIngredient.name)}</strong>
             <button class="rec-twoaway-link" data-item="${Utils.escapeHtml(missingIngredient.name)}">Add to shopping list &#8594;</button>
+          </div>` : ''}
+        ${!isOneAway && missingIngredients && missingIngredients.length > 0 ? `
+          <div class="rec-missing-info">
+            <span class="rec-missing-label">Not in your bar:</span>
+            ${missingIngredients.map(m => `
+              <span class="rec-missing-item">${Utils.escapeHtml(m.name)}</span>
+              <button class="rec-twoaway-link" data-item="${Utils.escapeHtml(m.name)}">Add &#8594;</button>
+            `).join('')}
           </div>` : ''}
         <div class="rec-glass">Glass: ${Utils.escapeHtml(recipe.glassware)}</div>
       </div>`;

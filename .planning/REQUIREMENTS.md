@@ -55,6 +55,12 @@ _Inserted between Phases 5 and AI Integration to address recipe list depth, sear
 - [x] **REC-10**: Recipe card layout fix — `rec-card-actions` (♥ ☆) moved into the `rec-card-header` flex row (no longer absolute-positioned); no longer covers the Match score bar. CSS: removed `position:absolute`, added `flex-shrink:0; align-self:flex-start`.
 - [x] **REC-11**: Toggle state for ♥ / ★ action buttons — heart shows ♡ (open, U+2661) when not in Favorites, ♥ (filled, U+2665) when favorited; star shows ☆ when not wishlisted, ★ when wishlisted. Clicking a filled button removes the recipe from that list (toggle, not "already in" guard). Buttons update instantly after GitHub save.
 
+### REC-BUG — Recommender Engine Bugs
+
+- [x] **REC-BUG-01**: Unconstrained mode missing-ingredient display — when scope is "Unconstrained" (scope=3), missing ingredients are still computed and attached to buildable cards as `missingIngredients`. The card renders an informational "Not in your bar:" row (dashed chips, muted style) with per-ingredient "Add →" shopping-list links, mirroring one-away display without the amber urgency style. Engine: `buildable.push({ …, missingIngredients: missing.length > 0 ? missing : undefined })`.
+- [x] **REC-BUG-02**: Veto filter ignores individual ingredients — the veto check now tests each ingredient's `.name` in addition to `recipe.base`. Fix in `recommender-engine.js`: `ingredientStrs = recipe.ingredients.map(i => (i.name||'').toLowerCase()); activeVetoes.some(v => baseStr.includes(v) || ingredientStrs.some(n => n.includes(v)))`. Recipes containing vetoed ingredients (e.g. Egg White) are now filtered correctly.
+- [x] **INV-BUG-01**: "Got it" dialog defaults to Whiskeys — added `_detectSection(itemName)` keyword-matching function that tests item name against ~18 category keyword lists (vermouth, rum, gin, syrup, etc.) and returns the correct PLACEMENT_SECTIONS key. The dialog `<select>` pre-selects the detected section. Items named "Vermouth" now correctly default to "Fortified & Aperitif Wines".
+
 ### RECIPE-MADE — "I Made This" Tracking
 
 - [ ] **RECIPE-MADE-01**: "I Made This" (✓ / ○) button on every Recommender recipe card — third action button alongside ♥ and ★. Clicking marks the recipe as made and adds it to `recipes.made_log[]` (each entry: `{name, date_made, notes?}`). Icon shows ○ (not made) or a filled ✓ (made). Clicking a made recipe removes it from the log (toggle).
