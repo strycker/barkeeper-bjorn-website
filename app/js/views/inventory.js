@@ -373,7 +373,7 @@ const InventoryView = (() => {
       const styleEl  = formEl.querySelector('[data-field="style"]');
       const newStyle = (styleEl ? styleEl.value : '').trim();
       if (!newStyle) {
-        Utils.toast('Category is required — please select one.', 'error');
+        Utils.showToast('Category is required — please select one.', 'error');
         if (styleEl) styleEl.focus();
         return;
       }
