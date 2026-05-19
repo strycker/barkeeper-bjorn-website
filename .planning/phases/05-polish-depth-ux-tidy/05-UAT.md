@@ -9,22 +9,19 @@ updated: 2026-05-19T00:00:00Z
 ## Current Test
 <!-- OVERWRITE each test - shows where we are -->
 
-number: 1
-name: Category Dropdown Shows All Categories
+number: 2
+name: Tier Dropdown Shows All Tiers
 expected: |
-  Open Inventory → click any bottle chip to edit.
-  The "Category" dropdown should show all 12 categories:
-  Whiskeys & Brown Spirits, Agave Spirits, Gins / Vodkas / White Spirits,
-  Rums & Cane Spirits, Brandies & Cognacs, Vermouths & Fortified Wines,
-  Liqueurs & Cordials, Bitters, Syrups, Mixers & Soft Drinks,
-  Non-Alcoholic Spirits, Other / Misc.
+  In the bottle edit form, click "More fields ▾".
+  The Tier dropdown should show 7 options:
+  Unset, Well, Standard, Premium, Craft, Boutique, Rare/Exceptional.
 awaiting: user response
 
 ## Tests
 
 ### 1. Category Dropdown Shows All Categories
 expected: Open Inventory → click any bottle chip to edit. The "Category" dropdown should show all 12 categories (Whiskeys & Brown Spirits, Agave Spirits, Gins / Vodkas / White Spirits, Rums & Cane Spirits, Brandies & Cognacs, Vermouths & Fortified Wines, Liqueurs & Cordials, Bitters, Syrups, Mixers & Soft Drinks, Non-Alcoholic Spirits, Other / Misc.). No more empty dropdown.
-result: [pending]
+result: pass
 
 ### 2. Tier Dropdown Shows All Tiers
 expected: In the same bottle edit form, click "More fields ▾". The Tier dropdown should show: Unset, Well, Standard, Premium, Craft, Boutique, Rare/Exceptional — 7 options total. No more empty tier dropdown.

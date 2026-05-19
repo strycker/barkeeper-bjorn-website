@@ -125,5 +125,13 @@ Requirements for these phases are defined in ROADMAP.md. They are not yet broken
 
 ---
 
+## Backlog — Captured Ideas
+
+> Items captured during UAT / user sessions. Not yet assigned to a phase.
+
+- **REC-MUST-01**: Recommender sidebar "Must Have" text field — user types an ingredient (e.g. "crème de cacao", "pisco") and results filter to only recipes that call for that specific ingredient. Works alongside mood sliders and scope; complements the existing class-level occasion/base-spirit filters with ingredient-level precision. Captured 2026-05-19.
+
+---
+
 *Created: 2026-05-11*
 *Restructured: 2026-05-18 — Phases 1–4 marked shipped; Phases 5–9 rewritten to match restructured ROADMAP.md; stale PAR/ONB/DASH/SET traceability table replaced*
