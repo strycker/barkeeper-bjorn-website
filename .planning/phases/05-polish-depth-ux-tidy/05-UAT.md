@@ -9,12 +9,12 @@ updated: 2026-05-19T00:00:00Z
 ## Current Test
 <!-- OVERWRITE each test - shows where we are -->
 
-number: 7
-name: Recommender Scope Buttons — Cumulative Highlight
+number: 8
+name: Unconstrained Scope Button
 expected: |
-  On the Recommender page, scope buttons (0 = Buildable, 1 = One Away, 2 = Two Away)
-  should highlight cumulatively. Clicking "One Away" keeps button 0 also highlighted.
-  Clicking "Two Away" keeps buttons 0 and 1 also active.
+  A 4th scope button "Unconstrained" should appear with a dashed border.
+  Clicking it returns recipes ranked by mood/occasion regardless of inventory.
+  Vetoes are still respected.
 awaiting: user response
 
 ## Tests
@@ -45,7 +45,7 @@ result: pass
 
 ### 7. Recommender Scope Buttons — Cumulative Highlight
 expected: On the Recommender page, scope buttons (0 = Buildable, 1 = One Away, 2 = Two Away) should highlight cumulatively. Clicking "One Away" should keep button 0 also highlighted/active. Clicking "Two Away" should keep buttons 0 and 1 also active.
-result: [pending]
+result: pass
 
 ### 8. Unconstrained Scope Button
 expected: A 4th scope button "Unconstrained" should appear with a dashed border. Clicking it returns recipes ranked by mood/occasion regardless of what's in your inventory — all recipes show in the buildable bucket. Vetoes are still respected.
