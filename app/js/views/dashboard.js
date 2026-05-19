@@ -49,7 +49,7 @@ const DashboardView = (() => {
       heroEl.className = 'dash-hero';
       const heroImg = document.createElement('img');
       heroImg.className = 'dash-hero-img';
-      heroImg.src = `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/main/images/barkeeper_bjorn_002.png`;
+      heroImg.src = `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/main/images/barkeeper_bjorn_001.png`;
       heroImg.alt = '';
       heroImg.onerror = () => { heroEl.style.display = 'none'; };
       heroEl.appendChild(heroImg);
