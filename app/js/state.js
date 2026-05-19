@@ -59,10 +59,13 @@ const State = (() => {
   }
 
   // Detect a 409 / SHA-mismatch error from the GitHub Contents API.
+  // GitHub returns at least two different formats:
+  //   "X does not match Y"  (PUT with wrong SHA)
+  //   "is at X but expected Y"  (alternative conflict format)
   function _isShaConflict(err) {
     if (!err || !err.message) return false;
     const m = err.message.toLowerCase();
-    return m.includes('does not match') || m.includes('sha') || m.includes('409');
+    return m.includes('does not match') || m.includes('but expected') || m.includes('409');
   }
 
   async function save(key, message) {
