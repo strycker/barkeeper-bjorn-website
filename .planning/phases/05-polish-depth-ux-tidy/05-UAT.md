@@ -9,12 +9,13 @@ updated: 2026-05-19T00:00:00Z
 ## Current Test
 <!-- OVERWRITE each test - shows where we are -->
 
-number: 11
-name: Army & Navy in Recommender
+number: 12
+name: Bottle Edit Form Labels — Category and Specific Style/Type
 expected: |
-  If you have Gin, fresh lemon juice (or lemons), and Orgeat in inventory,
-  "Army & Navy" should appear as a buildable recipe in the Recommender.
-  It should also appear in Recipes → Favorites.
+  When editing any bottle, the first field label should read "Category" (not "Style")
+  and the second should read "Specific Style/Type" (not "Type").
+  Category has placeholder "Broad category…" and Specific Style/Type has
+  placeholder "e.g. Single Barrel, Cask Strength, Espadín".
 awaiting: user response
 
 ## Tests
@@ -61,7 +62,7 @@ result: pass
 
 ### 11. Army & Navy in Recommender
 expected: If you have Gin, fresh lemon juice (or lemons), and Orgeat in inventory, "Army & Navy" should appear as a buildable recipe in the Recommender. It should also appear in your Favorites (♥) in the Recipes view.
-result: [pending]
+result: pass
 
 ### 12. Bottle Edit Form Labels — Category and Specific Style/Type
 expected: When editing any bottle, the first field label should read "Category" (not "Style") and the second should read "Specific Style/Type" (not "Type"). Category has placeholder "Broad category…" and Specific Style/Type has placeholder "e.g. Single Barrel, Cask Strength, Espadín".
