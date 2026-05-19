@@ -21,6 +21,7 @@ const InventoryView = (() => {
     { key: 'bitters.fruit_botanical',  label: 'Bitters — Fruit & Botanical', hint: 'Orange, lemon, celery…' },
     { key: 'bitters.other',            label: 'Bitters — Other',           hint: 'Any specialty bitters…' },
     { key: 'syrups',                   label: 'Syrups',                    hint: 'Simple, orgeat, honey, ginger, falernum…' },
+    { key: 'mixers_bottles',           label: 'Mixers & Soft Drinks',      hint: 'Orgeat, tonic, ginger beer, cola, soda water…' },
     { key: 'non_alcoholic_spirits',    label: 'Non-Alcoholic Spirits',     hint: 'Seedlip, Lyre\'s, Ritual…' },
   ];
 
@@ -34,15 +35,7 @@ const InventoryView = (() => {
     { key: 'garnish_and_service',    label: 'Garnish & Service',   hint: 'Cherries, picks, glassware notes…' },
   ];
 
-  // Lookup tables loaded from app/config/*.json — edit those files, not this code
-  const CATEGORIES           = Config.categories();
-  const SECTION_STYLE        = Config.sectionStyle();
-  const SECTION_TYPE_DEFAULT = Config.sectionTypeDefault();
-  const QUICK_ADD_RULES      = Config.quickAddRules();
-  const TYPE_KEYWORDS        = Config.typeKeywords();
-  const BRAND_CATALOG        = Config.brandCatalog();
-  const TIERS                = Config.tiers();
-  const TIER_LABEL           = Config.tierLabels();
+  // Tier color classes are static (not from config)
   const TIER_COLORS = {
     '': 'tier-unset',
     'well': 'tier-well',
@@ -53,8 +46,15 @@ const InventoryView = (() => {
     'rare/exceptional': 'tier-rare-exceptional',
   };
 
-  // Type options for datalist autocomplete (base list from config, extended by custom localStorage entries)
-  const TYPE_OPTIONS = Config.typeOptions();
+  // Returns canonical sectionKey for a given style string (first match wins).
+  // Used when saving an edit to move a bottle to a new section if the category changed.
+  function canonicalSectionForStyle(style) {
+    const ss = Config.sectionStyle();
+    for (const [key, val] of Object.entries(ss)) {
+      if (val === style) return key;
+    }
+    return null;
+  }
 
   function loadCustomTypes() {
     try { return JSON.parse(localStorage.getItem('bb_custom_types') || '[]'); }
@@ -69,7 +69,7 @@ const InventoryView = (() => {
     }
   }
 
-  function allTypeOptions() { return [...TYPE_OPTIONS, ...loadCustomTypes()]; }
+  function allTypeOptions() { return [...Config.typeOptions(), ...loadCustomTypes()]; }
 
   const STRAINER_OPTIONS = Config.strainerOptions();
 
@@ -79,12 +79,17 @@ const InventoryView = (() => {
   function parseBottleEntry(rawName, sectionKey) {
     const lower = rawName.toLowerCase();
     const now = new Date().toISOString();
-    let style = SECTION_STYLE[sectionKey] || '';
+    const sectionStyle      = Config.sectionStyle();
+    const brandCatalog      = Config.brandCatalog();
+    const typeKeywords      = Config.typeKeywords();
+    const sectionTypeDefault = Config.sectionTypeDefault();
+
+    let style = sectionStyle[sectionKey] || '';
     let type  = '';
     let brand = '';
 
     // Brand catalog — longest-first for greedy match (sorted at call time)
-    for (const [kw, info] of BRAND_CATALOG) {
+    for (const [kw, info] of brandCatalog) {
       if (lower.includes(kw)) {
         brand = info.brand;
         if (!type && info.typeHint) type = info.typeHint;
@@ -93,7 +98,7 @@ const InventoryView = (() => {
     }
 
     // Type keywords — override brand hint when a more-specific keyword is found
-    for (const [kw, typeName] of TYPE_KEYWORDS) {
+    for (const [kw, typeName] of typeKeywords) {
       if (lower.includes(kw)) {
         type = typeName;
         break;
@@ -104,14 +109,14 @@ const InventoryView = (() => {
     if (!style) style = 'Other / Misc.';
 
     // Ensure type is never empty: use section-specific short default rather than group name
-    if (!type) type = SECTION_TYPE_DEFAULT[sectionKey] || rawName;
+    if (!type) type = sectionTypeDefault[sectionKey] || rawName;
 
     return { style, type, brand, tier: '', best_for: '', notes: '', created_at: now, updated_at: now };
   }
 
   function parseBottleSection(name) {
     const lower = name.toLowerCase();
-    for (const { key, words } of QUICK_ADD_RULES) {
+    for (const { key, words } of Config.quickAddRules()) {
       for (const w of words) {
         if (lower.includes(w)) return key;
       }
@@ -233,12 +238,13 @@ const InventoryView = (() => {
       const displayName = bottle.type || bottle.style || bottle.name || (typeof bottle === 'string' ? bottle : '');
       const brand = bottle.brand || '';
       const tierClass = TIER_COLORS[bottle.tier] || 'tier-unset';
+      const tierLabel = Config.tierLabels();
 
       // Build tooltip from non-empty parts
       const tooltipParts = [
         displayName,
         brand || null,
-        bottle.tier ? ((TIER_LABEL[bottle.tier] || bottle.tier) + ' tier') : null
+        bottle.tier ? ((tierLabel[bottle.tier] || bottle.tier) + ' tier') : null
       ].filter(Boolean);
       const tooltipText = tooltipParts.join(' — ');
 
@@ -300,12 +306,17 @@ const InventoryView = (() => {
     // Safe datalist ID
     const safeId = sectionKey.replace(/\./g, '-');
 
+    // Config read at render time (after Config.load() in app.js — never empty)
+    const categories = Config.categories();
+    const tiers      = Config.tiers();
+    const tierLabel  = Config.tierLabels();
+
     // Build category <select>: canonical list + preserve any custom value not in list
-    const catInList = CATEGORIES.includes(entry.style || '');
+    const catInList = categories.includes(entry.style || '');
     const customCatOption = (!catInList && entry.style)
       ? `<option value="${Utils.escapeHtml(entry.style)}" selected>${Utils.escapeHtml(entry.style)}</option>`
       : '';
-    const catOptions = CATEGORIES.map(c =>
+    const catOptions = categories.map(c =>
       `<option value="${Utils.escapeHtml(c)}"${entry.style === c ? ' selected' : ''}>${Utils.escapeHtml(c)}</option>`
     ).join('');
 
@@ -313,21 +324,23 @@ const InventoryView = (() => {
     formEl.className = 'bottle-edit-form';
     formEl.innerHTML = `
       <div class="bottle-edit-fields">
-        <label>Category <select data-field="style" required title="Standardized spirit category (required)">
+        <label>Category <select data-field="style" required title="Broad category (Bourbon, Gin, Vermouth, Mixers…)">
           <option value="">— select category —</option>
           ${customCatOption}
           ${catOptions}
         </select></label>
-        <label>Specific Style/Type <input type="text" data-field="type" list="type-options-${safeId}" placeholder="e.g. Single Barrel, Cask Strength, Espadín" title="Specific style or sub-type of this bottle" value="${Utils.escapeHtml(entry.type || '')}"></label>
+        <label>Specific Style/Type <input type="text" data-field="type" list="type-options-${safeId}" placeholder="e.g. Single Barrel, Cask Strength, Espadín" title="The specific bottle's style/type (e.g. Single Barrel, Espadín)" value="${Utils.escapeHtml(entry.type || '')}"></label>
+        <label>Sub-type <input type="text" data-field="subtype" placeholder="e.g. Terroir, Navy Strength, Barrel-Aged" title="Further specialization (e.g. Terroir Gin, Navy Strength)" value="${Utils.escapeHtml(entry.subtype || '')}"></label>
       </div>
       <button type="button" class="bottle-edit-toggle">More fields ▾</button>
       <div class="bottle-edit-fields--expanded" style="display:none;">
         <div class="bottle-edit-fields">
           <label>Brand <input type="text" data-field="brand" value="${Utils.escapeHtml(entry.brand || '')}"></label>
-          <label>Nationality <input type="text" data-field="nationality" placeholder="e.g. Scotland, Mexico, Kentucky USA" value="${Utils.escapeHtml(entry.nationality || '')}"></label>
+          <label>Country <input type="text" data-field="nationality" placeholder="e.g. Scotland, Mexico, USA" title="Country of origin" value="${Utils.escapeHtml(entry.nationality || '')}"></label>
+          <label>Region <input type="text" data-field="region" placeholder="e.g. Oaxaca, Speyside, Kentucky" title="Region within the country (e.g. Oaxaca, Speyside, Islay)" value="${Utils.escapeHtml(entry.region || '')}"></label>
           <label>Tier <select data-field="tier">
             <option value="">Unset</option>
-            ${TIERS.map(t => `<option value="${Utils.escapeHtml(t)}" ${entry.tier === t ? 'selected' : ''}>${Utils.escapeHtml(TIER_LABEL[t])}</option>`).join('')}
+            ${tiers.map(t => `<option value="${Utils.escapeHtml(t)}" ${entry.tier === t ? 'selected' : ''}>${Utils.escapeHtml(tierLabel[t] || t)}</option>`).join('')}
           </select></label>
           <label>Best for <select data-field="best_for">
             <option value="" ${!entry.best_for ? 'selected' : ''}></option>
@@ -357,30 +370,68 @@ const InventoryView = (() => {
 
     // Save Bottle
     formEl.querySelector('.bottle-edit-save').addEventListener('click', () => {
-      const styleEl = formEl.querySelector('[data-field="style"]');
+      const styleEl  = formEl.querySelector('[data-field="style"]');
       const newStyle = (styleEl ? styleEl.value : '').trim();
       if (!newStyle) {
         Utils.toast('Category is required — please select one.', 'error');
         if (styleEl) styleEl.focus();
         return;
       }
-      State.patch('inventory', i2 => {
-        const a2 = getNestedArr(i2, sectionKey);
-        const e2 = a2[index];
-        if (!e2) return;
-        formEl.querySelectorAll('[data-field]').forEach(el => {
-          const f = el.dataset.field;
-          e2[f] = (el.value || '').trim();
-        });
-        // Ensure type is never empty: use section short default, not the verbose group name
-        if (!e2.type) e2.type = SECTION_TYPE_DEFAULT[sectionKey] || e2.style;
-        // Persist custom type if novel
-        if (e2.type) saveCustomType(e2.type);
-        if (!e2.created_at) e2.created_at = new Date().toISOString();
-        e2.updated_at = new Date().toISOString();
+
+      const oldStyle    = snapshot.style || '';
+      const oldSection  = sectionKey;
+      const newSection  = canonicalSectionForStyle(newStyle);
+      const doMove      = newSection && newSection !== oldSection;
+
+      const sectionTypeDefault = Config.sectionTypeDefault();
+
+      // Collect all form field values
+      const updatedFields = {};
+      formEl.querySelectorAll('[data-field]').forEach(el => {
+        updatedFields[el.dataset.field] = (el.value || '').trim();
       });
-      markDirty();
-      closeEditForm(false);
+      if (!updatedFields.type) updatedFields.type = sectionTypeDefault[doMove ? newSection : oldSection] || newStyle;
+      if (updatedFields.type) saveCustomType(updatedFields.type);
+      const now = new Date().toISOString();
+
+      if (doMove) {
+        // Move bottle to the canonical section for the new category
+        State.patch('inventory', i2 => {
+          const srcArr = getNestedArr(i2, oldSection);
+          const bottle = srcArr.splice(index, 1)[0];
+          if (!bottle) return;
+          Object.assign(bottle, updatedFields);
+          if (!bottle.created_at) bottle.created_at = now;
+          bottle.updated_at = now;
+          const dstArr = getNestedArr(i2, newSection);
+          dstArr.push(bottle);
+          setNestedArr(i2, newSection, dstArr);
+          setNestedArr(i2, oldSection, srcArr);
+        });
+        markDirty();
+        _openEdit = null;
+        formEl.remove();
+        // Re-render both affected sections
+        const renderSection = (secKey) => {
+          const safeSecId = secKey.replace(/\./g, '-');
+          const g = document.getElementById(`bottles-${safeSecId}`);
+          if (g) renderBottleChips(g, getNestedArr(State.get('inventory'), secKey), secKey, State.get('inventory'));
+        };
+        renderSection(oldSection);
+        renderSection(newSection);
+        Utils.showToast(`Moved to ${sectionLabelByKey(newSection)}`);
+      } else {
+        State.patch('inventory', i2 => {
+          const a2 = getNestedArr(i2, oldSection);
+          const e2 = a2[index];
+          if (!e2) return;
+          Object.assign(e2, updatedFields);
+          if (!e2.created_at) e2.created_at = now;
+          e2.updated_at = now;
+        });
+        markDirty();
+        closeEditForm(false);
+      }
     });
 
     // Revert Changes
@@ -699,7 +750,8 @@ const InventoryView = (() => {
 
   function renderEquipmentSection(contentEl, inv) {
     const eq = inv.equipment || (inv.equipment = { strainers: [] });
-    const checked = new Set((eq.strainers || []).filter(s => STRAINER_OPTIONS.includes(s)));
+    const strainerOptions = Config.strainerOptions();
+    const checked = new Set((eq.strainers || []).filter(s => strainerOptions.includes(s)));
     const emptyHint = checked.size === 0
       ? '<p class="empty-hint" style="color:var(--text-dim);">No equipment tracked yet. Check the strainers you own below.</p>'
       : '';
@@ -708,7 +760,7 @@ const InventoryView = (() => {
         <h3>Strainers</h3>
         ${emptyHint}
         <div class="equipment-strainer-grid">
-          ${STRAINER_OPTIONS.map(name => `
+          ${strainerOptions.map(name => `
             <label class="strainer-option${checked.has(name) ? ' checked' : ''}">
               <input type="checkbox" data-strainer="${Utils.escapeHtml(name)}" ${checked.has(name) ? 'checked' : ''}>
               <span>${Utils.escapeHtml(name)}</span>

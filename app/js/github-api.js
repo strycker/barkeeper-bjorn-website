@@ -40,7 +40,9 @@ const GitHubAPI = (() => {
   async function readJSON(filePath) {
     const { branch } = cfg();
     const resp = await request('GET', `/contents/${filePath}?ref=${encodeURIComponent(branch)}`);
-    const text = atob(resp.content.replace(/\n/g, ''));
+    const raw   = atob(resp.content.replace(/\n/g, ''));
+    const bytes = Uint8Array.from(raw, c => c.charCodeAt(0));
+    const text  = new TextDecoder('utf-8').decode(bytes);
     return { data: JSON.parse(text), sha: resp.sha };
   }
 
