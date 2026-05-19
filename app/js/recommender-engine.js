@@ -7,6 +7,31 @@ const RecommenderEngine = (() => {
   // Spirit subtype tokens — used to prevent cross-subtype false positives (BUG-02)
   const SUBTYPE_TOKENS = ['scotch', 'bourbon', 'rye', 'japanese', 'irish', 'canadian'];
 
+  // Maps bartender specialty preset names → recipe specialty tag keywords to boost
+  const SPECIALTY_BOOST_MAP = {
+    'Classic cocktails':          ['classic'],
+    'Craft & artisanal':          ['craft', 'artisanal'],
+    'Tropical & tiki drinks':     ['tiki', 'tropical'],
+    'Avant-garde / experimental': ['avantgarde', 'craft'],
+    'Contemporary & trendy':      ['contemporary', 'modern'],
+    'Low-ABV & wellness':         ['low-abv', 'wellness'],
+    'Whiskey & brown spirits':    ['whiskey', 'bourbon', 'scotch', 'rye'],
+    'Wine & spirits education':   ['wine', 'vermouth'],
+    'Beer & cider':               ['beer', 'cider'],
+    'Brandy & cognac':            ['brandy', 'cognac'],
+  };
+
+  // Returns 0.0–0.2 boost when recipe tags/base match the bartender's specialty
+  function _specialtyBoost(recipe, specialty) {
+    if (!specialty || specialty === 'No preference (broad and balanced)') return 0;
+    const tags = SPECIALTY_BOOST_MAP[specialty];
+    if (!tags || !tags.length) return 0;
+    const recipeTags = [...(recipe.tags || []), ...(recipe.specialties || [])].map(t => t.toLowerCase());
+    const baseStr = (recipe.base || '').toLowerCase();
+    const matches = tags.some(t => recipeTags.some(rt => rt.includes(t)) || baseStr.includes(t));
+    return matches ? 0.18 : 0;
+  }
+
   // Map classics-db searchIn keys → extractor functions for actual inventory structure
   // Inventory top-level: base_spirits{whiskey,brandy,rum,agave,white_spirits,other},
   //   fortified_wines_and_aperitif_wines[], liqueurs_and_cordials{fruit_forward,nut_coffee,herbal,specialty_regional},
@@ -141,6 +166,7 @@ const RecommenderEngine = (() => {
   // Each item: { recipe, flavorScore, missingIngredient?, missingIngredients? }
   // opts.scope: 0|1|2|3  (3 = Unconstrained — skip inventory gating)
   // opts.ignoreVetoes: Set<string>  (veto strings to bypass for this call)
+  // opts.specialty: string  (bartender specialty preset for score boost)
   function recommend(inventory, rawProfile, opts = {}) {
     // eslint-disable-next-line no-undef
     const db = (typeof CLASSICS_DB !== 'undefined') ? CLASSICS_DB : [];
@@ -165,6 +191,7 @@ const RecommenderEngine = (() => {
     const activeVetoes = rawVetoes.filter(v => !(opts.ignoreVetoes && opts.ignoreVetoes.has(v)));
 
     const unconstrained = opts.scope === 3;
+    const specialty = opts.specialty || '';
 
     for (const recipe of db) {
       // Check veto — skip any recipe whose base matches an active vetoed string
@@ -178,7 +205,8 @@ const RecommenderEngine = (() => {
         if (!result.found) missing.push(ing);
       }
 
-      const score = _flavorScore(recipe, profile);
+      const flavorScore = _flavorScore(recipe, profile);
+      const score = Math.min(1, flavorScore * 0.85 + _specialtyBoost(recipe, specialty));
 
       if (unconstrained || missing.length === 0) {
         buildable.push({ recipe, flavorScore: score });

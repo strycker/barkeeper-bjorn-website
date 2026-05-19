@@ -104,13 +104,17 @@ const ProfileView = (() => {
     renderDrinkingStyle(profile, container);
   }
 
-  const ARCHETYPES = [
-    { name: 'The Minimalist',   description: 'Clean, simple, essential' },
-    { name: 'The Experimenter', description: 'Loves to try new things' },
-    { name: 'The Host',        description: 'Drinks for the crowd' },
-    { name: 'The Purist',      description: 'Respects tradition and craft' },
-    { name: 'The Adventurer',  description: 'Bold, unexpected combinations' },
-    { name: 'The Classicist',  description: 'Sticks to the canon' },
+  const CANONICAL_ARCHETYPES = [
+    { name: 'The Minimalist',              description: 'Three-ingredient classics, clean execution, no fuss.' },
+    { name: 'The Experimenter',            description: 'New ingredients, unusual techniques, willing to risk a miss.' },
+    { name: 'The Host',                    description: 'Crowd-pleasers, batched builds, easy to serve at scale.' },
+    { name: 'The Purist',                  description: 'Traditional recipes, exact proportions, respect for the canon.' },
+    { name: 'The Adventurer',              description: 'Bold flavors, smoke, bitter, unusual spirits.' },
+    { name: 'The Classicist',              description: 'Pre-Prohibition spec, vintage glassware, period-correct.' },
+    { name: 'Sophisticated',               description: 'Refined palate, premium spirits, elevated presentation.' },
+    { name: 'Curious / Studious',          description: 'Deep dive into history, technique, and ingredient provenance.' },
+    { name: "Bartender's Bartender",       description: 'Industry respect, precise technique, knows all the classics.' },
+    { name: 'Spirit-forward / Old-School', description: 'Spirit does the talking — minimal dilution, strong builds.' },
   ];
 
   // ─── Radar Chart (SVG hexagon) ───────────────────────────────────
@@ -478,20 +482,35 @@ const ProfileView = (() => {
   function renderDsArchetypes(container) {
     const grid = container.querySelector('#ds-archetypes');
     if (!grid) return;
-    const selected = (State.get('profile').archetypes || []).map(a => a.name);
-    grid.innerHTML = ARCHETYPES.map(a => `
-      <button class="archetype-chip${selected.includes(a.name) ? ' active' : ''}"
-              data-name="${Utils.escapeHtml(a.name)}" title="${Utils.escapeHtml(a.description)}">${Utils.escapeHtml(a.name)}</button>
-    `).join('');
+
+    const currentArchetypes = State.get('profile').archetypes || [];
+    const selectedNames = currentArchetypes.map(a => a.name || a);
+
+    // Merge canonical + any custom archetypes from profile not in canonical list
+    const canonicalNames = CANONICAL_ARCHETYPES.map(a => a.name);
+    const extraArchetypes = currentArchetypes
+      .filter(a => !canonicalNames.includes(a.name || a))
+      .map(a => typeof a === 'string' ? { name: a, description: '' } : a);
+    const allArchetypes = [...CANONICAL_ARCHETYPES, ...extraArchetypes];
+
+    grid.innerHTML = allArchetypes.map(a => `
+      <button class="archetype-chip${selectedNames.includes(a.name) ? ' active' : ''}"
+              data-name="${Utils.escapeHtml(a.name)}" title="${Utils.escapeHtml(a.description || a.name)}">${Utils.escapeHtml(a.name)}</button>
+    `).join('') + `
+      <div style="display:flex;gap:6px;margin-top:8px;width:100%;">
+        <input type="text" id="ds-archetype-input" placeholder="Custom archetype…" style="flex:1;font-size:0.85rem;">
+        <button class="btn btn-secondary btn-sm" id="ds-archetype-add-btn">+ Add</button>
+      </div>`;
+
     grid.querySelectorAll('.archetype-chip').forEach(btn => {
       btn.addEventListener('click', () => {
+        const name = btn.dataset.name;
         State.patch('profile', p => {
-          const cur = (p.archetypes || []).map(a => a.name);
-          const arch = ARCHETYPES.find(a => a.name === btn.dataset.name);
-          if (!arch) return;
-          if (cur.includes(arch.name)) {
-            p.archetypes = (p.archetypes || []).filter(a => a.name !== arch.name);
-          } else if (cur.length < 3) {
+          const curNames = (p.archetypes || []).map(a => a.name || a);
+          if (curNames.includes(name)) {
+            p.archetypes = (p.archetypes || []).filter(a => (a.name || a) !== name);
+          } else {
+            const arch = allArchetypes.find(a => a.name === name) || { name, description: '' };
             p.archetypes = [...(p.archetypes || []), arch];
           }
         });
@@ -499,6 +518,21 @@ const ProfileView = (() => {
         renderDsArchetypes(container);
       });
     });
+
+    const archetypeInput = grid.querySelector('#ds-archetype-input');
+    const addCustom = () => {
+      const val = archetypeInput.value.trim();
+      if (!val) return;
+      State.patch('profile', p => {
+        const curNames = (p.archetypes || []).map(a => a.name || a);
+        if (!curNames.includes(val)) p.archetypes = [...(p.archetypes || []), { name: val, description: '' }];
+      });
+      markDirty();
+      archetypeInput.value = '';
+      renderDsArchetypes(container);
+    };
+    grid.querySelector('#ds-archetype-add-btn').addEventListener('click', addCustom);
+    archetypeInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); addCustom(); } });
   }
 
   function renderDrinkingStyle(profile, container) {
@@ -536,7 +570,7 @@ const ProfileView = (() => {
           </select>
         </div>
         <div class="form-group">
-          <label>Archetypes (pick 1–3)</label>
+          <label>Archetypes</label>
           <div id="ds-archetypes" class="archetype-grid"></div>
         </div>
       </details>`;

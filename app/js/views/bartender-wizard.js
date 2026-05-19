@@ -207,6 +207,31 @@ const BartenderWizardView = (() => {
             </div>
           </div>
 
+          <!-- ── Specialty ────────────────────────────────────────────── -->
+          <div class="settings-section" id="bw-sect-specialty">
+            <div class="settings-section__heading">Specialty Focus</div>
+            <div class="form-group">
+              <label for="bw-specialty">Bartender specialty</label>
+              <select id="bw-specialty">
+                ${[
+                  'No preference (broad and balanced)',
+                  'Classic cocktails',
+                  'Craft & artisanal',
+                  'Tropical & tiki drinks',
+                  'Avant-garde / experimental',
+                  'Contemporary & trendy',
+                  'Low-ABV & wellness',
+                  'Whiskey & brown spirits',
+                  'Brandy & cognac',
+                  'Wine & spirits education',
+                ].map(s => `<option value="${Utils.escapeHtml(s)}"${(bk.personality?.specialty === s) ? ' selected' : ''}>${Utils.escapeHtml(s)}</option>`).join('')}
+              </select>
+              <p style="font-size:0.82rem;color:var(--text-dim);margin-top:4px;">
+                Boosts matching recipes in the Recommender by up to 18%.
+              </p>
+            </div>
+          </div>
+
           <!-- ── Personality ───────────────────────────────────────────── -->
           <div class="settings-section" id="bw-sect-personality">
             <div class="settings-section__heading">Personality</div>
@@ -284,6 +309,14 @@ const BartenderWizardView = (() => {
 
     document.getElementById('bw-imgstyle')?.addEventListener('input', e => {
       State.patch('barkeeper', bk2 => { bk2.image_gen_style = e.target.value; });
+      markDirty();
+    });
+
+    document.getElementById('bw-specialty')?.addEventListener('change', e => {
+      State.patch('barkeeper', bk2 => {
+        if (!bk2.personality) bk2.personality = {};
+        bk2.personality.specialty = e.target.value;
+      });
       markDirty();
     });
 
