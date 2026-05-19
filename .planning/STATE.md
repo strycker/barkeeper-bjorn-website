@@ -18,7 +18,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 | 2 | Web UI UX & Settings | Shipped | 5 | 100% |
 | 3 | Content Management | Shipped | 4 | 100% |
 | 4 | Inventory & Recommender Depth | Shipped | 3 | 100% |
-| 5 | Polish, Depth & UX Tidy | Shipped | 4 plans complete, 17/17 UAT | 100% |
+| 5 | Polish, Depth & UX Tidy | Shipped | 4 plans, 17/17 UAT, VALIDATION.md | 100% |
 | 6 | Recipe & Recommender UX | In Progress | REC-10+11+BUG-01-03 shipped; features pending | 35% |
 | 7 | AI Integration | Pending | — | 0% |
 | 8 | Portability | Pending | — | 0% |
