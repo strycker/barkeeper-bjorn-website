@@ -39,12 +39,40 @@ All requirements from Phases 1–4 are complete and validated. See phase SUMMARY
 
 ### CUST — Bartender Customization
 
-- [ ] **CUST-01**: Bartender Customization Wizard (`#bartender-wizard`) — new full-depth view with: name, avatar image URL, voice preset, long-form personality description (textarea), behavioral rules list (add/remove), cocktail naming style, image generation style preferences, signature signoff text
-- [ ] **CUST-02**: Settings → Bartender section keeps Name + Preset dropdown and adds "Full Customization →" link/button that navigates to the Wizard
+- [x] **CUST-01**: Bartender Customization Wizard (`#bartender-wizard`) — new full-depth view with: name, avatar image URL, voice preset, long-form personality description (textarea), behavioral rules list (add/remove), cocktail naming style, image generation style preferences, signature signoff text
+- [x] **CUST-02**: Settings → Bartender section keeps Name + Preset dropdown and adds "Full Customization →" link/button that navigates to the Wizard
+
+**Phase 5 status: SHIPPED — all 17 UAT tests passed 2026-05-19**
 
 ---
 
-## Phase 6: AI Integration
+## Phase 6: Recipe & Recommender UX
+
+_Inserted between Phases 5 and AI Integration to address recipe list depth, search, and action-button UX — all discovered during Phase 5 UAT._
+
+### REC-CARD — Recipe Card Polish (Bugfixes, shipped with Phase 5 close)
+
+- [x] **REC-10**: Recipe card layout fix — `rec-card-actions` (♥ ☆) moved into the `rec-card-header` flex row (no longer absolute-positioned); no longer covers the Match score bar. CSS: removed `position:absolute`, added `flex-shrink:0; align-self:flex-start`.
+- [x] **REC-11**: Toggle state for ♥ / ★ action buttons — heart shows ♡ (open, U+2661) when not in Favorites, ♥ (filled, U+2665) when favorited; star shows ☆ when not wishlisted, ★ when wishlisted. Clicking a filled button removes the recipe from that list (toggle, not "already in" guard). Buttons update instantly after GitHub save.
+
+### RECIPE-MADE — "I Made This" Tracking
+
+- [ ] **RECIPE-MADE-01**: "I Made This" (✓ / ○) button on every Recommender recipe card — third action button alongside ♥ and ★. Clicking marks the recipe as made and adds it to `recipes.made_log[]` (each entry: `{name, date_made, notes?}`). Icon shows ○ (not made) or a filled ✓ (made). Clicking a made recipe removes it from the log (toggle).
+- [ ] **RECIPE-MADE-02**: New "Made" tab in the Recipes view — shows `recipes.made_log` entries as rec-card style chips (same layout as Favorites/Wishlist tabs after RECIPE-VIEW-01). Sorted most-recent first. Each entry has a remove (×) button.
+
+### RECIPE-VIEW — Recipe Tab Chip Upgrade
+
+- [ ] **RECIPE-VIEW-01**: Favorites and Wishlist tabs in the Recipes view render entries as `rec-card` style chips — identical layout to Recommender cards (name, base, method, difficulty, occasion sentence, ingredient chips, glassware). Each card has a remove (×) button to remove the entry from that list without navigating to Recommender. Replaces the current plain `.card` list layout.
+- [ ] **RECIPE-VIEW-02**: Originals tab recipe cards are clickable chips — clicking opens the full recipe detail view (already implemented for Originals, but Favorites/Wishlist entries from classics-db should also be clickable to see full detail including method steps from the classics-db entry).
+
+### RECIPE-SEARCH — Text Search
+
+- [ ] **RECIPE-SEARCH-01**: Text search input at the top of the Recipes page (above tabs) — filters entries across whichever tab is active (Originals, Favorites, Wishlist, Made) by recipe name, ingredient name, or base spirit. Clears on tab switch. Instant filter (no submit button).
+- [ ] **REC-SEARCH-01**: Text search input at the top of the Recommendations page (above the cards area, below scope/filter controls) — filters visible cards by recipe name, base spirit, or ingredient keyword. Works across all sections (Buildable, One Away, Two Away). Instant filter.
+
+---
+
+## Phase 7: AI Integration
 
 ### AI — Core Infrastructure
 
@@ -88,7 +116,7 @@ All requirements from Phases 1–4 are complete and validated. See phase SUMMARY
 
 ---
 
-## Phase 7: Portability
+## Phase 8: Portability
 
 ### PORT — Data Portability
 
@@ -100,7 +128,7 @@ All requirements from Phases 1–4 are complete and validated. See phase SUMMARY
 
 ---
 
-## Phases 8–9: Future (Backend & Community)
+## Phases 9–10: Future (Backend & Community)
 
 Requirements for these phases are defined in ROADMAP.md. They are not yet broken into detailed requirement IDs — that happens during discuss-phase for each phase.
 
@@ -114,14 +142,13 @@ Requirements for these phases are defined in ROADMAP.md. They are not yet broken
 | ONB-01–04, NAV-01–05, SETTINGS-01–04, INV-01–02 | 2: Web UI UX & Settings | Shipped |
 | RECIPE-01–05, EXPORT-01–04 | 3: Content Management | Shipped |
 | INV-03–07, REC-01–03 | 4: Inventory & Recommender Depth | Shipped |
-| REC-05–09 | 5: Polish, Depth & UX Tidy | Pending |
-| INV-08–10 | 5: Polish, Depth & UX Tidy | Pending |
-| DATA-01–03 | 5: Polish, Depth & UX Tidy | Pending |
-| CUST-01–02 | 5: Polish, Depth & UX Tidy | Pending |
-| AI-01–13, SET-05, CHAT-01–09, REC-04, LIB-01 | 6: AI Integration | Pending |
-| PORT-01–05 | 7: Portability | Pending |
-| BACKEND-01–08 | 8: Backend & Multi-User | Pending |
-| COMMUNITY-01–08, API-01–06, AGENT-SYS-01–04 | 9: Community, API & Multi-Agent | Pending |
+| REC-05–09, INV-08–10, DATA-01–03, CUST-01–02 | 5: Polish, Depth & UX Tidy | **Shipped** |
+| REC-10–11 | 6: Recipe & Recommender UX | Shipped (bugfixes) |
+| RECIPE-MADE-01–02, RECIPE-VIEW-01–02, RECIPE-SEARCH-01, REC-SEARCH-01 | 6: Recipe & Recommender UX | Pending |
+| AI-01–13, SET-05, CHAT-01–09, REC-04, LIB-01 | 7: AI Integration | Pending |
+| PORT-01–05 | 8: Portability | Pending |
+| BACKEND-01–08 | 9: Backend & Multi-User | Pending |
+| COMMUNITY-01–08, API-01–06, AGENT-SYS-01–04 | 10: Community, API & Multi-Agent | Pending |
 
 ---
 
