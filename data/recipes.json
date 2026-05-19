@@ -167,6 +167,108 @@
       "garnish": "Brandied cherry"
     }
   ],
-  "wishlist": [],
+  "wishlist": [
+    {
+      "id": "ramos-gin-fizz",
+      "name": "Ramos Gin Fizz",
+      "base": "Gin",
+      "method": "shaken",
+      "glassware": "Highball",
+      "difficulty": 3,
+      "profile": {
+        "sweetness": 0.45,
+        "acid": 0.4,
+        "strength": 0.45,
+        "complexity": 0.55,
+        "season": 0.25,
+        "risk": 0.4
+      },
+      "occasion": "The ultimate brunch cocktail. 12-minute shake, cloud-like foam, New Orleans heritage.",
+      "tags": [
+        "brunch",
+        "refreshing",
+        "classic"
+      ],
+      "ingredients": [
+        {
+          "name": "Gin",
+          "amount": "2 oz",
+          "keywords": [
+            "gin"
+          ],
+          "searchIn": [
+            "white_spirits"
+          ]
+        },
+        {
+          "name": "Heavy Cream",
+          "amount": "2 oz",
+          "keywords": [
+            "cream",
+            "heavy cream"
+          ],
+          "searchIn": [
+            "perishables"
+          ]
+        },
+        {
+          "name": "Fresh Lemon Juice",
+          "amount": "½ oz",
+          "keywords": [
+            "lemon"
+          ],
+          "searchIn": [
+            "produce",
+            "perishables"
+          ]
+        },
+        {
+          "name": "Fresh Lime Juice",
+          "amount": "½ oz",
+          "keywords": [
+            "lime"
+          ],
+          "searchIn": [
+            "produce",
+            "perishables"
+          ]
+        },
+        {
+          "name": "Simple Syrup",
+          "amount": "1 oz",
+          "keywords": [
+            "simple",
+            "sugar"
+          ],
+          "searchIn": [
+            "syrups",
+            "pantry"
+          ]
+        },
+        {
+          "name": "Egg White",
+          "amount": "1",
+          "keywords": [
+            "egg"
+          ],
+          "searchIn": [
+            "perishables"
+          ]
+        },
+        {
+          "name": "Soda Water",
+          "amount": "1–2 oz",
+          "keywords": [
+            "soda",
+            "sparkling"
+          ],
+          "searchIn": [
+            "mixers"
+          ]
+        }
+      ],
+      "garnish": "None"
+    }
+  ],
   "last_updated": "2026-05-14"
 }
