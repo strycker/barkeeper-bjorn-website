@@ -9,11 +9,12 @@ updated: 2026-05-19T00:00:00Z
 ## Current Test
 <!-- OVERWRITE each test - shows where we are -->
 
-number: 6
-name: Mixers & Soft Drinks Section on Spirits Tab
+number: 7
+name: Recommender Scope Buttons — Cumulative Highlight
 expected: |
-  In Inventory → Spirits & Bottles tab, a "Mixers & Soft Drinks" section should appear.
-  Adding "Tonic Water" or "Ginger Beer" via the quick-add bar should route them there automatically.
+  On the Recommender page, scope buttons (0 = Buildable, 1 = One Away, 2 = Two Away)
+  should highlight cumulatively. Clicking "One Away" keeps button 0 also highlighted.
+  Clicking "Two Away" keeps buttons 0 and 1 also active.
 awaiting: user response
 
 ## Tests
@@ -40,7 +41,7 @@ result: pass
 
 ### 6. Mixers & Soft Drinks Section on Spirits Tab
 expected: In Inventory → Spirits & Bottles tab, a new section "Mixers & Soft Drinks" should appear. Adding "Tonic Water" or "Ginger Beer" via the quick-add bar should route them there automatically. Bottles in this section have the full edit form (Category, Specific Style/Type, Brand, Tier, etc.).
-result: [pending]
+result: pass
 
 ### 7. Recommender Scope Buttons — Cumulative Highlight
 expected: On the Recommender page, scope buttons (0 = Buildable, 1 = One Away, 2 = Two Away) should highlight cumulatively. Clicking "One Away" should keep button 0 also highlighted/active. Clicking "Two Away" should keep buttons 0 and 1 also active.
