@@ -556,36 +556,67 @@ const OnboardingView = (() => {
         </select>
       </div>
       <div class="form-group">
-        <label>Pick 1–3 archetypes that describe you</label>
+        <label>Archetypes — select any that describe you</label>
         <div id="wiz-ds-archetypes" class="archetype-grid"></div>
+        <div style="display:flex;gap:6px;margin-top:8px;">
+          <input type="text" id="wiz-ds-arch-input" placeholder="Add custom archetype…" style="flex:1;font-size:0.85rem;">
+          <button type="button" class="btn btn-secondary btn-sm" id="wiz-ds-arch-add">+ Add</button>
+        </div>
       </div>`;
 
-    const ARCHETYPES = [
-      { name: 'The Minimalist',   description: 'Three-ingredient classics, clean execution, no fuss.' },
-      { name: 'The Experimenter', description: 'New ingredients, unusual techniques, willing to risk a miss.' },
-      { name: 'The Host',         description: 'Crowd-pleasers, batched builds, easy to serve at scale.' },
-      { name: 'The Purist',       description: 'Traditional recipes, exact proportions, respect for the canon.' },
-      { name: 'The Adventurer',   description: 'Bold flavors, smoke, bitter, unusual spirits.' },
-      { name: 'The Classicist',   description: 'Pre-Prohibition spec, vintage glassware, period-correct.' },
+    const CANONICAL_ARCHETYPES = [
+      { name: 'The Minimalist',              description: 'Three-ingredient classics, clean execution, no fuss.' },
+      { name: 'The Experimenter',            description: 'New ingredients, unusual techniques, willing to risk a miss.' },
+      { name: 'The Host',                    description: 'Crowd-pleasers, batched builds, easy to serve at scale.' },
+      { name: 'The Purist',                  description: 'Traditional recipes, exact proportions, respect for the canon.' },
+      { name: 'The Adventurer',              description: 'Bold flavors, smoke, bitter, unusual spirits.' },
+      { name: 'The Classicist',              description: 'Pre-Prohibition spec, vintage glassware, period-correct.' },
+      { name: 'Sophisticated',               description: 'Refined palate, premium spirits, elevated presentation.' },
+      { name: 'Curious / Studious',          description: 'Deep dive into history, technique, and ingredient provenance.' },
+      { name: "Bartender's Bartender",       description: 'Industry respect, precise technique, knows all the classics.' },
+      { name: 'Spirit-forward / Old-School', description: 'Spirit does the talking — minimal dilution, strong builds.' },
     ];
+
+    // Merge existing archetypes not in canonical list (so user data is never lost)
+    const canonicalNames = new Set(CANONICAL_ARCHETYPES.map(a => a.name));
+    const extras = (_answers.archetypes || []).filter(a => !canonicalNames.has(a.name));
+    let allArchetypes = [...CANONICAL_ARCHETYPES, ...extras];
 
     const selected = new Set((_answers.archetypes || []).map(a => a.name));
     const grid = body.querySelector('#wiz-ds-archetypes');
-    grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:8px;';
-    ARCHETYPES.forEach(a => {
-      const chip = document.createElement('button');
-      chip.type = 'button';
-      chip.className = 'rec-filter-chip' + (selected.has(a.name) ? ' active' : '');
-      chip.title = a.description;
-      chip.textContent = a.name;
-      chip.addEventListener('click', () => {
-        if (selected.has(a.name)) selected.delete(a.name);
-        else if (selected.size < 3) selected.add(a.name);
-        else return; // cap at 3
-        _answers.archetypes = ARCHETYPES.filter(x => selected.has(x.name));
-        chip.classList.toggle('active');
+    grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;';
+
+    function rebuildGrid() {
+      grid.innerHTML = '';
+      allArchetypes.forEach(a => {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'rec-filter-chip' + (selected.has(a.name) ? ' active' : '');
+        if (a.description) chip.title = a.description;
+        chip.textContent = a.name;
+        chip.addEventListener('click', () => {
+          if (selected.has(a.name)) selected.delete(a.name);
+          else selected.add(a.name);
+          _answers.archetypes = allArchetypes.filter(x => selected.has(x.name));
+          chip.classList.toggle('active');
+        });
+        grid.appendChild(chip);
       });
-      grid.appendChild(chip);
+    }
+    rebuildGrid();
+
+    const archInput = body.querySelector('#wiz-ds-arch-input');
+    body.querySelector('#wiz-ds-arch-add').addEventListener('click', () => {
+      const name = archInput.value.trim();
+      if (!name) return;
+      if (!allArchetypes.find(a => a.name === name)) allArchetypes.push({ name, description: '' });
+      selected.add(name);
+      _answers.archetypes = allArchetypes.filter(x => selected.has(x.name));
+      archInput.value = '';
+      rebuildGrid();
+    });
+    archInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); body.querySelector('#wiz-ds-arch-add').click(); }
     });
 
     navButtons(body, container, {
