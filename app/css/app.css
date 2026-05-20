@@ -1462,3 +1462,32 @@ a:hover { color: var(--amber); }
   border: 1px solid rgba(80,200,120,0.3);
   border-radius: 10px; padding: 1px 7px; margin-left: 6px; vertical-align: middle;
 }
+
+/* Phase 6 — D-06 editable Originals in the universal detail modal */
+.recipe-detail-modal .rdm-edit-name {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 8px 10px;
+  font-size: 1.25rem; font-weight: 600; color: var(--text);
+}
+.recipe-detail-modal .rdm-edit-name:focus { outline: none; border-color: var(--amber); }
+
+.recipe-detail-modal .rdm-edit-meta {
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
+.recipe-detail-modal .rdm-edit-meta .form-group { flex: 1 1 140px; margin: 0; }
+.recipe-detail-modal .rdm-edit-meta label {
+  display: block; font-size: 0.78rem; color: var(--text-dim); margin-bottom: 4px;
+}
+.recipe-detail-modal .rdm-edit-method,
+.recipe-detail-modal .rdm-edit-glassware,
+.recipe-detail-modal .rdm-edit-garnish {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); padding: 8px 10px;
+  font-size: 0.88rem; color: var(--text);
+}
+.recipe-detail-modal .rdm-edit-method:focus,
+.recipe-detail-modal .rdm-edit-glassware:focus,
+.recipe-detail-modal .rdm-edit-garnish:focus { outline: none; border-color: var(--amber-dim); }
+
+.recipe-detail-modal #rdm-ingredients { margin-top: 6px; }
+.recipe-detail-modal #rdm-ingredients .rf-ing-row { margin-bottom: 6px; }
