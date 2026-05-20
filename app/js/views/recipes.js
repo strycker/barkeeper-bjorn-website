@@ -275,7 +275,7 @@ Please provide:
 
       card.querySelector('[data-remove]').addEventListener('click', e => {
         e.stopPropagation();
-        State.patch('recipes', r => { r[listKey] = (r[listKey] || []).filter(x => x.name !== recipe.name); });
+        State.patch('recipes', r => { r[listKey] = (r[listKey] || []).filter(x => !Utils.sameRecipe(x, recipe)); });
         State.save('recipes').then(() => {
           Utils.showToast('Removed');
           render(mainContainer, { tab: listKey === 'confirmed_favorites' ? 'favorites' : 'wishlist' });
@@ -337,7 +337,7 @@ Please provide:
 
       card.querySelector('[data-remove]').addEventListener('click', e => {
         e.stopPropagation();
-        State.patch('recipes', r => { r.made_log = (r.made_log || []).filter(x => x.name !== recipe.name); });
+        State.patch('recipes', r => { r.made_log = (r.made_log || []).filter(x => !Utils.sameRecipe(x, recipe)); });
         State.save('recipes').then(() => {
           Utils.showToast('Removed from Made');
           render(mainContainer, { tab: 'made' });
@@ -350,10 +350,10 @@ Please provide:
 
   function showRecipeDetail(recipe, listKey, mainContainer) {
     const madeLog = State.get('recipes')?.made_log || [];
-    const madeEntry = madeLog.find(m => m.name === recipe.name);
+    const madeEntry = madeLog.find(m => Utils.sameRecipe(m, recipe));
     const timesMade = madeEntry?.times_made || 0;
     const currentNotes = (listKey === 'made_log' ? recipe.notes : null) ||
-      (State.get('recipes')?.[listKey]?.find(r => r.name === recipe.name)?.notes) || '';
+      (State.get('recipes')?.[listKey]?.find(r => Utils.sameRecipe(r, recipe))?.notes) || '';
 
     const overlay = document.createElement('div');
     overlay.className = 'recipe-detail-modal-overlay';
@@ -413,7 +413,7 @@ Please provide:
     overlay.querySelector('.rdm-save-notes').addEventListener('click', () => {
       const notes = overlay.querySelector('.rdm-notes').value.trim();
       State.patch('recipes', r => {
-        const entry = (r[listKey] || []).find(x => x.name === recipe.name);
+        const entry = (r[listKey] || []).find(x => Utils.sameRecipe(x, recipe));
         if (entry) entry.notes = notes;
       });
       State.save('recipes').then(() => Utils.showToast('Notes saved.'))
@@ -424,7 +424,7 @@ Please provide:
       const today = new Date().toISOString().slice(0, 10);
       State.patch('recipes', r => {
         if (!r.made_log) r.made_log = [];
-        const existing = r.made_log.find(m => m.name === recipe.name);
+        const existing = r.made_log.find(m => Utils.sameRecipe(m, recipe));
         if (existing) {
           existing.times_made = (existing.times_made || 1) + 1;
           existing.last_made = today;
@@ -434,7 +434,7 @@ Please provide:
       });
       State.save('recipes').then(() => {
         Utils.showToast('Marked as made ✓');
-        const newCount = State.get('recipes')?.made_log?.find(m => m.name === recipe.name)?.times_made || 1;
+        const newCount = State.get('recipes')?.made_log?.find(m => Utils.sameRecipe(m, recipe))?.times_made || 1;
         const tallyCount = overlay.querySelector('.rdm-tally-count');
         if (tallyCount) tallyCount.textContent = newCount;
         const madeBtn = overlay.querySelector('.rdm-made-btn');
@@ -446,7 +446,7 @@ Please provide:
           resetBtn.textContent = 'Reset';
           tally.appendChild(resetBtn);
           resetBtn.addEventListener('click', () => {
-            State.patch('recipes', r => { r.made_log = (r.made_log || []).filter(m => m.name !== recipe.name); });
+            State.patch('recipes', r => { r.made_log = (r.made_log || []).filter(m => !Utils.sameRecipe(m, recipe)); });
             State.save('recipes').then(() => {
               Utils.showToast('Removed from Made');
               close();
@@ -461,7 +461,7 @@ Please provide:
     const unMadeBtn = overlay.querySelector('.rdm-unmade-btn');
     if (unMadeBtn) {
       unMadeBtn.addEventListener('click', () => {
-        State.patch('recipes', r => { r.made_log = (r.made_log || []).filter(m => m.name !== recipe.name); });
+        State.patch('recipes', r => { r.made_log = (r.made_log || []).filter(m => !Utils.sameRecipe(m, recipe)); });
         State.save('recipes').then(() => {
           Utils.showToast('Removed from Made');
           close();
