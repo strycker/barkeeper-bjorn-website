@@ -8,10 +8,10 @@ updated: 2026-05-20T12:00:00Z
 
 ## Current Test
 
-number: 2
-name: Heart/Star Filled vs. Open Toggle (REC-11)
+number: 3
+name: "I Made This" Button Adds to made_log (RECIPE-MADE-01)
 expected: |
-  On a Recommender card, click the ♥ — it should fill (♥) and the recipe should appear under Recipes → Favorites. Click the now-filled ♥ again on the same card — it should revert to open (♡) and leave Favorites. The ☆/★ star behaves identically for the Wishlist.
+  On a Recommender card, click the ○ "I Made This" button — it should turn into a filled ✓ and a "Marked as made" toast appears. Go to Recipes → Made tab; the recipe should be listed there. Back on the Recommender, click the ✓ again — it removes the entry and the Made tab no longer shows it.
 awaiting: user response
 
 ## Tests
@@ -23,7 +23,7 @@ note: Buttons sit inline in the header row as expected. Cosmetic follow-up logge
 
 ### 2. Heart/Star Filled vs. Open Toggle (REC-11)
 expected: On a Recommender card, click the ♥ — it should fill (♥) and the recipe should appear under Recipes → Favorites. Click the now-filled ♥ again on the same card — it should revert to open (♡) and the recipe should leave Favorites. The ☆/★ star behaves identically for the Wishlist.
-result: pending
+result: pass
 
 ### 3. "I Made This" Button Adds to made_log (RECIPE-MADE-01)
 expected: On a Recommender card, click the ○ "I Made This" button — it should turn into a filled ✓ and a "Marked as made" toast appears. Go to Recipes → Made tab; the recipe should be listed there. Back on the Recommender, click the ✓ again — it removes the entry and the Made tab no longer shows it.
@@ -108,9 +108,9 @@ result: pending
 ## Summary
 
 total: 22
-passed: 1
+passed: 2
 issues: 0
-pending: 21
+pending: 20
 skipped: 0
 
 ## Gaps
@@ -126,3 +126,4 @@ skipped: 0
 ## Deferred (future phases)
 
 - Recipes should be uniformly chip-based across all views, and chips should surface tally counts and other stats (times-made, etc.) beyond just the Made tab. Noted during Test 1; aligns with Phase 6 mental model "chips are the interface" — carry into a later phase.
+- Originals schema parity (noted Test 2): clicking "Confirmed Built"/mark-made on an Original (via its edit/detail modal) does NOT add it to the Made tab and shows no tally. Likely root cause: Originals don't carry the same JSON fields as classics/saved chips (e.g. _source, base, made-tracking fields). Later phase: audit Originals vs. non-Originals recipe-chip schemas and add fields to BOTH as needed so all recipe chips share one compatible format and made-tracking works uniformly. User explicitly deferred — do not fix during Phase 6 verification.
