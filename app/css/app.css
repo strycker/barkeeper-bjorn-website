@@ -1491,3 +1491,11 @@ a:hover { color: var(--amber); }
 
 .recipe-detail-modal #rdm-ingredients { margin-top: 6px; }
 .recipe-detail-modal #rdm-ingredients .rf-ing-row { margin-bottom: 6px; }
+
+/* Phase 6 — D-07 amber 'Your original' badge on Recommender Original cards */
+.rec-original-badge {
+  display: inline-block; font-size: 0.72rem; font-weight: 600;
+  color: var(--amber); background: rgba(212,148,58,0.12);
+  border: 1px solid var(--amber-dim);
+  border-radius: var(--radius-sm); padding: 1px 7px; margin-left: 6px; vertical-align: middle;
+}

@@ -74,6 +74,7 @@ const RecommenderView = (() => {
               <span class="rec-method">${Utils.escapeHtml(recipe.method)}</span>
               <span class="rec-sep">·</span>
               <span class="rec-diff ${diff.cls}">${diff.label}</span>
+              ${recipe._source === 'originals' ? '<span class="rec-original-badge">Your original</span>' : ''}
             </div>
           </div>
           <div class="rec-score">
@@ -132,6 +133,7 @@ const RecommenderView = (() => {
               <span class="rec-method">${Utils.escapeHtml(recipe.method)}</span>
               <span class="rec-sep">·</span>
               <span class="rec-diff ${diff.cls}">${diff.label}</span>
+              ${recipe._source === 'originals' ? '<span class="rec-original-badge">Your original</span>' : ''}
             </div>
           </div>
           <div class="rec-score">
