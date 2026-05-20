@@ -573,6 +573,10 @@
     {
       "item": "Fernet-Branca",
       "rationale": "one-away recommendation"
+    },
+    {
+      "item": "Bénédictine",
+      "rationale": "one-away recommendation"
     }
   ],
   "equipment": {
