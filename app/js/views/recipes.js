@@ -349,6 +349,7 @@ Please provide:
   }
 
   function showRecipeDetail(recipe, listKey, mainContainer) {
+    const editable = recipe._source === 'originals';
     const madeLog = State.get('recipes')?.made_log || [];
     const madeEntry = madeLog.find(m => Utils.sameRecipe(m, recipe));
     const timesMade = madeEntry?.times_made || 0;
@@ -362,7 +363,60 @@ Please provide:
       `<tr><td class="amount">${Utils.escapeHtml(ing.amount || '')}</td><td>${Utils.escapeHtml(ing.name || '')}</td></tr>`
     ).join('');
 
-    overlay.innerHTML = `
+    // Shared tally + notes + footer-close blocks (rendered in BOTH branches).
+    const tallyBlock = `
+        <div class="section-label" style="margin-top:16px;">Times Made</div>
+        <div class="rdm-tally">
+          <span class="rdm-tally-count">${timesMade}</span>
+          <button class="btn btn-secondary btn-sm rdm-made-btn">${timesMade > 0 ? '+ Made It Again' : 'Mark as Made'}</button>
+          ${timesMade > 0 ? `<button class="btn btn-ghost btn-sm rdm-unmade-btn">Reset</button>` : ''}
+        </div>
+
+        <div class="section-label" style="margin-top:16px;">Notes</div>
+        <textarea class="rdm-notes" rows="3" placeholder="Personal notes about this recipe…">${Utils.escapeHtml(currentNotes)}</textarea>`;
+
+    if (editable) {
+      const editIngRows = (recipe.ingredients?.length ? recipe.ingredients : [{ amount: '', name: '', notes: '' }])
+        .map((ing, i) => ingredientRowHtml(ing, i)).join('');
+
+      overlay.innerHTML = `
+      <div class="recipe-detail-modal">
+        <div class="recipe-detail-modal-header">
+          <div style="flex:1;min-width:0;">
+            <input class="rdm-edit-name" type="text" value="${Utils.escapeHtml(recipe.name || '')}" placeholder="Recipe name">
+          </div>
+          <button class="btn-icon rdm-close" aria-label="Close">✕</button>
+        </div>
+
+        <div class="section-label" style="margin-top:12px;">Ingredients</div>
+        <div id="rdm-ingredients">${editIngRows}</div>
+        <button type="button" class="btn btn-ghost btn-sm rdm-add-ing">+ Add Ingredient</button>
+
+        <div class="rdm-edit-meta" style="margin-top:12px;">
+          <div class="form-group">
+            <label>Method</label>
+            <input class="rdm-edit-method" type="text" value="${Utils.escapeHtml(recipe.method || '')}" placeholder="e.g. stirred">
+          </div>
+          <div class="form-group">
+            <label>Glassware</label>
+            <input class="rdm-edit-glassware" type="text" value="${Utils.escapeHtml(recipe.glassware || '')}" placeholder="e.g. coupe">
+          </div>
+          <div class="form-group">
+            <label>Garnish</label>
+            <input class="rdm-edit-garnish" type="text" value="${Utils.escapeHtml(recipe.garnish || '')}" placeholder="e.g. lemon twist">
+          </div>
+        </div>
+
+        ${tallyBlock}
+
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm rdm-save-recipe">Save Recipe</button>
+          <button class="btn btn-primary btn-sm rdm-save-notes">Save Notes</button>
+          <button class="btn btn-ghost btn-sm rdm-close-btn">Close</button>
+        </div>
+      </div>`;
+    } else {
+      overlay.innerHTML = `
       <div class="recipe-detail-modal">
         <div class="recipe-detail-modal-header">
           <div>
@@ -387,21 +441,14 @@ Please provide:
 
         ${recipe.garnish ? `<div style="margin-top:8px;font-size:0.88rem;color:var(--text-dim);"><strong>Garnish:</strong> ${Utils.escapeHtml(recipe.garnish)}</div>` : ''}
 
-        <div class="section-label" style="margin-top:16px;">Times Made</div>
-        <div class="rdm-tally">
-          <span class="rdm-tally-count">${timesMade}</span>
-          <button class="btn btn-secondary btn-sm rdm-made-btn">${timesMade > 0 ? '+ Made It Again' : 'Mark as Made'}</button>
-          ${timesMade > 0 ? `<button class="btn btn-ghost btn-sm rdm-unmade-btn">Reset</button>` : ''}
-        </div>
-
-        <div class="section-label" style="margin-top:16px;">Notes</div>
-        <textarea class="rdm-notes" rows="3" placeholder="Personal notes about this recipe…">${Utils.escapeHtml(currentNotes)}</textarea>
+        ${tallyBlock}
 
         <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
           <button class="btn btn-primary btn-sm rdm-save-notes">Save Notes</button>
           <button class="btn btn-ghost btn-sm rdm-close-btn">Close</button>
         </div>
       </div>`;
+    }
 
     document.body.appendChild(overlay);
 
@@ -409,6 +456,17 @@ Please provide:
     overlay.querySelector('.rdm-close').addEventListener('click', close);
     overlay.querySelector('.rdm-close-btn').addEventListener('click', close);
     overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+
+    if (editable) {
+      // Initial rows removable, then wire add-ingredient (mirror renderForm:873-878).
+      bindIngredientRemove(overlay);
+      overlay.querySelector('.rdm-add-ing').addEventListener('click', () => {
+        const ingList = overlay.querySelector('#rdm-ingredients');
+        const idx = ingList.querySelectorAll('.rf-ing-row').length;
+        ingList.insertAdjacentHTML('beforeend', ingredientRowHtml({ amount: '', name: '', notes: '' }, idx));
+        bindIngredientRemove(overlay);
+      });
+    }
 
     overlay.querySelector('.rdm-save-notes').addEventListener('click', () => {
       const notes = overlay.querySelector('.rdm-notes').value.trim();
