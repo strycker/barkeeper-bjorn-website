@@ -32,6 +32,7 @@ const RecommenderView = (() => {
   let _savedSliderValues = {};   // snapshot of profile values at render() time, for Reset to saved
   let _slidersVisible = false;   // mobile toggle state
   let _vetoOverrides = new Set(); // session-only; veto strings bypassed for this session
+  let _searchQuery = '';         // instant text search across all sections
 
   function _matchesFilter(recipe, filter) {
     if (!filter) return true;
@@ -59,8 +60,9 @@ const RecommenderView = (() => {
     const { recipe, flavorScore, missingIngredient, missingIngredients } = item;
     const diff = _difficultyLabel(recipe.difficulty);
     const savedRecipes = State.get('recipes') || {};
-    const isFav  = (savedRecipes.confirmed_favorites || []).some(r => r.name === recipe.name);
-    const isWish = (savedRecipes.wishlist || []).some(r => r.name === recipe.name);
+    const isFav  = (savedRecipes.confirmed_favorites || []).some(r => Utils.sameRecipe(r, recipe));
+    const isWish = (savedRecipes.wishlist || []).some(r => Utils.sameRecipe(r, recipe));
+    const isMade = (savedRecipes.made_log || []).some(r => Utils.sameRecipe(r, recipe));
     return `
       <div class="rec-card ${isOneAway ? 'rec-card--oneaway' : ''}">
         <div class="rec-card-header">
@@ -72,6 +74,7 @@ const RecommenderView = (() => {
               <span class="rec-method">${Utils.escapeHtml(recipe.method)}</span>
               <span class="rec-sep">·</span>
               <span class="rec-diff ${diff.cls}">${diff.label}</span>
+              ${recipe._source === 'originals' ? '<span class="rec-original-badge">Your original</span>' : ''}
             </div>
           </div>
           <div class="rec-score">
@@ -80,8 +83,9 @@ const RecommenderView = (() => {
             <div class="rec-score-pct">${Math.round(flavorScore * 100)}%</div>
           </div>
           <div class="rec-card-actions">
-            <button class="rec-fav-btn${isFav ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" title="${isFav ? 'Remove from Favorites' : 'Add to Favorites'}">${isFav ? '&#9829;' : '&#9825;'}</button>
-            <button class="rec-wish-btn${isWish ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" title="${isWish ? 'Remove from Wishlist' : 'Add to Wishlist'}">${isWish ? '&#9733;' : '&#9734;'}</button>
+            <button class="rec-fav-btn${isFav ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" data-base="${Utils.escapeHtml(recipe.base || '')}" title="${isFav ? 'Remove from Favorites' : 'Add to Favorites'}">${isFav ? '&#9829;' : '&#9825;'}</button>
+            <button class="rec-wish-btn${isWish ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" data-base="${Utils.escapeHtml(recipe.base || '')}" title="${isWish ? 'Remove from Wishlist' : 'Add to Wishlist'}">${isWish ? '&#9733;' : '&#9734;'}</button>
+            <button class="rec-made-btn${isMade ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" data-base="${Utils.escapeHtml(recipe.base || '')}" title="${isMade ? 'Remove from Made' : 'I Made This'}">${isMade ? '&#10003;' : '&#9675;'}</button>
           </div>
         </div>
         ${recipe.occasion ? `<p class="rec-occasion">${Utils.escapeHtml(recipe.occasion)}</p>` : ''}
@@ -115,8 +119,9 @@ const RecommenderView = (() => {
     const missing0 = missingIngredients[0];
     const missing1 = missingIngredients[1];
     const savedRecipes = State.get('recipes') || {};
-    const isFav  = (savedRecipes.confirmed_favorites || []).some(r => r.name === recipe.name);
-    const isWish = (savedRecipes.wishlist || []).some(r => r.name === recipe.name);
+    const isFav  = (savedRecipes.confirmed_favorites || []).some(r => Utils.sameRecipe(r, recipe));
+    const isWish = (savedRecipes.wishlist || []).some(r => Utils.sameRecipe(r, recipe));
+    const isMade = (savedRecipes.made_log || []).some(r => Utils.sameRecipe(r, recipe));
     return `
       <div class="rec-card rec-card--twoaway">
         <div class="rec-card-header">
@@ -128,6 +133,7 @@ const RecommenderView = (() => {
               <span class="rec-method">${Utils.escapeHtml(recipe.method)}</span>
               <span class="rec-sep">·</span>
               <span class="rec-diff ${diff.cls}">${diff.label}</span>
+              ${recipe._source === 'originals' ? '<span class="rec-original-badge">Your original</span>' : ''}
             </div>
           </div>
           <div class="rec-score">
@@ -136,8 +142,9 @@ const RecommenderView = (() => {
             <div class="rec-score-pct">${Math.round(flavorScore * 100)}%</div>
           </div>
           <div class="rec-card-actions">
-            <button class="rec-fav-btn${isFav ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" title="${isFav ? 'Remove from Favorites' : 'Add to Favorites'}">${isFav ? '&#9829;' : '&#9825;'}</button>
-            <button class="rec-wish-btn${isWish ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" title="${isWish ? 'Remove from Wishlist' : 'Add to Wishlist'}">${isWish ? '&#9733;' : '&#9734;'}</button>
+            <button class="rec-fav-btn${isFav ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" data-base="${Utils.escapeHtml(recipe.base || '')}" title="${isFav ? 'Remove from Favorites' : 'Add to Favorites'}">${isFav ? '&#9829;' : '&#9825;'}</button>
+            <button class="rec-wish-btn${isWish ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" data-base="${Utils.escapeHtml(recipe.base || '')}" title="${isWish ? 'Remove from Wishlist' : 'Add to Wishlist'}">${isWish ? '&#9733;' : '&#9734;'}</button>
+            <button class="rec-made-btn${isMade ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" data-base="${Utils.escapeHtml(recipe.base || '')}" title="${isMade ? 'Remove from Made' : 'I Made This'}">${isMade ? '&#10003;' : '&#9675;'}</button>
           </div>
         </div>
         ${recipe.occasion ? `<p class="rec-occasion">${Utils.escapeHtml(recipe.occasion)}</p>` : ''}
@@ -210,7 +217,7 @@ const RecommenderView = (() => {
   }
 
   function _rerender(container) {
-    const cardsEl = container.querySelector('.rec-cards');
+    const cardsEl = container.querySelector('.rec-main .rec-cards');
     if (!cardsEl || !_results) return;
 
     // Update base-spirit filter chips
@@ -232,12 +239,18 @@ const RecommenderView = (() => {
       }
     });
 
-    // Apply occasion + base-spirit filter to each result set
+    // Apply occasion + base-spirit + text search filter to each result set
     function applyFilters(items) {
+      const q = _searchQuery.toLowerCase().trim();
       return items.filter(it => {
         if (!_matchesFilter(it.recipe, _activeFilter)) return false;
-        if (_activeOccasions.size === 0) return true;
-        return (it.recipe.tags || []).some(t => _activeOccasions.has(t));
+        if (_activeOccasions.size > 0 && !(it.recipe.tags || []).some(t => _activeOccasions.has(t))) return false;
+        if (!q) return true;
+        const r = it.recipe;
+        if ((r.name || '').toLowerCase().includes(q)) return true;
+        if ((r.base || '').toLowerCase().includes(q)) return true;
+        if ((r.ingredients || []).some(i => (i.name || '').toLowerCase().includes(q))) return true;
+        return false;
       });
     }
 
@@ -302,14 +315,19 @@ const RecommenderView = (() => {
           ...(_results?.oneAway  || []),
           ...(_results?.twoAway  || []),
         ];
-        const item = allItems.find(r => r.recipe.name === recipeName);
-        const isFav = (State.get('recipes')?.confirmed_favorites || []).some(r => r.name === recipeName);
+        const recipeBase = btn.dataset.base || '';
+        const probe = { name: recipeName, base: recipeBase };
+        const item = allItems.find(r => Utils.sameRecipe(r.recipe, probe));
+        const isFav = (State.get('recipes')?.confirmed_favorites || []).some(r => Utils.sameRecipe(r, probe));
         if (isFav) {
-          State.patch('recipes', r => { r.confirmed_favorites = (r.confirmed_favorites || []).filter(f => f.name !== recipeName); });
+          State.patch('recipes', r => { r.confirmed_favorites = (r.confirmed_favorites || []).filter(f => !Utils.sameRecipe(f, probe)); });
           State.save('recipes').then(() => { Utils.showToast('Removed from Favorites'); _rerender(container); });
         } else {
           if (!item) return;
-          State.patch('recipes', r => { r.confirmed_favorites = r.confirmed_favorites || []; r.confirmed_favorites.push({ ...item.recipe }); });
+          State.patch('recipes', r => {
+            r.confirmed_favorites = r.confirmed_favorites || [];
+            r.confirmed_favorites.push({ ...item.recipe, _source: item.recipe._source || 'classics-db' });
+          });
           State.save('recipes').then(() => { Utils.showToast('Added to Favorites ♥'); _rerender(container); });
         }
       });
@@ -324,15 +342,48 @@ const RecommenderView = (() => {
           ...(_results?.oneAway  || []),
           ...(_results?.twoAway  || []),
         ];
-        const item = allItems.find(r => r.recipe.name === recipeName);
-        const isWish = (State.get('recipes')?.wishlist || []).some(r => r.name === recipeName);
+        const recipeBase = btn.dataset.base || '';
+        const probe = { name: recipeName, base: recipeBase };
+        const item = allItems.find(r => Utils.sameRecipe(r.recipe, probe));
+        const isWish = (State.get('recipes')?.wishlist || []).some(r => Utils.sameRecipe(r, probe));
         if (isWish) {
-          State.patch('recipes', r => { r.wishlist = (r.wishlist || []).filter(w => w.name !== recipeName); });
+          State.patch('recipes', r => { r.wishlist = (r.wishlist || []).filter(w => !Utils.sameRecipe(w, probe)); });
           State.save('recipes').then(() => { Utils.showToast('Removed from Wishlist'); _rerender(container); });
         } else {
           if (!item) return;
-          State.patch('recipes', r => { r.wishlist = r.wishlist || []; r.wishlist.push({ ...item.recipe }); });
+          State.patch('recipes', r => {
+            r.wishlist = r.wishlist || [];
+            r.wishlist.push({ ...item.recipe, _source: item.recipe._source || 'classics-db' });
+          });
           State.save('recipes').then(() => { Utils.showToast('Added to Wishlist ★'); _rerender(container); });
+        }
+      });
+    });
+
+    // Wire ✓ Made toggle buttons — click toggles add/remove
+    cardsEl.querySelectorAll('.rec-made-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const recipeName = btn.dataset.name;
+        const allItems = [
+          ...(_results?.buildable || []),
+          ...(_results?.oneAway  || []),
+          ...(_results?.twoAway  || []),
+        ];
+        const recipeBase = btn.dataset.base || '';
+        const probe = { name: recipeName, base: recipeBase };
+        const item = allItems.find(r => Utils.sameRecipe(r.recipe, probe));
+        const isMade = (State.get('recipes')?.made_log || []).some(r => Utils.sameRecipe(r, probe));
+        if (isMade) {
+          State.patch('recipes', r => { r.made_log = (r.made_log || []).filter(m => !Utils.sameRecipe(m, probe)); });
+          State.save('recipes').then(() => { Utils.showToast('Removed from Made'); _rerender(container); });
+        } else {
+          if (!item) return;
+          const today = new Date().toISOString().slice(0, 10);
+          State.patch('recipes', r => {
+            r.made_log = r.made_log || [];
+            r.made_log.unshift({ ...item.recipe, _source: item.recipe._source || 'classics-db', times_made: 1, first_made: today, last_made: today, notes: '' });
+          });
+          State.save('recipes').then(() => { Utils.showToast('Marked as made ✓'); _rerender(container); });
         }
       });
     });
@@ -355,7 +406,7 @@ const RecommenderView = (() => {
         _scopeLevel = Number(btn.dataset.scope);
         const inv = State.get('inventory') || {};
         const overrideProfile = _buildOverrideProfile(profile);
-        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '' });
+        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '', originals: State.get('recipes')?.originals || [] });
         _rerender(container);
       });
     });
@@ -367,7 +418,7 @@ const RecommenderView = (() => {
         if (_vetoOverrides.has(v)) _vetoOverrides.delete(v); else _vetoOverrides.add(v);
         const inv = State.get('inventory') || {};
         const overrideProfile = _buildOverrideProfile(profile);
-        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '' });
+        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '', originals: State.get('recipes')?.originals || [] });
         _rerender(container);
         // Update chip visual state
         btn.classList.toggle('bypassed', _vetoOverrides.has(v));
@@ -397,7 +448,7 @@ const RecommenderView = (() => {
         _sliderValues[input.dataset.axis] = parseFloat(input.value);
         const inv = State.get('inventory') || {};
         const overrideProfile = _buildOverrideProfile(profile);
-        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '' });
+        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '', originals: State.get('recipes')?.originals || [] });
         _rerender(container);
       });
     });
@@ -435,7 +486,16 @@ const RecommenderView = (() => {
         });
         const inv = State.get('inventory') || {};
         const overrideProfile = _buildOverrideProfile(profile);
-        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '' });
+        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '', originals: State.get('recipes')?.originals || [] });
+        _rerender(container);
+      });
+    }
+
+    // Text search (REC-SEARCH-01)
+    const searchInput = container.querySelector('#rec-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        _searchQuery = searchInput.value;
         _rerender(container);
       });
     }
@@ -478,7 +538,7 @@ const RecommenderView = (() => {
     // these are user-interaction state that persist within the session.
 
     // Run engine with saved profile
-    _results = RecommenderEngine.recommend(inventory, profile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '' });
+    _results = RecommenderEngine.recommend(inventory, profile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '', originals: State.get('recipes')?.originals || [] });
 
     const occasionTags = _getOccasionTags();
 
@@ -582,8 +642,13 @@ const RecommenderView = (() => {
             ${occasionChipsHtml}
             ${vetoesHtml}
           </aside>
-          <main class="rec-cards rec-main">
-            <!-- Populated by _rerender -->
+          <main class="rec-main">
+            <div class="rec-search-wrap">
+              <input type="search" class="rec-search-input" id="rec-search" placeholder="Search cocktails by name, spirit, or ingredient…" value="${Utils.escapeHtml(_searchQuery)}">
+            </div>
+            <div class="rec-cards">
+              <!-- Populated by _rerender -->
+            </div>
           </main>
         </div>
       </div>`;

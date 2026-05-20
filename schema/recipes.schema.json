@@ -33,15 +33,13 @@
     },
     "wishlist": {
       "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["name"],
-        "properties": {
-          "name": { "type": "string" },
-          "ingredients_summary": { "type": "string" },
-          "pending": { "type": "string", "description": "Missing ingredient(s) blocking this build." }
-        }
-      }
+      "items": { "$ref": "#/definitions/savedRecipe" },
+      "description": "Recipes bookmarked to try. Full recipe stored inline at save time."
+    },
+    "made_log": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/madeEntry" },
+      "description": "Recipes the bar owner has made. Most-recent first. Full recipe stored inline at save time."
     }
   },
   "definitions": {
@@ -131,6 +129,47 @@
         },
         "method": { "type": "string" },
         "garnish": { "type": "string" }
+      }
+    },
+    "savedRecipe": {
+      "type": "object",
+      "required": ["name"],
+      "description": "Full recipe stored inline at save time (Favorites, Wishlist).",
+      "properties": {
+        "_source": { "type": "string", "description": "Provenance: classics-db | originals | ai-generated" },
+        "name": { "type": "string" },
+        "base": { "type": "string" },
+        "method": { "type": "string" },
+        "glassware": { "type": "string" },
+        "garnish": { "type": "string" },
+        "occasion": { "type": "string" },
+        "ingredients": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/ingredient" }
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "madeEntry": {
+      "type": "object",
+      "required": ["name"],
+      "description": "Full recipe + tracking metadata stored inline at save time.",
+      "properties": {
+        "_source": { "type": "string", "description": "Provenance: classics-db | originals | ai-generated" },
+        "name": { "type": "string" },
+        "base": { "type": "string" },
+        "method": { "type": "string" },
+        "glassware": { "type": "string" },
+        "garnish": { "type": "string" },
+        "occasion": { "type": "string" },
+        "ingredients": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/ingredient" }
+        },
+        "times_made": { "type": "integer", "minimum": 1 },
+        "first_made": { "type": "string", "format": "date" },
+        "last_made": { "type": "string", "format": "date" },
+        "notes": { "type": "string" }
       }
     }
   }

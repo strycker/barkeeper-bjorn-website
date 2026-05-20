@@ -68,6 +68,31 @@ const RecommenderEngine = (() => {
     produce:            inv => (inv.fresh_produce        || []).map(lc),
   };
 
+  // All SECTION_MAP keys — used as the permissive searchIn for normalized Originals.
+  const ALL_SECTIONS = Object.keys(SECTION_MAP);
+
+  // Normalize a user-authored Original (data/recipes.json originals[*]) into the engine's
+  // expected recipe shape so it can be matched inventory-aware (Strategy B, D-07).
+  function normalizeOriginal(o) {
+    const ings = (o.ingredients || []).map(ing => {
+      const nm = (ing.name || '').toLowerCase();
+      const tokens = nm.split(/[^a-z0-9]+/).filter(t => t.length > 2);
+      return {
+        name: ing.name || '', amount: ing.amount || '',
+        keywords: [nm, ...tokens].filter(Boolean),
+        searchIn: ALL_SECTIONS,
+        optional: /optional/i.test(ing.notes || ''),
+      };
+    });
+    return {
+      ...o,
+      _source: 'originals',
+      base: o.base || (o.ingredients && o.ingredients[0] && o.ingredients[0].name) || '',
+      ingredients: ings,
+      tags: o.tags || [],
+    };
+  }
+
   // Derivation pairs: [sourceKeyword, derivedKeyword, ...targetSectionKeys]
   // Having the base ingredient implies the derived product is available.
   // Target section keys verified against classics-db.js searchIn values.
@@ -106,9 +131,9 @@ const RecommenderEngine = (() => {
 
   // Check if a single ingredient is present (keyword match against specified sections)
   function _hasIngredient(lookup, ingredient) {
-    const kws = ingredient.keywords.map(k => k.toLowerCase());
+    const kws = (ingredient.keywords || []).map(k => k.toLowerCase());
     const ingredientSubtypes = kws.filter(k => SUBTYPE_TOKENS.includes(k));
-    for (const sectionKey of ingredient.searchIn) {
+    for (const sectionKey of (ingredient.searchIn || [])) {
       const items = lookup[sectionKey] || [];
       for (const item of items) {
         for (const kw of kws) {
@@ -170,7 +195,16 @@ const RecommenderEngine = (() => {
   function recommend(inventory, rawProfile, opts = {}) {
     // eslint-disable-next-line no-undef
     const db = (typeof CLASSICS_DB !== 'undefined') ? CLASSICS_DB : [];
-    if (!db.length) return { buildable: [], oneAway: [], twoAway: [] };
+
+    // Strategy B (D-07): normalize Originals and add them to the scoring pool so they're
+    // matched against the user's actual inventory, exactly like classics. Exclude any
+    // Original lacking BOTH a derivable base AND ingredients.
+    const rawOriginals = Array.isArray(opts.originals) ? opts.originals : [];
+    const normOriginals = rawOriginals
+      .filter(o => ((o.base || (o.ingredients && o.ingredients[0] && o.ingredients[0].name)) && (o.ingredients || []).length > 0))
+      .map(normalizeOriginal);
+    const pool = [...db, ...normOriginals];
+    if (!pool.length) return { buildable: [], oneAway: [], twoAway: [] };
 
     const inv = inventory || {};
     const lookup = _buildLookup(inv);
@@ -193,7 +227,7 @@ const RecommenderEngine = (() => {
     const unconstrained = opts.scope === 3;
     const specialty = opts.specialty || '';
 
-    for (const recipe of db) {
+    for (const recipe of pool) {
       // Check veto — skip any recipe whose base or any ingredient matches an active vetoed string
       const baseStr = (recipe.base || '').toLowerCase();
       const ingredientStrs = recipe.ingredients.map(i => (i.name || '').toLowerCase());
@@ -227,5 +261,5 @@ const RecommenderEngine = (() => {
   }
 
   // Public API
-  return { recommend, normalizeProfile: _normalizeProfile };
+  return { recommend, normalizeProfile: _normalizeProfile, normalizeOriginal };
 })();
