@@ -176,13 +176,21 @@ Please provide:
     });
     container.appendChild(addBtn);
 
-    if (originals.length === 0) {
+    const filtered = _filterRecipes(originals, _searchQuery);
+
+    if (filtered.length === 0) {
       const empty = document.createElement('div');
       empty.className = 'empty-state';
-      empty.innerHTML = `
-        <div class="empty-icon">🍹</div>
-        <p>No original cocktails yet.</p>
-        <p style="font-size:0.85rem;color:var(--text-muted);">Click "+ New Recipe" or "✨ Generate with AI" to create your first one.</p>`;
+      if (originals.length === 0) {
+        empty.innerHTML = `
+          <div class="empty-icon">🍹</div>
+          <p>No original cocktails yet.</p>
+          <p style="font-size:0.85rem;color:var(--text-muted);">Click "+ New Recipe" or "✨ Generate with AI" to create your first one.</p>`;
+      } else {
+        empty.innerHTML = `
+          <div class="empty-icon">🔍</div>
+          <p>No matches found.</p>`;
+      }
       container.appendChild(empty);
       return;
     }
@@ -190,7 +198,7 @@ Please provide:
     const grid = document.createElement('div');
     grid.className = 'card-grid';
 
-    originals.forEach(r => {
+    filtered.forEach(r => {
       const card = document.createElement('div');
       card.className = 'recipe-card';
       const builtBadge = r.confirmed_built
@@ -426,8 +434,27 @@ Please provide:
       });
       State.save('recipes').then(() => {
         Utils.showToast('Marked as made ✓');
-        close();
-        render(mainContainer, { tab: 'made' });
+        const newCount = State.get('recipes')?.made_log?.find(m => m.name === recipe.name)?.times_made || 1;
+        const tallyCount = overlay.querySelector('.rdm-tally-count');
+        if (tallyCount) tallyCount.textContent = newCount;
+        const madeBtn = overlay.querySelector('.rdm-made-btn');
+        if (madeBtn) madeBtn.textContent = '+ Made It Again';
+        const tally = overlay.querySelector('.rdm-tally');
+        if (tally && !tally.querySelector('.rdm-unmade-btn')) {
+          const resetBtn = document.createElement('button');
+          resetBtn.className = 'btn btn-ghost btn-sm rdm-unmade-btn';
+          resetBtn.textContent = 'Reset';
+          tally.appendChild(resetBtn);
+          resetBtn.addEventListener('click', () => {
+            State.patch('recipes', r => { r.made_log = (r.made_log || []).filter(m => m.name !== recipe.name); });
+            State.save('recipes').then(() => {
+              Utils.showToast('Removed from Made');
+              close();
+              const activeTab = listKey === 'made_log' ? 'made' : (listKey === 'confirmed_favorites' ? 'favorites' : 'wishlist');
+              render(mainContainer, { tab: activeTab });
+            }).catch(err => Utils.showToast('Save failed: ' + err.message, 'error'));
+          });
+        }
       }).catch(err => Utils.showToast('Save failed: ' + err.message, 'error'));
     });
 
