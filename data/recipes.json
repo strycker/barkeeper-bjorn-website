@@ -165,6 +165,71 @@
         }
       ],
       "garnish": "Brandied cherry"
+    },
+    {
+      "id": "hanky-panky",
+      "name": "Hanky Panky",
+      "base": "Gin",
+      "method": "stirred",
+      "glassware": "Coupe",
+      "difficulty": 1,
+      "profile": {
+        "sweetness": 0.25,
+        "acid": 0,
+        "strength": 0.2,
+        "complexity": 0.75,
+        "season": 0.55,
+        "risk": 0.4
+      },
+      "occasion": "Ada Coleman 1925 — gin, sweet vermouth, Fernet. Bitter and herbal.",
+      "tags": [
+        "after-dinner",
+        "spirit-forward",
+        "classic"
+      ],
+      "specialties": [
+        "classic",
+        "craft"
+      ],
+      "ingredients": [
+        {
+          "name": "Gin",
+          "amount": "1½ oz",
+          "keywords": [
+            "gin",
+            "london dry"
+          ],
+          "searchIn": [
+            "white_spirits"
+          ]
+        },
+        {
+          "name": "Sweet Vermouth",
+          "amount": "1½ oz",
+          "keywords": [
+            "sweet vermouth",
+            "vermouth rosso",
+            "carpano"
+          ],
+          "searchIn": [
+            "fortified"
+          ]
+        },
+        {
+          "name": "Fernet-Branca",
+          "amount": "2 dashes",
+          "keywords": [
+            "fernet",
+            "fernet-branca",
+            "amaro"
+          ],
+          "searchIn": [
+            "liqueurs_herbal",
+            "liqueurs_specialty"
+          ]
+        }
+      ],
+      "garnish": "Orange twist"
     }
   ],
   "wishlist": [
