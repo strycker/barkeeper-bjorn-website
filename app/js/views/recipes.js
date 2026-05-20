@@ -2,33 +2,63 @@
 
 const RecipesView = (() => {
 
+  let _searchQuery = '';
+
+  function _filterRecipes(list, q) {
+    if (!q) return list;
+    const lq = q.toLowerCase();
+    return list.filter(r => {
+      if ((r.name || '').toLowerCase().includes(lq)) return true;
+      if ((r.base || '').toLowerCase().includes(lq)) return true;
+      if ((r.ingredients || []).some(i => (i.name || '').toLowerCase().includes(lq))) return true;
+      return false;
+    });
+  }
+
   function render(container, params = {}) {
+    _searchQuery = '';
     const recipes = State.get('recipes') || {};
     const originals = recipes.originals || [];
     const favorites = recipes.confirmed_favorites || [];
     const wishlist  = recipes.wishlist || [];
+    const madeLog   = recipes.made_log || [];
+    const initialTab = params.tab || 'originals';
 
     container.innerHTML = `
       <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
         <div>
           <h1>Recipe Book</h1>
-          <p>${originals.length} original${originals.length !== 1 ? 's' : ''} · ${favorites.length} confirmed favorite${favorites.length !== 1 ? 's' : ''}</p>
+          <p>${originals.length} original${originals.length !== 1 ? 's' : ''} · ${favorites.length} favorite${favorites.length !== 1 ? 's' : ''} · ${madeLog.length} made</p>
         </div>
         <button class="btn btn-ghost btn-sm" id="rb-generate-ai" style="align-self:center;">✨ Generate with AI</button>
       </div>
+      <div class="recipe-search-wrap">
+        <input type="search" class="recipe-search-input" id="recipe-search" placeholder="Search by name, spirit, or ingredient…">
+      </div>
       <div class="tabs">
-        <div class="tab active" data-tab="originals">Originals (${originals.length})</div>
-        <div class="tab" data-tab="favorites">Favorites (${favorites.length})</div>
-        <div class="tab" data-tab="wishlist">Wishlist (${wishlist.length})</div>
+        <div class="tab${initialTab === 'originals' ? ' active' : ''}" data-tab="originals">Originals (${originals.length})</div>
+        <div class="tab${initialTab === 'favorites' ? ' active' : ''}" data-tab="favorites">Favorites (${favorites.length})</div>
+        <div class="tab${initialTab === 'wishlist' ? ' active' : ''}" data-tab="wishlist">Wishlist (${wishlist.length})</div>
+        <div class="tab${initialTab === 'made' ? ' active' : ''}" data-tab="made">Made (${madeLog.length})</div>
       </div>
       <div id="recipe-tab-content"></div>`;
 
     const tabContent = container.querySelector('#recipe-tab-content');
+    const searchInput = container.querySelector('#recipe-search');
+
+    searchInput.addEventListener('input', () => {
+      _searchQuery = searchInput.value;
+      const activeTab = container.querySelector('.tab.active')?.dataset.tab || 'originals';
+      renderTab(activeTab, State.get('recipes') || {}, tabContent, container);
+    });
+
     container.querySelectorAll('.tab').forEach(tab => {
       tab.addEventListener('click', () => {
         container.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        renderTab(tab.dataset.tab, recipes, tabContent);
+        _searchQuery = '';
+        searchInput.value = '';
+        renderTab(tab.dataset.tab, State.get('recipes') || {}, tabContent, container);
       });
     });
 
@@ -41,7 +71,7 @@ const RecipesView = (() => {
       }
     }
 
-    renderTab('originals', recipes, tabContent);
+    renderTab(initialTab, recipes, tabContent, container);
 
     container.querySelector('#rb-generate-ai').addEventListener('click', () => {
       showAIPromptModal(container);
@@ -124,14 +154,16 @@ Please provide:
     overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   }
 
-  function renderTab(tabName, recipes, container) {
+  function renderTab(tabName, recipes, container, mainContainer) {
     container.innerHTML = '';
     if (tabName === 'originals') {
       renderOriginalsGrid(recipes.originals || [], container);
     } else if (tabName === 'favorites') {
-      renderFavoritesList(recipes.confirmed_favorites || [], container);
+      renderRecipeChips(recipes.confirmed_favorites || [], container, 'confirmed_favorites', mainContainer);
     } else if (tabName === 'wishlist') {
-      renderWishlist(recipes.wishlist || [], container);
+      renderRecipeChips(recipes.wishlist || [], container, 'wishlist', mainContainer);
+    } else if (tabName === 'made') {
+      renderMadeList(recipes.made_log || [], container, mainContainer);
     }
   }
 
@@ -188,62 +220,229 @@ Please provide:
     container.appendChild(grid);
   }
 
-  function renderFavoritesList(favorites, container) {
-    if (favorites.length === 0) {
+  function renderRecipeChips(list, container, listKey, mainContainer) {
+    const emptyIcon = listKey === 'confirmed_favorites' ? '⭐' : '📋';
+    const emptyMsg  = listKey === 'confirmed_favorites' ? 'No favorites yet.' : 'Wishlist is empty.';
+
+    const filtered = _filterRecipes(list, _searchQuery);
+    if (filtered.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
-          <div class="empty-icon">⭐</div>
-          <p>No confirmed favorites yet.</p>
+          <div class="empty-icon">${emptyIcon}</div>
+          <p>${_searchQuery ? 'No matches found.' : emptyMsg}</p>
         </div>`;
       return;
     }
 
-    favorites.forEach(fav => {
+    filtered.forEach(recipe => {
       const card = document.createElement('div');
-      card.className = 'card';
+      card.className = 'rec-card';
       card.style.cursor = 'pointer';
+
+      const ingChips = (recipe.ingredients || []).slice(0, 5).map(i =>
+        `<span class="rec-ing-chip">${Utils.escapeHtml(i.amount || '')} ${Utils.escapeHtml(i.name)}</span>`
+      ).join('');
+      const overflow = (recipe.ingredients || []).length > 5
+        ? `<span class="rec-ing-chip" style="color:var(--text-muted);">+${(recipe.ingredients||[]).length - 5} more</span>` : '';
+
       card.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:start;gap:12px;">
-          <div>
-            <div style="font-size:1.05rem;color:var(--amber);margin-bottom:4px;">${Utils.escapeHtml(fav.name)}</div>
-            ${fav.creator ? `<div style="font-size:0.82rem;color:var(--text-muted);">by ${Utils.escapeHtml(fav.creator)}</div>` : ''}
-            ${fav.notes ? `<div style="font-size:0.88rem;color:var(--text-dim);margin-top:8px;font-style:italic;">${Utils.escapeHtml(fav.notes)}</div>` : ''}
+        <div class="rec-card-header">
+          <div style="flex:1;min-width:0;">
+            <div class="rec-card-name">${Utils.escapeHtml(recipe.name)}</div>
+            <div class="rec-card-meta">
+              ${recipe.base ? `<span class="rec-base">${Utils.escapeHtml(recipe.base)}</span>` : ''}
+              ${recipe.method ? `<span class="rec-sep">·</span><span class="rec-method">${Utils.escapeHtml(recipe.method)}</span>` : ''}
+              ${recipe.glassware ? `<span class="rec-sep">·</span><span>${Utils.escapeHtml(recipe.glassware)}</span>` : ''}
+            </div>
           </div>
-          ${fav.date_confirmed ? `<span style="font-size:0.78rem;color:var(--text-muted);white-space:nowrap;">${Utils.formatDate(fav.date_confirmed)}</span>` : ''}
+          <button class="btn-icon" data-remove title="Remove" style="flex-shrink:0;">✕</button>
         </div>
-        ${fav.adaptation ? `<div style="margin-top:10px;font-size:0.85rem;background:var(--bg3);padding:8px 12px;border-radius:4px;color:var(--text-dim);">Adaptation: ${Utils.escapeHtml(fav.adaptation)}</div>` : ''}
-        ${renderIngredientsCompact(fav.ingredients || [])}`;
+        ${recipe.occasion ? `<p class="rec-occasion">${Utils.escapeHtml(recipe.occasion)}</p>` : ''}
+        <div class="rec-ingredients">${ingChips}${overflow}</div>`;
+
+      card.addEventListener('click', e => {
+        if (e.target.closest('[data-remove]')) return;
+        showRecipeDetail(recipe, listKey, mainContainer);
+      });
+
+      card.querySelector('[data-remove]').addEventListener('click', e => {
+        e.stopPropagation();
+        State.patch('recipes', r => { r[listKey] = (r[listKey] || []).filter(x => x.name !== recipe.name); });
+        State.save('recipes').then(() => {
+          Utils.showToast('Removed');
+          render(mainContainer, { tab: listKey === 'confirmed_favorites' ? 'favorites' : 'wishlist' });
+        });
+      });
+
       container.appendChild(card);
     });
   }
 
-  function renderWishlist(wishlist, container) {
-    if (wishlist.length === 0) {
+  function renderMadeList(madeLog, container, mainContainer) {
+    const filtered = _filterRecipes(madeLog, _searchQuery);
+    if (filtered.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
-          <div class="empty-icon">📋</div>
-          <p>Wishlist is empty.</p>
+          <div class="empty-icon">✓</div>
+          <p>${_searchQuery ? 'No matches found.' : 'Nothing marked as made yet.'}</p>
+          <p style="font-size:0.85rem;color:var(--text-muted);">Use the ○ button on Recommender cards to track what you've made.</p>
         </div>`;
       return;
     }
 
-    wishlist.forEach(item => {
+    // Most-recent first (already unshifted on add, but sort by last_made for robustness)
+    const sorted = [...filtered].sort((a, b) => (b.last_made || '') > (a.last_made || '') ? 1 : -1);
+
+    sorted.forEach(recipe => {
       const card = document.createElement('div');
-      card.className = 'card';
+      card.className = 'rec-card';
+      card.style.cursor = 'pointer';
+
+      const ingChips = (recipe.ingredients || []).slice(0, 5).map(i =>
+        `<span class="rec-ing-chip">${Utils.escapeHtml(i.amount || '')} ${Utils.escapeHtml(i.name)}</span>`
+      ).join('');
+      const overflow = (recipe.ingredients || []).length > 5
+        ? `<span class="rec-ing-chip" style="color:var(--text-muted);">+${(recipe.ingredients||[]).length - 5} more</span>` : '';
+
       card.innerHTML = `
-        <div style="font-size:1rem;color:var(--text);margin-bottom:6px;">${Utils.escapeHtml(item.name)}</div>
-        ${item.ingredients_summary ? `<div style="font-size:0.88rem;color:var(--text-dim);">${Utils.escapeHtml(item.ingredients_summary)}</div>` : ''}
-        ${item.pending ? `<div style="margin-top:8px;font-size:0.82rem;background:rgba(212,148,58,0.08);border:1px solid rgba(212,148,58,0.2);padding:6px 10px;border-radius:4px;color:var(--amber-dim);">⏳ Missing: ${Utils.escapeHtml(item.pending)}</div>` : ''}`;
+        <div class="rec-card-header">
+          <div style="flex:1;min-width:0;">
+            <div class="rec-card-name">
+              ${Utils.escapeHtml(recipe.name)}
+              <span class="rec-times-made-badge">×${recipe.times_made || 1}</span>
+            </div>
+            <div class="rec-card-meta">
+              ${recipe.base ? `<span class="rec-base">${Utils.escapeHtml(recipe.base)}</span>` : ''}
+              ${recipe.method ? `<span class="rec-sep">·</span><span class="rec-method">${Utils.escapeHtml(recipe.method)}</span>` : ''}
+              ${recipe.last_made ? `<span class="rec-sep">·</span><span style="color:var(--text-muted);">Last: ${Utils.escapeHtml(recipe.last_made)}</span>` : ''}
+            </div>
+          </div>
+          <button class="btn-icon" data-remove title="Remove from Made" style="flex-shrink:0;">✕</button>
+        </div>
+        ${recipe.occasion ? `<p class="rec-occasion">${Utils.escapeHtml(recipe.occasion)}</p>` : ''}
+        <div class="rec-ingredients">${ingChips}${overflow}</div>`;
+
+      card.addEventListener('click', e => {
+        if (e.target.closest('[data-remove]')) return;
+        showRecipeDetail(recipe, 'made_log', mainContainer);
+      });
+
+      card.querySelector('[data-remove]').addEventListener('click', e => {
+        e.stopPropagation();
+        State.patch('recipes', r => { r.made_log = (r.made_log || []).filter(x => x.name !== recipe.name); });
+        State.save('recipes').then(() => {
+          Utils.showToast('Removed from Made');
+          render(mainContainer, { tab: 'made' });
+        });
+      });
+
       container.appendChild(card);
     });
   }
 
-  function renderIngredientsCompact(ingredients) {
-    if (!ingredients || ingredients.length === 0) return '';
-    const items = ingredients.map(i =>
-      `<span style="font-size:0.82rem;color:var(--text-dim);">${Utils.escapeHtml(i.amount)} ${Utils.escapeHtml(i.name)}</span>`
-    ).join('<span style="color:var(--text-muted);margin:0 4px;">·</span>');
-    return `<div style="margin-top:10px;">${items}</div>`;
+  function showRecipeDetail(recipe, listKey, mainContainer) {
+    const madeLog = State.get('recipes')?.made_log || [];
+    const madeEntry = madeLog.find(m => m.name === recipe.name);
+    const timesMade = madeEntry?.times_made || 0;
+    const currentNotes = (listKey === 'made_log' ? recipe.notes : null) ||
+      (State.get('recipes')?.[listKey]?.find(r => r.name === recipe.name)?.notes) || '';
+
+    const overlay = document.createElement('div');
+    overlay.className = 'recipe-detail-modal-overlay';
+
+    const ingRows = (recipe.ingredients || []).map(ing =>
+      `<tr><td class="amount">${Utils.escapeHtml(ing.amount || '')}</td><td>${Utils.escapeHtml(ing.name || '')}</td></tr>`
+    ).join('');
+
+    overlay.innerHTML = `
+      <div class="recipe-detail-modal">
+        <div class="recipe-detail-modal-header">
+          <div>
+            <div class="rec-card-name">${Utils.escapeHtml(recipe.name)}</div>
+            <div class="rec-card-meta" style="margin-top:4px;">
+              ${recipe.base ? `<span class="rec-base">${Utils.escapeHtml(recipe.base)}</span>` : ''}
+              ${recipe.method ? `<span class="rec-sep">·</span><span class="rec-method">${Utils.escapeHtml(recipe.method)}</span>` : ''}
+              ${recipe.glassware ? `<span class="rec-sep">·</span><span>${Utils.escapeHtml(recipe.glassware)}</span>` : ''}
+            </div>
+          </div>
+          <button class="btn-icon rdm-close" aria-label="Close">✕</button>
+        </div>
+
+        ${recipe.occasion ? `<p class="rec-occasion" style="margin:8px 0;">${Utils.escapeHtml(recipe.occasion)}</p>` : ''}
+
+        ${ingRows ? `
+          <div class="section-label" style="margin-top:12px;">Ingredients</div>
+          <table class="ingredients-table">
+            <thead><tr><th>Amount</th><th>Ingredient</th></tr></thead>
+            <tbody>${ingRows}</tbody>
+          </table>` : ''}
+
+        ${recipe.garnish ? `<div style="margin-top:8px;font-size:0.88rem;color:var(--text-dim);"><strong>Garnish:</strong> ${Utils.escapeHtml(recipe.garnish)}</div>` : ''}
+
+        <div class="section-label" style="margin-top:16px;">Times Made</div>
+        <div class="rdm-tally">
+          <span class="rdm-tally-count">${timesMade}</span>
+          <button class="btn btn-secondary btn-sm rdm-made-btn">${timesMade > 0 ? '+ Made It Again' : 'Mark as Made'}</button>
+          ${timesMade > 0 ? `<button class="btn btn-ghost btn-sm rdm-unmade-btn">Reset</button>` : ''}
+        </div>
+
+        <div class="section-label" style="margin-top:16px;">Notes</div>
+        <textarea class="rdm-notes" rows="3" placeholder="Personal notes about this recipe…">${Utils.escapeHtml(currentNotes)}</textarea>
+
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm rdm-save-notes">Save Notes</button>
+          <button class="btn btn-ghost btn-sm rdm-close-btn">Close</button>
+        </div>
+      </div>`;
+
+    document.body.appendChild(overlay);
+
+    const close = () => overlay.remove();
+    overlay.querySelector('.rdm-close').addEventListener('click', close);
+    overlay.querySelector('.rdm-close-btn').addEventListener('click', close);
+    overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+
+    overlay.querySelector('.rdm-save-notes').addEventListener('click', () => {
+      const notes = overlay.querySelector('.rdm-notes').value.trim();
+      State.patch('recipes', r => {
+        const entry = (r[listKey] || []).find(x => x.name === recipe.name);
+        if (entry) entry.notes = notes;
+      });
+      State.save('recipes').then(() => Utils.showToast('Notes saved.'))
+        .catch(err => Utils.showToast('Save failed: ' + err.message, 'error'));
+    });
+
+    overlay.querySelector('.rdm-made-btn').addEventListener('click', () => {
+      const today = new Date().toISOString().slice(0, 10);
+      State.patch('recipes', r => {
+        if (!r.made_log) r.made_log = [];
+        const existing = r.made_log.find(m => m.name === recipe.name);
+        if (existing) {
+          existing.times_made = (existing.times_made || 1) + 1;
+          existing.last_made = today;
+        } else {
+          r.made_log.unshift({ ...recipe, _source: recipe._source || 'classics-db', times_made: 1, first_made: today, last_made: today, notes: '' });
+        }
+      });
+      State.save('recipes').then(() => {
+        Utils.showToast('Marked as made ✓');
+        close();
+        render(mainContainer, { tab: 'made' });
+      }).catch(err => Utils.showToast('Save failed: ' + err.message, 'error'));
+    });
+
+    const unMadeBtn = overlay.querySelector('.rdm-unmade-btn');
+    if (unMadeBtn) {
+      unMadeBtn.addEventListener('click', () => {
+        State.patch('recipes', r => { r.made_log = (r.made_log || []).filter(m => m.name !== recipe.name); });
+        State.save('recipes').then(() => {
+          Utils.showToast('Removed from Made');
+          close();
+          const activeTab = listKey === 'made_log' ? 'made' : (listKey === 'confirmed_favorites' ? 'favorites' : 'wishlist');
+          render(mainContainer, { tab: activeTab });
+        }).catch(err => Utils.showToast('Save failed: ' + err.message, 'error'));
+      });
+    }
   }
 
   function renderDetail(r, container) {
