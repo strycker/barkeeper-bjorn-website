@@ -324,7 +324,7 @@ const RecommenderView = (() => {
           if (!item) return;
           State.patch('recipes', r => {
             r.confirmed_favorites = r.confirmed_favorites || [];
-            r.confirmed_favorites.push({ ...item.recipe, _source: 'classics-db' });
+            r.confirmed_favorites.push({ ...item.recipe, _source: item.recipe._source || 'classics-db' });
           });
           State.save('recipes').then(() => { Utils.showToast('Added to Favorites ♥'); _rerender(container); });
         }
@@ -351,7 +351,7 @@ const RecommenderView = (() => {
           if (!item) return;
           State.patch('recipes', r => {
             r.wishlist = r.wishlist || [];
-            r.wishlist.push({ ...item.recipe, _source: 'classics-db' });
+            r.wishlist.push({ ...item.recipe, _source: item.recipe._source || 'classics-db' });
           });
           State.save('recipes').then(() => { Utils.showToast('Added to Wishlist ★'); _rerender(container); });
         }
@@ -379,7 +379,7 @@ const RecommenderView = (() => {
           const today = new Date().toISOString().slice(0, 10);
           State.patch('recipes', r => {
             r.made_log = r.made_log || [];
-            r.made_log.unshift({ ...item.recipe, _source: 'classics-db', times_made: 1, first_made: today, last_made: today, notes: '' });
+            r.made_log.unshift({ ...item.recipe, _source: item.recipe._source || 'classics-db', times_made: 1, first_made: today, last_made: today, notes: '' });
           });
           State.save('recipes').then(() => { Utils.showToast('Marked as made ✓'); _rerender(container); });
         }
@@ -404,7 +404,7 @@ const RecommenderView = (() => {
         _scopeLevel = Number(btn.dataset.scope);
         const inv = State.get('inventory') || {};
         const overrideProfile = _buildOverrideProfile(profile);
-        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '' });
+        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '', originals: State.get('recipes')?.originals || [] });
         _rerender(container);
       });
     });
@@ -416,7 +416,7 @@ const RecommenderView = (() => {
         if (_vetoOverrides.has(v)) _vetoOverrides.delete(v); else _vetoOverrides.add(v);
         const inv = State.get('inventory') || {};
         const overrideProfile = _buildOverrideProfile(profile);
-        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '' });
+        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '', originals: State.get('recipes')?.originals || [] });
         _rerender(container);
         // Update chip visual state
         btn.classList.toggle('bypassed', _vetoOverrides.has(v));
@@ -446,7 +446,7 @@ const RecommenderView = (() => {
         _sliderValues[input.dataset.axis] = parseFloat(input.value);
         const inv = State.get('inventory') || {};
         const overrideProfile = _buildOverrideProfile(profile);
-        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '' });
+        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '', originals: State.get('recipes')?.originals || [] });
         _rerender(container);
       });
     });
@@ -484,7 +484,7 @@ const RecommenderView = (() => {
         });
         const inv = State.get('inventory') || {};
         const overrideProfile = _buildOverrideProfile(profile);
-        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '' });
+        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '', originals: State.get('recipes')?.originals || [] });
         _rerender(container);
       });
     }
@@ -536,7 +536,7 @@ const RecommenderView = (() => {
     // these are user-interaction state that persist within the session.
 
     // Run engine with saved profile
-    _results = RecommenderEngine.recommend(inventory, profile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '' });
+    _results = RecommenderEngine.recommend(inventory, profile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '', originals: State.get('recipes')?.originals || [] });
 
     const occasionTags = _getOccasionTags();
 
