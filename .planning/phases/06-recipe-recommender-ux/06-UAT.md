@@ -8,17 +8,18 @@ updated: 2026-05-20T12:00:00Z
 
 ## Current Test
 
-number: 1
-name: Recipe Card Action Buttons in Header Row (REC-10)
+number: 2
+name: Heart/Star Filled vs. Open Toggle (REC-11)
 expected: |
-  Serve the app and go to the Recommender page. On any recipe card, the ♥ (heart) and ☆ (star) buttons should sit in the top card-header row alongside the recipe name — not floating in an absolutely-positioned corner. Resizing the window keeps them inline in the header.
+  On a Recommender card, click the ♥ — it should fill (♥) and the recipe should appear under Recipes → Favorites. Click the now-filled ♥ again on the same card — it should revert to open (♡) and leave Favorites. The ☆/★ star behaves identically for the Wishlist.
 awaiting: user response
 
 ## Tests
 
 ### 1. Recipe Card Action Buttons in Header Row (REC-10)
 expected: Serve the app (`python3 -m http.server 8000`, open `http://localhost:8000/app/`) and go to the Recommender page. On any recipe card, the ♥ (heart) and ☆ (star) buttons should sit in the top card-header row alongside the recipe name — not floating in an absolutely-positioned corner. Resizing the window keeps them inline in the header.
-result: pending
+result: pass
+note: Buttons sit inline in the header row as expected. Cosmetic follow-up logged in Gaps (heart/star icon shape + ellipse).
 
 ### 2. Heart/Star Filled vs. Open Toggle (REC-11)
 expected: On a Recommender card, click the ♥ — it should fill (♥) and the recipe should appear under Recipes → Favorites. Click the now-filled ♥ again on the same card — it should revert to open (♡) and the recipe should leave Favorites. The ☆/★ star behaves identically for the Wishlist.
@@ -107,11 +108,21 @@ result: pending
 ## Summary
 
 total: 22
-passed: 0
+passed: 1
 issues: 0
-pending: 22
+pending: 21
 skipped: 0
 
 ## Gaps
 
-[none yet]
+- truth: "Heart and star action-button icons are visually balanced (1:1 aspect ratio, similar size, no ellipse/circle background)"
+  status: cosmetic
+  reason: "User (Test 1): dislikes the ellipse around the heart/star; heart is elongated. Wants ~1:1 aspect ratio and size matched to the star."
+  severity: cosmetic
+  test: 1
+  artifacts: []
+  missing: []
+
+## Deferred (future phases)
+
+- Recipes should be uniformly chip-based across all views, and chips should surface tally counts and other stats (times-made, etc.) beyond just the Made tab. Noted during Test 1; aligns with Phase 6 mental model "chips are the interface" — carry into a later phase.
