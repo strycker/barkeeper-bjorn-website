@@ -478,6 +478,49 @@ Please provide:
         .catch(err => Utils.showToast('Save failed: ' + err.message, 'error'));
     });
 
+    if (editable) {
+      overlay.querySelector('.rdm-save-recipe').addEventListener('click', () => {
+        // CRITICAL ORDER (Pitfall C): capture lookup keys BEFORE reading edited
+        // inputs so a rename still finds the canonical + inline-copy entries.
+        const origId = recipe.id;
+        const origProbe = { name: recipe.name, base: recipe.base }; // pre-edit keys
+
+        const edited = {
+          name: overlay.querySelector('.rdm-edit-name').value.trim(),
+          method: overlay.querySelector('.rdm-edit-method').value.trim(),
+          glassware: overlay.querySelector('.rdm-edit-glassware').value.trim(),
+          garnish: overlay.querySelector('.rdm-edit-garnish').value.trim(),
+          ingredients: [...overlay.querySelectorAll('#rdm-ingredients .rf-ing-row')].map(row => {
+            const ing = {
+              amount: row.querySelector('.rf-ing-amount').value.trim(),
+              name: row.querySelector('.rf-ing-name').value.trim(),
+            };
+            const notes = row.querySelector('.rf-ing-notes').value.trim();
+            if (notes) ing.notes = notes;
+            return ing;
+          }).filter(i => i.name),
+        };
+        if (!edited.name) { Utils.showToast('Name is required.', 'error'); return; }
+        if (!edited.ingredients.length) { Utils.showToast('At least one ingredient is required.', 'error'); return; }
+
+        State.patch('recipes', r => {
+          const canon = (r.originals || []).find(o => o.id === origId)
+            || (r.originals || []).find(o => Utils.sameRecipe(o, origProbe));
+          if (canon) Object.assign(canon, edited);
+          if (listKey) {
+            const copy = (r[listKey] || []).find(x => Utils.sameRecipe(x, origProbe));
+            if (copy) Object.assign(copy, edited);
+          }
+        });
+        State.save('recipes').then(() => {
+          Utils.showToast('Recipe updated.');
+          close();
+          const tab = listKey === 'made_log' ? 'made' : (listKey === 'confirmed_favorites' ? 'favorites' : 'wishlist');
+          render(mainContainer, { tab });
+        }).catch(err => Utils.showToast('Save failed: ' + err.message, 'error'));
+      });
+    }
+
     overlay.querySelector('.rdm-made-btn').addEventListener('click', () => {
       const today = new Date().toISOString().slice(0, 10);
       State.patch('recipes', r => {
