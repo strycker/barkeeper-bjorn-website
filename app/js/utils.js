@@ -108,6 +108,14 @@ const Utils = (() => {
     return 'Strong B';
   }
 
+  // D-08 duplicate guard: two recipes are the same iff name AND base match
+  // (case-insensitive). Missing base/name treated as '' so '' === '' holds.
+  function sameRecipe(a, b) {
+    a = a || {}; b = b || {};
+    return (a.name || '').toLowerCase() === (b.name || '').toLowerCase()
+        && (a.base || '').toLowerCase() === (b.base || '').toLowerCase();
+  }
+
   return { el, html, escapeHtml, today, formatDate, showToast, showLoading, showError,
-           countInventoryItems, axisToValue, valueToAxisLabel };
+           countInventoryItems, axisToValue, valueToAxisLabel, sameRecipe };
 })();
