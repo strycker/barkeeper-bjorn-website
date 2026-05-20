@@ -14,7 +14,7 @@
 | 3 | Content Management | Recipe add/edit, image upload, export/import | RECIPE-01–05, EXPORT-01–04 | Complete |
 | 4 | Inventory & Recommender Depth | Structured bottle objects, in-place editing, mood sliders, scope toggle, name standardization | INV-03–07, REC-01–03 | Complete |
 | 5 | Polish, Depth & UX Tidy | Recommender UX fixes, vetoes filter panel, ingredient derivation, inventory field depth, data model tidy, Bartender Customization Wizard | REC-05–09, INV-08–10, DATA-01–03, CUST-01–02 | Complete |
-| 6 | Recipe & Recommender UX | "I Made This" tracking, chip-style Favorites/Wishlist/Made tabs, text search on Recipes + Recommender, card layout polish | REC-10–11, RECIPE-MADE-01–02, RECIPE-VIEW-01–02, RECIPE-SEARCH-01, REC-SEARCH-01 | Pending |
+| 6 | Recipe & Recommender UX | "I Made This" tracking, chip-style Favorites/Wishlist/Made tabs, text search on Recipes + Recommender, card layout polish | REC-10–11, RECIPE-MADE-01–02, RECIPE-VIEW-01–02, RECIPE-SEARCH-01, REC-SEARCH-01 | Code complete · awaiting UAT |
 | 7 | AI Integration | Claude API chat, classroom, AI design, AI recommendations, AI import, Library | AI-01–13, LIB-01, REC-04, SET-05, CHAT-01–09 | Pending |
 | 8 | Portability | Markdown round-trip, per-page export/import, append/overwrite import mode | PORT-01–05 | Pending |
 | 9 | Backend & Multi-User | Supabase, auth, per-user isolation, account settings | BACKEND-01–08 | Pending |
@@ -171,11 +171,11 @@
 
 **Files touched:** `app/js/views/recommender.js`, `app/js/views/recipes.js`, `app/css/app.css`, `data/recipes.json` (schema: `made_log[]`)
 
-**Plans:** 4 plans
-- [ ] 06-01-PLAN.md — D-08 dedup by name+base via Utils.sameRecipe (foundational); 8 ROADMAP reqs + 3 gap tasks already DONE
-- [ ] 06-02-PLAN.md — D-06 editable Originals in universal modal (dual-write)
-- [ ] 06-03-PLAN.md — D-07 Originals in Recommender, inventory-aware (Strategy B) + 'Your original' badge
-- [ ] 06-04-PLAN.md — D-09 phase completion: 06-TEST-CHECKLIST.md + 06-UAT.md
+**Plans:** 4 plans (all executed — code verified, awaiting user UAT)
+- [x] 06-01-PLAN.md — D-08 dedup by name+base via Utils.sameRecipe (foundational); 8 ROADMAP reqs + 3 gap tasks already DONE
+- [x] 06-02-PLAN.md — D-06 editable Originals in universal modal (dual-write)
+- [x] 06-03-PLAN.md — D-07 Originals in Recommender, inventory-aware (Strategy B) + 'Your original' badge
+- [x] 06-04-PLAN.md — D-09 phase completion: 06-TEST-CHECKLIST.md + 06-UAT.md
 
 > The 8 ROADMAP requirements and the 3 prior gap tasks (Originals-tab search, schema, modal tally) are already implemented and committed. This replan adds discuss-phase decisions D-06/D-07/D-08 plus D-09 completion deliverables. Files also touched: `app/js/recommender-engine.js`, `app/js/utils.js`.
 
