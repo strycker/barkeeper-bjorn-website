@@ -171,11 +171,13 @@
 
 **Files touched:** `app/js/views/recommender.js`, `app/js/views/recipes.js`, `app/css/app.css`, `data/recipes.json` (schema: `made_log[]`)
 
-**Plans:**
-- [ ] 06-00-PLAN.md — Test checklist
-- [ ] 06-01-PLAN.md — "I Made This" button + made_log schema + Made tab
-- [ ] 06-02-PLAN.md — Favorites/Wishlist/Made tabs → rec-card chips with remove
-- [ ] 06-03-PLAN.md — Text search on Recipes and Recommendations pages
+**Plans:** 4 plans
+- [ ] 06-01-PLAN.md — D-08 dedup by name+base via Utils.sameRecipe (foundational); 8 ROADMAP reqs + 3 gap tasks already DONE
+- [ ] 06-02-PLAN.md — D-06 editable Originals in universal modal (dual-write)
+- [ ] 06-03-PLAN.md — D-07 Originals in Recommender, inventory-aware (Strategy B) + 'Your original' badge
+- [ ] 06-04-PLAN.md — D-09 phase completion: 06-TEST-CHECKLIST.md + 06-UAT.md
+
+> The 8 ROADMAP requirements and the 3 prior gap tasks (Originals-tab search, schema, modal tally) are already implemented and committed. This replan adds discuss-phase decisions D-06/D-07/D-08 plus D-09 completion deliverables. Files also touched: `app/js/recommender-engine.js`, `app/js/utils.js`.
 
 **Success criteria:**
 1. On a Recommender card, ♡ heart fills to ♥ on click and the recipe appears in Recipes → Favorites; clicking ♥ again removes it from both
