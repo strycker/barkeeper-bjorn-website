@@ -60,9 +60,9 @@ const RecommenderView = (() => {
     const { recipe, flavorScore, missingIngredient, missingIngredients } = item;
     const diff = _difficultyLabel(recipe.difficulty);
     const savedRecipes = State.get('recipes') || {};
-    const isFav  = (savedRecipes.confirmed_favorites || []).some(r => r.name === recipe.name);
-    const isWish = (savedRecipes.wishlist || []).some(r => r.name === recipe.name);
-    const isMade = (savedRecipes.made_log || []).some(r => r.name === recipe.name);
+    const isFav  = (savedRecipes.confirmed_favorites || []).some(r => Utils.sameRecipe(r, recipe));
+    const isWish = (savedRecipes.wishlist || []).some(r => Utils.sameRecipe(r, recipe));
+    const isMade = (savedRecipes.made_log || []).some(r => Utils.sameRecipe(r, recipe));
     return `
       <div class="rec-card ${isOneAway ? 'rec-card--oneaway' : ''}">
         <div class="rec-card-header">
@@ -82,9 +82,9 @@ const RecommenderView = (() => {
             <div class="rec-score-pct">${Math.round(flavorScore * 100)}%</div>
           </div>
           <div class="rec-card-actions">
-            <button class="rec-fav-btn${isFav ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" title="${isFav ? 'Remove from Favorites' : 'Add to Favorites'}">${isFav ? '&#9829;' : '&#9825;'}</button>
-            <button class="rec-wish-btn${isWish ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" title="${isWish ? 'Remove from Wishlist' : 'Add to Wishlist'}">${isWish ? '&#9733;' : '&#9734;'}</button>
-            <button class="rec-made-btn${isMade ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" title="${isMade ? 'Remove from Made' : 'I Made This'}">${isMade ? '&#10003;' : '&#9675;'}</button>
+            <button class="rec-fav-btn${isFav ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" data-base="${Utils.escapeHtml(recipe.base || '')}" title="${isFav ? 'Remove from Favorites' : 'Add to Favorites'}">${isFav ? '&#9829;' : '&#9825;'}</button>
+            <button class="rec-wish-btn${isWish ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" data-base="${Utils.escapeHtml(recipe.base || '')}" title="${isWish ? 'Remove from Wishlist' : 'Add to Wishlist'}">${isWish ? '&#9733;' : '&#9734;'}</button>
+            <button class="rec-made-btn${isMade ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" data-base="${Utils.escapeHtml(recipe.base || '')}" title="${isMade ? 'Remove from Made' : 'I Made This'}">${isMade ? '&#10003;' : '&#9675;'}</button>
           </div>
         </div>
         ${recipe.occasion ? `<p class="rec-occasion">${Utils.escapeHtml(recipe.occasion)}</p>` : ''}
@@ -118,9 +118,9 @@ const RecommenderView = (() => {
     const missing0 = missingIngredients[0];
     const missing1 = missingIngredients[1];
     const savedRecipes = State.get('recipes') || {};
-    const isFav  = (savedRecipes.confirmed_favorites || []).some(r => r.name === recipe.name);
-    const isWish = (savedRecipes.wishlist || []).some(r => r.name === recipe.name);
-    const isMade = (savedRecipes.made_log || []).some(r => r.name === recipe.name);
+    const isFav  = (savedRecipes.confirmed_favorites || []).some(r => Utils.sameRecipe(r, recipe));
+    const isWish = (savedRecipes.wishlist || []).some(r => Utils.sameRecipe(r, recipe));
+    const isMade = (savedRecipes.made_log || []).some(r => Utils.sameRecipe(r, recipe));
     return `
       <div class="rec-card rec-card--twoaway">
         <div class="rec-card-header">
@@ -140,9 +140,9 @@ const RecommenderView = (() => {
             <div class="rec-score-pct">${Math.round(flavorScore * 100)}%</div>
           </div>
           <div class="rec-card-actions">
-            <button class="rec-fav-btn${isFav ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" title="${isFav ? 'Remove from Favorites' : 'Add to Favorites'}">${isFav ? '&#9829;' : '&#9825;'}</button>
-            <button class="rec-wish-btn${isWish ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" title="${isWish ? 'Remove from Wishlist' : 'Add to Wishlist'}">${isWish ? '&#9733;' : '&#9734;'}</button>
-            <button class="rec-made-btn${isMade ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" title="${isMade ? 'Remove from Made' : 'I Made This'}">${isMade ? '&#10003;' : '&#9675;'}</button>
+            <button class="rec-fav-btn${isFav ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" data-base="${Utils.escapeHtml(recipe.base || '')}" title="${isFav ? 'Remove from Favorites' : 'Add to Favorites'}">${isFav ? '&#9829;' : '&#9825;'}</button>
+            <button class="rec-wish-btn${isWish ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" data-base="${Utils.escapeHtml(recipe.base || '')}" title="${isWish ? 'Remove from Wishlist' : 'Add to Wishlist'}">${isWish ? '&#9733;' : '&#9734;'}</button>
+            <button class="rec-made-btn${isMade ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" data-base="${Utils.escapeHtml(recipe.base || '')}" title="${isMade ? 'Remove from Made' : 'I Made This'}">${isMade ? '&#10003;' : '&#9675;'}</button>
           </div>
         </div>
         ${recipe.occasion ? `<p class="rec-occasion">${Utils.escapeHtml(recipe.occasion)}</p>` : ''}
@@ -313,10 +313,12 @@ const RecommenderView = (() => {
           ...(_results?.oneAway  || []),
           ...(_results?.twoAway  || []),
         ];
-        const item = allItems.find(r => r.recipe.name === recipeName);
-        const isFav = (State.get('recipes')?.confirmed_favorites || []).some(r => r.name === recipeName);
+        const recipeBase = btn.dataset.base || '';
+        const probe = { name: recipeName, base: recipeBase };
+        const item = allItems.find(r => Utils.sameRecipe(r.recipe, probe));
+        const isFav = (State.get('recipes')?.confirmed_favorites || []).some(r => Utils.sameRecipe(r, probe));
         if (isFav) {
-          State.patch('recipes', r => { r.confirmed_favorites = (r.confirmed_favorites || []).filter(f => f.name !== recipeName); });
+          State.patch('recipes', r => { r.confirmed_favorites = (r.confirmed_favorites || []).filter(f => !Utils.sameRecipe(f, probe)); });
           State.save('recipes').then(() => { Utils.showToast('Removed from Favorites'); _rerender(container); });
         } else {
           if (!item) return;
@@ -338,10 +340,12 @@ const RecommenderView = (() => {
           ...(_results?.oneAway  || []),
           ...(_results?.twoAway  || []),
         ];
-        const item = allItems.find(r => r.recipe.name === recipeName);
-        const isWish = (State.get('recipes')?.wishlist || []).some(r => r.name === recipeName);
+        const recipeBase = btn.dataset.base || '';
+        const probe = { name: recipeName, base: recipeBase };
+        const item = allItems.find(r => Utils.sameRecipe(r.recipe, probe));
+        const isWish = (State.get('recipes')?.wishlist || []).some(r => Utils.sameRecipe(r, probe));
         if (isWish) {
-          State.patch('recipes', r => { r.wishlist = (r.wishlist || []).filter(w => w.name !== recipeName); });
+          State.patch('recipes', r => { r.wishlist = (r.wishlist || []).filter(w => !Utils.sameRecipe(w, probe)); });
           State.save('recipes').then(() => { Utils.showToast('Removed from Wishlist'); _rerender(container); });
         } else {
           if (!item) return;
@@ -363,10 +367,12 @@ const RecommenderView = (() => {
           ...(_results?.oneAway  || []),
           ...(_results?.twoAway  || []),
         ];
-        const item = allItems.find(r => r.recipe.name === recipeName);
-        const isMade = (State.get('recipes')?.made_log || []).some(r => r.name === recipeName);
+        const recipeBase = btn.dataset.base || '';
+        const probe = { name: recipeName, base: recipeBase };
+        const item = allItems.find(r => Utils.sameRecipe(r.recipe, probe));
+        const isMade = (State.get('recipes')?.made_log || []).some(r => Utils.sameRecipe(r, probe));
         if (isMade) {
-          State.patch('recipes', r => { r.made_log = (r.made_log || []).filter(m => m.name !== recipeName); });
+          State.patch('recipes', r => { r.made_log = (r.made_log || []).filter(m => !Utils.sameRecipe(m, probe)); });
           State.save('recipes').then(() => { Utils.showToast('Removed from Made'); _rerender(container); });
         } else {
           if (!item) return;
