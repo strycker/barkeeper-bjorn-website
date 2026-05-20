@@ -95,10 +95,22 @@ This keeps the universal modal consistent while respecting provenance.
 
 ### D-07: Originals in Recommender
 Originals are added to the Recommender scoring pool alongside CLASSICS_DB:
-- Scored identically using existing `base`, `ingredients`, `method`, `occasion`/`tags` fields
-- Mood axis weights default to 0.5 (neutral) if not set on the original
+- Scored using existing `base`, `ingredients`, `method`, `occasion`/`tags` fields
+- Mood axis weights default to 0.5 (neutral) if not set on the original (Originals store `profile` as prose text, not the axis object; prose yields neutral 0.5)
 - Originals appear **mixed into regular results** (not a separate section) with a small `'Your original'` badge to distinguish them
 - Originals that lack `base` or `ingredients` are excluded from scoring (cannot be matched)
+
+**Matching strategy: Strategy B — inventory-aware matching (locked 2026-05-20).**
+Originals are matched against the user's actual inventory like classics, NOT treated as
+always-buildable. This requires the planner to:
+- Normalize each Original into the engine's expected shape: synthesize `keywords`/`searchIn`
+  per ingredient (reuse the Phase 5 REC-09 ingredient-derivation map where possible),
+  derive `base` from the first ingredient or `base` field, default missing `tags` to `[]`,
+  default missing mood axes to 0.5
+- Guard `_hasIngredient` against missing `keywords` (engine currently calls
+  `ingredient.keywords.map(...)` at recommender-engine.js:109 — will throw on raw Originals)
+- Accept the known tradeoff: an Original whose ingredient names don't normalize to inventory
+  tokens may not appear as buildable. This is expected behavior, not a bug.
 
 ### D-08: Duplicate Guard
 - **Unique key:** name + base spirit (case-insensitive). Two recipes with the same name but different bases are treated as distinct.

@@ -573,3 +573,366 @@ ASVS V5 (Input Validation): `Utils.escapeHtml()` applied at all innerHTML inject
 
 **Research date:** 2026-05-20
 **Valid until:** 2026-06-20 (stable vanilla JS codebase; no moving dependencies)
+
+---
+
+# Research Addendum: New Decisions (D-06 – D-09)
+
+**Researched:** 2026-05-20 (second pass — discuss-phase added D-06, D-07, D-08, D-09)
+**Domain:** Editable universal modal, Originals scoring integration, name+base dedup
+**Confidence:** HIGH (all findings from reading live implementation files this session)
+
+> **CONTEXT.** The original 8 ROADMAP requirements + 3 gap tasks (Originals-tab search,
+> schema update, modal tally live-refresh) are ALREADY IMPLEMENTED AND COMMITTED. This
+> addendum researches ONLY the three NEW behavioral decisions (D-06, D-07, D-08) plus the
+> phase-completion approach (D-09). The original audit sections above are retained as-is.
+>
+> **Correction to prior audit:** The three "Open Questions"/"gaps" in the original research
+> pass are now RESOLVED in live code:
+> - `renderOriginalsGrid()` calls `_filterRecipes(originals, _searchQuery)` (recipes.js:179) — Originals search works.
+> - `schema/recipes.schema.json` now declares `made_log` (madeEntry def, lines 39–43, 153–174) and the full inline `savedRecipe`/`wishlist` shape (lines 134–152). Schema gap closed.
+> - The detail modal live-updates `.rdm-tally-count` after [+ Made It Again] (recipes.js:437–447) without close/reopen. Tally gap closed.
+> The planner should treat these as DONE, not re-plan them.
+
+---
+
+## New-Decision Requirements Map
+
+| Decision | Description | Files to touch | Net-new risk |
+|----------|-------------|----------------|--------------|
+| D-06 | Originals editable in universal modal (dual-write) | `recipes.js` (`showRecipeDetail`), `app/css/app.css` | MEDIUM — modal currently builds static HTML; needs conditional editable rendering + dual-write |
+| D-07 | Originals scored in Recommender | `recommender-engine.js` (`recommend`), `recommender.js` (call sites + badge), `app/css/app.css` | HIGH — Originals shape does NOT match what the engine consumes; normalization layer required |
+| D-08 | Duplicate guard: name+base case-insensitive | `recommender.js` (3 toggle handlers + 3 read checks), `recipes.js` (modal lookups + remove handlers) | MEDIUM — many `.name`-only `.find/.some/.filter` call sites; all must become name+base |
+| D-09 | Full UAT + VALIDATION.md | new `06-UAT.md`, `06-VALIDATION.md` (plan deliverables) | LOW — follow Phase 5 pattern |
+
+---
+
+## D-06: Originals Editable in Universal Modal
+
+### Current modal anatomy (`showRecipeDetail`, recipes.js:351–473)
+
+The function signature is `showRecipeDetail(recipe, listKey, mainContainer)`. It is called from:
+- `renderRecipeChips` remove-guarded click → `showRecipeDetail(recipe, listKey, mainContainer)` where `listKey` is `'confirmed_favorites'` or `'wishlist'` (recipes.js:273)
+- `renderMadeList` click → `showRecipeDetail(recipe, 'made_log', mainContainer)` (recipes.js:335)
+- NOTE: the Originals **tab** does NOT use this modal — it uses the full-page `renderDetail(r, container)` (recipes.js:475) with its own Edit→`renderForm` flow. D-06 is about reaching an Original **via Favorites/Wishlist/Made chips** (and, per D-07, eventually via the Recommender), where `_source: 'originals'`.
+
+The modal body is built as one big template literal (recipes.js:365–404) with these sections:
+1. Header: name + meta (base · method · glassware) — currently **static text** (lines 367–375)
+2. Occasion paragraph (line 379) — static
+3. Ingredients table (lines 381–386) — static `<tr>` rows from `ingRows` (built lines 361–363)
+4. Garnish line (line 388) — static
+5. Times Made tally (lines 390–395) — interactive
+6. Notes textarea (lines 397–398) — editable
+7. Footer buttons: Save Notes / Close (lines 400–403)
+
+Wired handlers after append: `.rdm-close`, `.rdm-close-btn`, overlay click (close); `.rdm-save-notes` (line 413); `.rdm-made-btn` (line 423); `.rdm-unmade-btn` (line 461).
+
+### What D-06 requires
+
+When `recipe._source === 'originals'`, sections 1, 3, 4 (and the method shown in meta) become **editable inputs**; everything else stays. When `_source` is `'classics-db'`, `'ai-generated'`, or undefined → fields stay read-only (current behavior).
+
+`_source` detection: read `recipe._source`. **CAVEAT:** inline copies in `confirmed_favorites`/`wishlist` written by the Recommender carry `_source: 'classics-db'` (recommender.js:325, 350, 376). For an Original to be editable from those lists, it must have been saved with `_source: 'originals'` — which only happens once D-07 adds Originals to the Recommender pool and the favorite/made write preserves the recipe's own `_source` (the Recommender currently HARDCODES `'classics-db'` — see D-07 §"Write-path _source" below). So D-06 and D-07 are coupled: the editable-modal path for Originals only fires for entries whose stored `_source` is `'originals'`.
+
+### Recommended implementation approach
+
+1. **Compute `const editable = recipe._source === 'originals';`** at the top of `showRecipeDetail`.
+2. **Conditionally render each field.** For the header name, method, glassware, garnish, swap the static spans/divs for `<input>` elements when `editable`. Keep the same CSS classes for read-only; add input variants.
+3. **Ingredients (editable case):** reuse the existing form helpers. `ingredientRowHtml(ing, i)` (recipes.js:969) produces a `.rf-ing-row` with `.rf-ing-amount`, `.rf-ing-name`, `.rf-ing-notes`, `.rf-ing-remove`. `bindIngredientRemove(wrap)` (recipes.js:979) wires removal (keeps at least one row). For an "add row" button, mirror recipes.js:873–878 (insert `ingredientRowHtml({amount:'',name:'',notes:''}, idx)` then re-bind). These helpers are in the SAME IIFE scope as `showRecipeDetail`, so they are directly callable — no refactor needed.
+   - Read-only case keeps the current `<table class="ingredients-table">` (lines 381–386).
+4. **Save button (editable case):** add a `Save Recipe` button (or repurpose the footer). Read the inputs the same way `renderForm`'s save does (recipes.js:897–905 for ingredients).
+
+### Dual-write pattern (THE critical part of D-06)
+
+A single `State.patch('recipes', r => { ... })` must update TWO locations:
+1. **`recipes.originals`** — the canonical record. Match by **`id`** (Originals always have a stable `id` like `cocktail1778776984398`). The inline copy stored in a list also carries that `id` (it was `{...recipe}` spread at save time), so you can match `r.originals.find(o => o.id === recipe.id)`. If the inline copy lacks an `id` (older data), fall back to name+base.
+2. **The inline copy in the source list** — `r[listKey].find(...)`. Per D-08, match by **name + base, case-insensitive**: `r[listKey].find(x => (x.name||'').toLowerCase() === (recipe.name||'').toLowerCase() && (x.base||'').toLowerCase() === (recipe.base||'').toLowerCase())`. CAVEAT: if the user EDITS the name in the modal, the OLD name is the lookup key, the NEW name is the value to write — capture the original `recipe.name`/`recipe.base` BEFORE applying edits, use those for the `.find`, then assign the new field values onto the found entry (and onto the originals entry).
+
+Example skeleton (planner reference):
+```javascript
+const editable = recipe._source === 'originals';
+// ... after collecting edited values into `edited` object:
+const origId   = recipe.id;
+const origName = (recipe.name || '').toLowerCase();
+const origBase = (recipe.base || '').toLowerCase();
+State.patch('recipes', r => {
+  // 1. canonical originals record
+  const canon = (r.originals || []).find(o => o.id === origId)
+    || (r.originals || []).find(o => (o.name||'').toLowerCase() === origName);
+  if (canon) Object.assign(canon, edited);
+  // 2. inline copy in the list the chip came from (works for all listKeys incl. made_log)
+  if (listKey) {
+    const copy = (r[listKey] || []).find(x =>
+      (x.name||'').toLowerCase() === origName && (x.base||'').toLowerCase() === origBase);
+    if (copy) Object.assign(copy, edited); // preserves times_made/first_made/last_made on made_log
+  }
+});
+State.save('recipes').then(() => { Utils.showToast('Recipe updated.'); /* re-render or refresh modal */ });
+```
+- Use `Object.assign(target, edited)` (not replace) so made_log tracking fields (`times_made`, `first_made`, `last_made`) and `_source` survive.
+- After save, re-render the underlying tab so the chip reflects the new name/ingredients: `render(mainContainer, { tab })` where `tab` maps from `listKey` (same mapping used at recipes.js:453 and 468). Closing the modal first is acceptable and simplest.
+
+### CSS
+
+Add input-variant styles inside `.recipe-detail-modal` so editable fields look intentional (the form already has `.rf-ing-row` styling reused). New classes likely needed: an editable-name input style and an editable meta-row. Append to `app/css/app.css` per CLAUDE.md (single stylesheet).
+
+### Confidence: HIGH on mechanism, MEDIUM on coupling
+The helper reuse and dual-write are straightforward. The MEDIUM is the D-06↔D-07 `_source` coupling: editable-Originals-from-a-list only manifests once a list entry actually stores `_source:'originals'`, which depends on D-07's write-path fix.
+
+---
+
+## D-07: Originals in the Recommender (the hard one)
+
+### Exact engine contract
+
+`RecommenderEngine.recommend(inventory, rawProfile, opts)` (recommender-engine.js:170):
+- `db` is **hardcoded** to `CLASSICS_DB` (line 172): `const db = (typeof CLASSICS_DB !== 'undefined') ? CLASSICS_DB : [];`. There is **no parameter** for a second pool today. D-07 requires either a new param (e.g. `opts.extraRecipes` or a 4th arg) or concatenating inside.
+- The loop `for (const recipe of db)` (line 196) reads, per recipe:
+  - `recipe.base` (string) — used for veto check (line 198) and rendered.
+  - `recipe.ingredients` (array) — REQUIRED. Each ingredient is accessed for:
+    - `ing.optional` (line 204) — skip if true
+    - `ing.name` (line 199) — veto check
+    - `_hasIngredient(lookup, ing)` (line 205) which reads **`ing.keywords`** (array, line 109) and **`ing.searchIn`** (array of section keys, line 111). **If `ing.keywords` is undefined, `.map` throws** (line 109: `ingredient.keywords.map(...)`).
+  - `recipe.profile` (line 132, `_flavorScore`) — must be an **OBJECT** of axis numbers `{sweetness, acid, strength, complexity, season, risk}` (0–1). If `recipe.profile` is falsy, score defaults to 0.5 (line 132). **If `recipe.profile` is a STRING (as Originals store it), `recipe.profile[axis]` is `undefined` for every axis → `recipeVal == null` → all axes skipped → score 0.5** (line 140). So a string profile does NOT crash, it just yields neutral 0.5 — acceptable per D-07 ("default 0.5 if not set").
+  - `recipe.tags` / `recipe.specialties` (line 29, `_specialtyBoost`) — optional, safe if absent (`|| []`).
+  - `recipe.difficulty` (rendered in recommender.js:60 `_difficultyLabel`) — `undefined` → falls through to "Advanced" label (engine doesn't require it, but the card renders it).
+
+### Originals shape vs. engine needs — the gaps
+
+From `data/recipes.json` originals[0] ("Smokey the Pear") and `recipes.originals` written by `renderForm` (recipes.js:912–939):
+
+| Engine needs | Original has? | Gap / fix |
+|--------------|---------------|-----------|
+| `recipe.base` (string) | ❌ NO `base` field. Original has `ingredients[0].name` (the first spirit) | **Derive** `base` from `ingredients[0].name`, or exclude. Note recipes.js:208 already does `const base = r.ingredients?.[0]?.name` for the Originals card. |
+| `recipe.ingredients[].keywords` | ❌ NO `keywords` | **Must synthesize.** Without keywords, `_hasIngredient` throws. Minimum: `keywords: [ing.name.toLowerCase()]`. |
+| `recipe.ingredients[].searchIn` | ❌ NO `searchIn` | **Must synthesize** a section list, else `_hasIngredient` searches nothing → ingredient always "missing" → Original never buildable. Hard to map reliably (would need ingredient→section heuristics). |
+| `recipe.ingredients[].optional` | partial (`notes:"Optional"` is free text, not the `optional:true` flag) | optional flag absent → all ingredients treated as required. |
+| `recipe.profile` as axis object | ❌ It's a STRING description | Yields neutral 0.5 score (no crash). Per D-07, 0.5 default is acceptable. |
+| `recipe.tags` | ❌ NO tags | `_specialtyBoost` + occasion filter both safe with `|| []`. Original won't match occasion chips. |
+| `recipe.method` | ✅ has `method` (free text) and `method_type` | engine renders `recipe.method`; Originals have it. |
+| `recipe.glassware`, `recipe.garnish`, `recipe.name`, `recipe.occasion` | name/glassware/garnish ✅; `occasion` ❌ (Originals use `profile`/`tagline`) | cosmetic. |
+
+### Two viable normalization strategies (planner picks one)
+
+**Strategy A — Score-only, scope-independent (RECOMMENDED, lowest risk).**
+Because Originals lack `searchIn`/`keywords`, inventory matching is unreliable. Treat Originals as **always buildable** (the user owns the recipe) and skip the `_hasIngredient` gating for them. Concretely:
+- Add `_source` tag to each Original when building the pool.
+- In `recommend`, when `recipe._source === 'originals'`, push to `buildable` with `missing = []` (skip the `_hasIngredient` loop entirely). flavorScore uses `_flavorScore` which returns 0.5 for string profiles.
+- This avoids synthesizing `keywords`/`searchIn` and avoids the `.map` crash. It honors D-07 "mixed into regular results."
+- D-07 exclusion rule still applies: skip Originals with no `base` derivable AND no ingredients.
+
+**Strategy B — Full normalization (higher fidelity, higher effort).**
+Write a `normalizeOriginal(orig)` transformer that produces an engine-shaped recipe:
+- `base`: `orig.base || orig.ingredients?.[0]?.name || ''`
+- `ingredients`: map each to `{ name, amount, keywords: [name.toLowerCase(), ...tokenize(name)], searchIn: <ALL_SECTION_KEYS or heuristic>, optional: /optional/i.test(notes) }`
+- `profile`: if string, omit (→0.5); if you later add an axis object to Originals, pass through.
+- `tags`: `[]`.
+This is fragile because `searchIn` mapping is a guess; wrong sections cause false "missing." Use ALL section keys to be permissive, accepting that subtype guards (recommender-engine.js:110) won't help.
+
+**Recommendation:** Strategy A. It satisfies the stated decision ("scored alongside CLASSICS_DB", "0.5 if not set", "excluded if lacking base/ingredients", "mixed in with a badge") without the brittle `searchIn` synthesis. Document that Originals appear in "You Can Make These" (buildable) by design because the user authored them.
+
+### Where Originals enter — pool construction
+
+Option 1 (engine change): add a parameter. Change `recommend(inventory, rawProfile, opts)` to read `opts.originals` (array) and iterate `[...db, ...(opts.originals||[])]`. The recommender.js call sites (lines 401, 413, 443, 481, 533) all pass `opts` already — add `originals: State.get('recipes')?.originals || []` to each, OR (cleaner) read `State.get('recipes')?.originals` inside the engine. But the engine currently has NO `State` dependency and reads `CLASSICS_DB` as a global; reading `State` inside keeps symmetry but couples the engine to State. **Recommended:** pass via `opts.originals` from the view (5 call sites — see below), keeping the engine pure.
+
+Option 2 (view change only): out of scope — engine owns scoring.
+
+### Write-path `_source` (couples to D-06)
+
+When an Original is favorited/wishlisted/made FROM the Recommender, the current code hardcodes `_source:'classics-db'` (recommender.js:325, 350, 376). For D-06 editability to work, these must preserve the recipe's own source: `_source: item.recipe._source || 'classics-db'`. The Original pushed into the pool must carry `_source:'originals'` so this propagates.
+
+### Card rendering — 'Your original' badge
+
+`_renderCard` (recommender.js:59) and `_renderTwoAwayCard` (recommender.js:115) build the card header. Add a badge when `recipe._source === 'originals'` (e.g. in `.rec-card-meta` after the difficulty span, or next to the name). Reuse the badge pattern; CONTEXT Claude's Discretion specifies **amber-colored**, consistent with existing badges. The existing `.rec-times-made-badge` (green) is the structural template; add `.rec-original-badge` (amber) in app.css.
+- `recipe.difficulty` is undefined for Originals → `_difficultyLabel(undefined)` returns "Advanced" (recommender-engine.js:45-49). Consider suppressing the difficulty chip for Originals, or accept "Advanced" as a known cosmetic quirk (flag for UAT).
+- `recipe.ingredients.map(i => ... i.amount ... i.name)` (recommender.js:92) — Originals HAVE amount+name, so chips render fine. `recipe.base` rendered at line 72 — must be the derived base or empty.
+
+### Exclusion rule (D-07)
+
+"Originals lacking `base` or `ingredients` are excluded." Implement as a filter when building the pool: `originals.filter(o => (o.base || o.ingredients?.[0]?.name) && (o.ingredients||[]).length > 0)`.
+
+### Confidence: HIGH on the shape-mismatch diagnosis, MEDIUM on chosen strategy
+The crash risk (`ing.keywords.map` on Originals) is VERIFIED by reading line 109. Strategy A vs B is a planner decision; A is strongly recommended.
+
+---
+
+## D-08: Duplicate Guard (name + base, case-insensitive)
+
+### Current dedup is name-ONLY. Every call site that must change:
+
+**recommender.js — read (button state):**
+| Line | Current | Change to (name+base, case-insensitive) |
+|------|---------|------------------------------------------|
+| 63 | `confirmed_favorites.some(r => r.name === recipe.name)` | also compare base, `.toLowerCase()` |
+| 64 | `wishlist.some(r => r.name === recipe.name)` | same |
+| 65 | `made_log.some(r => r.name === recipe.name)` | same |
+| 121 | `confirmed_favorites.some(r => r.name === recipe.name)` (twoaway) | same |
+| 122 | `wishlist.some(...)` (twoaway) | same |
+| 123 | `made_log.some(...)` (twoaway) | same |
+
+**recommender.js — toggle write handlers:**
+| Line | Current | Change |
+|------|---------|--------|
+| 317 | `isFav = ...some(r => r.name === recipeName)` | name+base |
+| 319 | remove: `filter(f => f.name !== recipeName)` | filter by NOT(name+base) |
+| 342 | `isWish = ...some(...)` | name+base |
+| 344 | remove: `filter(w => w.name !== recipeName)` | name+base |
+| 367 | `isMade = ...some(...)` | name+base |
+| 369 | remove: `filter(m => m.name !== recipeName)` | name+base |
+
+CAVEAT: the toggle handlers read `btn.dataset.name` (a NAME string only). To dedup by name+base they need the base too. Options: (a) add a `data-base` attribute on the buttons in `_renderCard`/`_renderTwoAwayCard` (lines 85–87, 143–145), then read both; or (b) look up the full `item` from `allItems` (already done at lines 311–316 etc. via `allItems.find(r => r.recipe.name === recipeName)`) and use `item.recipe.base`. Option (b) is cleaner — the `item` is already in scope; derive base from `item.recipe.base`. But the `allItems.find` itself is name-only (line 316, 341, 366) and would mis-match if two pooled recipes share a name with different bases → also upgrade that `.find` to name+base, which means the buttons DO need `data-base` (or data-id). **Recommended:** add `data-base` to all three buttons in both card renderers and read `btn.dataset.base` alongside `btn.dataset.name`.
+
+**recipes.js — modal + chip lookups:**
+| Line | Current | Change |
+|------|---------|--------|
+| 278 | favorites/wishlist remove: `filter(x => x.name !== recipe.name)` | name+base |
+| 340 | made remove: `filter(x => x.name !== recipe.name)` | name+base |
+| 353 | `madeLog.find(m => m.name === recipe.name)` (modal open tally) | name+base |
+| 356 | `[listKey].find(r => r.name === recipe.name)` (notes load) | name+base |
+| 416 | notes save: `[listKey].find(x => x.name === recipe.name)` | name+base |
+| 427 | `made_log.find(m => m.name === recipe.name)` (made-again) | name+base |
+| 437 | `made_log.find(m => m.name === recipe.name)` (tally refresh) | name+base |
+| 449 | `made_log.filter(m => m.name !== recipe.name)` (reset) | name+base |
+| 464 | `made_log.filter(m => m.name !== recipe.name)` (unmade) | name+base |
+
+Note recipes.js:492 (`originals.filter(x => x.id !== r.id)`) and 944 (`findIndex(x => x.id === r.id)`) already use `id` — leave those.
+
+### Recommended helper (DRY)
+
+Add a small comparator, e.g. in `Utils` or as a module-local in each view:
+```javascript
+function _sameRecipe(a, b) {
+  return (a.name || '').toLowerCase() === (b.name || '').toLowerCase()
+      && (a.base || '').toLowerCase() === (b.base || '').toLowerCase();
+}
+```
+Then `list.some(x => _sameRecipe(x, recipe))` / `list.filter(x => !_sameRecipe(x, recipe))`. Putting it in `Utils` (utils.js) lets both views share one definition (CLAUDE.md allows utils helpers). For the recommender toggle handlers that only have a name string + the looked-up `item`, compare against `item.recipe`.
+
+### D-08 sub-rules confirmed against code
+
+- **"Adding blocked when present; clicking filled removes"** — already the toggle pattern (recommender.js:318/343/368 branch on isFav/isWish/isMade). Just the equality must become name+base. No new "blocked add" logic needed; the toggle inherently prevents dupes.
+- **"Favorites and Wishlist independent"** — already true: separate arrays, separate toggles, no cross-removal. No change.
+- **"Made log increments instead of duplicating"** — already implemented in the MODAL path (recipes.js:427–433: `existing` found → `times_made++`). But the RECOMMENDER ✓ button (recommender.js:371–378) ALWAYS `unshift`s a fresh entry with `times_made:1` and the dedup is via the toggle (if already made, the click removes instead). So from the Recommender, a second "mark made" is impossible (button is already ✓/active → removes). Increment-on-repeat only happens via the modal. This matches D-04/D-08 as long as the made-check uses name+base. Confirm in UAT.
+
+### Confidence: HIGH — all call sites enumerated from direct reads.
+
+---
+
+## D-09: Phase Completion
+
+Plan deliverables (not code research): produce `06-UAT.md` and `06-VALIDATION.md` mirroring
+`.planning/phases/05-polish-depth-ux-tidy/05-UAT.md` and `05-VALIDATION.md`. UAT scope per
+CONTEXT D-09: all 8 ROADMAP requirements + 3 gap tasks (now done) + D-06/D-07/D-08. User
+initiates UAT/verify via GSD commands — no auto-advance. See Validation Architecture below
+for the checklist source-of-truth.
+
+---
+
+## Don't Hand-Roll (new-decision additions)
+
+| Problem | Don't Build | Use Instead | Why |
+|---------|-------------|-------------|-----|
+| Editable ingredient rows in modal | new row markup/handlers | `ingredientRowHtml()` + `bindIngredientRemove()` (recipes.js:969, 979) | same IIFE scope, already escapes, already battle-tested in renderForm |
+| Recipe equality check | inline name+base everywhere | one `_sameRecipe(a,b)` helper (Utils or module-local) | 15+ call sites; one definition prevents drift |
+| Originals→engine shape coercion | brittle searchIn synthesis | Strategy A (treat Originals as buildable, skip inventory gating) | avoids the `ing.keywords.map` crash and unreliable section mapping |
+| Modal/overlay | custom modal | existing `.recipe-detail-modal-overlay` (already in app.css) | D-06 extends the existing modal, not a new one |
+
+---
+
+## Common Pitfalls (new-decision additions)
+
+### Pitfall A: `ing.keywords.map` crashes on Originals
+`_hasIngredient` (recommender-engine.js:109) does `ingredient.keywords.map(...)`. Originals
+have NO `keywords`. Feeding a raw Original into the engine loop throws `TypeError: cannot
+read 'map' of undefined`. **Avoid:** Strategy A (skip `_hasIngredient` for `_source==='originals'`)
+OR synthesize `keywords` before scoring.
+
+### Pitfall B: String `profile` silently scores 0.5
+Originals store `profile` as a prose string; the engine expects an axis object. No crash, but
+every Original gets a neutral 0.5 flavor match. Acceptable per D-07, but means Originals won't
+rank by mood. Flag in UAT so it's not mistaken for a bug.
+
+### Pitfall C: Editing an Original's name breaks the dual-write lookup
+If the save uses the NEW name to find the inline copy, it finds nothing. **Avoid:** capture
+original name+base (and `id`) BEFORE applying edits; use the OLD key for `.find`, write NEW values.
+
+### Pitfall D: `_source` hardcoded to 'classics-db' on Recommender writes
+recommender.js:325/350/376 hardcode `_source:'classics-db'`. An Original favorited from the
+Recommender would be stored as classics-db → modal renders it read-only (D-06 fails). **Avoid:**
+use `item.recipe._source || 'classics-db'`.
+
+### Pitfall E: `data-name`-only buttons can't dedup by base
+Toggle handlers read `btn.dataset.name` only (recommender.js:310 etc.). Add `data-base` to the
+three buttons in both card renderers so name+base dedup works end-to-end.
+
+### Pitfall F: difficulty chip shows "Advanced" for Originals
+`_difficultyLabel(undefined)` → "Advanced" (recommender-engine.js:45-49). Suppress for Originals
+or accept as cosmetic. Note for UAT.
+
+---
+
+## Validation Architecture (D-06 – D-09)
+
+> No automated test framework exists (vanilla JS SPA, no Jest/Vitest/Playwright). Validation is
+> manual UAT. `workflow.nyquist_validation` maps to a manual checklist per wave + full UAT at phase gate.
+
+### Test Framework
+| Property | Value |
+|----------|-------|
+| Framework | None — manual browser UAT |
+| Config file | None |
+| Quick run command | `python3 -m http.server 8000` then exercise the feature in-browser |
+| Full suite command | Full `06-UAT.md` checklist (Phase 5 UAT format) |
+
+### New-Decision Requirements → Test Map
+| Decision | Behavior to verify | Test type | Command |
+|----------|--------------------|-----------|---------|
+| D-06 | Open an Original via Favorites/Wishlist/Made chip → name, ingredients (add/remove), method, glassware, garnish are EDITABLE inputs | manual-interaction | browser |
+| D-06 | Open a classics-db chip → those fields are READ-ONLY (text, no inputs) | manual-interaction | browser |
+| D-06 | Edit an Original in the modal + Save → `recipes.originals` updated AND the inline list copy updated (inspect data/recipes.json after save / re-open chip) | data-inspection | browser + JSON |
+| D-06 | Edit the NAME of an Original and save → no orphaned/duplicate entry; inline copy renamed | manual-interaction | browser |
+| D-07 | Originals appear in Recommender results mixed with classics, each with an amber 'Your original' badge | manual-visual | browser |
+| D-07 | An Original with no base AND no ingredients does NOT appear in Recommender | manual-interaction | browser |
+| D-07 | No console error when Recommender renders with Originals present (verifies no keywords.map crash) | manual-console | browser devtools |
+| D-07 | Favoriting an Original from the Recommender stores `_source:'originals'` (then it opens editable per D-06) | data-inspection | browser + JSON |
+| D-08 | ♥/★/✓ show filled when recipe already in list (name+base match) | manual-visual | browser |
+| D-08 | Two recipes same name, different base → treated as distinct (both can be added) | manual-interaction | browser |
+| D-08 | Clicking a filled button removes; clicking again re-adds — never duplicates | manual-interaction | browser |
+| D-08 | Same recipe can be in Favorites AND Wishlist simultaneously | manual-interaction | browser |
+| D-08 | Marking an already-made recipe again via modal increments times_made (no dup row) | manual-interaction | browser |
+| D-09 | `06-UAT.md` + `06-VALIDATION.md` exist and all items pass | doc-review | n/a |
+
+### Sampling Rate
+- **Per task commit:** Smoke-test the specific changed behavior in browser; check devtools console for errors (esp. D-07 crash risk).
+- **Per wave merge:** Run the relevant subset of the table above.
+- **Phase gate:** Full `06-UAT.md` green before `/gsd-verify-work`.
+
+### Wave 0 Gaps
+- [ ] `06-UAT.md` — full checklist (8 ROADMAP + 3 gap-done + D-06/D-07/D-08), Phase 5 format
+- [ ] `06-VALIDATION.md` — Phase 5 format
+- No test files to create (no framework).
+
+---
+
+## Assumptions Log (addendum)
+
+| # | Claim | Section | Risk if Wrong |
+|---|-------|---------|---------------|
+| A3 | The 3 prior "gap" tasks (Originals search, schema, modal tally) are DONE in committed code | Correction note | Low — VERIFIED by reading recipes.js:179, schema:39-43/153-174, recipes.js:437-447 |
+| A4 | Strategy A (Originals always-buildable) is acceptable to the user | D-07 | MEDIUM — user may expect inventory-aware matching for Originals; if so, Strategy B + searchIn synthesis needed. Confirm in discuss/plan. |
+| A5 | Originals always carry a stable `id` for dual-write matching | D-06 | Low — renderForm always sets `id` (recipes.js:913); old inline copies also spread it |
+| A6 | Suppressing/accepting the "Advanced" difficulty chip for Originals is fine | D-07 Pitfall F | Low — cosmetic |
+
+---
+
+## Metadata (addendum)
+
+**Confidence breakdown:**
+- D-06 dual-write mechanism: HIGH — helpers and patch pattern verified in code
+- D-06↔D-07 `_source` coupling: HIGH — hardcoded 'classics-db' verified (recommender.js:325/350/376)
+- D-07 shape mismatch + crash risk: HIGH — `ing.keywords.map` (line 109), string `profile` (line 132-140) verified
+- D-07 chosen strategy: MEDIUM — Strategy A recommended; user confirmation advised (A4)
+- D-08 call-site enumeration: HIGH — all sites read directly
+- D-09: HIGH — follows established Phase 5 pattern
+
+**Research date:** 2026-05-20 (addendum)
+**Valid until:** 2026-06-20 (stable vanilla JS codebase)
