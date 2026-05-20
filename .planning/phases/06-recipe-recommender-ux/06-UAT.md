@@ -1,14 +1,18 @@
 ---
-status: pending
+status: testing
 phase: 06-recipe-recommender-ux
 source: [06-01-SUMMARY.md, 06-02-SUMMARY.md, 06-03-SUMMARY.md, 06-04-SUMMARY.md]
 started: 2026-05-20T00:00:00Z
-updated: 2026-05-20T00:00:00Z
+updated: 2026-05-20T12:00:00Z
 ---
 
 ## Current Test
 
-[awaiting user]
+number: 1
+name: Recipe Card Action Buttons in Header Row (REC-10)
+expected: |
+  Serve the app and go to the Recommender page. On any recipe card, the ♥ (heart) and ☆ (star) buttons should sit in the top card-header row alongside the recipe name — not floating in an absolutely-positioned corner. Resizing the window keeps them inline in the header.
+awaiting: user response
 
 ## Tests
 
