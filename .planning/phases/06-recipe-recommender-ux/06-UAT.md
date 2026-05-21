@@ -8,10 +8,10 @@ updated: 2026-05-20T12:00:00Z
 
 ## Current Test
 
-number: 4
-name: Made Tab Shows made_log Most-Recent-First (RECIPE-MADE-02)
+number: 5
+name: Favorites and Wishlist Render as rec-card Chips (RECIPE-VIEW-01)
 expected: |
-  Mark two different recipes as made from the Recommender (e.g. one, then another). Go to Recipes → Made. Both appear as rec-card chips, the most-recently-made on top (sorted by last_made descending). Each chip shows a green ×N times-made badge and has an × remove button that removes it from the list.
+  Add a recipe to Favorites and another to Wishlist (via the ♥/☆ buttons on the Recommender). Go to Recipes → Favorites, then Recipes → Wishlist. Each tab shows its entries as rec-card chips (matching the Recommender card style), each with an × remove button in the corner. Ingredient chips show the first 5 then a "+N more" overflow span.
 awaiting: user response
 
 ## Tests
@@ -33,7 +33,7 @@ severity: major
 
 ### 4. Made Tab Shows made_log Most-Recent-First (RECIPE-MADE-02)
 expected: Mark two different recipes as made from the Recommender (e.g. one, then another). Go to Recipes → Made. Both appear as rec-card chips, the most-recently-made on top (sorted by last_made descending). Each chip shows a green ×N times-made badge and has an × remove button that removes it from the list.
-result: pending
+result: pass
 
 ### 5. Favorites and Wishlist Render as rec-card Chips (RECIPE-VIEW-01)
 expected: Add a recipe to Favorites and another to Wishlist (via the ♥/☆ buttons on the Recommender). Go to Recipes → Favorites, then Recipes → Wishlist. Each tab shows its entries as rec-card chips (matching the Recommender card style), each with an × remove button in the corner. Ingredient chips show the first 5 then a "+N more" overflow span.
@@ -110,9 +110,9 @@ result: pending
 ## Summary
 
 total: 22
-passed: 2
+passed: 3
 issues: 1
-pending: 19
+pending: 18
 skipped: 0
 
 ## Gaps
