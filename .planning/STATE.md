@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: awaiting_uat
-last_updated: "2026-05-20T12:00:00.000Z"
+status: phase_complete
+last_updated: "2026-05-21T00:00:00.000Z"
 progress:
   total_phases: 10
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 26
   completed_plans: 26
   percent: 100
@@ -33,7 +33,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 | 3 | Content Management | Shipped | 4 | 100% |
 | 4 | Inventory & Recommender Depth | Shipped | 3 | 100% |
 | 5 | Polish, Depth & UX Tidy | Shipped | 4 plans, 17/17 UAT, VALIDATION.md | 100% |
-| 6 | Recipe & Recommender UX | Code complete · awaiting UAT | 4 plans executed + verified (GOAL ACHIEVED 13/13); D-06/07/08 shipped, D-09 deliverables ready | 100% |
+| 6 | Recipe & Recommender UX | Shipped | 4 plans, 20/22 UAT pass (2 issues deferred), 2 recommender blocker bugs fixed mid-UAT | 100% |
 | 7 | AI Integration | Pending | — | 0% |
 | 8 | Portability | Pending | — | 0% |
 | 9 | Backend & Multi-User | Pending | — | 0% |
@@ -189,4 +189,4 @@ Wave 2 plans (05-03, 05-04) can also run in parallel with each other; 05-03 shou
 
 ---
 *State initialized: 2026-05-04*
-*Last activity: 2026-05-20 — Phase 6 EXECUTED: all 4 plans complete (06-01 D-08 name+base dedup via Utils.sameRecipe; 06-02 D-06 editable Originals modal with rename-safe dual-write; 06-03 D-07 Originals in Recommender inventory-aware Strategy B + amber badge + crash guard; 06-04 D-09 06-TEST-CHECKLIST.md + 06-UAT.md). Verifier: GOAL ACHIEVED (13/13 must-haves), node --check passes on all 4 JS files, engine smoke test confirms Originals scored inventory-aware without crash. Status awaiting_uat — user runs 06-UAT.md (22 tests) via GSD commands; no auto-advance per D-09. Earlier: Phase 6 replanned: 06-01 (D-08 dedup), 06-02 (D-06 editable Originals modal), 06-03 (D-07 Originals in Recommender, Strategy B), 06-04 (D-09 UAT+checklist). 8 ROADMAP reqs + 3 gap tasks confirmed DONE. Earlier: Phase 5 UAT complete (17/17 pass). Phase 6 opened: REC-10 (card layout fix) and REC-11 (heart/star toggle state) shipped. Three Phase 6 bugs fixed: REC-BUG-01 (unconstrained mode now shows missing-ingredient info rows with shopping-list links), REC-BUG-02 (veto filter now checks all ingredient names, not just recipe.base — fixes egg white appearing in results), INV-BUG-01 (Got-it dialog auto-detects correct inventory section via keyword matching — fixes vermouth defaulting to Whiskeys). ROADMAP renumbered to 10 phases. 168-recipe DB. Favicon. Archetype selection fixed.*
+*Last activity: 2026-05-21 — Phase 6 UAT COMPLETE: 22/22 tests resolved (20 pass, 2 issues explicitly deferred to future phases). Two recommender blocker bugs found and fixed mid-UAT: (1) lc() in recommender-engine.js read bottle `style` not `type`, so owned bottles read as missing — fixed by concatenating type/style/brand/subtype/name/nationality/region (buildable 6→20); (2) over-broad bare 'amaro' keyword in classics-db matched Campari (type:'Amaro'), making Paper Plane/Toronto falsely buildable — removed bare 'amaro' from Amaro Nonino + Fernet-Branca. Deferred issues: Test 3 (stale-SHA save failures on rapid saves) and Test 12 (rename doesn't sync across all lists holding a recipe). Enhancement backlog captured in 06-UAT.md Deferred: unified recipe-chip schema + shared render (chips identical everywhere with ♥/☆/✓ + cross-list move), normalize recipe storage (store once, reference by id — also fixes Test 12), inventory synonym/alias layer (limes→lime juice, Cointreau/GM/Triple Sec→Orange Liqueur), bartender specialty as ranking weight not filter + sidebar specialty selectors, AI recipe discovery button, optional ingredients (checkbox + buildable ignores optionals), recipe image upload (data/recipe_images/, id-named), substitution suggestions on cards, optional Method/Instructions + "Shot" method type, Made-icon checkmark, heart/star icon shape. Phase 6 shipped. ——— Prior: Phase 6 EXECUTED: all 4 plans complete (06-01 D-08 name+base dedup via Utils.sameRecipe; 06-02 D-06 editable Originals modal with rename-safe dual-write; 06-03 D-07 Originals in Recommender inventory-aware Strategy B + amber badge + crash guard; 06-04 D-09 06-TEST-CHECKLIST.md + 06-UAT.md). Verifier: GOAL ACHIEVED (13/13 must-haves), node --check passes on all 4 JS files, engine smoke test confirms Originals scored inventory-aware without crash. Status awaiting_uat — user runs 06-UAT.md (22 tests) via GSD commands; no auto-advance per D-09. Earlier: Phase 6 replanned: 06-01 (D-08 dedup), 06-02 (D-06 editable Originals modal), 06-03 (D-07 Originals in Recommender, Strategy B), 06-04 (D-09 UAT+checklist). 8 ROADMAP reqs + 3 gap tasks confirmed DONE. Earlier: Phase 5 UAT complete (17/17 pass). Phase 6 opened: REC-10 (card layout fix) and REC-11 (heart/star toggle state) shipped. Three Phase 6 bugs fixed: REC-BUG-01 (unconstrained mode now shows missing-ingredient info rows with shopping-list links), REC-BUG-02 (veto filter now checks all ingredient names, not just recipe.base — fixes egg white appearing in results), INV-BUG-01 (Got-it dialog auto-detects correct inventory section via keyword matching — fixes vermouth defaulting to Whiskeys). ROADMAP renumbered to 10 phases. 168-recipe DB. Favicon. Archetype selection fixed.*
