@@ -334,6 +334,72 @@
   "last_updated": "2026-05-20",
   "made_log": [
     {
+      "id": "mezcal-old-fashioned",
+      "name": "Mezcal Old Fashioned",
+      "base": "Mezcal",
+      "method": "stirred",
+      "glassware": "Rocks glass",
+      "difficulty": 1,
+      "profile": {
+        "sweetness": 0.15,
+        "acid": 0,
+        "strength": 0.1,
+        "complexity": 0.65,
+        "season": 0.55,
+        "risk": 0.55
+      },
+      "occasion": "Smoke, earth, and agave dressed in a classic structure. Deeply satisfying.",
+      "tags": [
+        "after-dinner",
+        "spirit-forward",
+        "cozy"
+      ],
+      "ingredients": [
+        {
+          "name": "Mezcal",
+          "amount": "2 oz",
+          "keywords": [
+            "mezcal",
+            "agave"
+          ],
+          "searchIn": [
+            "agave"
+          ]
+        },
+        {
+          "name": "Simple Syrup",
+          "amount": "¼ oz",
+          "keywords": [
+            "simple",
+            "sugar",
+            "agave"
+          ],
+          "searchIn": [
+            "syrups",
+            "pantry"
+          ]
+        },
+        {
+          "name": "Angostura Bitters",
+          "amount": "2 dashes",
+          "keywords": [
+            "angostura",
+            "bitters"
+          ],
+          "searchIn": [
+            "bitters_anchors",
+            "bitters_other"
+          ]
+        }
+      ],
+      "garnish": "Orange twist",
+      "_source": "classics-db",
+      "times_made": 1,
+      "first_made": "2026-05-21",
+      "last_made": "2026-05-21",
+      "notes": ""
+    },
+    {
       "id": "army-and-navy",
       "name": "Army & Navy",
       "base": "Gin",
