@@ -8,10 +8,10 @@ updated: 2026-05-20T12:00:00Z
 
 ## Current Test
 
-number: 18
-name: Filled State Matches by Name + Base (D-08)
+number: 19
+name: Same Name, Different Base Treated as Distinct (D-08)
 expected: |
-  Favorite a recipe from the Recommender, then re-open or re-render the Recommender. That recipe's ♥ should render FILLED because the name+base match (case-insensitive) is detected via the shared comparator. The ☆ and ✓ buttons reflect Wishlist/Made membership the same way.
+  If two recipes share the same name but have different base spirits, adding one to Favorites should NOT mark the other as already-favorited. Each can be added independently and both appear as separate entries in Recipes → Favorites.
 awaiting: user response
 
 ## Tests
@@ -98,7 +98,8 @@ note: Passed after the lc() field-extraction blocker fix (commit 0d99dcd). Owned
 
 ### 18. Filled State Matches by Name + Base (D-08)
 expected: Favorite a recipe from the Recommender, then re-open or re-render the Recommender. That recipe's ♥ should render FILLED because the name+base match (case-insensitive) is detected via the shared comparator. The ☆ and ✓ buttons reflect Wishlist/Made membership the same way.
-result: pending
+result: pass
+note: Filled-state matching works for ♥/☆/✓. Cosmetic follow-up logged: Made button should use an actual hollow/filled checkmark ✓ rather than a plain circle.
 
 ### 19. Same Name, Different Base Treated as Distinct (D-08)
 expected: If two recipes share the same name but have different base spirits, adding one to Favorites should NOT mark the other as already-favorited. Each can be added independently and both appear as separate entries in Recipes → Favorites.
@@ -119,9 +120,9 @@ result: pending
 ## Summary
 
 total: 22
-passed: 15
+passed: 16
 issues: 2
-pending: 5
+pending: 4
 skipped: 0
 
 ## Gaps
@@ -149,6 +150,14 @@ skipped: 0
   test: 5
   artifacts: []
   missing: ["Shared chip render function used by both Recommender and Recipes views", "Action buttons (♥/☆/✓) on Recipes-page chips with toggle/move behavior"]
+
+- truth: "Made button uses an actual checkmark icon (hollow when unmade, filled when made)"
+  status: cosmetic
+  reason: "User (Test 18): the Made toggle currently shows a plain circle (○/●). Wants a real checkmark ✓ that renders hollow vs. filled to read clearly as 'made'."
+  severity: cosmetic
+  test: 18
+  artifacts: []
+  missing: []
 
 - truth: "Heart and star action-button icons are visually balanced (1:1 aspect ratio, similar size, no ellipse/circle background)"
   status: cosmetic
