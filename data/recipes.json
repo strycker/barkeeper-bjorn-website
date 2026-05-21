@@ -333,6 +333,66 @@
         }
       ],
       "garnish": "Lemon twist or cherry"
+    },
+    {
+      "id": "cynar-spritz",
+      "name": "Cynar Spritz",
+      "base": "Cynar",
+      "method": "built",
+      "glassware": "Wine glass",
+      "difficulty": 1,
+      "profile": {
+        "sweetness": 0.2,
+        "acid": 0.15,
+        "strength": 0.8,
+        "complexity": 0.55,
+        "season": 0.4,
+        "risk": 0.5
+      },
+      "occasion": "Bitter artichoke amaro meets sparkling wine. Bolder, weirder, better than Aperol.",
+      "tags": [
+        "aperitif",
+        "refreshing"
+      ],
+      "ingredients": [
+        {
+          "name": "Cynar",
+          "amount": "2 oz",
+          "keywords": [
+            "cynar"
+          ],
+          "searchIn": [
+            "liqueurs_herbal",
+            "liqueurs_specialty"
+          ]
+        },
+        {
+          "name": "Prosecco",
+          "amount": "3 oz",
+          "keywords": [
+            "prosecco",
+            "champagne",
+            "sparkling"
+          ],
+          "searchIn": [
+            "fortified",
+            "mixers"
+          ]
+        },
+        {
+          "name": "Soda Water",
+          "amount": "1 oz",
+          "keywords": [
+            "soda",
+            "sparkling"
+          ],
+          "searchIn": [
+            "mixers"
+          ]
+        }
+      ],
+      "garnish": "Orange slice",
+      "_source": "classics-db"
     }
   ],
   "last_updated": "2026-05-20",
