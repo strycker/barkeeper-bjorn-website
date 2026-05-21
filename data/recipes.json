@@ -507,6 +507,84 @@
       ],
       "garnish": "Orange slice",
       "_source": "classics-db"
+    },
+    {
+      "id": "fitzgerald",
+      "name": "Fitzgerald",
+      "base": "Gin",
+      "method": "shaken",
+      "glassware": "Coupe",
+      "difficulty": 1,
+      "profile": {
+        "sweetness": 0.3,
+        "acid": 0.45,
+        "strength": 0.35,
+        "complexity": 0.3,
+        "season": 0.2,
+        "risk": 0.15
+      },
+      "occasion": "Gin sour with Angostura — cleaner and more elegant than you'd expect.",
+      "tags": [
+        "sour",
+        "classic",
+        "refreshing"
+      ],
+      "specialties": [
+        "classic",
+        "craft"
+      ],
+      "ingredients": [
+        {
+          "name": "Gin",
+          "amount": "2 oz",
+          "keywords": [
+            "gin",
+            "london dry"
+          ],
+          "searchIn": [
+            "white_spirits"
+          ]
+        },
+        {
+          "name": "Lemon Juice",
+          "amount": "¾ oz",
+          "keywords": [
+            "lemon",
+            "lemon juice"
+          ],
+          "searchIn": [
+            "produce",
+            "perishables"
+          ]
+        },
+        {
+          "name": "Simple Syrup",
+          "amount": "¾ oz",
+          "keywords": [
+            "simple",
+            "syrup",
+            "sugar"
+          ],
+          "searchIn": [
+            "syrups",
+            "pantry"
+          ]
+        },
+        {
+          "name": "Angostura Bitters",
+          "amount": "2 dashes",
+          "keywords": [
+            "angostura",
+            "bitters"
+          ],
+          "searchIn": [
+            "bitters_anchors",
+            "bitters_other"
+          ]
+        }
+      ],
+      "garnish": "Lemon slice",
+      "_source": "classics-db"
     }
   ],
   "last_updated": "2026-05-21",
