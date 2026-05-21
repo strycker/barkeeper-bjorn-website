@@ -8,10 +8,10 @@ updated: 2026-05-20T12:00:00Z
 
 ## Current Test
 
-number: 20
-name: Toggle Never Creates a Duplicate (D-08)
+number: 21
+name: Same Recipe in Favorites AND Wishlist Simultaneously (D-08)
 expected: |
-  On a Recommender card, click ♥ to add, then click the filled ♥ to remove, then click again to re-add. Check Recipes → Favorites: the recipe appears exactly once — repeated toggling never accumulates duplicate entries.
+  On a single Recommender card, click both the ♥ and the ☆. The recipe should appear under BOTH Recipes → Favorites and Recipes → Wishlist at the same time — the two lists are independent and one does not remove from the other.
 awaiting: user response
 
 ## Tests
@@ -108,7 +108,7 @@ note: User requested two future-phase recipe-schema improvements — optional Me
 
 ### 20. Toggle Never Creates a Duplicate (D-08)
 expected: On a Recommender card, click ♥ to add, then click the filled ♥ to remove, then click again to re-add. Check Recipes → Favorites: the recipe appears exactly once — repeated toggling never accumulates duplicate entries.
-result: pending
+result: pass
 
 ### 21. Same Recipe in Favorites AND Wishlist Simultaneously (D-08)
 expected: On a single Recommender card, click both the ♥ and the ☆. The recipe should appear under BOTH Recipes → Favorites and Recipes → Wishlist at the same time — the two lists are independent and one does not remove from the other.
@@ -121,9 +121,9 @@ result: pending
 ## Summary
 
 total: 22
-passed: 17
+passed: 18
 issues: 2
-pending: 3
+pending: 2
 skipped: 0
 
 ## Gaps
