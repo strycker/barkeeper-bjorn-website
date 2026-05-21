@@ -8,10 +8,10 @@ updated: 2026-05-20T12:00:00Z
 
 ## Current Test
 
-number: 10
-name: Classics-db Chip Stays Read-Only in the Modal (D-06)
+number: 11
+name: Editing an Original Dual-Writes Both Locations (D-06)
 expected: |
-  Favorite a regular classics-db recipe from the Recommender, then open it from Recipes → Favorites. The detail modal shows name, method, glassware, garnish, and the ingredients table as STATIC TEXT — no input fields and no "Save Recipe" button (only Save Notes / Close in the footer). This confirms editability is gated on `_source==='originals'`.
+  Open an Original via a Favorites/Wishlist/Made chip (per Test 9), change a field (e.g. the method text or an ingredient amount), and click "Save Recipe". A success toast appears. Then inspect `data/recipes.json`: BOTH the matching entry in the `originals` array AND the inline copy in the list you opened it from (e.g. `confirmed_favorites`) should show the new value.
 awaiting: user response
 
 ## Tests
@@ -60,7 +60,7 @@ note: Editable Originals modal works from a Favorites chip. User notes the Origi
 
 ### 10. Classics-db Chip Stays Read-Only in the Modal (D-06)
 expected: Favorite a regular classics-db recipe from the Recommender, then open it from Recipes → Favorites. The detail modal shows name, method, glassware, garnish, and the ingredients table as STATIC TEXT — no input fields and no "Save Recipe" button (only Save Notes / Close in the footer). This confirms editability is gated on `_source==='originals'`.
-result: pending
+result: pass
 
 ### 11. Editing an Original Dual-Writes Both Locations (D-06)
 expected: Open an Original via a Favorites/Wishlist/Made chip (per Test 9), change a field (e.g. the method text or an ingredient amount), and click "Save Recipe". A success toast appears. Then inspect `data/recipes.json`: BOTH the matching entry in the `originals` array AND the inline copy in the list you opened it from (e.g. `confirmed_favorites`) should show the new value.
@@ -113,9 +113,9 @@ result: pending
 ## Summary
 
 total: 22
-passed: 8
+passed: 9
 issues: 1
-pending: 13
+pending: 12
 skipped: 0
 
 ## Gaps
