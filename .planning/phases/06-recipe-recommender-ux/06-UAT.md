@@ -8,10 +8,10 @@ updated: 2026-05-20T12:00:00Z
 
 ## Current Test
 
-number: 8
-name: Recommender Page Search Filters Visible Cards (REC-SEARCH-01)
+number: 9
+name: Originals Editable in the Modal (D-06)
 expected: |
-  On the Recommender page, type "negroni" into the search input inside the results area (above the cards). Only cards whose name, base, or an ingredient name contains "negroni" (case-insensitive) remain; non-matching cards are hidden. Clearing the box restores all cards in the current scope.
+  First ensure an Original is reachable as a saved chip with `_source:'originals'` — favorite one of your Originals from the Recommender (see Test 13), then go to Recipes → Favorites and click that Original's chip. In the detail modal, the name, method, glassware, garnish, and each ingredient row should be editable `<input>` fields, with an "add ingredient" control and remove buttons per row, plus a "Save Recipe" button.
 awaiting: user response
 
 ## Tests
@@ -50,7 +50,8 @@ result: pass
 
 ### 8. Recommender Page Search Filters Visible Cards (REC-SEARCH-01)
 expected: On the Recommender page, type "negroni" into the search input inside the results area (above the cards). Only cards whose name, base, or an ingredient name contains "negroni" (case-insensitive) remain; non-matching cards are hidden. Clearing the box restores all cards in the current scope.
-result: pending
+result: pass
+note: Search filter works. User reiterated that owned Campari recipes still show as "missing 1 bottle" — already covered by the deferred inventory synonym/lookup item (Test 5 feedback).
 
 ### 9. Originals Editable in the Modal (D-06)
 expected: First ensure an Original is reachable as a saved chip with `_source:'originals'` — favorite one of your Originals from the Recommender (see Test 13), then go to Recipes → Favorites and click that Original's chip. In the detail modal, the name, method, glassware, garnish, and each ingredient row should be editable `<input>` fields, with an "add ingredient" control and remove buttons per row, plus a "Save Recipe" button.
@@ -111,9 +112,9 @@ result: pending
 ## Summary
 
 total: 22
-passed: 6
+passed: 7
 issues: 1
-pending: 15
+pending: 14
 skipped: 0
 
 ## Gaps
