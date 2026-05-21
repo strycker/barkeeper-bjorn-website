@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-05-19",
+  "last_updated": "2026-05-21",
   "base_spirits": {
     "whiskey": [
       {
@@ -523,7 +523,8 @@
     "Lemons",
     "Mint",
     "Basil",
-    "Rosemary"
+    "Rosemary",
+    "Limes"
   ],
   "vetoes": {
     "disliked_ingredients": [
@@ -564,10 +565,6 @@
     },
     {
       "item": "Campari",
-      "rationale": "one-away recommendation"
-    },
-    {
-      "item": "Fresh Lime Juice",
       "rationale": "one-away recommendation"
     },
     {
