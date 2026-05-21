@@ -8,10 +8,10 @@ updated: 2026-05-20T12:00:00Z
 
 ## Current Test
 
-number: 3
-name: "I Made This" Button Adds to made_log (RECIPE-MADE-01)
+number: 4
+name: Made Tab Shows made_log Most-Recent-First (RECIPE-MADE-02)
 expected: |
-  On a Recommender card, click the ○ "I Made This" button — it should turn into a filled ✓ and a "Marked as made" toast appears. Go to Recipes → Made tab; the recipe should be listed there. Back on the Recommender, click the ✓ again — it removes the entry and the Made tab no longer shows it.
+  Mark two different recipes as made from the Recommender (e.g. one, then another). Go to Recipes → Made. Both appear as rec-card chips, the most-recently-made on top (sorted by last_made descending). Each chip shows a green ×N times-made badge and has an × remove button that removes it from the list.
 awaiting: user response
 
 ## Tests
@@ -27,7 +27,9 @@ result: pass
 
 ### 3. "I Made This" Button Adds to made_log (RECIPE-MADE-01)
 expected: On a Recommender card, click the ○ "I Made This" button — it should turn into a filled ✓ and a "Marked as made" toast appears. Go to Recipes → Made tab; the recipe should be listed there. Back on the Recommender, click the ✓ again — it removes the entry and the Made tab no longer shows it.
-result: pending
+result: issue
+reported: "Almost works. I'm able to mark as made, but I cannot seem to un-check it. I cannot remove it from the Made list, either. I get an error 'Save failed: data/recipes.json does not match <sha> — reload the page to refresh file state, then try again.' Refreshing the page does seem to help, but things are slow."
+severity: major
 
 ### 4. Made Tab Shows made_log Most-Recent-First (RECIPE-MADE-02)
 expected: Mark two different recipes as made from the Recommender (e.g. one, then another). Go to Recipes → Made. Both appear as rec-card chips, the most-recently-made on top (sorted by last_made descending). Each chip shows a green ×N times-made badge and has an × remove button that removes it from the list.
@@ -109,11 +111,19 @@ result: pending
 
 total: 22
 passed: 2
-issues: 0
-pending: 20
+issues: 1
+pending: 19
 skipped: 0
 
 ## Gaps
+
+- truth: "Toggling 'I Made This' on/off and removing from Made tab works without SHA conflict errors"
+  status: open
+  reason: "User (Test 3): marking as made works, but un-toggling and removing from Made tab fails with 'Save failed: data/recipes.json does not match <sha>' — stale SHA after rapid successive saves. Page reload fixes it but is slow."
+  severity: major
+  test: 3
+  artifacts: []
+  missing: ["State.save() SHA conflict handling — stale SHA after back-to-back saves not fully resolved by BUG-03 retry-on-409"]
 
 - truth: "Heart and star action-button icons are visually balanced (1:1 aspect ratio, similar size, no ellipse/circle background)"
   status: cosmetic
@@ -127,3 +137,4 @@ skipped: 0
 
 - Recipes should be uniformly chip-based across all views, and chips should surface tally counts and other stats (times-made, etc.) beyond just the Made tab. Noted during Test 1; aligns with Phase 6 mental model "chips are the interface" — carry into a later phase.
 - Originals schema parity (noted Test 2): clicking "Confirmed Built"/mark-made on an Original (via its edit/detail modal) does NOT add it to the Made tab and shows no tally. Likely root cause: Originals don't carry the same JSON fields as classics/saved chips (e.g. _source, base, made-tracking fields). Later phase: audit Originals vs. non-Originals recipe-chip schemas and add fields to BOTH as needed so all recipe chips share one compatible format and made-tracking works uniformly. User explicitly deferred — do not fix during Phase 6 verification.
+- DB access/update UX smoothness (noted Test 3): State.save() SHA conflicts cause save failures when saves happen in rapid succession — the in-memory SHA goes stale. User requests a future phase revisit of how databases are accessed and updated to make the UX smoother (less stale-SHA errors, faster saves). Do not fix during Phase 6 verification.
