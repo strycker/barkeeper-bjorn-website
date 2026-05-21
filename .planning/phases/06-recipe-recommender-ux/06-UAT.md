@@ -8,10 +8,10 @@ updated: 2026-05-20T12:00:00Z
 
 ## Current Test
 
-number: 9
-name: Originals Editable in the Modal (D-06)
+number: 10
+name: Classics-db Chip Stays Read-Only in the Modal (D-06)
 expected: |
-  First ensure an Original is reachable as a saved chip with `_source:'originals'` — favorite one of your Originals from the Recommender (see Test 13), then go to Recipes → Favorites and click that Original's chip. In the detail modal, the name, method, glassware, garnish, and each ingredient row should be editable `<input>` fields, with an "add ingredient" control and remove buttons per row, plus a "Save Recipe" button.
+  Favorite a regular classics-db recipe from the Recommender, then open it from Recipes → Favorites. The detail modal shows name, method, glassware, garnish, and the ingredients table as STATIC TEXT — no input fields and no "Save Recipe" button (only Save Notes / Close in the footer). This confirms editability is gated on `_source==='originals'`.
 awaiting: user response
 
 ## Tests
@@ -55,7 +55,8 @@ note: Search filter works. User reiterated that owned Campari recipes still show
 
 ### 9. Originals Editable in the Modal (D-06)
 expected: First ensure an Original is reachable as a saved chip with `_source:'originals'` — favorite one of your Originals from the Recommender (see Test 13), then go to Recipes → Favorites and click that Original's chip. In the detail modal, the name, method, glassware, garnish, and each ingredient row should be editable `<input>` fields, with an "add ingredient" control and remove buttons per row, plus a "Save Recipe" button.
-result: pending
+result: pass
+note: Editable Originals modal works from a Favorites chip. User notes the Originals-tab chip shows different fields than the Favorites-tab chip — reinforces the deferred unified-schema requirement (one JSON shape + one chip render everywhere).
 
 ### 10. Classics-db Chip Stays Read-Only in the Modal (D-06)
 expected: Favorite a regular classics-db recipe from the Recommender, then open it from Recipes → Favorites. The detail modal shows name, method, glassware, garnish, and the ingredients table as STATIC TEXT — no input fields and no "Save Recipe" button (only Save Notes / Close in the footer). This confirms editability is gated on `_source==='originals'`.
@@ -112,9 +113,9 @@ result: pending
 ## Summary
 
 total: 22
-passed: 7
+passed: 8
 issues: 1
-pending: 14
+pending: 13
 skipped: 0
 
 ## Gaps
@@ -146,7 +147,7 @@ skipped: 0
 ## Deferred (future phases)
 
 - Recipes should be uniformly chip-based across all views, and chips should surface tally counts and other stats (times-made, etc.) beyond just the Made tab. Noted during Test 1; aligns with Phase 6 mental model "chips are the interface" — carry into a later phase.
-- Originals schema parity (noted Test 2): clicking "Confirmed Built"/mark-made on an Original (via its edit/detail modal) does NOT add it to the Made tab and shows no tally. Likely root cause: Originals don't carry the same JSON fields as classics/saved chips (e.g. _source, base, made-tracking fields). Later phase: audit Originals vs. non-Originals recipe-chip schemas and add fields to BOTH as needed so all recipe chips share one compatible format and made-tracking works uniformly. User explicitly deferred — do not fix during Phase 6 verification.
+- Originals schema parity (noted Test 2, reinforced Test 9): clicking "Confirmed Built"/mark-made on an Original (via its edit/detail modal) does NOT add it to the Made tab and shows no tally. Likely root cause: Originals don't carry the same JSON fields as classics/saved chips (e.g. _source, base, made-tracking fields). User confirmed at Test 9 that the Originals-tab chip displays different fields than the same recipe's Favorites-tab chip. CAPABILITY REQUIREMENT for a future phase: define ONE canonical recipe-chip JSON schema and use it EVERYWHERE — Originals, Favorites, Wishlist, Made, and Recommendations — so every chip carries identical fields, renders through one shared routine, and made-tracking/tally works uniformly across all views. Audit all current recipe sources and backfill missing fields on both Originals and non-Originals. User explicitly deferred — do not fix during Phase 6 verification.
 - DB access/update UX smoothness (noted Test 3): State.save() SHA conflicts cause save failures when saves happen in rapid succession — the in-memory SHA goes stale. User requests a future phase revisit of how databases are accessed and updated to make the UX smoother (less stale-SHA errors, faster saves). Do not fix during Phase 6 verification.
 - Unified chip render + cross-list actions (noted Test 5): Recipes-page chips (Favorites/Wishlist/Made) and Recommender cards share no render code and diverge in capability. Future phase: extract a single shared chip component used by both views, with ♥/☆/✓ action buttons that allow toggling and moving recipes between lists without returning to the Recommender.
 - Inventory synonym/alias lookups (noted Test 5 feedback): Recommender treats ingredient names too literally. Future phase: add a synonym/alias layer so that owning "limes" implies "lime juice", owning "Cointreau", "Grand Marnier", or "Triple Sec" implies "Orange Liqueur", etc. Also fix Campari and Rye (and similar spirits the user owns) not being matched correctly — appearing as "One Bottle Away" or missing when they are in the inventory.
