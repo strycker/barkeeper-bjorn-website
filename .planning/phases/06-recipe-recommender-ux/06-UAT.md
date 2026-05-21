@@ -8,10 +8,10 @@ updated: 2026-05-20T12:00:00Z
 
 ## Current Test
 
-number: 7
-name: Recipes Page Search Filters Active Tab and Clears on Switch (RECIPE-SEARCH-01)
+number: 8
+name: Recommender Page Search Filters Visible Cards (REC-SEARCH-01)
 expected: |
-  On Recipes → Favorites, type "gin" in the search input above the tabs. Only chips whose name, base spirit, or an ingredient name contains "gin" (case-insensitive) remain visible. Click the Wishlist tab — the search input clears automatically and the Wishlist shows all its entries unfiltered.
+  On the Recommender page, type "negroni" into the search input inside the results area (above the cards). Only cards whose name, base, or an ingredient name contains "negroni" (case-insensitive) remain; non-matching cards are hidden. Clearing the box restores all cards in the current scope.
 awaiting: user response
 
 ## Tests
@@ -46,7 +46,7 @@ result: pass
 
 ### 7. Recipes Page Search Filters Active Tab and Clears on Switch (RECIPE-SEARCH-01)
 expected: On Recipes → Favorites, type "gin" in the search input above the tabs. Only chips whose name, base spirit, or an ingredient name contains "gin" (case-insensitive) remain visible. Click the Wishlist tab — the search input clears automatically and the Wishlist shows all its entries unfiltered.
-result: pending
+result: pass
 
 ### 8. Recommender Page Search Filters Visible Cards (REC-SEARCH-01)
 expected: On the Recommender page, type "negroni" into the search input inside the results area (above the cards). Only cards whose name, base, or an ingredient name contains "negroni" (case-insensitive) remain; non-matching cards are hidden. Clearing the box restores all cards in the current scope.
@@ -111,9 +111,9 @@ result: pending
 ## Summary
 
 total: 22
-passed: 5
+passed: 6
 issues: 1
-pending: 16
+pending: 15
 skipped: 0
 
 ## Gaps
