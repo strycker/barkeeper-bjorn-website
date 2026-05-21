@@ -8,10 +8,10 @@ updated: 2026-05-20T12:00:00Z
 
 ## Current Test
 
-number: 12
-name: Renaming an Original Has No Orphan/Duplicate (D-06)
+number: 13
+name: Originals Appear in Recommender with Amber Badge (D-07)
 expected: |
-  Open an Original via a chip, change its NAME in the modal, and Save Recipe. After saving, inspect `data/recipes.json`: the `originals` entry and the inline list copy should both carry the NEW name, and there should be NO leftover entry under the OLD name in either location (no orphaned or duplicated record).
+  Ensure you have at least one Original saved (Recipes → Originals tab) whose ingredients exist in your inventory. Go to the Recommender. The Original should appear mixed in with the classics-db results, carrying an amber "Your original" badge on its card.
 awaiting: user response
 
 ## Tests
@@ -68,7 +68,10 @@ result: pass
 
 ### 12. Renaming an Original Has No Orphan/Duplicate (D-06)
 expected: Open an Original via a chip, change its NAME in the modal, and Save Recipe. After saving, inspect `data/recipes.json`: the `originals` entry and the inline list copy should both carry the NEW name, and there should be NO leftover entry under the OLD name in either location (no orphaned or duplicated record).
-result: pending
+result: issue
+reported: "Partially -- the name change works for the Original tab, but it does not update the cocktail name if that chip was also a Favorite or Wishlist. Please keep everything in sync and update ALL locations for this cocktail."
+severity: major
+note: User deferred the fix to a future phase — do not fix during Phase 6 verification.
 
 ### 13. Originals Appear in Recommender with Amber Badge (D-07)
 expected: Ensure you have at least one Original saved (Recipes → Originals tab) whose ingredients exist in your inventory. Go to the Recommender. The Original should appear mixed in with the classics-db results, carrying an amber "Your original" badge on its card.
@@ -114,8 +117,8 @@ result: pending
 
 total: 22
 passed: 10
-issues: 1
-pending: 11
+issues: 2
+pending: 10
 skipped: 0
 
 ## Gaps
@@ -127,6 +130,14 @@ skipped: 0
   test: 3
   artifacts: []
   missing: ["State.save() SHA conflict handling — stale SHA after back-to-back saves not fully resolved by BUG-03 retry-on-409"]
+
+- truth: "Renaming an Original updates the name in EVERY location it appears — originals array AND all inline list copies (confirmed_favorites, wishlist, made_log)"
+  status: open
+  reason: "User (Test 12): renaming an Original updates the originals entry and the list it was opened from, but a copy of that same recipe living in OTHER lists (e.g. it was both a Favorite and a Wishlist item) keeps the OLD name. Dual-write only touches the single list the modal was opened from, not all lists containing the recipe."
+  severity: major
+  test: 12
+  artifacts: []
+  missing: ["Save-Recipe rename propagation across ALL inline list copies (confirmed_favorites + wishlist + made_log), matched by old name+base probe"]
 
 - truth: "Recipes-page chips show the same action buttons (♥/☆/✓) as Recommender cards, allowing cross-list moves from the Recipes page"
   status: open
@@ -152,4 +163,5 @@ skipped: 0
 - Unified chip render + cross-list actions (noted Test 5): Recipes-page chips (Favorites/Wishlist/Made) and Recommender cards share no render code and diverge in capability. Future phase: extract a single shared chip component used by both views, with ♥/☆/✓ action buttons that allow toggling and moving recipes between lists without returning to the Recommender.
 - Inventory synonym/alias lookups (noted Test 5 feedback): Recommender treats ingredient names too literally. Future phase: add a synonym/alias layer so that owning "limes" implies "lime juice", owning "Cointreau", "Grand Marnier", or "Triple Sec" implies "Orange Liqueur", etc. Also fix Campari and Rye (and similar spirits the user owns) not being matched correctly — appearing as "One Bottle Away" or missing when they are in the inventory.
 - Bartender specialty as ranking weight, not filter (noted Test 5 feedback): The Bartender Specialty setting currently narrows results too aggressively, acting as a filter. Future phase: convert it to a scoring weight that reorders recommendations rather than excluding recipes. Add a Specialty selector panel to the Recommender sidebar (alongside Mood and Occasion sliders) with options: "Equal Weight" (default) + each specialty; selected specialty boosts score but does not exclude.
+- Full cross-list rename/edit sync (noted Test 12): When an Original (or any recipe) is edited/renamed, the change must propagate to EVERY location the recipe appears — the originals array plus all inline copies in confirmed_favorites, wishlist, and made_log — not just the single list the modal was opened from. Future phase: make Save-Recipe update all matching copies (by old name+base probe) and avoid orphans/duplicates everywhere. Related to the unified-schema requirement.
 - AI recipe discovery ("Use AI to get more recipes") (noted Test 5 feedback): Add a button near the top of the Recommender page that queries the Claude API using the user's current preference state (sweetness, acidity, complexity, season, risk tolerance, base spirit, occasion, specialty). New recipes returned by the AI are merged into the shared classics-db recipe library so they are discoverable by all users and persist across sessions. This feature becomes more important as the platform grows to multiple users sharing a common recipe library.
