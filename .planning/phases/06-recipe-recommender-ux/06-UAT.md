@@ -8,10 +8,10 @@ updated: 2026-05-20T12:00:00Z
 
 ## Current Test
 
-number: 11
-name: Editing an Original Dual-Writes Both Locations (D-06)
+number: 12
+name: Renaming an Original Has No Orphan/Duplicate (D-06)
 expected: |
-  Open an Original via a Favorites/Wishlist/Made chip (per Test 9), change a field (e.g. the method text or an ingredient amount), and click "Save Recipe". A success toast appears. Then inspect `data/recipes.json`: BOTH the matching entry in the `originals` array AND the inline copy in the list you opened it from (e.g. `confirmed_favorites`) should show the new value.
+  Open an Original via a chip, change its NAME in the modal, and Save Recipe. After saving, inspect `data/recipes.json`: the `originals` entry and the inline list copy should both carry the NEW name, and there should be NO leftover entry under the OLD name in either location (no orphaned or duplicated record).
 awaiting: user response
 
 ## Tests
@@ -64,7 +64,7 @@ result: pass
 
 ### 11. Editing an Original Dual-Writes Both Locations (D-06)
 expected: Open an Original via a Favorites/Wishlist/Made chip (per Test 9), change a field (e.g. the method text or an ingredient amount), and click "Save Recipe". A success toast appears. Then inspect `data/recipes.json`: BOTH the matching entry in the `originals` array AND the inline copy in the list you opened it from (e.g. `confirmed_favorites`) should show the new value.
-result: pending
+result: pass
 
 ### 12. Renaming an Original Has No Orphan/Duplicate (D-06)
 expected: Open an Original via a chip, change its NAME in the modal, and Save Recipe. After saving, inspect `data/recipes.json`: the `originals` entry and the inline list copy should both carry the NEW name, and there should be NO leftover entry under the OLD name in either location (no orphaned or duplicated record).
@@ -113,9 +113,9 @@ result: pending
 ## Summary
 
 total: 22
-passed: 9
+passed: 10
 issues: 1
-pending: 12
+pending: 11
 skipped: 0
 
 ## Gaps
