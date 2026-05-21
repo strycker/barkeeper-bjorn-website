@@ -1,8 +1,15 @@
 // Recommender Engine — matches classics-db recipes against user inventory + flavor profile
 const RecommenderEngine = (() => {
 
-  // Safe lowercase — handles strings, bottle objects {style}, {name}, and null/undefined
-  const lc = s => (typeof s === 'string' ? s : (s?.style ?? s?.name ?? String(s ?? ''))).toLowerCase();
+  // Safe lowercase searchable string — handles plain strings and bottle objects.
+  // Bottle objects store the specific spirit in `type` (e.g. "Bourbon", "Mezcal") and the
+  // broad category in `style`; concatenate all descriptive fields so a recipe keyword can
+  // match against the specific type, brand, subtype, or category — not just `style`.
+  const lc = s => (typeof s === 'string'
+    ? s
+    : ([s?.type, s?.style, s?.brand, s?.subtype, s?.name, s?.nationality, s?.region]
+        .filter(Boolean).join(' ') || String(s ?? ''))
+  ).toLowerCase();
 
   // Spirit subtype tokens — used to prevent cross-subtype false positives (BUG-02)
   const SUBTYPE_TOKENS = ['scotch', 'bourbon', 'rye', 'japanese', 'irish', 'canadian'];
