@@ -8,10 +8,10 @@ updated: 2026-05-20T12:00:00Z
 
 ## Current Test
 
-number: 5
-name: Favorites and Wishlist Render as rec-card Chips (RECIPE-VIEW-01)
+number: 6
+name: Favorites/Wishlist Chip Opens Detail Modal (RECIPE-VIEW-02)
 expected: |
-  Add a recipe to Favorites and another to Wishlist (via the ♥/☆ buttons on the Recommender). Go to Recipes → Favorites, then Recipes → Wishlist. Each tab shows its entries as rec-card chips (matching the Recommender card style), each with an × remove button in the corner. Ingredient chips show the first 5 then a "+N more" overflow span.
+  On Recipes → Favorites, click anywhere on a chip EXCEPT the × button. The universal detail modal opens showing the recipe name, base · method · glassware meta, an ingredients table, garnish, a Times Made tally, and a Notes textarea. Clicking the ✕, the Close button, or the dark overlay outside the modal closes it.
 awaiting: user response
 
 ## Tests
@@ -37,7 +37,8 @@ result: pass
 
 ### 5. Favorites and Wishlist Render as rec-card Chips (RECIPE-VIEW-01)
 expected: Add a recipe to Favorites and another to Wishlist (via the ♥/☆ buttons on the Recommender). Go to Recipes → Favorites, then Recipes → Wishlist. Each tab shows its entries as rec-card chips (matching the Recommender card style), each with an × remove button in the corner. Ingredient chips show the first 5 then a "+N more" overflow span.
-result: pending
+result: pass
+note: Chips render correctly with × remove and ingredient overflow. Gap logged: Recipes-page chips are missing the ♥/☆/✓ action buttons present on Recommender cards — no way to move a recipe between lists (e.g. Favorites → Wishlist) from the Recipes page. Chip standardization deferred to future phase.
 
 ### 6. Favorites/Wishlist Chip Opens Detail Modal (RECIPE-VIEW-02)
 expected: On Recipes → Favorites, click anywhere on a chip EXCEPT the × button. The universal detail modal opens showing the recipe name, base · method · glassware meta, an ingredients table, garnish, a Times Made tally, and a Notes textarea. Clicking the ✕, the Close button, or the dark overlay outside the modal closes it.
@@ -110,9 +111,9 @@ result: pending
 ## Summary
 
 total: 22
-passed: 3
+passed: 4
 issues: 1
-pending: 18
+pending: 17
 skipped: 0
 
 ## Gaps
@@ -124,6 +125,14 @@ skipped: 0
   test: 3
   artifacts: []
   missing: ["State.save() SHA conflict handling — stale SHA after back-to-back saves not fully resolved by BUG-03 retry-on-409"]
+
+- truth: "Recipes-page chips show the same action buttons (♥/☆/✓) as Recommender cards, allowing cross-list moves from the Recipes page"
+  status: open
+  reason: "User (Test 5): no heart/star/checkmark on Recipes-page chips — can't move a recipe from Favorites to Wishlist without going back to the Recommender. Chip render is split across two code paths; needs a single shared chip routine."
+  severity: major
+  test: 5
+  artifacts: []
+  missing: ["Shared chip render function used by both Recommender and Recipes views", "Action buttons (♥/☆/✓) on Recipes-page chips with toggle/move behavior"]
 
 - truth: "Heart and star action-button icons are visually balanced (1:1 aspect ratio, similar size, no ellipse/circle background)"
   status: cosmetic
@@ -138,3 +147,7 @@ skipped: 0
 - Recipes should be uniformly chip-based across all views, and chips should surface tally counts and other stats (times-made, etc.) beyond just the Made tab. Noted during Test 1; aligns with Phase 6 mental model "chips are the interface" — carry into a later phase.
 - Originals schema parity (noted Test 2): clicking "Confirmed Built"/mark-made on an Original (via its edit/detail modal) does NOT add it to the Made tab and shows no tally. Likely root cause: Originals don't carry the same JSON fields as classics/saved chips (e.g. _source, base, made-tracking fields). Later phase: audit Originals vs. non-Originals recipe-chip schemas and add fields to BOTH as needed so all recipe chips share one compatible format and made-tracking works uniformly. User explicitly deferred — do not fix during Phase 6 verification.
 - DB access/update UX smoothness (noted Test 3): State.save() SHA conflicts cause save failures when saves happen in rapid succession — the in-memory SHA goes stale. User requests a future phase revisit of how databases are accessed and updated to make the UX smoother (less stale-SHA errors, faster saves). Do not fix during Phase 6 verification.
+- Unified chip render + cross-list actions (noted Test 5): Recipes-page chips (Favorites/Wishlist/Made) and Recommender cards share no render code and diverge in capability. Future phase: extract a single shared chip component used by both views, with ♥/☆/✓ action buttons that allow toggling and moving recipes between lists without returning to the Recommender.
+- Inventory synonym/alias lookups (noted Test 5 feedback): Recommender treats ingredient names too literally. Future phase: add a synonym/alias layer so that owning "limes" implies "lime juice", owning "Cointreau", "Grand Marnier", or "Triple Sec" implies "Orange Liqueur", etc. Also fix Campari and Rye (and similar spirits the user owns) not being matched correctly — appearing as "One Bottle Away" or missing when they are in the inventory.
+- Bartender specialty as ranking weight, not filter (noted Test 5 feedback): The Bartender Specialty setting currently narrows results too aggressively, acting as a filter. Future phase: convert it to a scoring weight that reorders recommendations rather than excluding recipes. Add a Specialty selector panel to the Recommender sidebar (alongside Mood and Occasion sliders) with options: "Equal Weight" (default) + each specialty; selected specialty boosts score but does not exclude.
+- AI recipe discovery ("Use AI to get more recipes") (noted Test 5 feedback): Add a button near the top of the Recommender page that queries the Claude API using the user's current preference state (sweetness, acidity, complexity, season, risk tolerance, base spirit, occasion, specialty). New recipes returned by the AI are merged into the shared classics-db recipe library so they are discoverable by all users and persist across sessions. This feature becomes more important as the platform grows to multiple users sharing a common recipe library.
