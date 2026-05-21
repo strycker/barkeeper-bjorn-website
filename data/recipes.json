@@ -223,6 +223,68 @@
       "_source": "originals",
       "base": "Mezcal",
       "tags": []
+    },
+    {
+      "id": "caipirinha",
+      "name": "Caipirinha",
+      "base": "Cachaça",
+      "method": "built",
+      "glassware": "Rocks glass",
+      "difficulty": 1,
+      "profile": {
+        "sweetness": 0.3,
+        "acid": 0.7,
+        "strength": 0.2,
+        "complexity": 0.3,
+        "season": 0.1,
+        "risk": 0.25
+      },
+      "occasion": "Brazil's national cocktail. Funky, tart, aggressively lime-forward.",
+      "tags": [
+        "refreshing",
+        "sour",
+        "classic"
+      ],
+      "ingredients": [
+        {
+          "name": "Cachaça",
+          "amount": "2 oz",
+          "keywords": [
+            "cachaça",
+            "cachaca",
+            "cacha"
+          ],
+          "searchIn": [
+            "rum"
+          ]
+        },
+        {
+          "name": "Fresh Lime",
+          "amount": "1 whole, cut",
+          "keywords": [
+            "lime"
+          ],
+          "searchIn": [
+            "produce",
+            "perishables"
+          ]
+        },
+        {
+          "name": "Sugar",
+          "amount": "2 tsp",
+          "keywords": [
+            "sugar",
+            "simple",
+            "demerara"
+          ],
+          "searchIn": [
+            "pantry",
+            "syrups"
+          ]
+        }
+      ],
+      "garnish": "Lime wheel",
+      "_source": "classics-db"
     }
   ],
   "wishlist": [
