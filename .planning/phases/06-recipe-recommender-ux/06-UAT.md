@@ -12,7 +12,9 @@ number: 17
 name: Strategy B — Inventory-Aware Original Matching (D-07)
 expected: |
   Take an Original whose ingredient names match bottles you actually own (normalize to inventory tokens) — it should appear in the buildable "You Can Make These" bucket of the Recommender. An Original whose ingredient names do NOT normalize to your inventory may not appear as buildable — this is the accepted Strategy-B tradeoff (not a bug).
-awaiting: user response
+blocker_fixed: |
+  During Test 17 the user reported the Recommender showed ALL owned bottles as missing. Root cause: recommender-engine.js lc() read the bottle object's `style` (broad category, e.g. "Whiskeys & Brown Spirits") but never its `type` (specific spirit, e.g. "Bourbon"), so every specific-spirit lookup failed. Fixed by concatenating type/style/brand/subtype/name/nationality/region into the searchable string (commit 0d99dcd). Verified: buildable 6→20; Negroni/Boulevardier/Mezcal Negroni (Campari), New York Sour (Bourbon), Oaxacan Old Fashioned (Mezcal) now buildable; existing engine/normalize tests pass. Rye/limes the user mentioned are genuinely absent from inventory (not a matching bug). Awaiting user re-test before scoring Test 17.
+awaiting: user response (re-test after fix)
 
 ## Tests
 
