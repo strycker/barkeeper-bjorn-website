@@ -19,15 +19,12 @@
         },
         {
           "amount": "1.0 oz",
-          "name": "Crème de Poire"
+          "name": "Crème de Poire",
+          "notes": "can add 1 tsp Prickly pear preserves"
         },
         {
           "amount": "0.5 oz",
           "name": "Cocchi"
-        },
-        {
-          "amount": "1/2 tsp",
-          "name": "Prickly pear preserves"
         },
         {
           "amount": "4 dashes",
