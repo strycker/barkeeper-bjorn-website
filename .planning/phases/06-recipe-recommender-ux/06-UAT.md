@@ -8,10 +8,10 @@ updated: 2026-05-20T12:00:00Z
 
 ## Current Test
 
-number: 19
-name: Same Name, Different Base Treated as Distinct (D-08)
+number: 20
+name: Toggle Never Creates a Duplicate (D-08)
 expected: |
-  If two recipes share the same name but have different base spirits, adding one to Favorites should NOT mark the other as already-favorited. Each can be added independently and both appear as separate entries in Recipes → Favorites.
+  On a Recommender card, click ♥ to add, then click the filled ♥ to remove, then click again to re-add. Check Recipes → Favorites: the recipe appears exactly once — repeated toggling never accumulates duplicate entries.
 awaiting: user response
 
 ## Tests
@@ -103,7 +103,8 @@ note: Filled-state matching works for ♥/☆/✓. Cosmetic follow-up logged: Ma
 
 ### 19. Same Name, Different Base Treated as Distinct (D-08)
 expected: If two recipes share the same name but have different base spirits, adding one to Favorites should NOT mark the other as already-favorited. Each can be added independently and both appear as separate entries in Recipes → Favorites.
-result: pending
+result: pass
+note: User requested two future-phase recipe-schema improvements — optional Method/Instructions field, and "Shot" as an accepted Method Type.
 
 ### 20. Toggle Never Creates a Duplicate (D-08)
 expected: On a Recommender card, click ♥ to add, then click the filled ♥ to remove, then click again to re-add. Check Recipes → Favorites: the recipe appears exactly once — repeated toggling never accumulates duplicate entries.
@@ -120,9 +121,9 @@ result: pending
 ## Summary
 
 total: 22
-passed: 16
+passed: 17
 issues: 2
-pending: 4
+pending: 3
 skipped: 0
 
 ## Gaps
@@ -176,6 +177,7 @@ skipped: 0
 - Inventory synonym/alias lookups (noted Test 5 feedback): Recommender treats ingredient names too literally. Future phase: add a synonym/alias layer so that owning "limes" implies "lime juice", owning "Cointreau", "Grand Marnier", or "Triple Sec" implies "Orange Liqueur", etc. Also fix Campari and Rye (and similar spirits the user owns) not being matched correctly — appearing as "One Bottle Away" or missing when they are in the inventory.
 - Bartender specialty as ranking weight, not filter (noted Test 5 feedback): The Bartender Specialty setting currently narrows results too aggressively, acting as a filter. Future phase: convert it to a scoring weight that reorders recommendations rather than excluding recipes. Add a Specialty selector panel to the Recommender sidebar (alongside Mood and Occasion sliders) with options: "Equal Weight" (default) + each specialty; selected specialty boosts score but does not exclude.
 - Full cross-list rename/edit sync (noted Test 12): When an Original (or any recipe) is edited/renamed, the change must propagate to EVERY location the recipe appears — the originals array plus all inline copies in confirmed_favorites, wishlist, and made_log — not just the single list the modal was opened from. Future phase: make Save-Recipe update all matching copies (by old name+base probe) and avoid orphans/duplicates everywhere. Related to the unified-schema requirement.
+- Recipe Method/Instructions optional + Shot type (noted Test 19): The Method/Instructions field should be optional (can be empty for simple recipes like a poured shot). Add "Shot" as an accepted Method Type alongside Stirred/Shaken/Built/etc. A layered shot could still use an instructions description. Future phase: update recipe schema, editor UI, and detail modal to allow empty method/instructions without validation errors.
 - Optional ingredients (noted Test 17): Add an "optional" checkbox next to every ingredient row in the recipe editor. The Recommender must treat optional ingredients as NOT required for buildability — a recipe counts as "You Can Make These" / "Only what I have" when all NON-optional ingredients are present, regardless of optional ones (so a sophisticated drink with one optional modifier you lack still shows as buildable rather than "2 Bottles Away"). Engine note: normalizeOriginal already parses an `optional` flag from ingredient notes (recommender-engine.js:84) but the bucketing logic does not yet exclude optionals from the missing-count — this needs both the UI checkbox AND the engine to skip optionals when computing buildable/one-away/two-away. Future phase.
 - Recipe image upload (noted Test 13): Allow uploading an image per recipe. Display full-size when a chip is clicked (in the detail modal) and as a thumbnail on the chip otherwise. Images live in a `data/recipe_images/` subdirectory; recipe chip JSON references only the filename. On upload, auto-rename the file to the recipe's unique id (e.g. `cocktail1778776984398.png`) preserving the original extension (.png/.jpg/etc), not the display name. Future phase.
 - Normalize recipe storage / de-duplicate records (noted Test 16): Favoriting/wishlisting/marking-made currently copies the ENTIRE recipe record into confirmed_favorites/wishlist/made_log, so the same cocktail is duplicated across multiple places in recipes.json. Future phase: store each recipe ONCE in a canonical library (keyed by its unique id, e.g. `cocktail1778776984398`) and have the list entries hold only that id (plus list-specific metadata like times_made/last_made), auto-loading the full record by reference. This minimizes duplication AND inherently fixes the Test 12 cross-list rename/edit-sync bug (edit the one canonical record, every list reflects it). Supersedes the embed-and-sync approach.
