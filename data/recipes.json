@@ -63,19 +63,8 @@
       "creator": "Barkeeper Bjorn",
       "ingredients": [
         {
-          "amount": "0.75 oz",
-          "name": "Fresh lemon juice",
-          "notes": "Provides bright acidity"
-        },
-        {
-          "amount": "0.5 oz",
-          "name": "Simple syrup",
-          "notes": "Balances the tartness"
-        },
-        {
-          "amount": "2 dashes",
-          "name": "Angostura bitters",
-          "notes": "Provides aromatic complexity"
+          "amount": "",
+          "name": "A"
         }
       ],
       "method": "Add all ingredients to a cocktail shaker with ice. Shake vigorously for 12-15 seconds until well-chilled. Double strain into the prepared glass over fresh ice.",
