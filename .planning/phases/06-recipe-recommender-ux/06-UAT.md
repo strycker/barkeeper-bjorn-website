@@ -8,10 +8,10 @@ updated: 2026-05-20T12:00:00Z
 
 ## Current Test
 
-number: 21
-name: Same Recipe in Favorites AND Wishlist Simultaneously (D-08)
+number: 22
+name: Marking Made Again Increments times_made (D-08)
 expected: |
-  On a single Recommender card, click both the ♥ and the ☆. The recipe should appear under BOTH Recipes → Favorites and Recipes → Wishlist at the same time — the two lists are independent and one does not remove from the other.
+  Mark a recipe as made (it appears in Recipes → Made with ×1). Open that Made chip's detail modal and click [+ Made It Again]. The Times Made tally increments to ×2 (the `.rdm-tally-count` updates live without closing the modal), and inspecting `data/recipes.json` → `made_log` shows a SINGLE entry with `times_made: 2` — not a duplicated row.
 awaiting: user response
 
 ## Tests
@@ -112,7 +112,8 @@ result: pass
 
 ### 21. Same Recipe in Favorites AND Wishlist Simultaneously (D-08)
 expected: On a single Recommender card, click both the ♥ and the ☆. The recipe should appear under BOTH Recipes → Favorites and Recipes → Wishlist at the same time — the two lists are independent and one does not remove from the other.
-result: pending
+result: pass
+note: User reported recommender regression — Paper Plane showing buildable despite missing Amaro Nonino. Root cause: the lc() fix exposed a bare "amaro" keyword in classics-db that matched Campari (type:"Amaro"). Fixed by removing bare "amaro" from Amaro Nonino and Fernet-Branca ingredients in classics-db.js (commit alongside this UAT update). Paper Plane and Toronto now correctly one-away/two-away. Automated substitution suggestions logged as a future phase feature.
 
 ### 22. Marking Made Again Increments times_made (D-08)
 expected: Mark a recipe as made (it appears in Recipes → Made with ×1). Open that Made chip's detail modal and click [+ Made It Again]. The Times Made tally increments to ×2 (the `.rdm-tally-count` updates live without closing the modal), and inspecting `data/recipes.json` → `made_log` shows a SINGLE entry with `times_made: 2` — not a duplicated row.
@@ -121,9 +122,9 @@ result: pending
 ## Summary
 
 total: 22
-passed: 18
+passed: 19
 issues: 2
-pending: 2
+pending: 1
 skipped: 0
 
 ## Gaps
@@ -177,6 +178,7 @@ skipped: 0
 - Inventory synonym/alias lookups (noted Test 5 feedback): Recommender treats ingredient names too literally. Future phase: add a synonym/alias layer so that owning "limes" implies "lime juice", owning "Cointreau", "Grand Marnier", or "Triple Sec" implies "Orange Liqueur", etc. Also fix Campari and Rye (and similar spirits the user owns) not being matched correctly — appearing as "One Bottle Away" or missing when they are in the inventory.
 - Bartender specialty as ranking weight, not filter (noted Test 5 feedback): The Bartender Specialty setting currently narrows results too aggressively, acting as a filter. Future phase: convert it to a scoring weight that reorders recommendations rather than excluding recipes. Add a Specialty selector panel to the Recommender sidebar (alongside Mood and Occasion sliders) with options: "Equal Weight" (default) + each specialty; selected specialty boosts score but does not exclude.
 - Full cross-list rename/edit sync (noted Test 12): When an Original (or any recipe) is edited/renamed, the change must propagate to EVERY location the recipe appears — the originals array plus all inline copies in confirmed_favorites, wishlist, and made_log — not just the single list the modal was opened from. Future phase: make Save-Recipe update all matching copies (by old name+base probe) and avoid orphans/duplicates everywhere. Related to the unified-schema requirement.
+- Ingredient substitution suggestions (noted Test 21): When the Recommender matches a recipe using a broad category keyword (e.g. Campari satisfying an "amaro" slot), display a note on the card chip such as "Campari can substitute for Amaro Nonino". This requires tracking which inventory item matched which ingredient keyword and surfacing the substitution in the card render. Future phase.
 - Recipe Method/Instructions optional + Shot type (noted Test 19): The Method/Instructions field should be optional (can be empty for simple recipes like a poured shot). Add "Shot" as an accepted Method Type alongside Stirred/Shaken/Built/etc. A layered shot could still use an instructions description. Future phase: update recipe schema, editor UI, and detail modal to allow empty method/instructions without validation errors.
 - Optional ingredients (noted Test 17): Add an "optional" checkbox next to every ingredient row in the recipe editor. The Recommender must treat optional ingredients as NOT required for buildability — a recipe counts as "You Can Make These" / "Only what I have" when all NON-optional ingredients are present, regardless of optional ones (so a sophisticated drink with one optional modifier you lack still shows as buildable rather than "2 Bottles Away"). Engine note: normalizeOriginal already parses an `optional` flag from ingredient notes (recommender-engine.js:84) but the bucketing logic does not yet exclude optionals from the missing-count — this needs both the UI checkbox AND the engine to skip optionals when computing buildable/one-away/two-away. Future phase.
 - Recipe image upload (noted Test 13): Allow uploading an image per recipe. Display full-size when a chip is clicked (in the detail modal) and as a thumbnail on the chip otherwise. Images live in a `data/recipe_images/` subdirectory; recipe chip JSON references only the filename. On upload, auto-rename the file to the recipe's unique id (e.g. `cocktail1778776984398.png`) preserving the original extension (.png/.jpg/etc), not the display name. Future phase.

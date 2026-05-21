@@ -124,7 +124,7 @@ const CLASSICS_DB = [
     tags: ['after-dinner', 'spirit-forward'],
     ingredients: [
       { name: 'Rye Whiskey', amount: '2 oz', keywords: ['rye', 'whiskey'], searchIn: ['whiskey'] },
-      { name: 'Fernet-Branca', amount: '¼ oz', keywords: ['fernet', 'amaro'], searchIn: ['liqueurs_herbal', 'liqueurs_specialty'] },
+      { name: 'Fernet-Branca', amount: '¼ oz', keywords: ['fernet', 'branca'], searchIn: ['liqueurs_herbal', 'liqueurs_specialty'] },
       { name: 'Simple Syrup', amount: '¼ oz', keywords: ['simple', 'sugar'], searchIn: ['syrups', 'pantry'] },
       { name: 'Angostura Bitters', amount: '1 dash', keywords: ['angostura', 'bitters'], searchIn: ['bitters_anchors'] },
     ],
@@ -138,7 +138,7 @@ const CLASSICS_DB = [
     ingredients: [
       { name: 'Bourbon', amount: '¾ oz', keywords: ['bourbon', 'whiskey'], searchIn: ['whiskey'] },
       { name: 'Aperol', amount: '¾ oz', keywords: ['aperol'], searchIn: ['liqueurs_herbal', 'liqueurs_specialty'] },
-      { name: 'Amaro Nonino', amount: '¾ oz', keywords: ['amaro', 'nonino', 'averna', 'ramazzotti'], searchIn: ['liqueurs_herbal', 'liqueurs_specialty'] },
+      { name: 'Amaro Nonino', amount: '¾ oz', keywords: ['nonino', 'averna', 'ramazzotti'], searchIn: ['liqueurs_herbal', 'liqueurs_specialty'] },
       { name: 'Fresh Lemon Juice', amount: '¾ oz', keywords: ['lemon'], searchIn: ['produce', 'perishables'] },
     ],
     garnish: 'None, or lemon twist' },
