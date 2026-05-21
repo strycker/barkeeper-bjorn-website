@@ -56,26 +56,6 @@
         "guests": "Too smokey!",
         "notes": "Dial back the mezcal and increase the pear flavor"
       }
-    },
-    {
-      "id": "cocktail1779335023203",
-      "name": "Test Cocktail",
-      "creator": "Barkeeper Bjorn",
-      "ingredients": [
-        {
-          "amount": "2 oz",
-          "name": "akfjhskjdhgs"
-        }
-      ],
-      "method": "Add all ingredients to a cocktail shaker with ice. Shake vigorously for 12-15 seconds until well-chilled. Double strain into the prepared glass over fresh ice.",
-      "tagline": "A balanced exploration of your bar's potential",
-      "date_created": "2026-05-20",
-      "method_type": "shaken",
-      "glassware": "Rocks glass",
-      "garnish": "Lemon wheel and a brandied cherry",
-      "profile": "Opens with bright citrus and vanilla from the bourbon, followed by rich dried fruit notes from the cognac. The finish is warming with subtle baking spice from the bitters. Well-balanced between sweet and tart with medium strength.",
-      "why_it_works": "This cocktail combines the accessible comfort of bourbon with the sophisticated depth of cognac, while the lemon and simple syrup create a classic sour structure. The dual-spirit approach showcases multiple bottles from your collection while maintaining balance. The bitters tie everything together with aromatic complexity without overwhelming the core flavors.",
-      "confirmed_built": false
     }
   ],
   "confirmed_favorites": [
