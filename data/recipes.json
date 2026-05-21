@@ -18,13 +18,16 @@
           "name": "Pear Juice"
         },
         {
-          "amount": "1.0 oz",
-          "name": "Crème de Poire",
-          "notes": "can add 1 tsp Prickly pear preserves"
+          "amount": "1 oz",
+          "name": "Crème de Poire"
         },
         {
           "amount": "0.5 oz",
           "name": "Cocchi"
+        },
+        {
+          "amount": "1/2 tsp",
+          "name": "Prickly pear preserves"
         },
         {
           "amount": "4 dashes",
@@ -399,273 +402,40 @@
       "creator": "Glenn Strycker",
       "ingredients": [
         {
-          "name": "Mezcal",
           "amount": "1 oz",
-          "keywords": [
-            "mezcal",
-            "mezcal"
-          ],
-          "searchIn": [
-            "whiskey",
-            "brandy",
-            "rum",
-            "agave",
-            "white_spirits",
-            "other_spirits",
-            "fortified",
-            "liqueurs_fruit",
-            "liqueurs_nut",
-            "liqueurs_herbal",
-            "liqueurs_specialty",
-            "bitters_anchors",
-            "bitters_other",
-            "syrups",
-            "mixers",
-            "perishables",
-            "pantry",
-            "produce"
-          ],
-          "optional": false
+          "name": "Mezcal"
         },
         {
-          "name": "White Jamaican Rum",
           "amount": "1 oz",
-          "keywords": [
-            "white jamaican rum",
-            "white",
-            "jamaican",
-            "rum"
-          ],
-          "searchIn": [
-            "whiskey",
-            "brandy",
-            "rum",
-            "agave",
-            "white_spirits",
-            "other_spirits",
-            "fortified",
-            "liqueurs_fruit",
-            "liqueurs_nut",
-            "liqueurs_herbal",
-            "liqueurs_specialty",
-            "bitters_anchors",
-            "bitters_other",
-            "syrups",
-            "mixers",
-            "perishables",
-            "pantry",
-            "produce"
-          ],
-          "optional": false
+          "name": "White Jamaican Rum"
         },
         {
-          "name": "Pear Juice",
           "amount": "2.5 oz",
-          "keywords": [
-            "pear juice",
-            "pear",
-            "juice"
-          ],
-          "searchIn": [
-            "whiskey",
-            "brandy",
-            "rum",
-            "agave",
-            "white_spirits",
-            "other_spirits",
-            "fortified",
-            "liqueurs_fruit",
-            "liqueurs_nut",
-            "liqueurs_herbal",
-            "liqueurs_specialty",
-            "bitters_anchors",
-            "bitters_other",
-            "syrups",
-            "mixers",
-            "perishables",
-            "pantry",
-            "produce"
-          ],
-          "optional": false
+          "name": "Pear Juice"
         },
         {
-          "name": "Crème de Poire",
           "amount": "1 oz",
-          "keywords": [
-            "crème de poire",
-            "poire"
-          ],
-          "searchIn": [
-            "whiskey",
-            "brandy",
-            "rum",
-            "agave",
-            "white_spirits",
-            "other_spirits",
-            "fortified",
-            "liqueurs_fruit",
-            "liqueurs_nut",
-            "liqueurs_herbal",
-            "liqueurs_specialty",
-            "bitters_anchors",
-            "bitters_other",
-            "syrups",
-            "mixers",
-            "perishables",
-            "pantry",
-            "produce"
-          ],
-          "optional": false
+          "name": "Crème de Poire"
         },
         {
-          "name": "Cocchi",
           "amount": "0.5 oz",
-          "keywords": [
-            "cocchi",
-            "cocchi"
-          ],
-          "searchIn": [
-            "whiskey",
-            "brandy",
-            "rum",
-            "agave",
-            "white_spirits",
-            "other_spirits",
-            "fortified",
-            "liqueurs_fruit",
-            "liqueurs_nut",
-            "liqueurs_herbal",
-            "liqueurs_specialty",
-            "bitters_anchors",
-            "bitters_other",
-            "syrups",
-            "mixers",
-            "perishables",
-            "pantry",
-            "produce"
-          ],
-          "optional": false
+          "name": "Cocchi"
         },
         {
-          "name": "Prickly pear preserves",
           "amount": "1/2 tsp",
-          "keywords": [
-            "prickly pear preserves",
-            "prickly",
-            "pear",
-            "preserves"
-          ],
-          "searchIn": [
-            "whiskey",
-            "brandy",
-            "rum",
-            "agave",
-            "white_spirits",
-            "other_spirits",
-            "fortified",
-            "liqueurs_fruit",
-            "liqueurs_nut",
-            "liqueurs_herbal",
-            "liqueurs_specialty",
-            "bitters_anchors",
-            "bitters_other",
-            "syrups",
-            "mixers",
-            "perishables",
-            "pantry",
-            "produce"
-          ],
-          "optional": true
+          "name": "Prickly pear preserves"
         },
         {
-          "name": "Rhubarb bitters",
           "amount": "4 dashes",
-          "keywords": [
-            "rhubarb bitters",
-            "rhubarb",
-            "bitters"
-          ],
-          "searchIn": [
-            "whiskey",
-            "brandy",
-            "rum",
-            "agave",
-            "white_spirits",
-            "other_spirits",
-            "fortified",
-            "liqueurs_fruit",
-            "liqueurs_nut",
-            "liqueurs_herbal",
-            "liqueurs_specialty",
-            "bitters_anchors",
-            "bitters_other",
-            "syrups",
-            "mixers",
-            "perishables",
-            "pantry",
-            "produce"
-          ],
-          "optional": false
+          "name": "Rhubarb bitters"
         },
         {
-          "name": "Angostura",
           "amount": "2 dashes",
-          "keywords": [
-            "angostura",
-            "angostura"
-          ],
-          "searchIn": [
-            "whiskey",
-            "brandy",
-            "rum",
-            "agave",
-            "white_spirits",
-            "other_spirits",
-            "fortified",
-            "liqueurs_fruit",
-            "liqueurs_nut",
-            "liqueurs_herbal",
-            "liqueurs_specialty",
-            "bitters_anchors",
-            "bitters_other",
-            "syrups",
-            "mixers",
-            "perishables",
-            "pantry",
-            "produce"
-          ],
-          "optional": false
+          "name": "Angostura"
         },
         {
-          "name": "Black walnut bitters",
           "amount": "2 dashes",
-          "keywords": [
-            "black walnut bitters",
-            "black",
-            "walnut",
-            "bitters"
-          ],
-          "searchIn": [
-            "whiskey",
-            "brandy",
-            "rum",
-            "agave",
-            "white_spirits",
-            "other_spirits",
-            "fortified",
-            "liqueurs_fruit",
-            "liqueurs_nut",
-            "liqueurs_herbal",
-            "liqueurs_specialty",
-            "bitters_anchors",
-            "bitters_other",
-            "syrups",
-            "mixers",
-            "perishables",
-            "pantry",
-            "produce"
-          ],
-          "optional": false
+          "name": "Black walnut bitters"
         }
       ],
       "method": "Shake hard with ice.  Strain into a chilled martini glass.",
