@@ -285,6 +285,65 @@
       ],
       "garnish": "Lime wheel",
       "_source": "classics-db"
+    },
+    {
+      "id": "gimlet",
+      "name": "Gimlet",
+      "base": "Gin",
+      "method": "shaken",
+      "glassware": "Coupe",
+      "difficulty": 2,
+      "profile": {
+        "sweetness": 0.3,
+        "acid": 0.65,
+        "strength": 0.25,
+        "complexity": 0.25,
+        "season": 0.2,
+        "risk": 0.1
+      },
+      "occasion": "Simple, tart, gin-forward. Unbeatable with quality gin.",
+      "tags": [
+        "sour",
+        "refreshing",
+        "classic"
+      ],
+      "ingredients": [
+        {
+          "name": "Gin",
+          "amount": "2 oz",
+          "keywords": [
+            "gin"
+          ],
+          "searchIn": [
+            "white_spirits"
+          ]
+        },
+        {
+          "name": "Fresh Lime Juice",
+          "amount": "¾ oz",
+          "keywords": [
+            "lime"
+          ],
+          "searchIn": [
+            "produce",
+            "perishables"
+          ]
+        },
+        {
+          "name": "Simple Syrup",
+          "amount": "¾ oz",
+          "keywords": [
+            "simple",
+            "sugar"
+          ],
+          "searchIn": [
+            "syrups",
+            "pantry"
+          ]
+        }
+      ],
+      "garnish": "Lime wheel",
+      "_source": "classics-db"
     }
   ],
   "wishlist": [
