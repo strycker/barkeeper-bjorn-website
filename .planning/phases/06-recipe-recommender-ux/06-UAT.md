@@ -8,10 +8,10 @@ updated: 2026-05-20T12:00:00Z
 
 ## Current Test
 
-number: 15
-name: No Console Error When Recommender Renders Originals (D-07)
+number: 16
+name: Favoriting an Original Preserves _source:'originals' (D-07)
 expected: |
-  Open browser devtools → Console. With at least one Original present, navigate to the Recommender and exercise the scope buttons. There should be NO `TypeError: cannot read 'map' of undefined` (or any uncaught error) — the `ing.keywords.map` crash on un-normalized Originals is guarded.
+  On a Recommender card showing an Original (amber badge), click the ♥. Inspect `data/recipes.json` → `confirmed_favorites`: the new entry's `_source` field should be `"originals"` (NOT `"classics-db"`). Then open that entry from Recipes → Favorites — it should open in the editable modal (confirming the D-06 ↔ D-07 coupling).
 awaiting: user response
 
 ## Tests
@@ -84,7 +84,7 @@ note: Exact precondition (an ingredient-free Original) is impossible to create �
 
 ### 15. No Console Error When Recommender Renders Originals (D-07)
 expected: Open browser devtools → Console. With at least one Original present, navigate to the Recommender and exercise the scope buttons. There should be NO `TypeError: cannot read 'map' of undefined` (or any uncaught error) — the `ing.keywords.map` crash on un-normalized Originals is guarded.
-result: pending
+result: pass
 
 ### 16. Favoriting an Original Preserves _source:'originals' (D-07)
 expected: On a Recommender card showing an Original (amber badge), click the ♥. Inspect `data/recipes.json` → `confirmed_favorites`: the new entry's `_source` field should be `"originals"` (NOT `"classics-db"`). Then open that entry from Recipes → Favorites — it should open in the editable modal (confirming the D-06 ↔ D-07 coupling).
@@ -117,9 +117,9 @@ result: pending
 ## Summary
 
 total: 22
-passed: 12
+passed: 13
 issues: 2
-pending: 8
+pending: 7
 skipped: 0
 
 ## Gaps
