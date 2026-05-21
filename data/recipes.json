@@ -97,6 +97,79 @@
       "garnish": "Lemon twist or cherry",
       "from_classics_db": true,
       "notes": "First time I actually liked Orgeat.  This was tasty and simple to make.  Only complaint is that it ends up being a cloudy yellow-brown color... not as appetizing as other more colorful concoctions.  Consider stirring rather than shaking and adding something red to make this a more pleasing color."
+    },
+    {
+      "id": "french-75",
+      "name": "French 75",
+      "base": "Gin",
+      "method": "shaken",
+      "glassware": "Champagne flute",
+      "difficulty": 2,
+      "profile": {
+        "sweetness": 0.3,
+        "acid": 0.5,
+        "strength": 0.4,
+        "complexity": 0.4,
+        "season": 0.3,
+        "risk": 0.2
+      },
+      "occasion": "Celebratory fizz. Gin lends botanicals that vodka can't.",
+      "tags": [
+        "brunch",
+        "party",
+        "refreshing"
+      ],
+      "ingredients": [
+        {
+          "name": "Gin",
+          "amount": "1½ oz",
+          "keywords": [
+            "gin"
+          ],
+          "searchIn": [
+            "white_spirits"
+          ]
+        },
+        {
+          "name": "Fresh Lemon Juice",
+          "amount": "½ oz",
+          "keywords": [
+            "lemon"
+          ],
+          "searchIn": [
+            "produce",
+            "perishables"
+          ]
+        },
+        {
+          "name": "Simple Syrup",
+          "amount": "½ oz",
+          "keywords": [
+            "simple",
+            "sugar"
+          ],
+          "searchIn": [
+            "syrups",
+            "pantry"
+          ]
+        },
+        {
+          "name": "Champagne or Prosecco",
+          "amount": "2 oz",
+          "keywords": [
+            "champagne",
+            "prosecco",
+            "sparkling",
+            "cava"
+          ],
+          "searchIn": [
+            "fortified",
+            "mixers"
+          ]
+        }
+      ],
+      "garnish": "Lemon twist",
+      "_source": "classics-db"
     }
   ],
   "wishlist": [
