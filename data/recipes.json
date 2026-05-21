@@ -334,6 +334,83 @@
   "last_updated": "2026-05-20",
   "made_log": [
     {
+      "id": "french-75",
+      "name": "French 75",
+      "base": "Gin",
+      "method": "shaken",
+      "glassware": "Champagne flute",
+      "difficulty": 2,
+      "profile": {
+        "sweetness": 0.3,
+        "acid": 0.5,
+        "strength": 0.4,
+        "complexity": 0.4,
+        "season": 0.3,
+        "risk": 0.2
+      },
+      "occasion": "Celebratory fizz. Gin lends botanicals that vodka can't.",
+      "tags": [
+        "brunch",
+        "party",
+        "refreshing"
+      ],
+      "ingredients": [
+        {
+          "name": "Gin",
+          "amount": "1½ oz",
+          "keywords": [
+            "gin"
+          ],
+          "searchIn": [
+            "white_spirits"
+          ]
+        },
+        {
+          "name": "Fresh Lemon Juice",
+          "amount": "½ oz",
+          "keywords": [
+            "lemon"
+          ],
+          "searchIn": [
+            "produce",
+            "perishables"
+          ]
+        },
+        {
+          "name": "Simple Syrup",
+          "amount": "½ oz",
+          "keywords": [
+            "simple",
+            "sugar"
+          ],
+          "searchIn": [
+            "syrups",
+            "pantry"
+          ]
+        },
+        {
+          "name": "Champagne or Prosecco",
+          "amount": "2 oz",
+          "keywords": [
+            "champagne",
+            "prosecco",
+            "sparkling",
+            "cava"
+          ],
+          "searchIn": [
+            "fortified",
+            "mixers"
+          ]
+        }
+      ],
+      "garnish": "Lemon twist",
+      "_source": "classics-db",
+      "times_made": 1,
+      "first_made": "2026-05-21",
+      "last_made": "2026-05-21",
+      "notes": ""
+    },
+    {
       "id": "mezcal-old-fashioned",
       "name": "Mezcal Old Fashioned",
       "base": "Mezcal",
