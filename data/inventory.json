@@ -577,6 +577,10 @@
     {
       "item": "Bénédictine",
       "rationale": "one-away recommendation"
+    },
+    {
+      "item": "Cynar",
+      "rationale": "one-away recommendation"
     }
   ],
   "equipment": {
