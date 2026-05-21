@@ -982,6 +982,302 @@
   "last_updated": "2026-05-20",
   "made_log": [
     {
+      "id": "cocktail1778776984398",
+      "name": "Smokey the Pear",
+      "creator": "Glenn Strycker",
+      "ingredients": [
+        {
+          "name": "Mezcal",
+          "amount": "1 oz",
+          "keywords": [
+            "mezcal",
+            "mezcal"
+          ],
+          "searchIn": [
+            "whiskey",
+            "brandy",
+            "rum",
+            "agave",
+            "white_spirits",
+            "other_spirits",
+            "fortified",
+            "liqueurs_fruit",
+            "liqueurs_nut",
+            "liqueurs_herbal",
+            "liqueurs_specialty",
+            "bitters_anchors",
+            "bitters_other",
+            "syrups",
+            "mixers",
+            "perishables",
+            "pantry",
+            "produce"
+          ],
+          "optional": false
+        },
+        {
+          "name": "White Jamaican Rum",
+          "amount": "1 oz",
+          "keywords": [
+            "white jamaican rum",
+            "white",
+            "jamaican",
+            "rum"
+          ],
+          "searchIn": [
+            "whiskey",
+            "brandy",
+            "rum",
+            "agave",
+            "white_spirits",
+            "other_spirits",
+            "fortified",
+            "liqueurs_fruit",
+            "liqueurs_nut",
+            "liqueurs_herbal",
+            "liqueurs_specialty",
+            "bitters_anchors",
+            "bitters_other",
+            "syrups",
+            "mixers",
+            "perishables",
+            "pantry",
+            "produce"
+          ],
+          "optional": false
+        },
+        {
+          "name": "Pear Juice",
+          "amount": "2.5 oz",
+          "keywords": [
+            "pear juice",
+            "pear",
+            "juice"
+          ],
+          "searchIn": [
+            "whiskey",
+            "brandy",
+            "rum",
+            "agave",
+            "white_spirits",
+            "other_spirits",
+            "fortified",
+            "liqueurs_fruit",
+            "liqueurs_nut",
+            "liqueurs_herbal",
+            "liqueurs_specialty",
+            "bitters_anchors",
+            "bitters_other",
+            "syrups",
+            "mixers",
+            "perishables",
+            "pantry",
+            "produce"
+          ],
+          "optional": false
+        },
+        {
+          "name": "Crème de Poire",
+          "amount": "1 oz",
+          "keywords": [
+            "crème de poire",
+            "poire"
+          ],
+          "searchIn": [
+            "whiskey",
+            "brandy",
+            "rum",
+            "agave",
+            "white_spirits",
+            "other_spirits",
+            "fortified",
+            "liqueurs_fruit",
+            "liqueurs_nut",
+            "liqueurs_herbal",
+            "liqueurs_specialty",
+            "bitters_anchors",
+            "bitters_other",
+            "syrups",
+            "mixers",
+            "perishables",
+            "pantry",
+            "produce"
+          ],
+          "optional": false
+        },
+        {
+          "name": "Cocchi",
+          "amount": "0.5 oz",
+          "keywords": [
+            "cocchi",
+            "cocchi"
+          ],
+          "searchIn": [
+            "whiskey",
+            "brandy",
+            "rum",
+            "agave",
+            "white_spirits",
+            "other_spirits",
+            "fortified",
+            "liqueurs_fruit",
+            "liqueurs_nut",
+            "liqueurs_herbal",
+            "liqueurs_specialty",
+            "bitters_anchors",
+            "bitters_other",
+            "syrups",
+            "mixers",
+            "perishables",
+            "pantry",
+            "produce"
+          ],
+          "optional": false
+        },
+        {
+          "name": "Prickly pear preserves",
+          "amount": "1/2 tsp",
+          "keywords": [
+            "prickly pear preserves",
+            "prickly",
+            "pear",
+            "preserves"
+          ],
+          "searchIn": [
+            "whiskey",
+            "brandy",
+            "rum",
+            "agave",
+            "white_spirits",
+            "other_spirits",
+            "fortified",
+            "liqueurs_fruit",
+            "liqueurs_nut",
+            "liqueurs_herbal",
+            "liqueurs_specialty",
+            "bitters_anchors",
+            "bitters_other",
+            "syrups",
+            "mixers",
+            "perishables",
+            "pantry",
+            "produce"
+          ],
+          "optional": true
+        },
+        {
+          "name": "Rhubarb bitters",
+          "amount": "4 dashes",
+          "keywords": [
+            "rhubarb bitters",
+            "rhubarb",
+            "bitters"
+          ],
+          "searchIn": [
+            "whiskey",
+            "brandy",
+            "rum",
+            "agave",
+            "white_spirits",
+            "other_spirits",
+            "fortified",
+            "liqueurs_fruit",
+            "liqueurs_nut",
+            "liqueurs_herbal",
+            "liqueurs_specialty",
+            "bitters_anchors",
+            "bitters_other",
+            "syrups",
+            "mixers",
+            "perishables",
+            "pantry",
+            "produce"
+          ],
+          "optional": false
+        },
+        {
+          "name": "Angostura",
+          "amount": "2 dashes",
+          "keywords": [
+            "angostura",
+            "angostura"
+          ],
+          "searchIn": [
+            "whiskey",
+            "brandy",
+            "rum",
+            "agave",
+            "white_spirits",
+            "other_spirits",
+            "fortified",
+            "liqueurs_fruit",
+            "liqueurs_nut",
+            "liqueurs_herbal",
+            "liqueurs_specialty",
+            "bitters_anchors",
+            "bitters_other",
+            "syrups",
+            "mixers",
+            "perishables",
+            "pantry",
+            "produce"
+          ],
+          "optional": false
+        },
+        {
+          "name": "Black walnut bitters",
+          "amount": "2 dashes",
+          "keywords": [
+            "black walnut bitters",
+            "black",
+            "walnut",
+            "bitters"
+          ],
+          "searchIn": [
+            "whiskey",
+            "brandy",
+            "rum",
+            "agave",
+            "white_spirits",
+            "other_spirits",
+            "fortified",
+            "liqueurs_fruit",
+            "liqueurs_nut",
+            "liqueurs_herbal",
+            "liqueurs_specialty",
+            "bitters_anchors",
+            "bitters_other",
+            "syrups",
+            "mixers",
+            "perishables",
+            "pantry",
+            "produce"
+          ],
+          "optional": false
+        }
+      ],
+      "method": "Shake hard with ice.  Strain into a chilled martini glass.",
+      "tagline": "Smokey Mezcal cocktail with pear juice and rhubarb bitters",
+      "date_created": "2026-05-01",
+      "method_type": "shaken",
+      "glassware": "Martini",
+      "garnish": "Pear slice + cocktail cherry",
+      "profile": "Smoky-meets-pear shaken cocktail. Desert/Mexican thematic -- the prickly pear preserves are the structural pun (a \"pear\" that isn't a pear, growing in mezcal country). Recommended sub-spirit pairing: white Jamaican rum first choice (funky/vegetal echoes agave's roasted notes; Jamaican esters complement pear esters), gin second (London Dry > floral botanicals can complement pear, but heavy florals will fight it), vodka third (subtracts smoke without adding character).",
+      "why_it_works": "Mezcal offers smokey flavors that compliment the pear",
+      "confirmed_built": true,
+      "ratings": {
+        "bar_owner": 5,
+        "notes": "Dial back the mezcal and increase the pear flavor"
+      },
+      "_source": "originals",
+      "base": "Mezcal",
+      "tags": [],
+      "times_made": 1,
+      "first_made": "2026-05-21",
+      "last_made": "2026-05-21",
+      "notes": ""
+    },
+    {
       "id": "french-75",
       "name": "French 75",
       "base": "Gin",
