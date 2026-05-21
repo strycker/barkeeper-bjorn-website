@@ -53,23 +53,6 @@
         "guests": "Too smokey!",
         "notes": "Dial back the mezcal and increase the pear flavor"
       }
-    },
-    {
-      "id": "cocktail1779336971270",
-      "name": "Smokey the Pear",
-      "creator": "Glenn",
-      "ingredients": [
-        {
-          "amount": "2 oz",
-          "name": "Whisky"
-        }
-      ],
-      "method": "Assemble",
-      "tagline": "test2",
-      "date_created": "2026-05-20",
-      "method_type": "built",
-      "glassware": "shot",
-      "confirmed_built": false
     }
   ],
   "confirmed_favorites": [
