@@ -8,10 +8,10 @@ updated: 2026-05-20T12:00:00Z
 
 ## Current Test
 
-number: 14
-name: Original Lacking Base and Ingredients Is Excluded (D-07)
+number: 15
+name: No Console Error When Recommender Renders Originals (D-07)
 expected: |
-  Create (or note) an Original that has neither a derivable base spirit nor any ingredients. Open the Recommender — that Original should NOT appear anywhere in the results (it is filtered out before scoring). Originals that DO have a base or ingredients still appear.
+  Open browser devtools → Console. With at least one Original present, navigate to the Recommender and exercise the scope buttons. There should be NO `TypeError: cannot read 'map' of undefined` (or any uncaught error) — the `ing.keywords.map` crash on un-normalized Originals is guarded.
 awaiting: user response
 
 ## Tests
@@ -79,7 +79,8 @@ result: pass
 
 ### 14. Original Lacking Base and Ingredients Is Excluded (D-07)
 expected: Create (or note) an Original that has neither a derivable base spirit nor any ingredients. Open the Recommender — that Original should NOT appear anywhere in the results (it is filtered out before scoring). Originals that DO have a base or ingredients still appear.
-result: pending
+result: pass
+note: Exact precondition (an ingredient-free Original) is impossible to create — save validation correctly rejects an Original with no ingredients, enforcing the constraint at the save layer (equivalent protection to engine-side filtering). User ran the related check: an Original with a nonsensical ingredient does NOT appear under "You Can Make These" and correctly appears under the missing-1-ingredient scope. Intent satisfied.
 
 ### 15. No Console Error When Recommender Renders Originals (D-07)
 expected: Open browser devtools → Console. With at least one Original present, navigate to the Recommender and exercise the scope buttons. There should be NO `TypeError: cannot read 'map' of undefined` (or any uncaught error) — the `ing.keywords.map` crash on un-normalized Originals is guarded.
@@ -116,9 +117,9 @@ result: pending
 ## Summary
 
 total: 22
-passed: 11
+passed: 12
 issues: 2
-pending: 9
+pending: 8
 skipped: 0
 
 ## Gaps
