@@ -8,10 +8,10 @@ updated: 2026-05-20T12:00:00Z
 
 ## Current Test
 
-number: 6
-name: Favorites/Wishlist Chip Opens Detail Modal (RECIPE-VIEW-02)
+number: 7
+name: Recipes Page Search Filters Active Tab and Clears on Switch (RECIPE-SEARCH-01)
 expected: |
-  On Recipes → Favorites, click anywhere on a chip EXCEPT the × button. The universal detail modal opens showing the recipe name, base · method · glassware meta, an ingredients table, garnish, a Times Made tally, and a Notes textarea. Clicking the ✕, the Close button, or the dark overlay outside the modal closes it.
+  On Recipes → Favorites, type "gin" in the search input above the tabs. Only chips whose name, base spirit, or an ingredient name contains "gin" (case-insensitive) remain visible. Click the Wishlist tab — the search input clears automatically and the Wishlist shows all its entries unfiltered.
 awaiting: user response
 
 ## Tests
@@ -42,7 +42,7 @@ note: Chips render correctly with × remove and ingredient overflow. Gap logged:
 
 ### 6. Favorites/Wishlist Chip Opens Detail Modal (RECIPE-VIEW-02)
 expected: On Recipes → Favorites, click anywhere on a chip EXCEPT the × button. The universal detail modal opens showing the recipe name, base · method · glassware meta, an ingredients table, garnish, a Times Made tally, and a Notes textarea. Clicking the ✕, the Close button, or the dark overlay outside the modal closes it.
-result: pending
+result: pass
 
 ### 7. Recipes Page Search Filters Active Tab and Clears on Switch (RECIPE-SEARCH-01)
 expected: On Recipes → Favorites, type "gin" in the search input above the tabs. Only chips whose name, base spirit, or an ingredient name contains "gin" (case-insensitive) remain visible. Click the Wishlist tab — the search input clears automatically and the Wishlist shows all its entries unfiltered.
@@ -111,9 +111,9 @@ result: pending
 ## Summary
 
 total: 22
-passed: 4
+passed: 5
 issues: 1
-pending: 17
+pending: 16
 skipped: 0
 
 ## Gaps
