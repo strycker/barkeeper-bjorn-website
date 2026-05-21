@@ -243,6 +243,51 @@
       "_source": "originals",
       "base": "Mezcal",
       "tags": []
+    },
+    {
+      "id": "cocktail1779336971270",
+      "name": "Smokey the Pear",
+      "creator": "Glenn",
+      "ingredients": [
+        {
+          "name": "Whisky",
+          "amount": "2 oz",
+          "keywords": [
+            "whisky",
+            "whisky"
+          ],
+          "searchIn": [
+            "whiskey",
+            "brandy",
+            "rum",
+            "agave",
+            "white_spirits",
+            "other_spirits",
+            "fortified",
+            "liqueurs_fruit",
+            "liqueurs_nut",
+            "liqueurs_herbal",
+            "liqueurs_specialty",
+            "bitters_anchors",
+            "bitters_other",
+            "syrups",
+            "mixers",
+            "perishables",
+            "pantry",
+            "produce"
+          ],
+          "optional": false
+        }
+      ],
+      "method": "Assemble",
+      "tagline": "test2",
+      "date_created": "2026-05-20",
+      "method_type": "built",
+      "glassware": "shot",
+      "confirmed_built": false,
+      "_source": "originals",
+      "base": "Whisky",
+      "tags": []
     }
   ],
   "wishlist": [
