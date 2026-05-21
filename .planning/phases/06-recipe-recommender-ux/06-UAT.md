@@ -1,28 +1,35 @@
 ---
-status: pending
+status: testing
 phase: 06-recipe-recommender-ux
 source: [06-01-SUMMARY.md, 06-02-SUMMARY.md, 06-03-SUMMARY.md, 06-04-SUMMARY.md]
 started: 2026-05-20T00:00:00Z
-updated: 2026-05-20T00:00:00Z
+updated: 2026-05-20T12:00:00Z
 ---
 
 ## Current Test
 
-[awaiting user]
+number: 4
+name: Made Tab Shows made_log Most-Recent-First (RECIPE-MADE-02)
+expected: |
+  Mark two different recipes as made from the Recommender (e.g. one, then another). Go to Recipes → Made. Both appear as rec-card chips, the most-recently-made on top (sorted by last_made descending). Each chip shows a green ×N times-made badge and has an × remove button that removes it from the list.
+awaiting: user response
 
 ## Tests
 
 ### 1. Recipe Card Action Buttons in Header Row (REC-10)
 expected: Serve the app (`python3 -m http.server 8000`, open `http://localhost:8000/app/`) and go to the Recommender page. On any recipe card, the ♥ (heart) and ☆ (star) buttons should sit in the top card-header row alongside the recipe name — not floating in an absolutely-positioned corner. Resizing the window keeps them inline in the header.
-result: pending
+result: pass
+note: Buttons sit inline in the header row as expected. Cosmetic follow-up logged in Gaps (heart/star icon shape + ellipse).
 
 ### 2. Heart/Star Filled vs. Open Toggle (REC-11)
 expected: On a Recommender card, click the ♥ — it should fill (♥) and the recipe should appear under Recipes → Favorites. Click the now-filled ♥ again on the same card — it should revert to open (♡) and the recipe should leave Favorites. The ☆/★ star behaves identically for the Wishlist.
-result: pending
+result: pass
 
 ### 3. "I Made This" Button Adds to made_log (RECIPE-MADE-01)
 expected: On a Recommender card, click the ○ "I Made This" button — it should turn into a filled ✓ and a "Marked as made" toast appears. Go to Recipes → Made tab; the recipe should be listed there. Back on the Recommender, click the ✓ again — it removes the entry and the Made tab no longer shows it.
-result: pending
+result: issue
+reported: "Almost works. I'm able to mark as made, but I cannot seem to un-check it. I cannot remove it from the Made list, either. I get an error 'Save failed: data/recipes.json does not match <sha> — reload the page to refresh file state, then try again.' Refreshing the page does seem to help, but things are slow."
+severity: major
 
 ### 4. Made Tab Shows made_log Most-Recent-First (RECIPE-MADE-02)
 expected: Mark two different recipes as made from the Recommender (e.g. one, then another). Go to Recipes → Made. Both appear as rec-card chips, the most-recently-made on top (sorted by last_made descending). Each chip shows a green ×N times-made badge and has an × remove button that removes it from the list.
@@ -103,11 +110,31 @@ result: pending
 ## Summary
 
 total: 22
-passed: 0
-issues: 0
-pending: 22
+passed: 2
+issues: 1
+pending: 19
 skipped: 0
 
 ## Gaps
 
-[none yet]
+- truth: "Toggling 'I Made This' on/off and removing from Made tab works without SHA conflict errors"
+  status: open
+  reason: "User (Test 3): marking as made works, but un-toggling and removing from Made tab fails with 'Save failed: data/recipes.json does not match <sha>' — stale SHA after rapid successive saves. Page reload fixes it but is slow."
+  severity: major
+  test: 3
+  artifacts: []
+  missing: ["State.save() SHA conflict handling — stale SHA after back-to-back saves not fully resolved by BUG-03 retry-on-409"]
+
+- truth: "Heart and star action-button icons are visually balanced (1:1 aspect ratio, similar size, no ellipse/circle background)"
+  status: cosmetic
+  reason: "User (Test 1): dislikes the ellipse around the heart/star; heart is elongated. Wants ~1:1 aspect ratio and size matched to the star."
+  severity: cosmetic
+  test: 1
+  artifacts: []
+  missing: []
+
+## Deferred (future phases)
+
+- Recipes should be uniformly chip-based across all views, and chips should surface tally counts and other stats (times-made, etc.) beyond just the Made tab. Noted during Test 1; aligns with Phase 6 mental model "chips are the interface" — carry into a later phase.
+- Originals schema parity (noted Test 2): clicking "Confirmed Built"/mark-made on an Original (via its edit/detail modal) does NOT add it to the Made tab and shows no tally. Likely root cause: Originals don't carry the same JSON fields as classics/saved chips (e.g. _source, base, made-tracking fields). Later phase: audit Originals vs. non-Originals recipe-chip schemas and add fields to BOTH as needed so all recipe chips share one compatible format and made-tracking works uniformly. User explicitly deferred — do not fix during Phase 6 verification.
+- DB access/update UX smoothness (noted Test 3): State.save() SHA conflicts cause save failures when saves happen in rapid succession — the in-memory SHA goes stale. User requests a future phase revisit of how databases are accessed and updated to make the UX smoother (less stale-SHA errors, faster saves). Do not fix during Phase 6 verification.
