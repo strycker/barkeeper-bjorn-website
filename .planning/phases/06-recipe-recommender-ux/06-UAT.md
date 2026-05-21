@@ -8,10 +8,10 @@ updated: 2026-05-20T12:00:00Z
 
 ## Current Test
 
-number: 16
-name: Favoriting an Original Preserves _source:'originals' (D-07)
+number: 17
+name: Strategy B — Inventory-Aware Original Matching (D-07)
 expected: |
-  On a Recommender card showing an Original (amber badge), click the ♥. Inspect `data/recipes.json` → `confirmed_favorites`: the new entry's `_source` field should be `"originals"` (NOT `"classics-db"`). Then open that entry from Recipes → Favorites — it should open in the editable modal (confirming the D-06 ↔ D-07 coupling).
+  Take an Original whose ingredient names match bottles you actually own (normalize to inventory tokens) — it should appear in the buildable "You Can Make These" bucket of the Recommender. An Original whose ingredient names do NOT normalize to your inventory may not appear as buildable — this is the accepted Strategy-B tradeoff (not a bug).
 awaiting: user response
 
 ## Tests
@@ -88,7 +88,8 @@ result: pass
 
 ### 16. Favoriting an Original Preserves _source:'originals' (D-07)
 expected: On a Recommender card showing an Original (amber badge), click the ♥. Inspect `data/recipes.json` → `confirmed_favorites`: the new entry's `_source` field should be `"originals"` (NOT `"classics-db"`). Then open that entry from Recipes → Favorites — it should open in the editable modal (confirming the D-06 ↔ D-07 coupling).
-result: pending
+result: pass
+note: _source preserved as "originals" and entry opens editable. User flags the full-record duplication across lists as redundant — deferred normalization item logged (store one canonical record, reference by unique id elsewhere).
 
 ### 17. Strategy B — Inventory-Aware Original Matching (D-07)
 expected: Take an Original whose ingredient names match bottles you actually own (normalize to inventory tokens) — it should appear in the buildable "You Can Make These" bucket of the Recommender. An Original whose ingredient names do NOT normalize to your inventory may not appear as buildable — this is the accepted Strategy-B tradeoff (not a bug).
@@ -117,9 +118,9 @@ result: pending
 ## Summary
 
 total: 22
-passed: 13
+passed: 14
 issues: 2
-pending: 7
+pending: 6
 skipped: 0
 
 ## Gaps
@@ -166,4 +167,5 @@ skipped: 0
 - Bartender specialty as ranking weight, not filter (noted Test 5 feedback): The Bartender Specialty setting currently narrows results too aggressively, acting as a filter. Future phase: convert it to a scoring weight that reorders recommendations rather than excluding recipes. Add a Specialty selector panel to the Recommender sidebar (alongside Mood and Occasion sliders) with options: "Equal Weight" (default) + each specialty; selected specialty boosts score but does not exclude.
 - Full cross-list rename/edit sync (noted Test 12): When an Original (or any recipe) is edited/renamed, the change must propagate to EVERY location the recipe appears — the originals array plus all inline copies in confirmed_favorites, wishlist, and made_log — not just the single list the modal was opened from. Future phase: make Save-Recipe update all matching copies (by old name+base probe) and avoid orphans/duplicates everywhere. Related to the unified-schema requirement.
 - Recipe image upload (noted Test 13): Allow uploading an image per recipe. Display full-size when a chip is clicked (in the detail modal) and as a thumbnail on the chip otherwise. Images live in a `data/recipe_images/` subdirectory; recipe chip JSON references only the filename. On upload, auto-rename the file to the recipe's unique id (e.g. `cocktail1778776984398.png`) preserving the original extension (.png/.jpg/etc), not the display name. Future phase.
+- Normalize recipe storage / de-duplicate records (noted Test 16): Favoriting/wishlisting/marking-made currently copies the ENTIRE recipe record into confirmed_favorites/wishlist/made_log, so the same cocktail is duplicated across multiple places in recipes.json. Future phase: store each recipe ONCE in a canonical library (keyed by its unique id, e.g. `cocktail1778776984398`) and have the list entries hold only that id (plus list-specific metadata like times_made/last_made), auto-loading the full record by reference. This minimizes duplication AND inherently fixes the Test 12 cross-list rename/edit-sync bug (edit the one canonical record, every list reflects it). Supersedes the embed-and-sync approach.
 - AI recipe discovery ("Use AI to get more recipes") (noted Test 5 feedback): Add a button near the top of the Recommender page that queries the Claude API using the user's current preference state (sweetness, acidity, complexity, season, risk tolerance, base spirit, occasion, specialty). New recipes returned by the AI are merged into the shared classics-db recipe library so they are discoverable by all users and persist across sessions. This feature becomes more important as the platform grows to multiple users sharing a common recipe library.
