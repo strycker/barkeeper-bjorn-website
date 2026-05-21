@@ -18,9 +18,9 @@
           "name": "Pear Juice"
         },
         {
-          "amount": "1 oz",
+          "amount": "1.5 oz",
           "name": "Crème de Poire",
-          "notes": "1 tsp Prickly pear preserves optional"
+          "notes": "Prickly pear preserves optional"
         },
         {
           "amount": "0.5 oz",
@@ -187,15 +187,12 @@
         },
         {
           "amount": "1.5 oz",
-          "name": "Crème de Poire"
+          "name": "Crème de Poire",
+          "notes": "Prickly pear preserves optional"
         },
         {
           "amount": "0.5 oz",
           "name": "Cocchi"
-        },
-        {
-          "amount": "1/2 tsp",
-          "name": "Prickly pear preserves"
         },
         {
           "amount": "4 dashes",
