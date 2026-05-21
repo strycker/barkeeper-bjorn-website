@@ -8,10 +8,10 @@ updated: 2026-05-20T12:00:00Z
 
 ## Current Test
 
-number: 13
-name: Originals Appear in Recommender with Amber Badge (D-07)
+number: 14
+name: Original Lacking Base and Ingredients Is Excluded (D-07)
 expected: |
-  Ensure you have at least one Original saved (Recipes → Originals tab) whose ingredients exist in your inventory. Go to the Recommender. The Original should appear mixed in with the classics-db results, carrying an amber "Your original" badge on its card.
+  Create (or note) an Original that has neither a derivable base spirit nor any ingredients. Open the Recommender — that Original should NOT appear anywhere in the results (it is filtered out before scoring). Originals that DO have a base or ingredients still appear.
 awaiting: user response
 
 ## Tests
@@ -75,7 +75,7 @@ note: User deferred the fix to a future phase — do not fix during Phase 6 veri
 
 ### 13. Originals Appear in Recommender with Amber Badge (D-07)
 expected: Ensure you have at least one Original saved (Recipes → Originals tab) whose ingredients exist in your inventory. Go to the Recommender. The Original should appear mixed in with the classics-db results, carrying an amber "Your original" badge on its card.
-result: pending
+result: pass
 
 ### 14. Original Lacking Base and Ingredients Is Excluded (D-07)
 expected: Create (or note) an Original that has neither a derivable base spirit nor any ingredients. Open the Recommender — that Original should NOT appear anywhere in the results (it is filtered out before scoring). Originals that DO have a base or ingredients still appear.
@@ -116,9 +116,9 @@ result: pending
 ## Summary
 
 total: 22
-passed: 10
+passed: 11
 issues: 2
-pending: 10
+pending: 9
 skipped: 0
 
 ## Gaps
@@ -164,4 +164,5 @@ skipped: 0
 - Inventory synonym/alias lookups (noted Test 5 feedback): Recommender treats ingredient names too literally. Future phase: add a synonym/alias layer so that owning "limes" implies "lime juice", owning "Cointreau", "Grand Marnier", or "Triple Sec" implies "Orange Liqueur", etc. Also fix Campari and Rye (and similar spirits the user owns) not being matched correctly — appearing as "One Bottle Away" or missing when they are in the inventory.
 - Bartender specialty as ranking weight, not filter (noted Test 5 feedback): The Bartender Specialty setting currently narrows results too aggressively, acting as a filter. Future phase: convert it to a scoring weight that reorders recommendations rather than excluding recipes. Add a Specialty selector panel to the Recommender sidebar (alongside Mood and Occasion sliders) with options: "Equal Weight" (default) + each specialty; selected specialty boosts score but does not exclude.
 - Full cross-list rename/edit sync (noted Test 12): When an Original (or any recipe) is edited/renamed, the change must propagate to EVERY location the recipe appears — the originals array plus all inline copies in confirmed_favorites, wishlist, and made_log — not just the single list the modal was opened from. Future phase: make Save-Recipe update all matching copies (by old name+base probe) and avoid orphans/duplicates everywhere. Related to the unified-schema requirement.
+- Recipe image upload (noted Test 13): Allow uploading an image per recipe. Display full-size when a chip is clicked (in the detail modal) and as a thumbnail on the chip otherwise. Images live in a `data/recipe_images/` subdirectory; recipe chip JSON references only the filename. On upload, auto-rename the file to the recipe's unique id (e.g. `cocktail1778776984398.png`) preserving the original extension (.png/.jpg/etc), not the display name. Future phase.
 - AI recipe discovery ("Use AI to get more recipes") (noted Test 5 feedback): Add a button near the top of the Recommender page that queries the Claude API using the user's current preference state (sweetness, acidity, complexity, season, risk tolerance, base spirit, occasion, specialty). New recipes returned by the AI are merged into the shared classics-db recipe library so they are discoverable by all users and persist across sessions. This feature becomes more important as the platform grows to multiple users sharing a common recipe library.
