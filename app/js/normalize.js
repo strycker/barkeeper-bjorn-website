@@ -288,6 +288,37 @@ const Normalize = (() => {
     };
   }
 
+  // Phase 7 LIB-01 (D-13): 6th data file — user-curated external links.
+  // Allowlist mirrors schema/library.schema.json linkItem. CRUD only — no
+  // AI write payload, so no WriteGate needed; Normalize handles coercion.
+  const LIBRARY_ITEM_KEYS = new Set(['url', 'title', 'description', 'tags']);
+
+  function _coerceLibraryLink(entry) {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return null;
+    const out = {};
+    Object.keys(entry).forEach(k => {
+      if (LIBRARY_ITEM_KEYS.has(k)) out[k] = entry[k];
+    });
+    out.url = ensureString(out.url).trim();
+    if (!out.url) return null;
+    // Title falls back to URL when missing.
+    out.title       = ensureString(out.title) || out.url;
+    out.description = ensureString(out.description);
+    // Tags: array of non-empty strings.
+    out.tags = ensureArray(out.tags)
+      .map(t => ensureString(t).trim())
+      .filter(Boolean);
+    return out;
+  }
+
+  function library(data) {
+    const src = ensureObject(data);
+    return {
+      links:        ensureArray(src.links).map(_coerceLibraryLink).filter(Boolean),
+      last_updated: ensureString(src.last_updated) || isoToday(),
+    };
+  }
+
   // Dispatch by State key
   function byKey(key, data) {
     if (key === 'inventory') return inventory(data);
@@ -295,8 +326,9 @@ const Normalize = (() => {
     if (key === 'profile')   return profile(data);
     if (key === 'recipes')   return recipes(data);
     if (key === 'drafts')    return drafts(data);
+    if (key === 'library')   return library(data);
     return data;
   }
 
-  return { inventory, barkeeper, profile, recipes, drafts, byKey };
+  return { inventory, barkeeper, profile, recipes, drafts, library, byKey };
 })();
