@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "drafts.schema.json",
+  "title": "Drafts",
+  "description": "AI-generated recipe drafts (5th State data file, D-11). Each draft carries _source:'ai-generated' and is promoted into recipes.originals (re-tagged _source:'originals') via the Drafts tab.",
+  "type": "object",
+  "required": ["drafts"],
+  "properties": {
+    "last_updated": { "type": "string", "format": "date" },
+    "drafts": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/draftItem" },
+      "description": "AI-generated recipe drafts awaiting promote-or-reject."
+    }
+  },
+  "definitions": {
+    "ingredient": {
+      "type": "object",
+      "required": ["name", "amount"],
+      "properties": {
+        "name":   { "type": "string" },
+        "amount": { "type": "string", "description": "e.g., '2 oz', '¾ oz', 'dash', 'barspoon'" },
+        "notes":  { "type": "string", "description": "e.g., 'fresh squeezed', 'chilled'" }
+      }
+    },
+    "draftItem": {
+      "type": "object",
+      "required": ["name"],
+      "description": "Universal recipe shape (mirrors recipes.schema.json savedRecipe) plus AI-draft metadata.",
+      "properties": {
+        "_source":       { "type": "string", "description": "Provenance — 'ai-generated' for drafts (re-tagged to 'originals' on promote)." },
+        "draft_id":      { "type": "string", "description": "Stable ID for the draft chip (e.g. 'draft' + Date.now())." },
+        "created_at":    { "type": "string", "format": "date-time" },
+        "updated_at":    { "type": "string", "format": "date-time" },
+        "source_prompt": { "type": "string", "description": "The user prompt that produced this draft (audit trail)." },
+        "name":          { "type": "string" },
+        "tagline":       { "type": "string" },
+        "base":          { "type": "string" },
+        "method":        { "type": "string" },
+        "method_type":   { "type": "string", "enum": ["shaken", "stirred", "built", "blended", "thrown", "other"] },
+        "glassware":     { "type": "string" },
+        "garnish":       { "type": "string" },
+        "occasion":      { "type": "string" },
+        "ingredients": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/ingredient" }
+        },
+        "notes":         { "type": "string" },
+        "tasting_notes": { "type": "string" },
+        "why_it_works":  { "type": "string" }
+      }
+    }
+  }
+}

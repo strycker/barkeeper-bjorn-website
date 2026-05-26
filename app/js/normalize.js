@@ -247,14 +247,56 @@ const Normalize = (() => {
     return out;
   }
 
+  // Phase 7 D-11: 5th data file. Each entry carries _source:'ai-generated' (re-tagged
+  // to 'originals' on promote). Field allowlist mirrors schema/drafts.schema.json.
+  const DRAFT_ITEM_KEYS = new Set([
+    '_source', 'draft_id', 'created_at', 'updated_at', 'source_prompt',
+    'name', 'tagline', 'base', 'method', 'method_type', 'glassware', 'garnish',
+    'occasion', 'ingredients', 'notes', 'tasting_notes', 'why_it_works',
+  ]);
+
+  function _coerceDraft(entry) {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return null;
+    const out = {};
+    Object.keys(entry).forEach(k => {
+      if (DRAFT_ITEM_KEYS.has(k)) out[k] = entry[k];
+    });
+    out.name = ensureString(out.name);
+    if (!out.name) return null;
+    // Provenance tag — always 'ai-generated' on the drafts file (idempotent).
+    out._source = 'ai-generated';
+    // Coerce ingredient array to {name, amount, notes?} shape.
+    if (Array.isArray(out.ingredients)) {
+      out.ingredients = out.ingredients
+        .filter(i => i && typeof i === 'object')
+        .map(i => {
+          const ing = { name: ensureString(i.name), amount: ensureString(i.amount) };
+          if (i.notes) ing.notes = ensureString(i.notes);
+          return ing;
+        });
+    } else if (out.ingredients != null) {
+      delete out.ingredients;
+    }
+    return out;
+  }
+
+  function drafts(data) {
+    const src = ensureObject(data);
+    return {
+      drafts:       ensureArray(src.drafts).map(_coerceDraft).filter(Boolean),
+      last_updated: ensureString(src.last_updated) || isoToday(),
+    };
+  }
+
   // Dispatch by State key
   function byKey(key, data) {
     if (key === 'inventory') return inventory(data);
     if (key === 'barkeeper') return barkeeper(data);
     if (key === 'profile')   return profile(data);
     if (key === 'recipes')   return recipes(data);
+    if (key === 'drafts')    return drafts(data);
     return data;
   }
 
-  return { inventory, barkeeper, profile, recipes, byKey };
+  return { inventory, barkeeper, profile, recipes, drafts, byKey };
 })();

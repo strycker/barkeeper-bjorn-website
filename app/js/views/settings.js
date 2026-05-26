@@ -37,6 +37,23 @@ const SettingsView = (() => {
     'Educational & nerdy',
   ];
 
+  // ─── Chat model options (D-12, AI-SPEC §4 — bare aliases only) ───────────
+  const CHAT_MODELS = [
+    ['claude-haiku-4-5',  'Haiku (fast/cheap)'],
+    ['claude-sonnet-4-6', 'Sonnet (recommended)'],
+    ['claude-opus-4-7',   'Opus (max quality)'],
+  ];
+  const DEFAULT_CHAT_MODEL = 'claude-sonnet-4-6';
+  function currentChatModel() {
+    const stored = localStorage.getItem('bb_chat_model');
+    // L-2 polish: clear stale/unknown IDs (e.g. a date-suffixed pre-Phase-7 alias) and fall back to default
+    if (!stored || !CHAT_MODELS.some(([v]) => v === stored)) {
+      if (stored) localStorage.removeItem('bb_chat_model');
+      return DEFAULT_CHAT_MODEL;
+    }
+    return stored;
+  }
+
   // ─── Logout confirmation dialog ───────────────────────────────────────────
   function showLogoutDialog(onConfirm) {
     const overlay = document.createElement('div');
@@ -163,6 +180,31 @@ const SettingsView = (() => {
           </p>
           <button class="btn btn-primary btn-sm" id="st-save-ai-key" type="button">Save API key</button>
           <p id="st-ai-key-status" style="min-height:1.2em;margin-top:8px;font-size:0.82rem;"></p>
+
+          <!-- ── SET-05: Model selector (D-12) ───────────────────────────── -->
+          <div class="form-group" style="margin-top:20px;">
+            <label for="st-chat-model">Model</label>
+            <select id="st-chat-model">
+              ${CHAT_MODELS.map(([value, label]) =>
+                `<option value="${Utils.escapeHtml(value)}"${value === currentChatModel() ? ' selected' : ''}>${Utils.escapeHtml(label)}</option>`
+              ).join('')}
+            </select>
+          </div>
+          <p style="font-size:0.82rem;color:var(--text-dim);">
+            Sonnet is the recommended balance of speed, quality, and cost on your key. (per D-12)
+          </p>
+          <p id="st-chat-model-status" style="min-height:1.2em;margin-top:8px;font-size:0.82rem;"></p>
+
+          <!-- ── AI-09: Call Log panel ──────────────────────────────────── -->
+          <div class="settings-section__heading" style="margin-top:24px;">AI Call Log</div>
+          <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:8px;">
+            Most-recent API calls (timestamp, type, model, token usage). Your API key is never logged.
+          </p>
+          <div id="st-ai-log" style="font-size:0.85rem;margin-bottom:12px;"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-secondary btn-sm" id="st-ai-log-copy" type="button">Copy raw JSON</button>
+            <button class="btn btn-ghost btn-sm" id="st-ai-log-clear" type="button">Clear log</button>
+          </div>
         </div>
 
         <!-- ── Section 5: Export & Import (EXPORT-01–04) ───────────────── -->
@@ -298,6 +340,76 @@ const SettingsView = (() => {
       }
     });
 
+    // ── Event: SET-05 Model selector (D-12) ──────────────────────────────
+    container.querySelector('#st-chat-model').addEventListener('change', (e) => {
+      const value = e.target.value;
+      const statusEl = container.querySelector('#st-chat-model-status');
+      localStorage.setItem('bb_chat_model', value);
+      statusEl.textContent = 'Model saved ✓';
+      statusEl.style.color = 'var(--green)';
+      Utils.showToast('Chat model updated.');
+    });
+
+    // ── AI-09: Call Log panel render + handlers ──────────────────────────
+    function renderAiLog(panel) {
+      let log = [];
+      try {
+        const raw = localStorage.getItem('bb_api_log');
+        log = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(log)) log = [];
+      } catch (_err) {
+        log = [];
+      }
+      if (log.length === 0) {
+        panel.innerHTML = `<p style="color:var(--text-dim);font-style:italic;">No API calls logged yet.</p>`;
+        return;
+      }
+      // Newest-first; escape EVERY interpolated value before innerHTML (T-07-08 / Security V10).
+      const rows = [...log].reverse().map(entry => {
+        const tsRaw = entry && entry.ts;
+        let tsStr = '';
+        try { tsStr = tsRaw ? new Date(tsRaw).toLocaleString() : '—'; }
+        catch (_e) { tsStr = String(tsRaw || '—'); }
+        const type  = entry && entry.type  ? String(entry.type)  : '—';
+        const model = entry && entry.model ? String(entry.model) : '—';
+        const u = (entry && entry.usage) || {};
+        const inTok    = u.input_tokens ?? 0;
+        const outTok   = u.output_tokens ?? 0;
+        const cacheRd  = u.cache_read_input_tokens ?? 0;
+        const cacheCr  = u.cache_creation_input_tokens ?? 0;
+        const usageStr = `in ${inTok} / out ${outTok} / cache_read ${cacheRd} / cache_create ${cacheCr}`;
+        return `<div style="padding:6px 0;border-bottom:1px solid var(--border,#333);">
+          <div style="color:var(--text-dim);font-size:0.78rem;">${Utils.escapeHtml(tsStr)}</div>
+          <div><strong>${Utils.escapeHtml(type)}</strong> · ${Utils.escapeHtml(model)}</div>
+          <div style="color:var(--text-muted);font-size:0.8rem;">${Utils.escapeHtml(usageStr)}</div>
+        </div>`;
+      }).join('');
+      panel.innerHTML = rows;
+    }
+
+    const aiLogPanel = container.querySelector('#st-ai-log');
+    renderAiLog(aiLogPanel);
+
+    container.querySelector('#st-ai-log-copy').addEventListener('click', async () => {
+      const raw = localStorage.getItem('bb_api_log') || '[]';
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(raw);
+          Utils.showToast('Call log copied.');
+        } else {
+          Utils.showToast('Clipboard unavailable — copy manually from devtools.', 'error');
+        }
+      } catch (err) {
+        Utils.showToast(`Copy failed: ${err.message}`, 'error');
+      }
+    });
+
+    container.querySelector('#st-ai-log-clear').addEventListener('click', () => {
+      localStorage.removeItem('bb_api_log');
+      renderAiLog(aiLogPanel);
+      Utils.showToast('Call log cleared.');
+    });
+
     // ── Event: Export / Import (EXPORT-01–04) ────────────────────────────
     container.querySelector('#st-export-json').addEventListener('click', () => {
       DataExport.exportJSON().catch(err => Utils.showToast(err.message, 'error'));
@@ -350,6 +462,13 @@ const SettingsView = (() => {
 
         State.set('barkeeper', Object.assign({}, DEFAULT_BARKEEPER, { last_updated: Utils.today() }));
         await State.save('barkeeper', 'Reset all data via Settings');
+
+        // Phase-7 AI-side localStorage sweep (T-07-10): clear chat-model + API call log.
+        // GitHub credentials (bb_token / bb_owner / bb_repo / bb_branch) and the
+        // bb_anthropic_key are intentionally preserved (consistent with the existing UX:
+        // "Your GitHub credentials are preserved.").
+        localStorage.removeItem('bb_chat_model');
+        localStorage.removeItem('bb_api_log');
 
         resetStatus.textContent = 'All data has been reset.';
         resetStatus.style.color = 'var(--green)';

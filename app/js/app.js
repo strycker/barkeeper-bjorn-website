@@ -64,6 +64,14 @@
       }
     }
 
+    // CHAT-06: when leaving a view that exposes cleanup(), invoke it so any
+    // in-flight stream/request is aborted before the next view renders.
+    if (_currentRoute && _currentRoute !== route) {
+      if (_currentRoute === 'chat' && typeof ChatView !== 'undefined' && typeof ChatView.cleanup === 'function') {
+        try { ChatView.cleanup(); } catch { /* defensive */ }
+      }
+    }
+
     _currentRoute = route;
     updateNav(route);
     content.scrollTop = 0;
@@ -89,6 +97,9 @@
         break;
       case 'recommender':
         RecommenderView.render(content);
+        break;
+      case 'chat':
+        ChatView.render(content);
         break;
       case 'shopping':
         ShoppingView.render(content);
