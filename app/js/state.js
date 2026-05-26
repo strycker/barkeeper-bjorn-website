@@ -6,10 +6,17 @@ const State = (() => {
     profile:    'data/bar-owner-profile.json',
     inventory:  'data/inventory.json',
     recipes:    'data/recipes.json',
+    drafts:     'data/drafts.json',
   };
 
-  let _data = {};    // { barkeeper, profile, inventory, recipes }
-  let _shas = {};    // { barkeeper, profile, inventory, recipes }
+  // Phase 7 D-11: `drafts` is a tolerant 5th file — a 404 on data/drafts.json
+  // (existing repos that pre-date Phase 7) resolves to an empty {drafts:[]}
+  // instead of rejecting the whole loadAll. All other files are strict.
+  const TOLERANT_FILES = new Set(['drafts']);
+  const TOLERANT_EMPTY = { drafts: { drafts: [] } };
+
+  let _data = {};    // { barkeeper, profile, inventory, recipes, drafts }
+  let _shas = {};    // { barkeeper, profile, inventory, recipes, drafts }
   let _loading = false;
   let _loaded = false;
   let _listeners = [];
@@ -40,8 +47,20 @@ const State = (() => {
     try {
       const results = await Promise.all(
         Object.entries(FILES).map(async ([key, path]) => {
-          const { data, sha } = await GitHubAPI.readJSON(path);
-          return { key, data, sha };
+          try {
+            const { data, sha } = await GitHubAPI.readJSON(path);
+            return { key, data, sha };
+          } catch (err) {
+            // Tolerant 404: a missing `drafts` file in existing pre-Phase-7 repos
+            // should resolve to an empty payload rather than rejecting the whole
+            // Promise.all (Pitfall 1). All other files remain strict.
+            const msg = (err && err.message ? err.message : '').toLowerCase();
+            const is404 = msg.includes('not found') || msg.includes('404');
+            if (TOLERANT_FILES.has(key) && is404) {
+              return { key, data: TOLERANT_EMPTY[key] || {}, sha: null };
+            }
+            throw err;
+          }
         })
       );
       results.forEach(({ key, data, sha }) => {
