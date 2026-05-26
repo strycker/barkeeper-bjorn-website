@@ -18,17 +18,19 @@ const RecipesView = (() => {
   function render(container, params = {}) {
     _searchQuery = '';
     const recipes = State.get('recipes') || {};
+    const draftsObj = State.get('drafts') || { drafts: [] };
     const originals = recipes.originals || [];
     const favorites = recipes.confirmed_favorites || [];
     const wishlist  = recipes.wishlist || [];
     const madeLog   = recipes.made_log || [];
+    const draftList = draftsObj.drafts || [];
     const initialTab = params.tab || 'originals';
 
     container.innerHTML = `
       <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
         <div>
           <h1>Recipe Book</h1>
-          <p>${originals.length} original${originals.length !== 1 ? 's' : ''} · ${favorites.length} favorite${favorites.length !== 1 ? 's' : ''} · ${madeLog.length} made</p>
+          <p>${originals.length} original${originals.length !== 1 ? 's' : ''} · ${favorites.length} favorite${favorites.length !== 1 ? 's' : ''} · ${madeLog.length} made${draftList.length ? ` · ${draftList.length} draft${draftList.length !== 1 ? 's' : ''}` : ''}</p>
         </div>
         <button class="btn btn-ghost btn-sm" id="rb-generate-ai" style="align-self:center;">✨ Generate with AI</button>
       </div>
@@ -40,6 +42,7 @@ const RecipesView = (() => {
         <div class="tab${initialTab === 'favorites' ? ' active' : ''}" data-tab="favorites">Favorites (${favorites.length})</div>
         <div class="tab${initialTab === 'wishlist' ? ' active' : ''}" data-tab="wishlist">Wishlist (${wishlist.length})</div>
         <div class="tab${initialTab === 'made' ? ' active' : ''}" data-tab="made">Made (${madeLog.length})</div>
+        <div class="tab${initialTab === 'drafts' ? ' active' : ''}" data-tab="drafts">Drafts (${draftList.length})</div>
       </div>
       <div id="recipe-tab-content"></div>`;
 
@@ -434,6 +437,134 @@ const RecipesView = (() => {
       renderRecipeChips(recipes.wishlist || [], container, 'wishlist', mainContainer);
     } else if (tabName === 'made') {
       renderMadeList(recipes.made_log || [], container, mainContainer);
+    } else if (tabName === 'drafts') {
+      const draftsObj = State.get('drafts') || { drafts: [] };
+      renderDraftChips(draftsObj.drafts || [], container, mainContainer);
+    }
+  }
+
+  // ── Drafts tab (D-11): list AI-generated drafts + Promote-to-Original ────
+  function renderDraftChips(list, container, mainContainer) {
+    const filtered = _filterRecipes(list, _searchQuery);
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">✨</div>
+          <p>${_searchQuery ? 'No matches found.' : 'No AI drafts yet.'}</p>
+          <p style="font-size:0.85rem;color:var(--text-muted);">Click "✨ Generate with AI" above to design one.</p>
+        </div>`;
+      return;
+    }
+
+    filtered.forEach(draft => {
+      const card = document.createElement('div');
+      card.className = 'rec-card';
+      const ingChips = (draft.ingredients || []).slice(0, 5).map(i =>
+        `<span class="rec-ing-chip">${Utils.escapeHtml(i.amount || '')} ${Utils.escapeHtml(i.name || '')}</span>`
+      ).join('');
+      const overflow = (draft.ingredients || []).length > 5
+        ? `<span class="rec-ing-chip" style="color:var(--text-muted);">+${(draft.ingredients||[]).length - 5} more</span>` : '';
+
+      card.innerHTML = `
+        <div class="rec-card-header">
+          <div style="flex:1;min-width:0;">
+            <div class="rec-card-name">${Utils.escapeHtml(draft.name)} <span class="badge badge-amber" style="font-size:0.7rem;margin-left:6px;">draft</span></div>
+            <div class="rec-card-meta">
+              ${draft.base ? `<span class="rec-base">${Utils.escapeHtml(draft.base)}</span>` : ''}
+              ${draft.method ? `<span class="rec-sep">·</span><span class="rec-method">${Utils.escapeHtml(draft.method)}</span>` : ''}
+              ${draft.glassware ? `<span class="rec-sep">·</span><span>${Utils.escapeHtml(draft.glassware)}</span>` : ''}
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
+            <button class="btn btn-primary btn-sm" data-promote="${Utils.escapeHtml(draft.draft_id || '')}">Promote to Original</button>
+            <button class="btn-icon" data-discard title="Discard draft">✕</button>
+          </div>
+        </div>
+        ${draft.tagline ? `<p class="rec-occasion" style="font-style:italic;">${Utils.escapeHtml(draft.tagline)}</p>` : ''}
+        <div class="rec-ingredients">${ingChips}${overflow}</div>
+        ${draft.source_prompt ? `<div style="font-size:0.78rem;color:var(--text-muted);margin-top:6px;"><strong>From:</strong> ${Utils.escapeHtml(draft.source_prompt)}</div>` : ''}`;
+
+      card.querySelector('[data-promote]').addEventListener('click', e => {
+        e.stopPropagation();
+        promoteDraftToOriginal(draft, mainContainer);
+      });
+
+      card.querySelector('[data-discard]').addEventListener('click', e => {
+        e.stopPropagation();
+        if (!confirm(`Discard draft "${draft.name}"?`)) return;
+        const cur = State.get('drafts') || { drafts: [] };
+        const next = {
+          ...cur,
+          drafts: (cur.drafts || []).filter(d => d.draft_id !== draft.draft_id),
+          last_updated: new Date().toISOString().slice(0, 10),
+        };
+        // Discard isn't an AI-generated write — straight save is fine (no model output entering data).
+        State.set('drafts', next);
+        State.save('drafts').then(() => {
+          Utils.showToast('Draft discarded.');
+          render(mainContainer, { tab: 'drafts' });
+        }).catch(err => Utils.showToast('Save failed: ' + err.message, 'error'));
+      });
+
+      container.appendChild(card);
+    });
+  }
+
+  // ── Promote draft -> originals (D-11) ────────────────────────────────────
+  // Re-tag _source to 'originals', assign 'cocktail'+Date.now() id (matches
+  // ^cocktail[0-9]+$), append to recipes.originals, then SEQUENTIALLY save
+  // recipes BEFORE drafts (Pitfall 4 - never parallel saves to avoid 409).
+  async function promoteDraftToOriginal(draft, mainContainer) {
+    const recipesNow = State.get('recipes') || {};
+    const originalsArr = Array.isArray(recipesNow.originals) ? recipesNow.originals.slice() : [];
+
+    // Build promoted entry. Drop draft-only metadata.
+    const promoted = {
+      ...draft,
+      _source: 'originals',
+      id: 'cocktail' + Date.now(),
+      creator: draft.creator || ((State.get('barkeeper') || {}).identity?.name) || 'Barkeeper Bjorn',
+      date_created: new Date().toISOString().slice(0, 10),
+    };
+    delete promoted.draft_id;
+    delete promoted.source_prompt;
+    delete promoted.created_at;
+    delete promoted.updated_at;
+
+    // Duplicate flag (Utils.sameRecipe match against existing originals).
+    const dup = originalsArr.find(o => Utils.sameRecipe(o, promoted));
+    const dupNote = dup ? `\nPossible duplicate of existing original "${dup.name}".` : '';
+
+    originalsArr.push(promoted);
+    const newRecipes = {
+      ...recipesNow,
+      originals: originalsArr,
+      last_updated: new Date().toISOString().slice(0, 10),
+    };
+
+    const result = await WriteGate.gate({
+      schemaKey: 'recipes',
+      oldData: recipesNow,
+      newPayload: newRecipes,
+      message: `Promote to Original: ${promoted.name}${dupNote}`,
+      onConfirm: async () => {
+        // Pitfall 4: save SEQUENTIALLY — recipes THEN drafts. Never parallel.
+        State.set('recipes', newRecipes);
+        await State.save('recipes');
+        // Now remove the draft from drafts.json.
+        State.patch('drafts', d => {
+          d.drafts = (d.drafts || []).filter(x => x.draft_id !== draft.draft_id);
+          d.last_updated = new Date().toISOString().slice(0, 10);
+        });
+        await State.save('drafts');
+      },
+    });
+
+    if (result && result.status === 'confirmed') {
+      Utils.showToast(`Promoted "${promoted.name}" to Originals.`);
+      render(mainContainer, { tab: 'drafts' });
+    } else if (result && result.status === 'invalid') {
+      // WriteGate already toasted the schema error.
     }
   }
 
