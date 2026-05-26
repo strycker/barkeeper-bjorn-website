@@ -86,6 +86,7 @@ const RecommenderView = (() => {
             <button class="rec-fav-btn${isFav ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" data-base="${Utils.escapeHtml(recipe.base || '')}" title="${isFav ? 'Remove from Favorites' : 'Add to Favorites'}">${isFav ? '&#9829;' : '&#9825;'}</button>
             <button class="rec-wish-btn${isWish ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" data-base="${Utils.escapeHtml(recipe.base || '')}" title="${isWish ? 'Remove from Wishlist' : 'Add to Wishlist'}">${isWish ? '&#9733;' : '&#9734;'}</button>
             <button class="rec-made-btn${isMade ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" data-base="${Utils.escapeHtml(recipe.base || '')}" title="${isMade ? 'Remove from Made' : 'I Made This'}">${isMade ? '&#10003;' : '&#9675;'}</button>
+            <button class="rec-ask-btn ai-ask-btn" data-ask-name="${Utils.escapeHtml(recipe.name)}" data-ask-base="${Utils.escapeHtml(recipe.base || '')}" title="Ask Bjorn about this">Ask Bjorn</button>
           </div>
         </div>
         ${recipe.occasion ? `<p class="rec-occasion">${Utils.escapeHtml(recipe.occasion)}</p>` : ''}
@@ -145,6 +146,7 @@ const RecommenderView = (() => {
             <button class="rec-fav-btn${isFav ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" data-base="${Utils.escapeHtml(recipe.base || '')}" title="${isFav ? 'Remove from Favorites' : 'Add to Favorites'}">${isFav ? '&#9829;' : '&#9825;'}</button>
             <button class="rec-wish-btn${isWish ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" data-base="${Utils.escapeHtml(recipe.base || '')}" title="${isWish ? 'Remove from Wishlist' : 'Add to Wishlist'}">${isWish ? '&#9733;' : '&#9734;'}</button>
             <button class="rec-made-btn${isMade ? ' active' : ''}" data-name="${Utils.escapeHtml(recipe.name)}" data-base="${Utils.escapeHtml(recipe.base || '')}" title="${isMade ? 'Remove from Made' : 'I Made This'}">${isMade ? '&#10003;' : '&#9675;'}</button>
+            <button class="rec-ask-btn ai-ask-btn" data-ask-name="${Utils.escapeHtml(recipe.name)}" data-ask-base="${Utils.escapeHtml(recipe.base || '')}" title="Ask Bjorn about this">Ask Bjorn</button>
           </div>
         </div>
         ${recipe.occasion ? `<p class="rec-occasion">${Utils.escapeHtml(recipe.occasion)}</p>` : ''}
@@ -303,6 +305,32 @@ const RecommenderView = (() => {
         _activeFilter = '';
         _activeOccasions = new Set();
         _rerender(container);
+      });
+    });
+
+    // Wire "Ask Bjorn about this" buttons — REC-04 / AI-04 (seed drawer)
+    cardsEl.querySelectorAll('.rec-ask-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (typeof ChatView === 'undefined' || !ChatView.openDrawer) {
+          Utils.showToast('Chat module not loaded.', 'error');
+          return;
+        }
+        const recipeName = btn.dataset.askName || '';
+        const recipeBase = btn.dataset.askBase || '';
+        // Build mood snippet from current slider values (ephemeral mood floats).
+        const moodBits = AXIS_KEYS
+          .map(k => {
+            const v = _sliderValues[k];
+            if (typeof v !== 'number') return null;
+            return `${k}:${v.toFixed(2)}`;
+          })
+          .filter(Boolean)
+          .join(', ');
+        const seed =
+          `Tell me about the ${recipeName}${recipeBase ? ` (${recipeBase})` : ''}. ` +
+          `Would it suit my taste, and what variations would you suggest given my bar?` +
+          (moodBits ? `\n\n(Current mood floats: ${moodBits}.)` : '');
+        ChatView.openDrawer({ seed });
       });
     });
 

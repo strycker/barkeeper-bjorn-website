@@ -615,9 +615,12 @@ const InventoryView = (() => {
     }
 
     container.innerHTML = `
-      <div class="page-header">
-        <h1>Inventory</h1>
-        <p>Your current bar — add or remove bottles. Changes are saved back to your GitHub repo.</p>
+      <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h1>Inventory</h1>
+          <p>Your current bar — add or remove bottles. Changes are saved back to your GitHub repo.</p>
+        </div>
+        <button class="btn btn-ghost btn-sm ai-advice-btn" id="inv-ai-best-bottle" style="align-self:center;" title="Ask Bjorn what bottle to buy next">✨ Best bottle to add (AI)</button>
       </div>
 
       <div id="inv-save-bar" style="display:none;position:sticky;top:60px;z-index:50;
@@ -629,6 +632,18 @@ const InventoryView = (() => {
       </div>
 
       <div id="inv-sections"></div>`;
+
+    document.getElementById('inv-ai-best-bottle')?.addEventListener('click', () => {
+      if (typeof ChatView === 'undefined' || !ChatView.openDrawer) {
+        Utils.showToast('Chat module not loaded.', 'error');
+        return;
+      }
+      // Drawer's buildContext() already grounds in current inventory + vetoes;
+      // the seed just asks the question.
+      ChatView.openDrawer({
+        seed: 'Given my current inventory and vetoes, what single bottle should I add next, and why? Focus on the biggest unlock for my taste profile.',
+      });
+    });
 
     document.getElementById('inv-save-btn')?.addEventListener('click', saveInventory);
     document.getElementById('inv-discard-btn')?.addEventListener('click', () => {

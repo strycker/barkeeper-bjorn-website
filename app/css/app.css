@@ -1758,3 +1758,30 @@ a:hover { color: var(--amber); }
   .library-card-head { flex-direction: column; }
   .library-card-actions { width: 100%; }
 }
+
+/* ── Phase 7: AI entry buttons (Ask Bjorn / Best bottle / Persona drafter) ── */
+.ai-ask-btn,
+.ai-advice-btn {
+  background: transparent;
+  color: var(--amber);
+  border: 1px solid var(--amber-dim);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.ai-ask-btn:hover,
+.ai-advice-btn:hover {
+  background: var(--amber);
+  color: var(--bg);
+  border-color: var(--amber);
+}
+.ai-ask-btn:disabled,
+.ai-advice-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.rec-card-actions .ai-ask-btn {
+  margin-left: 4px;
+}

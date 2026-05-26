@@ -263,14 +263,30 @@ Please provide:
               ${recipe.glassware ? `<span class="rec-sep">·</span><span>${Utils.escapeHtml(recipe.glassware)}</span>` : ''}
             </div>
           </div>
-          <button class="btn-icon" data-remove title="Remove" style="flex-shrink:0;">✕</button>
+          <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
+            <button class="rec-ask-btn ai-ask-btn" data-ask title="Ask Bjorn about this">Ask Bjorn</button>
+            <button class="btn-icon" data-remove title="Remove">✕</button>
+          </div>
         </div>
         ${recipe.occasion ? `<p class="rec-occasion">${Utils.escapeHtml(recipe.occasion)}</p>` : ''}
         <div class="rec-ingredients">${ingChips}${overflow}</div>`;
 
       card.addEventListener('click', e => {
         if (e.target.closest('[data-remove]')) return;
+        if (e.target.closest('[data-ask]')) return;
         showRecipeDetail(recipe, listKey, mainContainer);
+      });
+
+      card.querySelector('[data-ask]').addEventListener('click', e => {
+        e.stopPropagation();
+        if (typeof ChatView === 'undefined' || !ChatView.openDrawer) {
+          Utils.showToast('Chat module not loaded.', 'error');
+          return;
+        }
+        const seed =
+          `Tell me about the ${recipe.name}${recipe.base ? ` (${recipe.base})` : ''}. ` +
+          `Would it suit my taste, and what variations would you suggest given my bar?`;
+        ChatView.openDrawer({ seed });
       });
 
       card.querySelector('[data-remove]').addEventListener('click', e => {
