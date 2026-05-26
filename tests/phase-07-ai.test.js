@@ -255,13 +255,27 @@ test('WriteGate.inventoryFidelity: substitution-noted ingredients are NOT phanto
 // the deriveWithAI surface tests below.
 vm.runInThisContext(fs.readFileSync(path.resolve(__dirname, '../app/js/recommender-engine.js'), 'utf8'));
 
-// Helper: swap a fresh ClaudeAPI stub onto globalThis for a single test, and
-// restore the real one afterward.
-function withClaudeStub(stub, fn) {
-  const real = globalThis.ClaudeAPI;
-  globalThis.ClaudeAPI = stub;
-  try { return fn(); }
-  finally { globalThis.ClaudeAPI = real; }
+// Helper: temporarily monkey-patch the real ClaudeAPI object's methods for a
+// single test, restoring them afterward. We patch in-place (rather than swap
+// the `const ClaudeAPI` binding) because `const` declarations under
+// vm.runInThisContext create lexical bindings — the engine module captures the
+// real ClaudeAPI by lexical reference, so a globalThis.ClaudeAPI swap is
+// invisible to it. Mutating the live object's methods is what the engine sees.
+//
+// MUST `await fn()` inside the try (not `return fn()`) — try/finally with a
+// returned promise fires `finally` synchronously, restoring methods BEFORE
+// the async test body completes. That race causes spurious cache misses.
+async function withClaudeStub(stub, fn) {
+  const target = ClaudeAPI;
+  const saved = {};
+  for (const k of Object.keys(stub)) {
+    saved[k] = target[k];
+    target[k] = stub[k];
+  }
+  try { return await fn(); }
+  finally {
+    for (const k of Object.keys(stub)) target[k] = saved[k];
+  }
 }
 
 test('AI-13: deriveWithAI is exported on RecommenderEngine', () => {
