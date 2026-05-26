@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: phase_complete
-last_updated: "2026-05-21T00:00:00.000Z"
+status: phase_planned
+last_updated: "2026-05-26T00:00:00.000Z"
 progress:
   total_phases: 10
   completed_phases: 6
-  total_plans: 26
+  total_plans: 32
   completed_plans: 26
-  percent: 100
+  percent: 81
 ---
 
 # Project State: Barkeeper Bjorn
@@ -20,7 +20,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 
 **Core value:** The user's real-world bar inventory and flavor profile should power both AI-driven conversation and rule-based recommendations — seamlessly, whether in a chat session or the web app.
 
-**Current focus:** Phase 6 — Recipe & Recommender UX
+**Current focus:** Phase 7 — AI Integration (planned; 6 plans, 25/25 reqs, plan-check PASS post-revision)
 
 ---
 
@@ -34,7 +34,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 | 4 | Inventory & Recommender Depth | Shipped | 3 | 100% |
 | 5 | Polish, Depth & UX Tidy | Shipped | 4 plans, 17/17 UAT, VALIDATION.md | 100% |
 | 6 | Recipe & Recommender UX | Shipped | 4 plans, 20/22 UAT pass (2 issues deferred), 2 recommender blocker bugs fixed mid-UAT | 100% |
-| 7 | AI Integration | Pending | — | 0% |
+| 7 | AI Integration | Planned | 6 plans, 25/25 reqs, plan-check PASS post-revision | 0% (planned) |
 | 8 | Portability | Pending | — | 0% |
 | 9 | Backend & Multi-User | Pending | — | 0% |
 | 10 | Community, API & Multi-Agent | Pending | — | 0% |
@@ -96,6 +96,21 @@ Wave 2 plans (05-03, 05-04) can also run in parallel with each other; 05-03 shou
 | 03-01 | 1 | Export/Import ZIP: drop zone, drag-and-drop, sequential writes, AI-context text | EXPORT-01–04 | app/js/export.js, app/js/views/settings.js, app/index.html, app/css/app.css |
 | 03-02 | 1 | Recipe form: Utils.toast fixes, New Recipe button, D-02 validation, AI prompt scaffold | RECIPE-01–05 | app/js/views/recipes.js |
 | 03-03 | 2 | AI integration: claude-api.js, AI Integration settings section, live Generate wiring | RECIPE-05 | app/js/claude-api.js, app/js/views/settings.js, app/js/views/recipes.js |
+
+---
+
+## Phase 7 Plan Index
+
+| Plan | Wave | Depends | Objective | Requirements |
+|------|------|---------|-----------|--------------|
+| 07-01 | 1 | — | Foundation: ClaudeAPI streaming/requestJSON/callMessages/buildContext/deriveContextMarkdown, drafts as 5th State file, WriteGate, node:test harness | CHAT-02, CHAT-05, CHAT-08, CHAT-09 |
+| 07-02 | 2 | 01 | Settings: AI-01 Reveal toggle, SET-05 model selector, AI-09 call-log panel | AI-01, SET-05, AI-09 |
+| 07-03 | 2 | 01 | Chat: persisted #chat thread + shared ephemeral quick-ask drawer + summarization | AI-02, CHAT-01, CHAT-03, CHAT-04, CHAT-06, CHAT-07 |
+| 07-04 | 3 | 01, 03 | Classroom (#classroom static + lesson-scoped Ask-Bjorn) and Library (#library 6th State file, link CRUD) | AI-06, AI-07, LIB-01 |
+| 07-05 | 4 | 01, 03, 04 | AI into 5 views: Ask-Bjorn entries, best-bottle advice, Wizard drafter, AI-03 generate→draft→promote, AI-13 recommender derivation fallback | REC-04, AI-04, AI-05, AI-12, AI-03, AI-13 |
+| 07-06 | 5 | 01, 02, 05 | AI data ops: legacy-MD import, JSON repair, paste-a-line fallback + Wave-0 fixtures | AI-08, AI-10, AI-11 |
+
+Plan-check post-revision verdict: PASS. M-2 (07-05 Task 1 5-file scope) deferred to executor with documented rationale; 6 LOW polish items deferred to execution-time.
 
 ---
 
@@ -189,4 +204,4 @@ Wave 2 plans (05-03, 05-04) can also run in parallel with each other; 05-03 shou
 
 ---
 *State initialized: 2026-05-04*
-*Last activity: 2026-05-21 — Phase 6 UAT COMPLETE: 22/22 tests resolved (20 pass, 2 issues explicitly deferred to future phases). Two recommender blocker bugs found and fixed mid-UAT: (1) lc() in recommender-engine.js read bottle `style` not `type`, so owned bottles read as missing — fixed by concatenating type/style/brand/subtype/name/nationality/region (buildable 6→20); (2) over-broad bare 'amaro' keyword in classics-db matched Campari (type:'Amaro'), making Paper Plane/Toronto falsely buildable — removed bare 'amaro' from Amaro Nonino + Fernet-Branca. Deferred issues: Test 3 (stale-SHA save failures on rapid saves) and Test 12 (rename doesn't sync across all lists holding a recipe). Enhancement backlog captured in 06-UAT.md Deferred: unified recipe-chip schema + shared render (chips identical everywhere with ♥/☆/✓ + cross-list move), normalize recipe storage (store once, reference by id — also fixes Test 12), inventory synonym/alias layer (limes→lime juice, Cointreau/GM/Triple Sec→Orange Liqueur), bartender specialty as ranking weight not filter + sidebar specialty selectors, AI recipe discovery button, optional ingredients (checkbox + buildable ignores optionals), recipe image upload (data/recipe_images/, id-named), substitution suggestions on cards, optional Method/Instructions + "Shot" method type, Made-icon checkmark, heart/star icon shape. Phase 6 shipped. ——— Prior: Phase 6 EXECUTED: all 4 plans complete (06-01 D-08 name+base dedup via Utils.sameRecipe; 06-02 D-06 editable Originals modal with rename-safe dual-write; 06-03 D-07 Originals in Recommender inventory-aware Strategy B + amber badge + crash guard; 06-04 D-09 06-TEST-CHECKLIST.md + 06-UAT.md). Verifier: GOAL ACHIEVED (13/13 must-haves), node --check passes on all 4 JS files, engine smoke test confirms Originals scored inventory-aware without crash. Status awaiting_uat — user runs 06-UAT.md (22 tests) via GSD commands; no auto-advance per D-09. Earlier: Phase 6 replanned: 06-01 (D-08 dedup), 06-02 (D-06 editable Originals modal), 06-03 (D-07 Originals in Recommender, Strategy B), 06-04 (D-09 UAT+checklist). 8 ROADMAP reqs + 3 gap tasks confirmed DONE. Earlier: Phase 5 UAT complete (17/17 pass). Phase 6 opened: REC-10 (card layout fix) and REC-11 (heart/star toggle state) shipped. Three Phase 6 bugs fixed: REC-BUG-01 (unconstrained mode now shows missing-ingredient info rows with shopping-list links), REC-BUG-02 (veto filter now checks all ingredient names, not just recipe.base — fixes egg white appearing in results), INV-BUG-01 (Got-it dialog auto-detects correct inventory section via keyword matching — fixes vermouth defaulting to Whiskeys). ROADMAP renumbered to 10 phases. 168-recipe DB. Favicon. Archetype selection fixed.*
+*Last activity: 2026-05-26 — Phase 7 PLANNED: 6 plans (07-01..07-06) covering all 25 ROADMAP requirements with no duplication. Foundation plan 07-01 establishes ClaudeAPI streaming/requestJSON/callMessages/buildContext/deriveContextMarkdown, drafts as the 5th State file (+ tolerant-404 load), and a reusable WriteGate (schema-validate → diff → confirm) — the chokepoint every other plan writes through. Plan-checker verdict: PASS-WITH-CONCERNS (1 HIGH, 6 MEDIUM, 6 LOW). Revisions applied: AI-13 moved from 07-01 (where deriveContextMarkdown was the D-06 context derivation, NOT AI-13) into 07-05 with a real `RecommenderEngine.deriveWithAI` task (key-gated, cached in bb_derivation_cache, fail-soft, additive — Phase 5 sync path unchanged); 07-06 depends_on now includes 02 (settings.js collision avoidance); 07-06 AI-08 import rewritten as ONE callMessages bundle call routed per-section through WriteGate (fixes 4× cost loop); 07-03 data/conversations/ explicitly documented as write-only-from-app; 07-04 lesson summary specified as "first sentence of body, capped at 200 chars" with the exact JS expression; 07-04 tolerant-load extension made explicit (drafts + library both tolerated; original 4 files strict). Post-revision verdict: PASS. M-2 (5-file scope in 07-05 Task 1) deferred to executor with rationale; 6 LOW polish items deferred to execution-time. Side-task: added the East India 75 to the classics database (app/js/classics-db-extra-3.js + index.html wiring) — searchable by Recommender; 169 recipes total. Phase 7 ready for /gsd-execute-phase. ——— Prior: 2026-05-21 Phase 6 UAT COMPLETE: 22/22 tests resolved (20 pass, 2 issues explicitly deferred to future phases). Two recommender blocker bugs found and fixed mid-UAT: (1) lc() in recommender-engine.js read bottle `style` not `type`, so owned bottles read as missing — fixed by concatenating type/style/brand/subtype/name/nationality/region (buildable 6→20); (2) over-broad bare 'amaro' keyword in classics-db matched Campari (type:'Amaro'), making Paper Plane/Toronto falsely buildable — removed bare 'amaro' from Amaro Nonino + Fernet-Branca. Deferred issues: Test 3 (stale-SHA save failures on rapid saves) and Test 12 (rename doesn't sync across all lists holding a recipe). Enhancement backlog captured in 06-UAT.md Deferred: unified recipe-chip schema + shared render (chips identical everywhere with ♥/☆/✓ + cross-list move), normalize recipe storage (store once, reference by id — also fixes Test 12), inventory synonym/alias layer (limes→lime juice, Cointreau/GM/Triple Sec→Orange Liqueur), bartender specialty as ranking weight not filter + sidebar specialty selectors, AI recipe discovery button, optional ingredients (checkbox + buildable ignores optionals), recipe image upload (data/recipe_images/, id-named), substitution suggestions on cards, optional Method/Instructions + "Shot" method type, Made-icon checkmark, heart/star icon shape. Phase 6 shipped. ——— Prior: Phase 6 EXECUTED: all 4 plans complete (06-01 D-08 name+base dedup via Utils.sameRecipe; 06-02 D-06 editable Originals modal with rename-safe dual-write; 06-03 D-07 Originals in Recommender inventory-aware Strategy B + amber badge + crash guard; 06-04 D-09 06-TEST-CHECKLIST.md + 06-UAT.md). Verifier: GOAL ACHIEVED (13/13 must-haves), node --check passes on all 4 JS files, engine smoke test confirms Originals scored inventory-aware without crash. Status awaiting_uat — user runs 06-UAT.md (22 tests) via GSD commands; no auto-advance per D-09. Earlier: Phase 6 replanned: 06-01 (D-08 dedup), 06-02 (D-06 editable Originals modal), 06-03 (D-07 Originals in Recommender, Strategy B), 06-04 (D-09 UAT+checklist). 8 ROADMAP reqs + 3 gap tasks confirmed DONE. Earlier: Phase 5 UAT complete (17/17 pass). Phase 6 opened: REC-10 (card layout fix) and REC-11 (heart/star toggle state) shipped. Three Phase 6 bugs fixed: REC-BUG-01 (unconstrained mode now shows missing-ingredient info rows with shopping-list links), REC-BUG-02 (veto filter now checks all ingredient names, not just recipe.base — fixes egg white appearing in results), INV-BUG-01 (Got-it dialog auto-detects correct inventory section via keyword matching — fixes vermouth defaulting to Whiskeys). ROADMAP renumbered to 10 phases. 168-recipe DB. Favicon. Archetype selection fixed.*
