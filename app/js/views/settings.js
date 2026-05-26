@@ -37,6 +37,23 @@ const SettingsView = (() => {
     'Educational & nerdy',
   ];
 
+  // ─── Chat model options (D-12, AI-SPEC §4 — bare aliases only) ───────────
+  const CHAT_MODELS = [
+    ['claude-haiku-4-5',  'Haiku (fast/cheap)'],
+    ['claude-sonnet-4-6', 'Sonnet (recommended)'],
+    ['claude-opus-4-7',   'Opus (max quality)'],
+  ];
+  const DEFAULT_CHAT_MODEL = 'claude-sonnet-4-6';
+  function currentChatModel() {
+    const stored = localStorage.getItem('bb_chat_model');
+    // L-2 polish: clear stale/unknown IDs (e.g. a date-suffixed pre-Phase-7 alias) and fall back to default
+    if (!stored || !CHAT_MODELS.some(([v]) => v === stored)) {
+      if (stored) localStorage.removeItem('bb_chat_model');
+      return DEFAULT_CHAT_MODEL;
+    }
+    return stored;
+  }
+
   // ─── Logout confirmation dialog ───────────────────────────────────────────
   function showLogoutDialog(onConfirm) {
     const overlay = document.createElement('div');
@@ -163,6 +180,20 @@ const SettingsView = (() => {
           </p>
           <button class="btn btn-primary btn-sm" id="st-save-ai-key" type="button">Save API key</button>
           <p id="st-ai-key-status" style="min-height:1.2em;margin-top:8px;font-size:0.82rem;"></p>
+
+          <!-- ── SET-05: Model selector (D-12) ───────────────────────────── -->
+          <div class="form-group" style="margin-top:20px;">
+            <label for="st-chat-model">Model</label>
+            <select id="st-chat-model">
+              ${CHAT_MODELS.map(([value, label]) =>
+                `<option value="${Utils.escapeHtml(value)}"${value === currentChatModel() ? ' selected' : ''}>${Utils.escapeHtml(label)}</option>`
+              ).join('')}
+            </select>
+          </div>
+          <p style="font-size:0.82rem;color:var(--text-dim);">
+            Sonnet is the recommended balance of speed, quality, and cost on your key. (per D-12)
+          </p>
+          <p id="st-chat-model-status" style="min-height:1.2em;margin-top:8px;font-size:0.82rem;"></p>
         </div>
 
         <!-- ── Section 5: Export & Import (EXPORT-01–04) ───────────────── -->
@@ -296,6 +327,16 @@ const SettingsView = (() => {
         statusEl.style.color = 'var(--text-muted)';
         Utils.showToast('Anthropic API key cleared.');
       }
+    });
+
+    // ── Event: SET-05 Model selector (D-12) ──────────────────────────────
+    container.querySelector('#st-chat-model').addEventListener('change', (e) => {
+      const value = e.target.value;
+      const statusEl = container.querySelector('#st-chat-model-status');
+      localStorage.setItem('bb_chat_model', value);
+      statusEl.textContent = 'Model saved ✓';
+      statusEl.style.color = 'var(--green)';
+      Utils.showToast('Chat model updated.');
     });
 
     // ── Event: Export / Import (EXPORT-01–04) ────────────────────────────
