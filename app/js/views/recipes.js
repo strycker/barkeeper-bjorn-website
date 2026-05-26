@@ -104,54 +104,324 @@ const RecipesView = (() => {
     return { inventoryText, profileText, bkName, bkPreset };
   }
 
+  // ── AI-03: design prompt modal (live generation -> auto-saved draft) ────
+  // Replaces the prior copy-the-prompt stub. Flow:
+  //   1. user enters a design prompt
+  //   2. ClaudeAPI.requestJSON(schemaKey:'drafts', ...) -> normalized draft
+  //   3. WriteGate.gate auto-saves the draft (D-09)
+  //   4. refine card stays open for same-draft tweaks (D-10) and new generation
+  // All writes are fail-closed (no write on validation throw) and gated.
   function showAIPromptModal(container) {
     const { inventoryText, profileText, bkName, bkPreset } = buildPromptContext();
-
-    const prompt = `You are ${bkName}, a ${bkPreset} bartender. Design a new original cocktail for my home bar.
-
-My inventory:
-${inventoryText}
-
-My flavor profile: ${profileText}
-
-Please provide:
-- Name and tagline
-- Creator attribution (format: "Original by ${bkName}")
-- Full ingredient list with amounts (e.g. "2 oz Bourbon")
-- Method (step-by-step instructions)
-- Method type (shaken/stirred/built/blended/thrown/other)
-- Glassware and garnish
-- Flavor profile description
-- Why it works (the reasoning behind the recipe)`.trim();
-
-    const hasApiKey = !!localStorage.getItem('bb_anthropic_key');
+    const hasApiKey = !!(typeof ClaudeAPI !== 'undefined' && ClaudeAPI.getKey && ClaudeAPI.getKey());
 
     const overlay = document.createElement('div');
     overlay.className = 'confirm-dialog-overlay';
     overlay.innerHTML = `
-      <div class="confirm-dialog" style="max-width:560px;width:90vw;">
+      <div class="confirm-dialog ai-design-dialog" style="max-width:640px;width:92vw;">
         <h3 style="margin-bottom:8px;">Generate with AI</h3>
         ${hasApiKey
-          ? `<p style="color:var(--amber-dim);font-size:0.85rem;margin-bottom:12px;">AI generation coming in a future update. Copy the prompt below to use with any AI assistant.</p>`
-          : `<p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:12px;">Copy this prompt and paste it into Claude, ChatGPT, or any AI assistant.</p>`}
-        <textarea id="ai-prompt-text" rows="12"
-          style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;font-size:0.82rem;color:var(--text-dim);font-family:monospace;resize:vertical;"
-          readonly>${Utils.escapeHtml(prompt)}</textarea>
+          ? `<p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:12px;">Describe a cocktail and ${Utils.escapeHtml(bkName)} will design it. The draft auto-saves so you can refine it without losing work.</p>`
+          : `<p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:12px;">Add your Anthropic API key in Settings to generate drafts here. (Without a key, copy the prompt below into Claude/ChatGPT.)</p>`}
+        <textarea id="ai-design-prompt" rows="3"
+          placeholder="e.g. a smoky mezcal sour with honey and lemon, summery"
+          style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;font-size:0.88rem;font-family:inherit;resize:vertical;"></textarea>
+        <p id="ai-design-status" style="font-size:0.82rem;min-height:1.2em;margin-top:6px;color:var(--text-muted);"></p>
+        <div id="ai-design-preview"></div>
         <div class="dialog-btns" style="margin-top:12px;">
-          <button class="btn btn-ghost btn-sm" id="ai-close">Close</button>
-          <button class="btn btn-primary btn-sm" id="ai-copy">Copy Prompt</button>
+          <button class="btn btn-ghost btn-sm" id="ai-design-close">Close</button>
+          <button class="btn btn-primary btn-sm" id="ai-design-generate" ${hasApiKey ? '' : 'disabled'}>${hasApiKey ? 'Generate' : 'No API key'}</button>
         </div>
       </div>`;
     document.body.appendChild(overlay);
-    overlay.querySelector('#ai-close').addEventListener('click', () => overlay.remove());
-    overlay.querySelector('#ai-copy').addEventListener('click', () => {
-      navigator.clipboard.writeText(prompt).then(() => {
-        const btn = overlay.querySelector('#ai-copy');
-        btn.textContent = 'Copied!';
-        setTimeout(() => { btn.textContent = 'Copy Prompt'; }, 2000);
+
+    const closeBtn   = overlay.querySelector('#ai-design-close');
+    const genBtn     = overlay.querySelector('#ai-design-generate');
+    const promptEl   = overlay.querySelector('#ai-design-prompt');
+    const statusEl   = overlay.querySelector('#ai-design-status');
+    const previewEl  = overlay.querySelector('#ai-design-preview');
+
+    closeBtn.addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+
+    if (!hasApiKey) return;
+
+    // State for the open draft (D-10): same draft_id is updated on tweaks;
+    // 'generate new' creates a fresh draft_id; 'save copy' forks before refine.
+    let currentDraft = null;
+
+    genBtn.addEventListener('click', () => {
+      const userPrompt = promptEl.value.trim();
+      if (!userPrompt) {
+        statusEl.textContent = 'Enter a description first.';
+        statusEl.style.color = 'var(--red)';
+        return;
+      }
+      runAIDesign({ userPrompt, mode: 'new', genBtn, statusEl, previewEl, bkName, bkPreset, inventoryText, profileText, setCurrent: d => { currentDraft = d; renderRefineCard(previewEl, currentDraft, { bkName, bkPreset, inventoryText, profileText, setCurrent: d2 => { currentDraft = d2; }, container }); }, container });
+    });
+  }
+
+  // Build the system prompt for AI-03 design / refine requests.
+  function _aiDesignSystem(bkName, bkPreset, inventoryText, profileText) {
+    return [
+      `You are ${bkName}, a ${bkPreset} bartender. Design a SINGLE original cocktail for the home bar described below.`,
+      '',
+      '## Bar Inventory',
+      inventoryText || 'Not set yet.',
+      '',
+      '## Flavor Profile',
+      profileText || 'Not set yet.',
+      '',
+      'Respond with a SINGLE JSON object matching the draft schema:',
+      '{',
+      '  "drafts": [ {',
+      '    "name": string,            // required',
+      '    "tagline": string,',
+      '    "base": string,',
+      '    "ingredients": [ { "name": string, "amount": string, "notes": string } ],',
+      '    "method": string,',
+      '    "method_type": "shaken"|"stirred"|"built"|"blended"|"thrown"|"other",',
+      '    "glassware": string,',
+      '    "garnish": string,',
+      '    "tasting_notes": string,',
+      '    "why_it_works": string',
+      '  } ]',
+      '}',
+      'Wrap the single recipe in the drafts array. No prose, no markdown, no code fences.',
+    ].join('\n');
+  }
+
+  // Drive a single design/refine request through requestJSON (fail-closed).
+  // mode: 'new' (start from prompt) | 'tweak' (same draft_id) | 'fork' (new id seeded from a draft)
+  async function runAIDesign({ userPrompt, mode, baseDraft, genBtn, statusEl, previewEl, bkName, bkPreset, inventoryText, profileText, setCurrent, container }) {
+    if (genBtn) {
+      genBtn.disabled = true;
+      genBtn.dataset.label = genBtn.textContent;
+      genBtn.textContent = 'Generating…';
+    }
+    statusEl.textContent = '';
+    statusEl.style.color = 'var(--text-muted)';
+
+    try {
+      // Compose user prompt: for tweak/fork, include the prior draft JSON inline so
+      // the model can iterate on it. For new, just the user's description.
+      let composed = userPrompt;
+      if ((mode === 'tweak' || mode === 'fork') && baseDraft) {
+        const slim = {
+          name: baseDraft.name,
+          tagline: baseDraft.tagline,
+          base: baseDraft.base,
+          ingredients: baseDraft.ingredients,
+          method: baseDraft.method,
+          method_type: baseDraft.method_type,
+          glassware: baseDraft.glassware,
+          garnish: baseDraft.garnish,
+        };
+        composed = `Refine this existing draft per the user's tweak. Current draft:\n${JSON.stringify(slim, null, 2)}\n\nUser tweak: ${userPrompt}`;
+      }
+
+      const system = _aiDesignSystem(bkName, bkPreset, inventoryText, profileText);
+      const norm = await ClaudeAPI.requestJSON({
+        system,
+        userPrompt: composed,
+        schemaKey: 'drafts',
+        model: ClaudeAPI.getModel(),
+        maxTokens: 1500,
+      });
+
+      // requestJSON returns a Normalized {drafts:[...]} shape — pluck the new entry.
+      const drafts = (norm && Array.isArray(norm.drafts)) ? norm.drafts : [];
+      const candidate = drafts[drafts.length - 1];
+      if (!candidate || !candidate.name) {
+        throw new Error('No draft returned.');
+      }
+
+      // Build draft entry (D-10): same draft_id on tweak, new id on new/fork.
+      const now = new Date().toISOString();
+      let draftEntry;
+      if (mode === 'tweak' && baseDraft && baseDraft.draft_id) {
+        draftEntry = {
+          ...candidate,
+          _source: 'ai-generated',
+          draft_id: baseDraft.draft_id,
+          created_at: baseDraft.created_at || now,
+          updated_at: now,
+          source_prompt: baseDraft.source_prompt || userPrompt,
+        };
+      } else {
+        draftEntry = {
+          ...candidate,
+          _source: 'ai-generated',
+          draft_id: 'draft' + Date.now(),
+          created_at: now,
+          updated_at: now,
+          source_prompt: userPrompt,
+        };
+      }
+
+      // Build the new drafts.json payload.
+      const oldDrafts = State.get('drafts') || { drafts: [] };
+      const list = Array.isArray(oldDrafts.drafts) ? oldDrafts.drafts.slice() : [];
+      const idx = list.findIndex(d => d.draft_id === draftEntry.draft_id);
+      if (idx >= 0) list[idx] = draftEntry; else list.push(draftEntry);
+      const newDrafts = { drafts: list, last_updated: new Date().toISOString().slice(0, 10) };
+
+      // FM #3: phantom-ingredient flag before gate.
+      const inv = State.get('inventory') || {};
+      const tokens = _inventoryTokens(inv);
+      const vetoArr = (inv.vetoes && inv.vetoes.disliked_ingredients) || [];
+      const fid = (typeof WriteGate !== 'undefined' && WriteGate.inventoryFidelity)
+        ? WriteGate.inventoryFidelity(draftEntry, tokens, vetoArr)
+        : { phantoms: [], vetoed: [] };
+
+      // Auto-save via WriteGate (D-09 - never silently corrupt).
+      const gateMsg = mode === 'tweak'
+        ? `Refine draft: ${draftEntry.name}`
+        : `Save AI draft: ${draftEntry.name}`;
+      const result = await WriteGate.gate({
+        schemaKey: 'drafts',
+        oldData: oldDrafts,
+        newPayload: newDrafts,
+        message: gateMsg,
+        onConfirm: async () => {
+          State.set('drafts', newDrafts);
+          return State.save('drafts');
+        },
+      });
+
+      if (result && result.status === 'confirmed') {
+        setCurrent(draftEntry);
+        statusEl.textContent = `Saved as draft "${draftEntry.name}".`;
+        statusEl.style.color = 'var(--green)';
+        if (fid.phantoms && fid.phantoms.length) {
+          Utils.showToast(
+            `Phantom ingredient${fid.phantoms.length > 1 ? 's' : ''}: ${fid.phantoms.join(', ')} (not in your inventory).`,
+            'info',
+            5000,
+          );
+        }
+        if (fid.vetoed && fid.vetoed.length) {
+          Utils.showToast(
+            `Veto'd: ${fid.vetoed.join(', ')} — flagged before promote.`,
+            'info',
+            5000,
+          );
+        }
+        return draftEntry;
+      } else if (result && result.status === 'invalid') {
+        // WriteGate already toasted the validation error.
+        statusEl.textContent = 'Draft failed validation — not saved.';
+        statusEl.style.color = 'var(--red)';
+      } else {
+        statusEl.textContent = 'Draft cancelled.';
+        statusEl.style.color = 'var(--text-muted)';
+      }
+      return null;
+    } catch (err) {
+      const msg = (err && err.message) || String(err);
+      statusEl.textContent = 'Generation failed: ' + msg;
+      statusEl.style.color = 'var(--red)';
+      Utils.showToast('Generation failed: ' + msg, 'error', 5000);
+      return null;
+    } finally {
+      if (genBtn) {
+        genBtn.disabled = false;
+        genBtn.textContent = genBtn.dataset.label || 'Generate';
+      }
+    }
+  }
+
+  // Lowercase tokens from inventory bottle names — fed to inventoryFidelity.
+  function _inventoryTokens(inv) {
+    const tokens = new Set();
+    const addStr = s => {
+      if (!s) return;
+      const lc = String(s).toLowerCase();
+      tokens.add(lc);
+      lc.split(/[^a-z0-9]+/).filter(t => t.length > 2).forEach(t => tokens.add(t));
+    };
+    Object.values(inv.base_spirits || {}).forEach(arr => (arr || []).forEach(i => addStr(typeof i === 'string' ? i : (i.style || i.type || i.brand || i.name))));
+    Object.values(inv.liqueurs_and_cordials || {}).forEach(arr => (arr || []).forEach(i => addStr(typeof i === 'string' ? i : (i.style || i.type || i.brand || i.name))));
+    Object.values(inv.bitters || {}).forEach(arr => (arr || []).forEach(i => addStr(typeof i === 'string' ? i : (i.style || i.type || i.brand || i.name))));
+    ['fortified_wines_and_aperitif_wines', 'syrups', 'mixers', 'refrigerator_perishables', 'pantry_spice_rack', 'fresh_produce', 'non_alcoholic_spirits'].forEach(k => {
+      (inv[k] || []).forEach(i => addStr(typeof i === 'string' ? i : (i.style || i.type || i.brand || i.name)));
+    });
+    return [...tokens];
+  }
+
+  // Render the open refine card for the most recent draft (D-10).
+  function renderRefineCard(previewEl, draft, ctx) {
+    if (!draft) { previewEl.innerHTML = ''; return; }
+    const { bkName, bkPreset, inventoryText, profileText, setCurrent, container } = ctx;
+    const ingList = (draft.ingredients || [])
+      .map(i => `<li>${Utils.escapeHtml(i.amount || '')} ${Utils.escapeHtml(i.name || '')}${i.notes ? ` <span style="color:var(--text-muted);">(${Utils.escapeHtml(i.notes)})</span>` : ''}</li>`)
+      .join('');
+
+    previewEl.innerHTML = `
+      <div class="ai-refine-card" style="margin-top:14px;padding:12px;background:var(--bg3);border:1px solid var(--amber-dim);border-radius:var(--radius-sm);">
+        <div style="font-size:0.95rem;font-weight:600;color:var(--amber);">${Utils.escapeHtml(draft.name)}</div>
+        ${draft.tagline ? `<div style="font-size:0.82rem;color:var(--text-dim);font-style:italic;margin-top:2px;">${Utils.escapeHtml(draft.tagline)}</div>` : ''}
+        ${ingList ? `<ul style="margin:8px 0 6px;padding-left:18px;font-size:0.84rem;color:var(--text-dim);">${ingList}</ul>` : ''}
+        ${draft.method ? `<div style="font-size:0.82rem;color:var(--text-dim);"><strong>Method:</strong> ${Utils.escapeHtml(draft.method)}</div>` : ''}
+        ${draft.glassware ? `<div style="font-size:0.82rem;color:var(--text-dim);"><strong>Glass:</strong> ${Utils.escapeHtml(draft.glassware)}</div>` : ''}
+        ${draft.garnish ? `<div style="font-size:0.82rem;color:var(--text-dim);"><strong>Garnish:</strong> ${Utils.escapeHtml(draft.garnish)}</div>` : ''}
+        ${draft.why_it_works ? `<div style="font-size:0.82rem;color:var(--text-dim);margin-top:6px;"><strong>Why it works:</strong> ${Utils.escapeHtml(draft.why_it_works)}</div>` : ''}
+
+        <div style="margin-top:10px;">
+          <label style="font-size:0.82rem;color:var(--text-dim);">Refine this draft</label>
+          <input type="text" class="ai-refine-input" placeholder="e.g. make it less sweet"
+            style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 8px;font-size:0.85rem;margin-top:4px;">
+        </div>
+        <p class="ai-refine-status" style="font-size:0.82rem;min-height:1.2em;margin-top:6px;color:var(--text-muted);"></p>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">
+          <button class="btn btn-primary btn-sm ai-refine-tweak" title="Update the SAME draft with this tweak">Apply tweak (same draft)</button>
+          <button class="btn btn-secondary btn-sm ai-refine-new" title="Generate a brand-new draft from this idea">Generate new</button>
+          <button class="btn btn-ghost btn-sm ai-refine-fork" title="Save a copy of this draft before refining">Save copy then refine</button>
+        </div>
+      </div>`;
+
+    const tweakInput = previewEl.querySelector('.ai-refine-input');
+    const refineStatus = previewEl.querySelector('.ai-refine-status');
+
+    previewEl.querySelector('.ai-refine-tweak').addEventListener('click', async () => {
+      const tweak = tweakInput.value.trim();
+      if (!tweak) { refineStatus.textContent = 'Enter a tweak first.'; refineStatus.style.color = 'var(--red)'; return; }
+      const btn = previewEl.querySelector('.ai-refine-tweak');
+      const updated = await runAIDesign({
+        userPrompt: tweak, mode: 'tweak', baseDraft: draft,
+        genBtn: btn, statusEl: refineStatus, previewEl,
+        bkName, bkPreset, inventoryText, profileText,
+        setCurrent: d => { setCurrent(d); renderRefineCard(previewEl, d, ctx); },
+        container,
+      });
+      if (!updated) return;
+    });
+
+    previewEl.querySelector('.ai-refine-new').addEventListener('click', async () => {
+      const tweak = tweakInput.value.trim() || ('Variation on: ' + (draft.source_prompt || draft.name));
+      const btn = previewEl.querySelector('.ai-refine-new');
+      await runAIDesign({
+        userPrompt: tweak, mode: 'new',
+        genBtn: btn, statusEl: refineStatus, previewEl,
+        bkName, bkPreset, inventoryText, profileText,
+        setCurrent: d => { setCurrent(d); renderRefineCard(previewEl, d, ctx); },
+        container,
       });
     });
-    overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+
+    previewEl.querySelector('.ai-refine-fork').addEventListener('click', async () => {
+      // Fork-before-refine: clone the draft as a new entry, then immediately
+      // open the refine card on the new copy so the original is preserved.
+      const tweak = tweakInput.value.trim() || 'minor variation';
+      const btn = previewEl.querySelector('.ai-refine-fork');
+      await runAIDesign({
+        userPrompt: tweak, mode: 'fork', baseDraft: draft,
+        genBtn: btn, statusEl: refineStatus, previewEl,
+        bkName, bkPreset, inventoryText, profileText,
+        setCurrent: d => { setCurrent(d); renderRefineCard(previewEl, d, ctx); },
+        container,
+      });
+    });
   }
 
   function renderTab(tabName, recipes, container, mainContainer) {
