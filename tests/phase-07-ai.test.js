@@ -245,3 +245,91 @@ test('WriteGate.inventoryFidelity: substitution-noted ingredients are NOT phanto
   const result = WriteGate.inventoryFidelity(recipe, ['bourbon'], []);
   assert.deepEqual(result.phantoms, [], 'explicit substitution must not be a phantom');
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI-13: RecommenderEngine.deriveWithAI — key-gated, cached, fail-soft
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Load the recommender engine into this VM context. CLASSICS_DB is referenced
+// only inside `recommend()`, never at module load, so no stub is required for
+// the deriveWithAI surface tests below.
+vm.runInThisContext(fs.readFileSync(path.resolve(__dirname, '../app/js/recommender-engine.js'), 'utf8'));
+
+// Helper: temporarily monkey-patch the real ClaudeAPI object's methods for a
+// single test, restoring them afterward. We patch in-place (rather than swap
+// the `const ClaudeAPI` binding) because `const` declarations under
+// vm.runInThisContext create lexical bindings — the engine module captures the
+// real ClaudeAPI by lexical reference, so a globalThis.ClaudeAPI swap is
+// invisible to it. Mutating the live object's methods is what the engine sees.
+//
+// MUST `await fn()` inside the try (not `return fn()`) — try/finally with a
+// returned promise fires `finally` synchronously, restoring methods BEFORE
+// the async test body completes. That race causes spurious cache misses.
+async function withClaudeStub(stub, fn) {
+  const target = ClaudeAPI;
+  const saved = {};
+  for (const k of Object.keys(stub)) {
+    saved[k] = target[k];
+    target[k] = stub[k];
+  }
+  try { return await fn(); }
+  finally {
+    for (const k of Object.keys(stub)) target[k] = saved[k];
+  }
+}
+
+test('AI-13: deriveWithAI is exported on RecommenderEngine', () => {
+  assert.equal(typeof RecommenderEngine.deriveWithAI, 'function',
+    'deriveWithAI must be added to the IIFE return without dropping existing exports');
+  assert.equal(typeof RecommenderEngine.recommend, 'function',
+    'recommend() must still be exported (preserve every Phase-5 export)');
+  assert.equal(typeof RecommenderEngine.normalizeOriginal, 'function',
+    'normalizeOriginal must still be exported (preserve every Phase-5 export)');
+});
+
+test('AI-13: deriveWithAI returns false when no API key (Phase-5 byte-identical path)', async () => {
+  freshStorage();
+  let callCount = 0;
+  await withClaudeStub({
+    getKey: () => '',
+    getModel: () => 'claude-sonnet-4-6',
+    callMessages: async () => { callCount++; return '{"derived":true}'; },
+    extractJSON: t => JSON.parse(t),
+  }, async () => {
+    const result = await RecommenderEngine.deriveWithAI('lemon juice', new Set(['lemons']));
+    assert.equal(result, false, 'no key must return false');
+    assert.equal(callCount, 0, 'no-key path must NOT call callMessages');
+  });
+});
+
+test('AI-13: deriveWithAI caches positive answer in bb_derivation_cache (no second network call)', async () => {
+  freshStorage();
+  let callCount = 0;
+  await withClaudeStub({
+    getKey: () => 'sk-stub',
+    getModel: () => 'claude-sonnet-4-6',
+    callMessages: async () => { callCount++; return '{"derived":true}'; },
+    extractJSON: t => JSON.parse(t),
+  }, async () => {
+    const r1 = await RecommenderEngine.deriveWithAI('lemon juice', new Set(['lemons']));
+    const r2 = await RecommenderEngine.deriveWithAI('lemon juice', new Set(['lemons']));
+    assert.equal(r1, true);
+    assert.equal(r2, true);
+    assert.equal(callCount, 1, 'second call must hit cache (Pitfall 6 - cost trap)');
+    const cache = JSON.parse(localStorage.getItem('bb_derivation_cache') || '{}');
+    assert.ok(Object.keys(cache).length >= 1, 'cache must persist the decision');
+  });
+});
+
+test('AI-13: deriveWithAI is fail-soft on errors (never blocks the recommender)', async () => {
+  freshStorage();
+  await withClaudeStub({
+    getKey: () => 'sk-stub',
+    getModel: () => 'claude-sonnet-4-6',
+    callMessages: async () => { throw new Error('429 rate limited'); },
+    extractJSON: t => JSON.parse(t),
+  }, async () => {
+    const result = await RecommenderEngine.deriveWithAI('lime juice', new Set(['limes']));
+    assert.equal(result, false, 'on any error the helper must resolve to false, not throw');
+  });
+});

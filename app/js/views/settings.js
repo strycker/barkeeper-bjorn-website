@@ -219,6 +219,26 @@ const SettingsView = (() => {
             <button class="btn btn-secondary btn-sm" id="st-export-ai">Export for AI (text)</button>
           </div>
           <div id="st-import-area"></div>
+
+          <!-- ── AI-08 / AI-10: AI Import / Repair sub-panel (D-14) ──────── -->
+          <div id="sect-ai-import" style="margin-top:24px;padding-top:16px;border-top:1px solid var(--amber-dim);">
+            <div class="settings-section__heading">AI Import / Repair</div>
+            <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:12px;">
+              Paste legacy bartender notes (markdown) or upload an <code>.md</code> file.
+              Claude extracts inventory / profile / recipes / barkeeper sections; each is
+              schema-validated and previewed as a diff before any write. Invalid sections
+              fail closed — nothing is written until you confirm.
+            </p>
+            <textarea id="st-ai-import-text" rows="6"
+                      placeholder="# My old bar notes&#10;## Inventory&#10;- Bulleit Bourbon&#10;- Plymouth Gin&#10;..."
+                      style="width:100%;font-family:monospace;font-size:0.85rem;margin-bottom:8px;"></textarea>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:8px;">
+              <input type="file" id="st-ai-import-file" accept=".md,.markdown,.txt" style="font-size:0.85rem;">
+              <button class="btn btn-primary btn-sm" id="st-ai-import-btn" type="button">Import with Claude</button>
+            </div>
+            <p id="st-ai-import-status" style="min-height:1.2em;font-size:0.82rem;"></p>
+            <div id="st-ai-import-errors" style="font-size:0.85rem;"></div>
+          </div>
         </div>
 
         <!-- ── Section 4: Danger Zone (SETTINGS-04) ─────────────────────── -->
@@ -418,6 +438,215 @@ const SettingsView = (() => {
       DataExport.exportAIContext();
     });
     DataExport.renderImportUI(container.querySelector('#st-import-area'));
+
+    // ── AI-08 / AI-10: Import-legacy-markdown + repair handlers ──────────
+    // Schema keys this importer recognizes (mirrors Normalize.byKey dispatch).
+    const AI_IMPORT_KEYS = ['inventory', 'profile', 'recipes', 'barkeeper'];
+
+    // Friendly labels used in the diff dialog and status messages.
+    const AI_IMPORT_LABELS = {
+      inventory: 'inventory',
+      profile:   'profile',
+      recipes:   'recipes',
+      barkeeper: 'barkeeper',
+    };
+
+    // AI-10: repair a single broken section, then route through WriteGate.
+    // Fail-closed: if requestJSON still cannot produce a valid payload after
+    // its single retry it throws — we surface the error and write nothing.
+    async function repairSection(schemaKey, brokenObj, errors) {
+      const statusEl  = container.querySelector('#st-ai-import-status');
+      const errorsEl  = container.querySelector('#st-ai-import-errors');
+      try {
+        if (statusEl) {
+          statusEl.textContent = `Asking Claude to repair ${AI_IMPORT_LABELS[schemaKey] || schemaKey}…`;
+          statusEl.style.color = 'var(--text-muted)';
+        }
+        const fixed = await ClaudeAPI.requestJSON({
+          system:    `Repair this JSON so it matches the ${schemaKey} schema. JSON only — no prose.`,
+          userPrompt: JSON.stringify(brokenObj) + '\nErrors: ' + (errors || []).join('; '),
+          schemaKey,
+          model:     ClaudeAPI.getModel(),
+          maxTokens: 4096,
+        });
+        const result = await WriteGate.gate({
+          schemaKey,
+          oldData:    State.get(schemaKey),
+          newPayload: fixed,
+          message:    `Repair ${schemaKey} (AI)`,
+          onConfirm:  async () => {
+            State.set(schemaKey, fixed);
+            await State.save(schemaKey, `AI repair: ${schemaKey} via Settings`);
+          },
+        });
+        if (statusEl) {
+          if (result.status === 'confirmed') {
+            statusEl.textContent = `Repaired ${schemaKey} ✓`;
+            statusEl.style.color = 'var(--green)';
+          } else if (result.status === 'invalid') {
+            // requestJSON validated already — only possible if WriteGate disagreed.
+            statusEl.textContent = `Repair still invalid for ${schemaKey} — fail-closed, nothing written.`;
+            statusEl.style.color = 'var(--red)';
+          } else {
+            statusEl.textContent = `Repair cancelled for ${schemaKey}.`;
+            statusEl.style.color = 'var(--text-muted)';
+          }
+        }
+      } catch (err) {
+        // Fail-closed: surface the error, write nothing. Escape model-derived text.
+        if (statusEl) {
+          statusEl.textContent = `Repair failed for ${schemaKey} — fail-closed, nothing written.`;
+          statusEl.style.color = 'var(--red)';
+        }
+        if (errorsEl) {
+          errorsEl.innerHTML +=
+            `<div style="color:var(--red);margin-top:6px;">Repair error (${Utils.escapeHtml(schemaKey)}): ${Utils.escapeHtml(err && err.message ? err.message : String(err))}</div>`;
+        }
+      }
+    }
+
+    // AI-08: ONE Claude call extracts whatever sections are present in the
+    // legacy markdown blob (NOT a per-schema loop — Pitfall 6 cost trap).
+    // Each present section is then Normalized + validated + diff-confirmed
+    // (sequential — Pitfall 4). Invalid sections offer AI-10 repair; the
+    // schema-validate / WriteGate pipeline is the only path to a write.
+    async function importLegacy(mdText) {
+      const statusEl = container.querySelector('#st-ai-import-status');
+      const errorsEl = container.querySelector('#st-ai-import-errors');
+      if (errorsEl) errorsEl.innerHTML = '';
+      if (!mdText || !mdText.trim()) {
+        if (statusEl) {
+          statusEl.textContent = 'Paste some markdown notes or upload a file first.';
+          statusEl.style.color = 'var(--red)';
+        }
+        return;
+      }
+      if (!ClaudeAPI.getKey()) {
+        if (statusEl) {
+          statusEl.textContent = 'No Anthropic API key configured. Add one above first.';
+          statusEl.style.color = 'var(--red)';
+        }
+        return;
+      }
+      if (statusEl) {
+        statusEl.textContent = 'Asking Claude to extract sections…';
+        statusEl.style.color = 'var(--text-muted)';
+      }
+      let bundle;
+      try {
+        const text = await ClaudeAPI.callMessages({
+          model:      ClaudeAPI.getModel(),
+          max_tokens: 4096,
+          system: 'Extract any of the four sections present in legacy bartender notes: inventory, profile, recipes, barkeeper. Return ONE JSON object whose keys are ONLY the sections present (omit keys whose sections are absent). JSON only — no prose.',
+          messages: [{ role: 'user', content: mdText }],
+        });
+        bundle = ClaudeAPI.extractJSON(text);
+      } catch (err) {
+        if (statusEl) {
+          statusEl.textContent = `Import failed — fail-closed, nothing written.`;
+          statusEl.style.color = 'var(--red)';
+        }
+        if (errorsEl) {
+          errorsEl.innerHTML =
+            `<div style="color:var(--red);">Extract error: ${Utils.escapeHtml(err && err.message ? err.message : String(err))}</div>`;
+        }
+        return;
+      }
+      if (!bundle || typeof bundle !== 'object' || Array.isArray(bundle)) {
+        if (statusEl) {
+          statusEl.textContent = 'Claude did not return a JSON object — fail-closed, nothing written.';
+          statusEl.style.color = 'var(--red)';
+        }
+        return;
+      }
+      const present = Object.keys(bundle).filter(k => AI_IMPORT_KEYS.includes(k));
+      if (present.length === 0) {
+        if (statusEl) {
+          statusEl.textContent = 'No recognized sections found in the notes.';
+          statusEl.style.color = 'var(--text-muted)';
+        }
+        return;
+      }
+      if (statusEl) {
+        statusEl.textContent = `Found sections: ${present.join(', ')}. Validating…`;
+        statusEl.style.color = 'var(--text-muted)';
+      }
+      // Sequential per-section processing — Pitfall 4 (no parallel State.save).
+      let writtenCount = 0;
+      for (const key of present) {
+        const raw  = bundle[key];
+        const norm = Normalize.byKey(key, raw);
+        const errs = await WriteGate.validate(key, norm);
+        if (errs && errs.length) {
+          // Fail-closed — never write. Offer AI-10 repair.
+          if (errorsEl) {
+            const wrap = document.createElement('div');
+            wrap.style.cssText = 'margin-top:8px;padding:8px;border:1px solid var(--red);border-radius:4px;';
+            // Show up to 3 error strings to keep the panel readable.
+            const errPreview = errs.slice(0, 3).map(e => Utils.escapeHtml(e)).join('<br>');
+            wrap.innerHTML = `
+              <div style="color:var(--red);font-weight:600;margin-bottom:4px;">${Utils.escapeHtml(key)} — validation failed (not written)</div>
+              <div style="color:var(--text-dim);font-size:0.82rem;margin-bottom:6px;">${errPreview}</div>
+              <button type="button" class="btn btn-secondary btn-sm" data-repair="${Utils.escapeHtml(key)}">Ask Claude to repair this</button>`;
+            wrap.querySelector('button[data-repair]').addEventListener('click', () => {
+              repairSection(key, raw, errs);
+            });
+            errorsEl.appendChild(wrap);
+          }
+          continue;
+        }
+        // Valid → diff/confirm/write through the gate.
+        const result = await WriteGate.gate({
+          schemaKey:  key,
+          oldData:    State.get(key),
+          newPayload: norm,
+          message:    `Import ${key} from notes`,
+          onConfirm:  async () => {
+            State.set(key, norm);
+            await State.save(key, `AI import: ${key} from legacy notes`);
+          },
+        });
+        if (result.status === 'confirmed') writtenCount++;
+      }
+      if (statusEl) {
+        if (writtenCount > 0) {
+          statusEl.textContent = `Imported ${writtenCount} section(s) ✓`;
+          statusEl.style.color = 'var(--green)';
+        } else {
+          statusEl.textContent = 'Import complete — nothing written (cancelled or invalid).';
+          statusEl.style.color = 'var(--text-muted)';
+        }
+      }
+    }
+
+    // File picker: read uploaded .md/.txt into the textarea.
+    const importFileEl = container.querySelector('#st-ai-import-file');
+    if (importFileEl) {
+      importFileEl.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const textareaEl = container.querySelector('#st-ai-import-text');
+          if (textareaEl) textareaEl.value = String(reader.result || '');
+        };
+        reader.onerror = () => Utils.showToast('Failed to read file: ' + (reader.error && reader.error.message), 'error');
+        reader.readAsText(file);
+      });
+    }
+
+    const importBtn = container.querySelector('#st-ai-import-btn');
+    if (importBtn) {
+      importBtn.addEventListener('click', async () => {
+        importBtn.disabled = true;
+        try {
+          const textareaEl = container.querySelector('#st-ai-import-text');
+          await importLegacy(textareaEl ? textareaEl.value : '');
+        } finally {
+          importBtn.disabled = false;
+        }
+      });
+    }
 
     // ── Event: Logout (SETTINGS-03) ───────────────────────────────────────
     container.querySelector('#st-logout').addEventListener('click', () => {

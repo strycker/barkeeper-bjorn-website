@@ -239,6 +239,10 @@ const BartenderWizardView = (() => {
               <label for="bw-personality">Long-form personality description</label>
               <textarea id="bw-personality" rows="5"
                 placeholder="A few sentences about how this bartender thinks, jokes, and reacts.">${Utils.escapeHtml(bk.personality_description || '')}</textarea>
+              <div style="margin-top:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <button type="button" class="btn btn-ghost btn-sm ai-advice-btn" id="bw-ai-help" title="Use Claude to draft a personality from the fields above">✨ Help me write this with Claude</button>
+                <span id="bw-ai-help-status" style="font-size:0.82rem;color:var(--text-muted);"></span>
+              </div>
             </div>
           </div>
 
@@ -300,6 +304,76 @@ const BartenderWizardView = (() => {
     document.getElementById('bw-personality')?.addEventListener('input', e => {
       State.patch('barkeeper', bk2 => { bk2.personality_description = e.target.value; });
       markDirty();
+    });
+
+    // ── AI-12: Help me write this with Claude (persona drafter) ──────────────
+    // Free-text draft via callMessages (a JSON shape is overkill for a textarea
+    // value). Fills the textarea and dispatches `input` so the existing handler
+    // saves via State.patch — NO direct AI->GitHub write (T-07-27 mitigation).
+    document.getElementById('bw-ai-help')?.addEventListener('click', async () => {
+      const helpBtn  = document.getElementById('bw-ai-help');
+      const statusEl = document.getElementById('bw-ai-help-status');
+      const taEl     = document.getElementById('bw-personality');
+      if (!helpBtn || !taEl) return;
+
+      if (typeof ClaudeAPI === 'undefined' || !ClaudeAPI.getKey || !ClaudeAPI.getKey()) {
+        Utils.showToast('Add your Anthropic API key in Settings first.', 'error');
+        return;
+      }
+
+      // Snapshot current short inputs as drafting hints.
+      const bkSnap     = State.get('barkeeper') || {};
+      const nameVal    = (document.getElementById('bw-name')?.value || bkSnap.identity?.name || 'Barkeeper Bjorn').trim();
+      const voiceVal   = (document.getElementById('bw-voice')?.value || bkSnap.active_preset || 'Professional Mixologist').trim();
+      const specVal    = (document.getElementById('bw-specialty')?.value || bkSnap.personality?.specialty || '').trim();
+      const namingVal  = (document.getElementById('bw-naming')?.value || bkSnap.cocktail_naming_style || '').trim();
+      const signoffVal = (document.getElementById('bw-signoff')?.value || bkSnap.signoff || '').trim();
+      const existing   = (taEl.value || '').trim();
+
+      const userPrompt = [
+        `Bartender name: ${nameVal}`,
+        `Voice / preset: ${voiceVal}`,
+        specVal    ? `Specialty: ${specVal}` : '',
+        namingVal  ? `Naming style: ${namingVal}` : '',
+        signoffVal ? `Signoff: ${signoffVal}` : '',
+        existing   ? `Existing description (improve or expand):\n${existing}` : '',
+        '',
+        'Write a vivid 3-5 sentence long-form personality description for this bartender that captures voice, attitude, and pet topics. Return ONLY the description text — no preamble, no markdown headings, no quotes around it.',
+      ].filter(Boolean).join('\n');
+
+      helpBtn.disabled = true;
+      const origLabel = helpBtn.textContent;
+      helpBtn.textContent = 'Drafting…';
+      statusEl.textContent = '';
+      statusEl.style.color = 'var(--text-muted)';
+
+      try {
+        const text = await ClaudeAPI.callMessages({
+          model: ClaudeAPI.getModel(),
+          max_tokens: 512,
+          system: 'You draft a bartender persona description for a home-bar app. Speak about the bartender in third-person voice. No preface, no quotes, no markdown — just the paragraph.',
+          messages: [{ role: 'user', content: userPrompt }],
+        });
+        const cleaned = String(text || '').trim().replace(/^["“”']+|["“”']+$/g, '').trim();
+        if (!cleaned) {
+          throw new Error('Empty draft returned.');
+        }
+        // Assigning to .value does NOT parse HTML (no XSS vector — T-07-24).
+        taEl.value = cleaned;
+        // Trigger the existing input handler so State.patch + markDirty fire.
+        taEl.dispatchEvent(new Event('input', { bubbles: true }));
+        statusEl.textContent = 'Draft loaded — review and save.';
+        statusEl.style.color = 'var(--green)';
+        Utils.showToast('Persona draft loaded — edit before saving.');
+      } catch (err) {
+        const msg = (err && err.message) || String(err);
+        statusEl.textContent = 'Draft failed: ' + msg;
+        statusEl.style.color = 'var(--red)';
+        Utils.showToast('Draft failed: ' + msg, 'error');
+      } finally {
+        helpBtn.disabled = false;
+        helpBtn.textContent = origLabel;
+      }
     });
 
     document.getElementById('bw-naming')?.addEventListener('change', e => {

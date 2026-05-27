@@ -125,29 +125,51 @@ const DashboardView = (() => {
         <span class="menu-item-desc">${shopping > 0 ? `${shopping} item${shopping !== 1 ? 's' : ''} queued` : 'Gap analysis & prioritized list'}</span>
       </a>`;
 
-    // Two disabled coming-soon cards (NAV-04, D-24)
+    // Phase 7: un-disabled Chat / Classroom / Library cards (REC-04 / D-24 retired)
+    // + AI-05 "Best bottle to add" action wired to ChatView.openDrawer.
     menuEl.insertAdjacentHTML('beforeend', `
-      <div class="menu-item menu-item--disabled" data-coming-soon aria-disabled="true" tabindex="-1">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="28" height="28" aria-hidden="true">
-          <path d="M8 12h8M12 8v8M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+      <a href="#chat" class="menu-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28" aria-hidden="true">
+          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
         </svg>
         <span class="menu-item-title">Chat with Bjorn</span>
-        <span class="menu-item-desc"><span class="coming-soon-badge">Coming soon</span></span>
-      </div>
-      <div class="menu-item menu-item--disabled" data-coming-soon aria-disabled="true" tabindex="-1">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="28" height="28" aria-hidden="true">
+        <span class="menu-item-desc">Have a conversation about your bar</span>
+      </a>
+      <a href="#classroom" class="menu-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28" aria-hidden="true">
           <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
         </svg>
         <span class="menu-item-title">Classroom</span>
-        <span class="menu-item-desc"><span class="coming-soon-badge">Coming soon</span></span>
-      </div>`);
+        <span class="menu-item-desc">Learn techniques and theory</span>
+      </a>
+      <a href="#library" class="menu-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28" aria-hidden="true">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+        <span class="menu-item-title">Library</span>
+        <span class="menu-item-desc">References and bookmarks</span>
+      </a>
+      <a href="#" class="menu-item" id="dash-ai-best-bottle" data-ai-best-bottle>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28" aria-hidden="true">
+          <path d="M12 2v6M12 22v-2M5 12H2M22 12h-3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>
+        </svg>
+        <span class="menu-item-title">Best Bottle to Add (AI)</span>
+        <span class="menu-item-desc">Ask Bjorn what one bottle will unlock the most for your bar</span>
+      </a>`);
 
-    // Toast on disabled card click (D-25)
+    // AI-05: open the shared drawer seeded with the best-bottle question.
     menuEl.addEventListener('click', e => {
-      if (e.target.closest('[data-coming-soon]')) {
-        Utils.showToast('Unlock by adding your Anthropic API key in Settings.');
+      const aiBtn = e.target.closest('[data-ai-best-bottle]');
+      if (aiBtn) {
         e.preventDefault();
         e.stopPropagation();
+        if (typeof ChatView === 'undefined' || !ChatView.openDrawer) {
+          Utils.showToast('Chat module not loaded.', 'error');
+          return;
+        }
+        ChatView.openDrawer({
+          seed: 'Given my current inventory and vetoes, what single bottle should I add next, and why? Focus on the biggest unlock for my taste profile.',
+        });
       }
     });
 

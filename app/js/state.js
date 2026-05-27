@@ -7,16 +7,22 @@ const State = (() => {
     inventory:  'data/inventory.json',
     recipes:    'data/recipes.json',
     drafts:     'data/drafts.json',
+    library:    'data/library.json',
   };
 
-  // Phase 7 D-11: `drafts` is a tolerant 5th file — a 404 on data/drafts.json
-  // (existing repos that pre-date Phase 7) resolves to an empty {drafts:[]}
-  // instead of rejecting the whole loadAll. All other files are strict.
-  const TOLERANT_FILES = new Set(['drafts']);
-  const TOLERANT_EMPTY = { drafts: { drafts: [] } };
+  // Phase 7 tolerant-load set: `drafts` (D-11, 5th file) and `library`
+  // (LIB-01/D-13, 6th file) are both tolerant — a 404 on the file
+  // (existing repos that pre-date Phase 7) resolves to an empty payload
+  // instead of rejecting the whole loadAll (Pitfall 1). The original 4
+  // files (barkeeper, profile, inventory, recipes) remain strict.
+  const TOLERANT_FILES = new Set(['drafts', 'library']);
+  const TOLERANT_EMPTY = {
+    drafts:  { drafts: [] },
+    library: { links:  [] },
+  };
 
-  let _data = {};    // { barkeeper, profile, inventory, recipes, drafts }
-  let _shas = {};    // { barkeeper, profile, inventory, recipes, drafts }
+  let _data = {};    // { barkeeper, profile, inventory, recipes, drafts, library }
+  let _shas = {};    // { barkeeper, profile, inventory, recipes, drafts, library }
   let _loading = false;
   let _loaded = false;
   let _listeners = [];
@@ -51,9 +57,11 @@ const State = (() => {
             const { data, sha } = await GitHubAPI.readJSON(path);
             return { key, data, sha };
           } catch (err) {
-            // Tolerant 404: a missing `drafts` file in existing pre-Phase-7 repos
-            // should resolve to an empty payload rather than rejecting the whole
-            // Promise.all (Pitfall 1). All other files remain strict.
+            // Tolerant 404: missing `drafts` or `library` files in existing
+            // pre-Phase-7 repos resolve to empty payloads rather than
+            // rejecting the whole Promise.all (Pitfall 1). Drafts → {drafts:[]},
+            // library → {links:[]}. All other files (barkeeper, profile,
+            // inventory, recipes) remain strict and reject on 404.
             const msg = (err && err.message ? err.message : '').toLowerCase();
             const is404 = msg.includes('not found') || msg.includes('404');
             if (TOLERANT_FILES.has(key) && is404) {

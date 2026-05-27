@@ -1583,3 +1583,205 @@ a:hover { color: var(--amber); }
   .chat-page .chat-header { flex-direction: column; align-items: flex-start; }
   .chat-bubble { max-width: 95%; }
 }
+
+/* ─── Classroom (#classroom, Phase 7 D-13) ────────────────────────── */
+.classroom-page { max-width: 980px; margin: 0 auto; }
+.classroom-header { margin-bottom: 22px; }
+.classroom-header h1 { color: var(--amber); margin-bottom: 6px; }
+.classroom-sub { color: var(--text-dim); font-size: 0.92rem; max-width: 720px; }
+.classroom-topic { margin-bottom: 28px; }
+.classroom-topic h2 {
+  color: var(--text);
+  font-size: 1.15rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+  margin-bottom: 14px;
+}
+.classroom-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+@media (min-width: 720px) { .classroom-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .classroom-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.lesson-tile {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color var(--transition);
+}
+.lesson-tile:hover { border-color: var(--amber-dim); }
+.lesson-tile-title {
+  color: var(--amber);
+  font-size: 1rem;
+  margin: 0;
+}
+.lesson-tile-body {
+  color: var(--text);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  margin: 0;
+}
+.lesson-ask {
+  align-self: flex-start;
+  margin-top: 4px;
+}
+.classroom-empty {
+  color: var(--text-dim);
+  padding: 20px;
+  text-align: center;
+}
+
+/* ─── Library (#library, Phase 7 LIB-01) ──────────────────────────── */
+.library-page { max-width: 880px; margin: 0 auto; }
+.library-header { margin-bottom: 18px; }
+.library-header h1 { color: var(--amber); margin-bottom: 6px; }
+.library-sub { color: var(--text-dim); font-size: 0.92rem; max-width: 680px; }
+
+.library-form {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.library-form h2 {
+  color: var(--text);
+  font-size: 1.05rem;
+  margin: 0 0 4px;
+}
+.library-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.86rem;
+  color: var(--text-dim);
+}
+.library-form input,
+.library-form textarea {
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.92rem;
+  padding: 7px 9px;
+}
+.library-form input:focus,
+.library-form textarea:focus {
+  outline: none;
+  border-color: var(--amber-dim);
+}
+.library-form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+.library-form--edit { margin-bottom: 0; }
+
+.library-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.library-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+}
+.library-card--editing { padding: 0; background: transparent; border: none; }
+.library-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.library-card-title { font-size: 1rem; margin: 0; }
+.library-link {
+  color: var(--amber);
+  text-decoration: none;
+  word-break: break-word;
+}
+.library-link:hover { text-decoration: underline; }
+.library-link--unsafe {
+  color: var(--red);
+  font-style: italic;
+}
+.library-card-url {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  margin-top: 4px;
+  word-break: break-all;
+}
+.library-card-desc {
+  margin-top: 8px;
+  color: var(--text);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.library-card-actions {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.library-tags {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.library-tag {
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 999px;
+  color: var(--text-dim);
+  font-size: 0.74rem;
+  padding: 2px 9px;
+}
+.library-empty {
+  color: var(--text-dim);
+  padding: 20px;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .library-card-head { flex-direction: column; }
+  .library-card-actions { width: 100%; }
+}
+
+/* ── Phase 7: AI entry buttons (Ask Bjorn / Best bottle / Persona drafter) ── */
+.ai-ask-btn,
+.ai-advice-btn {
+  background: transparent;
+  color: var(--amber);
+  border: 1px solid var(--amber-dim);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.ai-ask-btn:hover,
+.ai-advice-btn:hover {
+  background: var(--amber);
+  color: var(--bg);
+  border-color: var(--amber);
+}
+.ai-ask-btn:disabled,
+.ai-advice-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.rec-card-actions .ai-ask-btn {
+  margin-left: 4px;
+}

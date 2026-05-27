@@ -113,6 +113,47 @@ const RecommenderEngine = (() => {
     ['honey', 'honey syrup',  'syrups',      'pantry',      'perishables'],
   ];
 
+  // ── AI-13: optional Claude fallback for ingredient derivation ─────────────
+  // Augments the static DERIVATIONS table at the caller's discretion:
+  // key-gated, cached in localStorage (Pitfall 6), fail-soft (never throws).
+  // With NO key, behaves byte-identically to Phase 5 — no network I/O, no
+  // cache access. The synchronous _expandLookup / _hasIngredient paths are
+  // UNCHANGED; AI-13 is additive only.
+  const DERIV_CACHE_KEY = 'bb_derivation_cache';
+  function _loadDerivCache() {
+    try { return JSON.parse(localStorage.getItem(DERIV_CACHE_KEY) || '{}'); }
+    catch { return {}; }
+  }
+  function _saveDerivCache(c) {
+    try { localStorage.setItem(DERIV_CACHE_KEY, JSON.stringify(c)); }
+    catch { /* storage full or disabled — non-fatal */ }
+  }
+  function _derivKey(ingredient, tokens) {
+    return String(ingredient).toLowerCase() + '|' + [...tokens].map(String).sort().join(',');
+  }
+
+  async function deriveWithAI(ingredient, inventoryTokens) {
+    // Key gate FIRST — Phase 5 byte-identical when no key (no cache, no network).
+    if (typeof ClaudeAPI === 'undefined' || !ClaudeAPI.getKey || !ClaudeAPI.getKey()) return false;
+    const cache = _loadDerivCache();
+    const k = _derivKey(ingredient, inventoryTokens);
+    if (Object.prototype.hasOwnProperty.call(cache, k)) return !!cache[k];
+    try {
+      const text = await ClaudeAPI.callMessages({
+        model: ClaudeAPI.getModel ? ClaudeAPI.getModel() : 'claude-sonnet-4-6',
+        max_tokens: 64,
+        system: 'Decide whether the named ingredient is reasonably derivable from the listed inventory tokens (e.g. lemons -> lemon juice; sugar -> simple syrup; mint leaves -> muddled mint). Return JSON only: {"derived": boolean}.',
+        messages: [{ role: 'user', content: 'Ingredient: ' + String(ingredient) + '\nInventory tokens: ' + [...inventoryTokens].join(', ') }],
+      });
+      const obj = ClaudeAPI.extractJSON(text);
+      const result = !!(obj && obj.derived);
+      cache[k] = result; _saveDerivCache(cache);
+      return result;
+    } catch (_) {
+      return false;   // fail-soft: AI errors never block the recommender (FM #2)
+    }
+  }
+
   // Build a flat inventory lookup from all sections (cached per call)
   function _buildLookup(inv) {
     const lookup = {};
@@ -268,5 +309,5 @@ const RecommenderEngine = (() => {
   }
 
   // Public API
-  return { recommend, normalizeProfile: _normalizeProfile, normalizeOriginal };
+  return { recommend, normalizeProfile: _normalizeProfile, normalizeOriginal, deriveWithAI };
 })();

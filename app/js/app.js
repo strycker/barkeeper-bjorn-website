@@ -101,6 +101,12 @@
       case 'chat':
         ChatView.render(content);
         break;
+      case 'classroom':
+        ClassroomView.render(content);
+        break;
+      case 'library':
+        LibraryView.render(content);
+        break;
       case 'shopping':
         ShoppingView.render(content);
         break;

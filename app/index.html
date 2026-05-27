@@ -33,6 +33,14 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
         <span>Recipes</span>
       </a>
+      <a href="#classroom" data-route="classroom">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        <span>Classroom</span>
+      </a>
+      <a href="#library" data-route="library">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v15H6.5a2.5 2.5 0 0 0-2.5 2.5z"/><path d="M9 7h7M9 11h7"/></svg>
+        <span>Library</span>
+      </a>
       <a href="#profile" data-route="profile">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         <span>Profile</span>
@@ -90,6 +98,9 @@
 <script src="js/classics-db-extra-3.js"></script>
 <script src="js/recommender-engine.js"></script>
 
+<!-- Classroom static content (07-04, must load before views/classroom.js) -->
+<script src="js/data/classroom-content.js"></script>
+
 <!-- Views -->
 <script src="js/views/setup.js"></script>
 <script src="js/views/dashboard.js"></script>
@@ -107,6 +118,8 @@
 <script src="js/claude-api.js"></script>
 <script src="js/write-gate.js"></script>
 <script src="js/views/chat.js"></script>
+<script src="js/views/classroom.js"></script>
+<script src="js/views/library.js"></script>
 
 <!-- App entry point (must be last) -->
 <script src="js/app.js"></script>

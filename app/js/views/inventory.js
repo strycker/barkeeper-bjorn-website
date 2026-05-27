@@ -73,7 +73,11 @@ const InventoryView = (() => {
 
 
 
-  // Parse a free-text bottle name into { style, type, brand } using the catalog
+  // Parse a free-text bottle name into { style, type, brand } using the catalog.
+  // AI-11: returns a non-enumerable _lowConfidence flag so callers can decide
+  // whether to ask Claude for a better parse. Low confidence = no brand AND
+  // no type keyword matched (i.e. the type ended up as the section default OR
+  // as the raw input name itself — inventory.js:110 fallback chain).
   function parseBottleEntry(rawName, sectionKey) {
     const lower = rawName.toLowerCase();
     const now = new Date().toISOString();
@@ -85,11 +89,14 @@ const InventoryView = (() => {
     let style = sectionStyle[sectionKey] || '';
     let type  = '';
     let brand = '';
+    let typeKeywordHit = false;
+    let brandHit = false;
 
     // Brand catalog — longest-first for greedy match (sorted at call time)
     for (const [kw, info] of brandCatalog) {
       if (lower.includes(kw)) {
         brand = info.brand;
+        brandHit = true;
         if (!type && info.typeHint) type = info.typeHint;
         break;
       }
@@ -99,6 +106,7 @@ const InventoryView = (() => {
     for (const [kw, typeName] of typeKeywords) {
       if (lower.includes(kw)) {
         type = typeName;
+        typeKeywordHit = true;
         break;
       }
     }
@@ -107,9 +115,99 @@ const InventoryView = (() => {
     if (!style) style = 'Other / Misc.';
 
     // Ensure type is never empty: use section-specific short default rather than group name
-    if (!type) type = sectionTypeDefault[sectionKey] || rawName;
+    let typeFellBackToRaw = false;
+    if (!type) {
+      type = sectionTypeDefault[sectionKey] || rawName;
+      if (type === rawName) typeFellBackToRaw = true;
+    }
 
-    return { style, type, brand, tier: '', best_for: '', notes: '', created_at: now, updated_at: now };
+    const entry = { style, type, brand, tier: '', best_for: '', notes: '', created_at: now, updated_at: now };
+    // Low confidence when the parser had nothing to anchor on — no brand match
+    // and no type keyword match (Pitfall 6 — only call Claude in this case).
+    Object.defineProperty(entry, '_lowConfidence', {
+      value: (!brandHit && !typeKeywordHit) || typeFellBackToRaw,
+      enumerable: false,
+      writable: true,
+    });
+    return entry;
+  }
+
+  // AI-11: Claude fallback for low-confidence paste-a-line parses.
+  // Cached by raw input string in localStorage.bb_parse_cache so a repeat of
+  // the same ambiguous line never costs a second API call (Pitfall 6).
+  // - No key  → returns null immediately (Phase-5 byte-identical behavior).
+  // - Network/parse errors → returns null (fail-soft; caller keeps regex result).
+  // - Successful parse is wrapped through WriteGate.validate('inventory', ...);
+  //   if the wrapped payload doesn't validate, discard and return null.
+  // Returns a normalized bottle object on success, or null otherwise.
+  async function aiParseBottle(rawLine, sectionKey) {
+    const line = String(rawLine || '').trim();
+    if (!line) return null;
+    if (typeof ClaudeAPI === 'undefined') return null;
+    // Cache check first — Pitfall 6.
+    let cache = {};
+    try { cache = JSON.parse(localStorage.getItem('bb_parse_cache') || '{}'); }
+    catch { cache = {}; }
+    if (cache && Object.prototype.hasOwnProperty.call(cache, line)) {
+      return cache[line];
+    }
+    if (typeof ClaudeAPI.getKey !== 'function' || ClaudeAPI.getKey() === '') {
+      return null;   // no key — Phase 5 byte-identical, no network.
+    }
+    let bottle = null;
+    try {
+      // NOTE on requestJSON vs callMessages: ClaudeAPI.requestJSON('inventory', ...)
+      // would Normalize.byKey('inventory', singleBottle) which collapses a
+      // single-bottle payload into an empty inventory (the bottle fields are
+      // dropped because they don't match the top-level inventory schema). So
+      // we use the lower-level callMessages here and wrap-then-validate the
+      // result against the inventory schema below — same fail-closed contract,
+      // correct shape preservation. (Rule 3 deviation from plan Task 2 step 1.)
+      const raw = await ClaudeAPI.callMessages({
+        model:      'claude-haiku-4-5',
+        max_tokens: 256,
+        system: 'Parse this single bottle line into a JSON object with keys {style, type, brand?, tier?}. style is the broad category (e.g. "Bourbon", "Gin", "Mezcal"); type is the specific style; brand is the producer if discernible. Return ONE JSON object — no prose, no markdown, no code fences.',
+        messages: [{ role: 'user', content: line }],
+      });
+      const parsed = ClaudeAPI.extractJSON(raw);
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
+      // Build a candidate bottle with required {style} and timestamps.
+      const now = new Date().toISOString();
+      const candidate = {
+        style:      typeof parsed.style === 'string' && parsed.style ? parsed.style : '',
+        type:       typeof parsed.type  === 'string' ? parsed.type  : '',
+        brand:      typeof parsed.brand === 'string' ? parsed.brand : '',
+        tier:       typeof parsed.tier  === 'string' ? parsed.tier  : '',
+        best_for:   '',
+        notes:      '',
+        created_at: now,
+        updated_at: now,
+      };
+      if (!candidate.style) return null;
+      // Validate by wrapping into a minimal inventory payload — WriteGate then
+      // exercises the same schema path that the AI-08/AI-10 writes go through.
+      const sec = sectionKey || 'base_spirits.other';
+      const wrap = Normalize.byKey('inventory', {});
+      const parts = sec.split('.');
+      if (parts.length === 2) {
+        wrap[parts[0]] = wrap[parts[0]] || {};
+        wrap[parts[0]][parts[1]] = [candidate];
+      } else {
+        wrap[sec] = [candidate];
+      }
+      const errs = await WriteGate.validate('inventory', wrap);
+      if (errs && errs.length) return null;   // invalid → discard; never accept
+      bottle = candidate;
+    } catch (_err) {
+      // Fail-soft per AI-SPEC §4 / Pitfall 6: never block the paste flow.
+      return null;
+    }
+    // Cache the successful parse under the raw input string (never the API key).
+    try {
+      cache[line] = bottle;
+      localStorage.setItem('bb_parse_cache', JSON.stringify(cache));
+    } catch { /* storage full / disabled — silent */ }
+    return bottle;
   }
 
   function parseBottleSection(name) {
@@ -204,12 +302,29 @@ const InventoryView = (() => {
       }
     });
 
-    // Add bottle handler
-    addBtn.addEventListener('click', () => {
+    // Add bottle handler (AI-11: low-confidence regex parses fall back to Claude)
+    addBtn.addEventListener('click', async () => {
       const name = nameInput.value.trim();
       if (!name) return;
-      const newEntry = parseBottleEntry(name, sectionKey);
-      const current = getNestedArr(inv, sectionKey);
+      // Phase 5 regex parse first — always runs (free, deterministic).
+      let newEntry = parseBottleEntry(name, sectionKey);
+      // AI-11 fallback: only on low confidence AND only with a key (fail-soft
+      // returns the regex result if Claude errors or no key). Paste-a-line
+      // stages a reviewable chip; the user still confirms via the existing
+      // save flow — no AI -> GitHub auto-write (T-07-33).
+      if (newEntry._lowConfidence) {
+        try {
+          const ai = await aiParseBottle(name, sectionKey);
+          if (ai) {
+            newEntry = ai;
+            // Optional UI hint — escape model output before injecting (T-07-30).
+            if (canonicalBanner) {
+              canonicalBanner.innerHTML = `<span class="ai-parse-hint">Parsed with AI: <strong>${Utils.escapeHtml(ai.type || ai.style || name)}</strong>${ai.brand ? ' · ' + Utils.escapeHtml(ai.brand) : ''}</span>`;
+              canonicalBanner.style.display = 'flex';
+            }
+          }
+        } catch { /* fail-soft — keep the regex result */ }
+      }
       State.patch('inventory', i2 => {
         const arr2 = getNestedArr(i2, sectionKey);
         arr2.push(newEntry);
@@ -217,8 +332,11 @@ const InventoryView = (() => {
       });
       markDirty();
       nameInput.value = '';
-      canonicalBanner.style.display = 'none';
-      canonicalBanner.innerHTML = '';
+      // Don't clobber the AI-parse hint immediately — leave it visible briefly.
+      if (!newEntry || !newEntry._fromAI) {
+        canonicalBanner.style.display = 'none';
+        canonicalBanner.innerHTML = '';
+      }
       renderBottleChips(grid, getNestedArr(State.get('inventory'), sectionKey), sectionKey, State.get('inventory'));
     });
 
@@ -615,9 +733,12 @@ const InventoryView = (() => {
     }
 
     container.innerHTML = `
-      <div class="page-header">
-        <h1>Inventory</h1>
-        <p>Your current bar — add or remove bottles. Changes are saved back to your GitHub repo.</p>
+      <div class="page-header" style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h1>Inventory</h1>
+          <p>Your current bar — add or remove bottles. Changes are saved back to your GitHub repo.</p>
+        </div>
+        <button class="btn btn-ghost btn-sm ai-advice-btn" id="inv-ai-best-bottle" style="align-self:center;" title="Ask Bjorn what bottle to buy next">✨ Best bottle to add (AI)</button>
       </div>
 
       <div id="inv-save-bar" style="display:none;position:sticky;top:60px;z-index:50;
@@ -629,6 +750,18 @@ const InventoryView = (() => {
       </div>
 
       <div id="inv-sections"></div>`;
+
+    document.getElementById('inv-ai-best-bottle')?.addEventListener('click', () => {
+      if (typeof ChatView === 'undefined' || !ChatView.openDrawer) {
+        Utils.showToast('Chat module not loaded.', 'error');
+        return;
+      }
+      // Drawer's buildContext() already grounds in current inventory + vetoes;
+      // the seed just asks the question.
+      ChatView.openDrawer({
+        seed: 'Given my current inventory and vetoes, what single bottle should I add next, and why? Focus on the biggest unlock for my taste profile.',
+      });
+    });
 
     document.getElementById('inv-save-btn')?.addEventListener('click', saveInventory);
     document.getElementById('inv-discard-btn')?.addEventListener('click', () => {
