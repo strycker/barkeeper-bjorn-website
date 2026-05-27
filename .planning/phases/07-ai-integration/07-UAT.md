@@ -14,10 +14,10 @@ updated: 2026-05-26T22:30:00.000Z
 
 ## Current Test
 
-number: 1
-name: Settings — Reveal toggle + model selector + call-log panel + Reset sweep
+number: 2
+name: Chat — no-key gate
 expected: |
-  In Settings → AI section: API-key field has a Reveal toggle that flips type=password ↔ text; a model `<select>` lists Haiku / Sonnet (default) / Opus and persists across reload; AI-09 log panel renders entries from `bb_api_log` (only `ts/type/model/usage` fields — never the key/prompt/system). After clicking "Reset all data", `bb_chat_model` and `bb_api_log` are gone from localStorage along with the other data.
+  WITHOUT an Anthropic key set, open `#chat`. A no-key message appears with a link to Settings. No network call is made (DevTools Network tab confirms zero `api.anthropic.com` requests). Trigger the quick-ask drawer (e.g. from Recommender → Ask Bjorn): same gate, no call.
 awaiting: user response
 
 ## Tests
@@ -113,7 +113,17 @@ evidence: M-3 plan-check fix verified in 07-03-PLAN.md.
 #### 1. Settings — Reveal toggle + model selector + call-log panel + Reset sweep
 expected: |
   Settings → AI section. (a) The key field's Reveal toggle flips between dotted/visible. (b) The model `<select>` shows Haiku / Sonnet (recommended) / Opus; changing it persists across reload via `bb_chat_model`. (c) AI-09 log panel renders entries from `bb_api_log` showing only `ts/type/model/usage` — never the key/prompt/system. After making at least one API call (e.g. ask Bjorn anything in #chat), the entry appears in the log. (d) "Reset all data" wipes the data files AND clears `bb_chat_model` + `bb_api_log` from localStorage.
-result: pending
+result: issue
+severity: minor
+reported: "Reset all data clears bb_api_log but bb_chat_model stays set; I think bb_chat_model should be preserved (UI preference, not data)."
+findings: |
+  Three real gaps in the Reset sweep:
+  1. bb_chat_model is currently CLEARED on Reset (settings.js:699) — should be PRESERVED (it's a UI preference like dark mode; reset shouldn't touch it). Persist user's chosen model across both "Reset all data" and the AI-09 "Clear log" button.
+  2. bb_chat_history (the actual chat thread — real user data) is NOT cleared on Reset — should clear (alongside the other user data files).
+  3. drafts (5th State file) and library (6th State file) are NOT reset to defaults on Reset — should reset (they hold user data: AI-generated drafts + saved external links).
+  Audit/debug data (bb_api_log) clearing is correct. API key + GitHub credentials preservation is correct.
+disposition: deferred to single fix-up plan at end of UAT
+
 
 #### 2. Chat — no-key gate
 expected: |
