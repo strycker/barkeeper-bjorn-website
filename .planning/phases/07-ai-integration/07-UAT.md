@@ -14,10 +14,10 @@ updated: 2026-05-26T22:30:00.000Z
 
 ## Current Test
 
-number: 4
-name: Chat — persistence + summarization
+number: 5
+name: Chat — abort-on-navigation + save + clear
 expected: |
-  Reload the browser → `#chat` resumes the prior conversation from `bb_chat_history`. Send several more messages until the thread exceeds the summarization threshold (~12 turns). Older turns continue to render, and the AI-09 log now shows a `claude-haiku-4-5` summarization call.
+  Start a long response, then navigate away from `#chat` mid-stream → the stream aborts (CHAT-06); returning to `#chat` shows the persisted transcript intact. Click "Save conversation to GitHub" → toast confirms, and a new `data/conversations/chat-*.json` commit appears in the repo. Click "Clear conversation" → transcript empties and `bb_chat_history` is gone from localStorage.
 awaiting: user response
 
 ## Tests
@@ -138,7 +138,7 @@ result: pass
 #### 4. Chat — persistence + summarization
 expected: |
   Reload the browser → `#chat` resumes the prior conversation from `bb_chat_history`. Send several more messages until the thread exceeds the summarization threshold (~12 turns). Older turns continue to render, and the AI-09 log now shows a `claude-haiku-4-5` summarization call.
-result: pending
+result: pass
 
 #### 5. Chat — abort-on-navigation + save + clear
 expected: |
