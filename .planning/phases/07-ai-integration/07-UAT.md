@@ -14,10 +14,10 @@ updated: 2026-05-26T22:30:00.000Z
 
 ## Current Test
 
-number: 2
-name: Chat — no-key gate
+number: 3
+name: Chat — streaming + bar context fidelity
 expected: |
-  WITHOUT an Anthropic key set, open `#chat`. A no-key message appears with a link to Settings. No network call is made (DevTools Network tab confirms zero `api.anthropic.com` requests). Trigger the quick-ask drawer (e.g. from Recommender → Ask Bjorn): same gate, no call.
+  With your key set, open `#chat` → ask "What should I make tonight?". The answer STREAMS token-by-token (not a single blob at the end). The reply references YOUR real inventory and your taste/mood (e.g. mentions a bottle you actually own, hits your sweetness/strength preference).
 awaiting: user response
 
 ## Tests
@@ -128,7 +128,7 @@ disposition: deferred to single fix-up plan at end of UAT
 #### 2. Chat — no-key gate
 expected: |
   WITHOUT an Anthropic key set, open `#chat`. A no-key message appears with a link to Settings. No network call is made (DevTools Network tab confirms zero `api.anthropic.com` requests). Trigger the quick-ask drawer (e.g. from Recommender → Ask Bjorn): same gate, no call.
-result: pending
+result: pass
 
 #### 3. Chat — streaming + bar context fidelity
 expected: |
