@@ -14,10 +14,10 @@ updated: 2026-05-26T22:30:00.000Z
 
 ## Current Test
 
-number: 3
-name: Chat — streaming + bar context fidelity
+number: 4
+name: Chat — persistence + summarization
 expected: |
-  With your key set, open `#chat` → ask "What should I make tonight?". The answer STREAMS token-by-token (not a single blob at the end). The reply references YOUR real inventory and your taste/mood (e.g. mentions a bottle you actually own, hits your sweetness/strength preference).
+  Reload the browser → `#chat` resumes the prior conversation from `bb_chat_history`. Send several more messages until the thread exceeds the summarization threshold (~12 turns). Older turns continue to render, and the AI-09 log now shows a `claude-haiku-4-5` summarization call.
 awaiting: user response
 
 ## Tests
@@ -133,7 +133,7 @@ result: pass
 #### 3. Chat — streaming + bar context fidelity
 expected: |
   With your key set, open `#chat` → ask "What should I make tonight?". The answer STREAMS token-by-token (not a single blob at the end). The reply references YOUR real inventory and your taste/mood (e.g. mentions a bottle you actually own, hits your sweetness/strength preference).
-result: pending
+result: pass
 
 #### 4. Chat — persistence + summarization
 expected: |
