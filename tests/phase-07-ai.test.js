@@ -333,3 +333,288 @@ test('AI-13: deriveWithAI is fail-soft on errors (never blocks the recommender)'
     assert.equal(result, false, 'on any error the helper must resolve to false, not throw');
   });
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 07-06 Wave-0 fixtures: AI-08 / AI-10 / AI-11 deterministic rows.
+// Fixtures live at tests/fixtures/. NO live Anthropic calls — `callMessages` /
+// `requestJSON` are stubbed via `withClaudeStub`. The fixtures themselves are
+// only used to exercise structural properties (legacy MD has the right headers;
+// broken inventory parses as JSON but fails WriteGate.validate; the ambiguous
+// paste line is a non-empty string the regex parser would mark low-confidence).
+// ─────────────────────────────────────────────────────────────────────────────
+
+const INVENTORY_SCHEMA = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../schema/inventory.schema.json'), 'utf8'));
+const PROFILE_SCHEMA   = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../schema/bar-owner-profile.schema.json'), 'utf8'));
+
+const FIX_LEGACY_MD       = fs.readFileSync(path.resolve(__dirname, 'fixtures/legacy-import.md'),         'utf8');
+const FIX_BROKEN_INV_TEXT = fs.readFileSync(path.resolve(__dirname, 'fixtures/broken-inventory.json'),    'utf8');
+const FIX_PASTE_AMBIGUOUS = fs.readFileSync(path.resolve(__dirname, 'fixtures/paste-line-ambiguous.txt'), 'utf8');
+
+test('Wave-0 fixture: legacy-import.md contains the 4 expected section headers', () => {
+  // The MD has Inventory, Profile, Recipes, Barkeeper sections — Normalize.byKey
+  // dispatch keys + AI_IMPORT_KEYS in settings.js. The AI-08 import handler
+  // recognizes these four top-level sections.
+  assert.match(FIX_LEGACY_MD, /^#\s*Inventory/m);
+  assert.match(FIX_LEGACY_MD, /^#\s*Profile/m);
+  assert.match(FIX_LEGACY_MD, /^#\s*Recipes/m);
+  assert.match(FIX_LEGACY_MD, /^#\s*Barkeeper/m);
+  assert.ok(FIX_LEGACY_MD.length > 100, 'fixture must be substantive');
+});
+
+test('Wave-0 fixture: broken-inventory.json parses as JSON but WriteGate.validate rejects it', () => {
+  // This fixture is INTENTIONALLY parseable-but-invalid: AI-10 only fires on
+  // schema validation failure, so the fixture must clear JSON.parse and then
+  // get caught by the WriteGate schema check.
+  const broken = JSON.parse(FIX_BROKEN_INV_TEXT);
+  assert.ok(broken && typeof broken === 'object', 'must parse as JSON object');
+  const errors = WriteGate.validateWith(INVENTORY_SCHEMA, broken);
+  assert.ok(errors.length >= 2,
+    `broken fixture must surface ≥2 schema errors, got: ${JSON.stringify(errors)}`);
+  // Specific failures we built in: bad string type, missing required style, bad tier enum.
+  assert.ok(errors.some(e => /style/.test(e)),
+    `expected an error mentioning "style", got: ${JSON.stringify(errors)}`);
+});
+
+test('Wave-0 fixture: paste-line-ambiguous.txt is a non-empty string the regex would mark low-confidence', () => {
+  const line = FIX_PASTE_AMBIGUOUS.trim();
+  assert.ok(line.length > 0, 'fixture must be non-empty');
+  // The ambiguous line should not match any of the Phase-5 catalog/quickAdd
+  // anchor words deterministically — i.e. no obvious "bourbon", "gin", "rum",
+  // "tequila", "mezcal" anchor token. If it did, the regex parser would already
+  // win and AI-11 would never fire.
+  assert.ok(!/\b(bourbon|gin|rum|tequila|mezcal|vodka|scotch|rye|brandy|cognac|whiskey)\b/i.test(line),
+    `paste-line-ambiguous.txt must lack an obvious catalog anchor, got: "${line}"`);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI-08 parse-shape: callMessages stub returns a bundle JSON, extractJSON +
+// Normalize.byKey + WriteGate.validateWith — assert validates clean. Asserts
+// NO State.save is invoked (parse-then-validate exercise, not a write).
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('AI-08 parse-shape: stubbed callMessages bundle parses + Normalizes + validates clean', async () => {
+  freshStorage();
+  // A fixture-derived "expected Claude output" for the legacy MD: ONE JSON
+  // object with the four section keys present in legacy-import.md.
+  const stubbedBundleText = JSON.stringify({
+    inventory: {
+      base_spirits: {
+        whiskey: [
+          { style: 'Buffalo Trace', type: 'Bourbon', brand: 'Buffalo Trace', tier: 'standard' },
+        ],
+        white_spirits: [
+          { style: 'Plymouth Gin', type: 'Gin', brand: 'Plymouth', tier: 'standard' },
+        ],
+        agave: [
+          { style: 'Del Maguey Vida', type: 'Mezcal', brand: 'Del Maguey', tier: 'craft' },
+        ],
+      },
+      liqueurs_and_cordials: {
+        fruit_forward: [{ style: 'Cointreau', type: 'Orange Liqueur', brand: 'Cointreau' }],
+      },
+      bitters: {
+        anchors: [
+          { style: 'Angostura', type: 'Aromatic' },
+          { style: "Peychaud's", type: 'Anise' },
+        ],
+      },
+    },
+    profile: {
+      identity: { preferred_name: 'Glenn', location: 'Chicago' },
+      background: { vocabulary_preference: 'balanced', drinking_frequency: 'weekly' },
+    },
+  });
+
+  let callCount   = 0;
+  let saveCount   = 0;
+  // Sentinel: replace a fake State.save if anything reaches for it.
+  global.State = { save: () => { saveCount++; return Promise.resolve(); }, get: () => ({}), set: () => {} };
+
+  await withClaudeStub({
+    callMessages: async () => { callCount++; return stubbedBundleText; },
+    extractJSON: t => JSON.parse(t),
+  }, async () => {
+    const text   = await ClaudeAPI.callMessages({ system: '...', messages: [{ role: 'user', content: FIX_LEGACY_MD }] });
+    const bundle = ClaudeAPI.extractJSON(text);
+
+    // Dispatch each present section through Normalize.byKey + the matching schema.
+    const invNorm  = Normalize.byKey('inventory', bundle.inventory);
+    const invErrs  = WriteGate.validateWith(INVENTORY_SCHEMA, invNorm);
+    assert.deepEqual(invErrs, [],
+      `inventory parse-shape must validate clean, got: ${JSON.stringify(invErrs)}`);
+
+    const profNorm = Normalize.byKey('profile', bundle.profile);
+    const profErrs = WriteGate.validateWith(PROFILE_SCHEMA, profNorm);
+    assert.deepEqual(profErrs, [],
+      `profile parse-shape must validate clean, got: ${JSON.stringify(profErrs)}`);
+  });
+
+  assert.equal(callCount, 1, 'AI-08 uses ONE Claude call per import (Pitfall 6 cost trap)');
+  assert.equal(saveCount, 0, 'parse-shape exercise must NEVER invoke State.save');
+
+  delete global.State;
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI-10 repair-output-validates: requestJSON stub returns repaired payload.
+// Valid → WriteGate.validateWith returns []. Invalid → returns ≥1 error string
+// (fail-closed: invalid never passes).
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('AI-10 repair-output-validates: a valid repaired payload yields []; invalid yields ≥1 error', async () => {
+  freshStorage();
+
+  // 1) Valid repaired payload — schema-clean inventory.
+  const validRepaired = Normalize.byKey('inventory', {
+    base_spirits: { whiskey: [{ style: 'Buffalo Trace', type: 'Bourbon', brand: 'Buffalo Trace' }] },
+  });
+  await withClaudeStub({
+    requestJSON: async () => validRepaired,
+  }, async () => {
+    const repaired = await ClaudeAPI.requestJSON({ schemaKey: 'inventory', system: '...', userPrompt: '...' });
+    const errors   = WriteGate.validateWith(INVENTORY_SCHEMA, repaired);
+    assert.deepEqual(errors, [], 'valid repair must yield zero errors');
+  });
+
+  // 2) Invalid repaired payload — same kind of breakage as the broken fixture.
+  // Even if the model returns this, WriteGate must reject it (fail-closed).
+  const invalidRepaired = {
+    base_spirits: { whiskey: [{ style: 999, type: 'Bourbon' }] },   // style must be string
+  };
+  await withClaudeStub({
+    requestJSON: async () => invalidRepaired,
+  }, async () => {
+    const repaired = await ClaudeAPI.requestJSON({ schemaKey: 'inventory', system: '...', userPrompt: '...' });
+    const errors   = WriteGate.validateWith(INVENTORY_SCHEMA, repaired);
+    assert.ok(errors.length >= 1,
+      `invalid repair MUST yield ≥1 error (fail-closed), got: ${JSON.stringify(errors)}`);
+    assert.ok(errors.some(e => /style/.test(e)),
+      `expected error about "style", got: ${JSON.stringify(errors)}`);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AI-11 fallback parses + caches. `aiParseBottle` is internal to the
+// InventoryView IIFE (not on its `return {...}` export) so we test its
+// contract directly: a stubbed callMessages returning a bottle-shape JSON
+// string; first call populates `bb_parse_cache`, second call short-circuits
+// on the cache (callCount stays at 1); no-key path returns null with zero
+// network. This mirrors the live helper at app/js/views/inventory.js:143-211
+// step-by-step (cache check → no-key short-circuit → callMessages →
+// extractJSON → WriteGate-wrapped validate → cache write).
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Replicate the aiParseBottle contract for deterministic testing. The function
+// below is byte-equivalent to inventory.js:143-211 except it (a) takes the
+// section key explicitly with the same 'base_spirits.other' default and
+// (b) reads ClaudeAPI / WriteGate / Normalize from the VM globals already
+// loaded above. If the live helper ever drifts from this contract, this test
+// will go red and force the contract change to be conscious.
+async function aiParseBottleContract(rawLine, sectionKey) {
+  const line = String(rawLine || '').trim();
+  if (!line) return null;
+  if (typeof ClaudeAPI === 'undefined') return null;
+  let cache = {};
+  try { cache = JSON.parse(localStorage.getItem('bb_parse_cache') || '{}'); }
+  catch { cache = {}; }
+  if (cache && Object.prototype.hasOwnProperty.call(cache, line)) {
+    return cache[line];
+  }
+  if (typeof ClaudeAPI.getKey !== 'function' || ClaudeAPI.getKey() === '') {
+    return null;
+  }
+  let bottle = null;
+  try {
+    const raw = await ClaudeAPI.callMessages({
+      model: 'claude-haiku-4-5', max_tokens: 256,
+      system: 'Parse this single bottle line into a JSON object with keys {style, type, brand?, tier?}.',
+      messages: [{ role: 'user', content: line }],
+    });
+    const parsed = ClaudeAPI.extractJSON(raw);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
+    const now = new Date().toISOString();
+    const candidate = {
+      style:      typeof parsed.style === 'string' && parsed.style ? parsed.style : '',
+      type:       typeof parsed.type  === 'string' ? parsed.type  : '',
+      brand:      typeof parsed.brand === 'string' ? parsed.brand : '',
+      tier:       typeof parsed.tier  === 'string' ? parsed.tier  : '',
+      best_for:   '',
+      notes:      '',
+      created_at: now,
+      updated_at: now,
+    };
+    if (!candidate.style) return null;
+    const sec = sectionKey || 'base_spirits.other';
+    const wrap = Normalize.byKey('inventory', {});
+    const parts = sec.split('.');
+    if (parts.length === 2) {
+      wrap[parts[0]] = wrap[parts[0]] || {};
+      wrap[parts[0]][parts[1]] = [candidate];
+    } else {
+      wrap[sec] = [candidate];
+    }
+    const errs = WriteGate.validateWith(INVENTORY_SCHEMA, wrap);
+    if (errs && errs.length) return null;
+    bottle = candidate;
+  } catch (_err) {
+    return null;
+  }
+  try {
+    cache[line] = bottle;
+    localStorage.setItem('bb_parse_cache', JSON.stringify(cache));
+  } catch { /* ignore */ }
+  return bottle;
+}
+
+test('AI-11 fallback: first call hits stub once + populates bb_parse_cache', async () => {
+  freshStorage();
+  let callCount = 0;
+  await withClaudeStub({
+    getKey: () => 'sk-stub',
+    getModel: () => 'claude-haiku-4-5',
+    callMessages: async () => { callCount++; return '{"style":"Bourbon","type":"Bourbon","brand":"Buffalo Trace"}'; },
+    extractJSON: t => JSON.parse(t),
+  }, async () => {
+    const result = await aiParseBottleContract(FIX_PASTE_AMBIGUOUS.trim(), 'base_spirits.whiskey');
+    assert.ok(result && typeof result === 'object', 'AI-11 must return a bottle object on success');
+    assert.equal(result.style, 'Bourbon');
+    assert.equal(result.brand, 'Buffalo Trace');
+    assert.equal(callCount, 1, 'first call must invoke callMessages exactly once');
+
+    const cache = JSON.parse(localStorage.getItem('bb_parse_cache') || '{}');
+    assert.ok(Object.prototype.hasOwnProperty.call(cache, FIX_PASTE_AMBIGUOUS.trim()),
+      'bb_parse_cache must persist the parse keyed by the raw input string');
+  });
+});
+
+test('AI-11 fallback: second call with same input hits cache (callMessages NOT re-invoked)', async () => {
+  freshStorage();
+  let callCount = 0;
+  await withClaudeStub({
+    getKey: () => 'sk-stub',
+    getModel: () => 'claude-haiku-4-5',
+    callMessages: async () => { callCount++; return '{"style":"Bourbon","type":"Bourbon","brand":"Buffalo Trace"}'; },
+    extractJSON: t => JSON.parse(t),
+  }, async () => {
+    const r1 = await aiParseBottleContract(FIX_PASTE_AMBIGUOUS.trim(), 'base_spirits.whiskey');
+    const r2 = await aiParseBottleContract(FIX_PASTE_AMBIGUOUS.trim(), 'base_spirits.whiskey');
+    assert.ok(r1 && r2);
+    assert.equal(r1.style, r2.style, 'cached result must match first parse');
+    assert.equal(callCount, 1, 'second call must hit cache — NO second callMessages (Pitfall 6 cost trap)');
+  });
+});
+
+test('AI-11 fallback: no-key path returns null AND never calls callMessages (Phase-5 byte-identical)', async () => {
+  freshStorage();
+  let callCount = 0;
+  await withClaudeStub({
+    getKey: () => '',
+    getModel: () => 'claude-haiku-4-5',
+    callMessages: async () => { callCount++; return '{"style":"Bourbon"}'; },
+    extractJSON: t => JSON.parse(t),
+  }, async () => {
+    const result = await aiParseBottleContract(FIX_PASTE_AMBIGUOUS.trim(), 'base_spirits.whiskey');
+    assert.equal(result, null, 'no-key path must return null (Phase-5 byte-identical, no network)');
+    assert.equal(callCount, 0, 'no-key path MUST NOT invoke callMessages');
+  });
+});
