@@ -14,10 +14,10 @@ updated: 2026-05-26T22:30:00.000Z
 
 ## Current Test
 
-number: 5
-name: Chat — abort-on-navigation + save + clear
+number: 6
+name: Classroom — renders without a key (AI-06)
 expected: |
-  Start a long response, then navigate away from `#chat` mid-stream → the stream aborts (CHAT-06); returning to `#chat` shows the persisted transcript intact. Click "Save conversation to GitHub" → toast confirms, and a new `data/conversations/chat-*.json` commit appears in the repo. Click "Clear conversation" → transcript empties and `bb_chat_history` is gone from localStorage.
+  WITHOUT a key, open `#classroom`. All four topics render — Techniques, Glassware, Ratios, Ingredients — with lesson tiles. Click "Ask Bjorn about this" on any lesson → no-key affordance toast/link, no network call.
 awaiting: user response
 
 ## Tests
@@ -143,7 +143,7 @@ result: pass
 #### 5. Chat — abort-on-navigation + save + clear
 expected: |
   Start a long response, then navigate away from `#chat` mid-stream → the stream aborts (CHAT-06); returning to `#chat` shows the persisted transcript intact. Click "Save conversation to GitHub" → toast confirms, and a new `data/conversations/chat-*.json` commit appears in the repo. Click "Clear conversation" → transcript empties and `bb_chat_history` is gone from localStorage.
-result: pending
+result: pass
 
 #### 6. Classroom — renders without a key (AI-06)
 expected: |
