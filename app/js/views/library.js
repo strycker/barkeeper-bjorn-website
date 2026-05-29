@@ -177,8 +177,12 @@ const LibraryView = (() => {
           l.links.push(newLink);
           l.last_updated = Utils.today();
         });
+        // Re-render IMMEDIATELY so DOM indices match the new state before the
+        // user can click again. State.save runs async (mutex-serialized in
+        // state.js); we only toast on save resolution.
+        render(container);
         State.save('library')
-          .then(() => { Utils.showToast('Link added.'); render(container); })
+          .then(() => Utils.showToast('Link added.'))
           .catch(err => Utils.showToast('Save failed: ' + (err && err.message || err), 'error', 5000));
       });
     }
@@ -215,8 +219,12 @@ const LibraryView = (() => {
           l.last_updated = Utils.today();
         });
         _editIndex = -1;
+        // Re-render IMMEDIATELY so the remaining cards' data-index attributes
+        // match the new in-memory state. Without this, rapid Remove clicks
+        // operate on stale indices and delete the wrong rows (TOCTOU).
+        render(container);
         State.save('library')
-          .then(() => { Utils.showToast('Link removed.'); render(container); })
+          .then(() => Utils.showToast('Link removed.'))
           .catch(err => Utils.showToast('Save failed: ' + (err && err.message || err), 'error', 5000));
         return;
       }
@@ -260,8 +268,11 @@ const LibraryView = (() => {
         l.last_updated = Utils.today();
       });
       _editIndex = -1;
+      // Re-render IMMEDIATELY so the form collapses and indices stay fresh —
+      // see TOCTOU note in the remove handler above.
+      render(container);
       State.save('library')
-        .then(() => { Utils.showToast('Link updated.'); render(container); })
+        .then(() => Utils.showToast('Link updated.'))
         .catch(err => Utils.showToast('Save failed: ' + (err && err.message || err), 'error', 5000));
     });
 
