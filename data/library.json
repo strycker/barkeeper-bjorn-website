@@ -1,4 +1,14 @@
 {
-  "links": [],
-  "last_updated": "2026-05-21"
+  "links": [
+    {
+      "url": "https://www.diffordsguide.com/",
+      "title": "Difford's Guide",
+      "description": "Cocktail reference site",
+      "tags": [
+        "reference",
+        "recipes"
+      ]
+    }
+  ],
+  "last_updated": "2026-05-29"
 }
