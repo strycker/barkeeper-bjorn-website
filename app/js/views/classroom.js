@@ -8,6 +8,13 @@
 
 const ClassroomView = (() => {
 
+  // Track which container we've bound delegated click listeners on. If a user
+  // navigates back to #classroom several times in a session, each render()
+  // would otherwise stack listeners on the same container so a single
+  // Ask-Bjorn click fires N drawer openings. (Same shape as the library.js
+  // duplicate-listener bug.)
+  let _boundContainer = null;
+
   // Build a compact lesson-scoped seed for the drawer (cap body at first
   // sentence, ≤200 chars). The seed text goes to the model, not innerHTML.
   function _buildSeed(lesson) {
@@ -61,7 +68,9 @@ const ClassroomView = (() => {
     html += '</div>';
     container.innerHTML = html;
 
-    // Wire Ask-Bjorn buttons (delegate via container).
+    // Wire Ask-Bjorn buttons (delegate via container) — bind ONCE per
+    // container to avoid the stacked-listener bug (see _boundContainer note).
+    if (_boundContainer === container) return;
     container.addEventListener('click', e => {
       const btn = e.target.closest('.lesson-ask');
       if (!btn) return;
@@ -87,6 +96,8 @@ const ClassroomView = (() => {
 
       ChatView.openDrawer({ seed: _buildSeed(lesson) });
     });
+
+    _boundContainer = container;
   }
 
   return { render };
