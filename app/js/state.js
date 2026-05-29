@@ -95,16 +95,30 @@ const State = (() => {
     return m.includes('does not match') || m.includes('but expected') || m.includes('409');
   }
 
-  async function save(key, message) {
+  // Per-key save mutex: serialize concurrent save() calls for the same key so
+  // only one outbound write is in flight at a time. Rapid CRUD (Library add →
+  // edit → remove in quick succession) used to fire overlapping saves that
+  // raced on the cached SHA; the single-retry path could not absorb the
+  // cascade, surfacing "does not match … reload the page" errors. With this
+  // queue, save(N+1) for the same key awaits save(N) before starting and so
+  // sees the SHA save(N) just wrote. Different keys still save in parallel.
+  const _saveQueue = {};
+
+  async function _doSave(key, message) {
     const path = FILES[key];
     try {
       const result = await GitHubAPI.writeJSON(path, _data[key], _shas[key], message);
       _shas[key] = result.content.sha;
       notify({ type: 'saved', key });
+      return;
     } catch (err) {
-      // On stale-SHA conflict, refetch the current SHA and retry once.
-      // Falls back to readJSON if getFileSHA fails (e.g. transient network hiccup).
-      if (_isShaConflict(err)) {
+      if (!_isShaConflict(err)) throw err;
+      // Stale-SHA conflict: refetch and retry up to twice with brief backoff,
+      // covering GitHub's brief eventual-consistency window after a write from
+      // another tab / client. Falls back to readJSON if getFileSHA fails
+      // (e.g. transient network hiccup).
+      let lastErr = err;
+      for (let attempt = 0; attempt < 2; attempt++) {
         try {
           let freshSha = await GitHubAPI.getFileSHA(path);
           if (!freshSha) {
@@ -116,12 +130,29 @@ const State = (() => {
           _shas[key] = retry.content.sha;
           notify({ type: 'saved', key });
           return;
-        } catch {
-          // retry failed — fall through to throw with helpful hint
+        } catch (retryErr) {
+          lastErr = retryErr;
+          if (!_isShaConflict(retryErr)) break;
+          // brief backoff before next attempt: 200ms, then 400ms
+          await new Promise(r => setTimeout(r, 200 * (attempt + 1)));
         }
-        throw new Error(`${err.message} — reload the page to refresh file state, then try again.`);
       }
-      throw err;
+      throw new Error(`${lastErr.message} — reload the page to refresh file state, then try again.`);
+    }
+  }
+
+  async function save(key, message) {
+    const prev = _saveQueue[key] || Promise.resolve();
+    // Chain off prev regardless of whether it resolved or rejected — a prior
+    // save's error must not abort this save's attempt.
+    const next = prev.catch(() => {}).then(() => _doSave(key, message));
+    _saveQueue[key] = next;
+    try {
+      return await next;
+    } finally {
+      // Only clear the slot if no newer save has queued behind us; otherwise
+      // the next save is still chained and the slot must remain.
+      if (_saveQueue[key] === next) delete _saveQueue[key];
     }
   }
 
