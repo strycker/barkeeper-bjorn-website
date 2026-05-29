@@ -18,6 +18,13 @@ const LibraryView = (() => {
   // Per-render UI state: which link index (if any) is being edited.
   let _editIndex = -1;
 
+  // Track which container we've bound delegated click/submit listeners on.
+  // render() is called many times per session (initial mount, after every
+  // edit-toggle / cancel / add / remove / update); rebinding on every call
+  // would stack listeners on the same container so each click fires N times
+  // and `splice(idx, 1)` runs N times, deleting unrelated rows.
+  let _boundContainer = null;
+
   // ── URL sanitization (T-07-17) ─────────────────────────────────────────
   // Returns the URL string when it is a safe http(s) link, otherwise null.
   // Callers MUST render the URL as escaped text (not an anchor) when null.
@@ -177,6 +184,8 @@ const LibraryView = (() => {
     }
 
     // ── Delegated card actions (edit / cancel-edit / remove / ask) ─────
+    // Bind ONCE per container — see _boundContainer note at top of module.
+    if (_boundContainer === container) return;
     container.addEventListener('click', e => {
       const editBtn   = e.target.closest('.library-edit');
       const cancelBtn = e.target.closest('.library-edit-cancel');
@@ -255,6 +264,10 @@ const LibraryView = (() => {
         .then(() => { Utils.showToast('Link updated.'); render(container); })
         .catch(err => Utils.showToast('Save failed: ' + (err && err.message || err), 'error', 5000));
     });
+
+    // Mark this container as bound so subsequent render() calls skip the
+    // delegated-listener block above (see _boundContainer note at top).
+    _boundContainer = container;
   }
 
   return { render };
