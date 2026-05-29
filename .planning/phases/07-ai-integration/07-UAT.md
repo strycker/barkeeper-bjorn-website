@@ -14,10 +14,10 @@ updated: 2026-05-26T22:30:00.000Z
 
 ## Current Test
 
-number: 7
-name: Classroom — lesson-scoped Q&A (AI-07)
+number: 8
+name: Library — CRUD + sanitized hrefs + Ask-Bjorn
 expected: |
-  With your key set, on the "why do we stir a Manhattan?" lesson (or similar Technique lesson), click "Ask Bjorn about this". The drawer opens seeded with the lesson context; the streamed answer stays SCOPED to that lesson (it talks about stirring/spirit-forward, not about something unrelated).
+  Open `#library` → add a link (url + title + description + tags) → reload the page → the link persists from `data/library.json` and the title renders as a clickable http(s) link. Try adding a link with url `javascript:alert(1)` → it renders as plain escaped text, NOT as a clickable/executable href. Edit and remove a link → both persist across reload. With your key set, click a link's "Ask Bjorn about this" → seeded drawer opens.
 awaiting: user response
 
 ## Tests
@@ -153,7 +153,7 @@ result: pass
 #### 7. Classroom — lesson-scoped Q&A (AI-07)
 expected: |
   With your key set, on the "why do we stir a Manhattan?" lesson (or similar Technique lesson), click "Ask Bjorn about this". The drawer opens seeded with the lesson context; the streamed answer stays SCOPED to that lesson (it talks about stirring/spirit-forward, not about something unrelated).
-result: pending
+result: pass
 
 #### 8. Library — CRUD + sanitized hrefs + Ask-Bjorn
 expected: |
