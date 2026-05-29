@@ -8,12 +8,6 @@
         "reference",
         "recipes"
       ]
-    },
-    {
-      "url": "javascript:alert(1)",
-      "title": "bad",
-      "description": "",
-      "tags": []
     }
   ],
   "last_updated": "2026-05-29"
