@@ -14,10 +14,10 @@ updated: 2026-05-26T22:30:00.000Z
 
 ## Current Test
 
-number: 6
-name: Classroom — renders without a key (AI-06)
+number: 7
+name: Classroom — lesson-scoped Q&A (AI-07)
 expected: |
-  WITHOUT a key, open `#classroom`. All four topics render — Techniques, Glassware, Ratios, Ingredients — with lesson tiles. Click "Ask Bjorn about this" on any lesson → no-key affordance toast/link, no network call.
+  With your key set, on the "why do we stir a Manhattan?" lesson (or similar Technique lesson), click "Ask Bjorn about this". The drawer opens seeded with the lesson context; the streamed answer stays SCOPED to that lesson (it talks about stirring/spirit-forward, not about something unrelated).
 awaiting: user response
 
 ## Tests
@@ -148,7 +148,7 @@ result: pass
 #### 6. Classroom — renders without a key (AI-06)
 expected: |
   WITHOUT a key, open `#classroom`. All four topics render — Techniques, Glassware, Ratios, Ingredients — with lesson tiles. Click "Ask Bjorn about this" on any lesson → no-key affordance toast/link, no network call.
-result: pending
+result: pass
 
 #### 7. Classroom — lesson-scoped Q&A (AI-07)
 expected: |
@@ -218,3 +218,24 @@ result: pending
 ## Gaps
 
 None identified yet. Run live-key UAT to surface any.
+
+---
+
+## Deferred / Backlog (future phases)
+
+### BL-1 — Classroom V2: structured lessons + adaptive progression
+*Surfaced during Test 6, 2026-05-26.*
+
+**Current state (Phase 7):** Classroom ships with ~4 static topics (Techniques / Glassware / Ratios / Ingredients) hard-coded in `app/js/data/classroom-content.js`. Each lesson is a `{title, body}` pair rendered as a tile. Renders fully without a key; with a key, "Ask Bjorn about this" seeds the drawer with the lesson context.
+
+**Requested enhancements (deferred):**
+
+1. **Formalize lessons as structured cards/chips with a JSON schema** — same treatment as recipes and ingredients (`schema/classroom.schema.json`). Fields per lesson: `id`, `topic`, `level` (`101 | 201 | advanced`), `title`, `body`, `prereqs` (lesson IDs), `tags`, `_source` (`built-in | user | ai-generated`). Move the static content into a versioned data file users can extend/curate, matching the GitHub-JSON storage ethos. Pre-load a foundational set (the "100 recipes equivalent" for education — comprehensive 101-level coverage of bartending fundamentals) so the basics never require an API key.
+
+2. **Adaptive progression** — track which lessons the user has completed (`bb_classroom_progress` or a State file). When all 101-level lessons in a topic are marked complete, automatically surface 201-level lessons; same step up to advanced. The static foundation handles 101; AI fills the gap for personalized 201+ when a key is present (RAG-style — Claude proposes a next-lesson card grounded in what the user already learned).
+
+3. **Lesson card actions** — alongside "Ask Bjorn about this," add "Mark complete," "Save to Library link" (cross-link into the Library view), and an "Add to my classroom" button on AI-suggested lessons.
+
+**Scope:** new phase (likely Phase 11+ after the current ROADMAP). Bundles cleanly with a possible "personalized learning loop" theme alongside future AI-driven recommendations.
+
+**Related to:** D-13 (Classroom + Library), AI-06/AI-07 (current Phase 7 reqs), AI-13 derivation pattern (the caching + key-gate + fail-soft pattern would apply to the 201+ AI-suggested lessons).
