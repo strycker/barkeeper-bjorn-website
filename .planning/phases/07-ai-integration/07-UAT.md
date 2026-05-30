@@ -14,10 +14,10 @@ updated: 2026-05-26T22:30:00.000Z
 
 ## Current Test
 
-number: 10
-name: Best-bottle advice (AI-05) + Dashboard cards un-disabled
+number: 11
+name: Bartender Wizard — Help-me-write (AI-12)
 expected: |
-  In Inventory, click "Best bottle to add (AI)" → drawer answers with a single-bottle recommendation grounded in your inventory and vetoes. Same from Dashboard. Confirm the Dashboard cards "Chat with Bjorn" / "Classroom" / "Library" are now real links (no longer disabled).
+  Open the Bartender Wizard, enter a short preference (e.g. "playful surfer"), click "Help me write this with Claude". The personality textarea fills with drafted long-form persona text; you can edit it before the existing save.
 awaiting: user response
 
 ## Tests
