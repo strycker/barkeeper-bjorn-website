@@ -14,10 +14,10 @@ updated: 2026-05-26T22:30:00.000Z
 
 ## Current Test
 
-number: 8
-name: Library — CRUD + sanitized hrefs + Ask-Bjorn
+number: 9
+name: Ask-Bjorn entry points on cards + chips (REC-04 / AI-04)
 expected: |
-  Open `#library` → add a link (url + title + description + tags) → reload the page → the link persists from `data/library.json` and the title renders as a clickable http(s) link. Try adding a link with url `javascript:alert(1)` → it renders as plain escaped text, NOT as a clickable/executable href. Edit and remove a link → both persist across reload. With your key set, click a link's "Ask Bjorn about this" → seeded drawer opens.
+  In Recommender, click "Ask Bjorn about this" on a recipe card → drawer opens seeded with that recipe and references your taste/mood. In Recipes, click "Ask Bjorn about this" on a recipe chip → same behavior.
 awaiting: user response
 
 ## Tests
@@ -158,7 +158,9 @@ result: pass
 #### 8. Library — CRUD + sanitized hrefs + Ask-Bjorn
 expected: |
   Open `#library` → add a link (url + title + description + tags) → reload the page → the link persists from `data/library.json` and the title renders as a clickable http(s) link. Try adding a link with url `javascript:alert(1)` → it renders as plain escaped text, NOT as a clickable/executable href. Edit and remove a link → both persist across reload. With your key set, click a link's "Ask Bjorn about this" → seeded drawer opens.
-result: pending
+result: pass
+caveat: "Initial save-failure / data-corruption issues under rapid CRUD; four targeted fixes landed during this test (per-key save mutex 6f385cd, delegated-listener stacking 14f79f4, render-on-patch TOCTOU 84d2311, coalesce concurrent saves 35e916b). User confirmed 'good enough' to move on; URL-sanitization + Ask-Bjorn drawer + persistence across reload all verified."
+follow_up: "Watch for any remaining save-reliability complaints across future UAT tests / sessions — if recurring, escalate to a focused storage-layer fix-up plan (move to localStorage primary + debounced GitHub sync)."
 
 #### 9. Ask-Bjorn entry points on cards + chips (REC-04 / AI-04)
 expected: |
