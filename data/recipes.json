@@ -52,7 +52,13 @@
         "bar_owner": 5,
         "guests": "Too smokey!",
         "notes": "Dial back the mezcal and increase the pear flavor"
-      }
+      },
+      "images": [
+        {
+          "filename": "cocktail1778776984398_1780103031139.png",
+          "alt_text": "Smokey the Pear"
+        }
+      ]
     }
   ],
   "confirmed_favorites": [
@@ -693,7 +699,7 @@
       "_source": "classics-db"
     }
   ],
-  "last_updated": "2026-05-21",
+  "last_updated": "2026-05-30",
   "made_log": [
     {
       "id": "east-india-75",
