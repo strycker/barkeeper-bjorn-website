@@ -172,7 +172,7 @@ backlog_ref: BL-2
 #### 10. Best-bottle advice (AI-05)
 expected: |
   In Inventory, click "Best bottle to add (AI)" → drawer answers with a single-bottle recommendation grounded in your inventory and vetoes. Same from Dashboard. Confirm the Dashboard cards "Chat with Bjorn" / "Classroom" / "Library" are now real links (no longer disabled).
-result: pending
+result: pass
 
 #### 11. Bartender Wizard — Help-me-write (AI-12)
 expected: |
