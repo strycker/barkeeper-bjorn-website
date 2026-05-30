@@ -95,14 +95,30 @@ const State = (() => {
     return m.includes('does not match') || m.includes('but expected') || m.includes('409');
   }
 
-  // Per-key save mutex: serialize concurrent save() calls for the same key so
-  // only one outbound write is in flight at a time. Rapid CRUD (Library add →
-  // edit → remove in quick succession) used to fire overlapping saves that
-  // raced on the cached SHA; the single-retry path could not absorb the
-  // cascade, surfacing "does not match … reload the page" errors. With this
-  // queue, save(N+1) for the same key awaits save(N) before starting and so
-  // sees the SHA save(N) just wrote. Different keys still save in parallel.
-  const _saveQueue = {};
+  // Per-key save coalescing: at most ONE save in flight per key, with at
+  // most ONE additional "drain" save pending behind it. Rapid CRUD (e.g.
+  // Library add → edit → remove in quick succession) used to chain a
+  // distinct GitHub Contents-API write for every State.patch call; the
+  // queue piled up, latency stacked, and even short transient SHA conflicts
+  // produced visible "does not match" errors. Coalescing instead lets the
+  // user's UI feel instant (synchronous render after patch) while the
+  // network catches up with a single final save that reflects the latest
+  // _data. Each _doSave reads _data[key] / _shas[key] at execution time,
+  // so the drain captures every patch that happened during the prior save.
+  const _activeSave  = {};   // key -> Promise currently executing
+  const _pendingSave = {};   // key -> { message } — at most one slot per key
+
+  function _drain(key) {
+    const pending = _pendingSave[key];
+    if (!pending) return Promise.resolve();
+    delete _pendingSave[key];
+    const p = _doSave(key, pending.message).finally(() => {
+      if (_activeSave[key] === p) delete _activeSave[key];
+      return _drain(key);
+    });
+    _activeSave[key] = p;
+    return p;
+  }
 
   async function _doSave(key, message) {
     const path = FILES[key];
@@ -142,18 +158,22 @@ const State = (() => {
   }
 
   async function save(key, message) {
-    const prev = _saveQueue[key] || Promise.resolve();
-    // Chain off prev regardless of whether it resolved or rejected — a prior
-    // save's error must not abort this save's attempt.
-    const next = prev.catch(() => {}).then(() => _doSave(key, message));
-    _saveQueue[key] = next;
-    try {
-      return await next;
-    } finally {
-      // Only clear the slot if no newer save has queued behind us; otherwise
-      // the next save is still chained and the slot must remain.
-      if (_saveQueue[key] === next) delete _saveQueue[key];
+    // If a save is already in flight for this key, mark a pending drain (or
+    // refresh the pending message) and return a promise that resolves when
+    // the drain — i.e. the final write — completes. Drops intermediate
+    // payloads on the floor: every _doSave reads _data[key] anew, so the
+    // drain write already reflects every State.patch that happened.
+    if (_activeSave[key]) {
+      _pendingSave[key] = { message };
+      return _activeSave[key].catch(() => {}).then(() => _drain(key));
     }
+    // No active save: start one immediately.
+    const p = _doSave(key, message).finally(() => {
+      if (_activeSave[key] === p) delete _activeSave[key];
+      return _drain(key);
+    });
+    _activeSave[key] = p;
+    return p;
   }
 
   function get(key) { return _data[key]; }
