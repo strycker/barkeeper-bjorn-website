@@ -14,10 +14,10 @@ updated: 2026-05-26T22:30:00.000Z
 
 ## Current Test
 
-number: 9
-name: Ask-Bjorn entry points on cards + chips (REC-04 / AI-04)
+number: 10
+name: Best-bottle advice (AI-05) + Dashboard cards un-disabled
 expected: |
-  In Recommender, click "Ask Bjorn about this" on a recipe card → drawer opens seeded with that recipe and references your taste/mood. In Recipes, click "Ask Bjorn about this" on a recipe chip → same behavior.
+  In Inventory, click "Best bottle to add (AI)" → drawer answers with a single-bottle recommendation grounded in your inventory and vetoes. Same from Dashboard. Confirm the Dashboard cards "Chat with Bjorn" / "Classroom" / "Library" are now real links (no longer disabled).
 awaiting: user response
 
 ## Tests
@@ -165,7 +165,9 @@ follow_up: "Watch for any remaining save-reliability complaints across future UA
 #### 9. Ask-Bjorn entry points on cards + chips (REC-04 / AI-04)
 expected: |
   In Recommender, click "Ask Bjorn about this" on a recipe card → drawer opens seeded with that recipe and references your taste/mood. In Recipes, click "Ask Bjorn about this" on a recipe chip → same behavior.
-result: pending
+result: pass
+caveat: "Recommender cards (part a) work completely. Recipes chips (part b) work on most tabs, but Originals chips remain styled/structured differently from other chip surfaces. AI-04 entry point is functional — flagged for the existing BL-2 unified-chip schema work, not a Phase-7 fix."
+backlog_ref: BL-2
 
 #### 10. Best-bottle advice (AI-05)
 expected: |
@@ -241,3 +243,14 @@ None identified yet. Run live-key UAT to surface any.
 **Scope:** new phase (likely Phase 11+ after the current ROADMAP). Bundles cleanly with a possible "personalized learning loop" theme alongside future AI-driven recommendations.
 
 **Related to:** D-13 (Classroom + Library), AI-06/AI-07 (current Phase 7 reqs), AI-13 derivation pattern (the caching + key-gate + fail-soft pattern would apply to the 201+ AI-suggested lessons).
+
+### BL-2 — Unified recipe-chip schema + shared render (Originals visual parity)
+*Surfaced during Test 9, 2026-05-26 (re-surfacing a Phase 6 deferred item).*
+
+**Current state:** Originals chips render via a different code path than Favorites / Wishlist / Made / Classics chips. User-visible result: Originals look and feel different from other chip surfaces (different layout, possibly different actions exposed). Already captured in the Phase 6 close-out note in STATE.md as part of the enhancement backlog.
+
+**Requested fix (deferred):** Normalize all recipe storage so each recipe is stored once and referenced by id across confirmed_favorites / wishlist / made_log / originals / drafts. Build one `renderRecipeChip(recipe, options)` function used everywhere so chips look identical (♥/☆/✓ badges, cross-list move actions, AI-04 Ask-Bjorn button — currently all consistent on non-Originals but missing or different on Originals). Also fixes Phase 6 Test 12 (rename doesn't sync across all lists holding a recipe — a symptom of duplicated storage).
+
+**Scope:** small/medium phase. Could be a focused mini-phase or rolled into a future "Recipes UX consistency" pass.
+
+**Related to:** Phase 6 deferred enhancements (already captured), REC-04 / AI-04 (Phase 7), drafts → Originals promote flow (AI-03 / D-11).
