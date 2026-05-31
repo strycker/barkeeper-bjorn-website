@@ -14,10 +14,10 @@ updated: 2026-05-26T22:30:00.000Z
 
 ## Current Test
 
-number: 11
-name: Bartender Wizard — Help-me-write (AI-12)
+number: 12
+name: AI-03 — Generate → draft → refine → promote
 expected: |
-  Open the Bartender Wizard, enter a short preference (e.g. "playful surfer"), click "Help me write this with Claude". The personality textarea fills with drafted long-form persona text; you can edit it before the existing save.
+  Recipes → "Generate with AI". Enter "design me a spirit-forward whiskey drink". A draft is generated, is schema-valid, AUTO-SAVED to the Drafts tab (D-09). If it used a bottle you don't own, a phantom-ingredient flag is surfaced in the draft preview. The refine card supports both "make it less sweet" (tweak SAME draft) and "generate new" (new draft, fork-before-refine on a 2nd refine).
 awaiting: user response
 
 ## Tests
@@ -177,7 +177,7 @@ result: pass
 #### 11. Bartender Wizard — Help-me-write (AI-12)
 expected: |
   Open the Bartender Wizard, enter a short preference (e.g. "playful surfer"), click "Help me write this with Claude". The personality textarea fills with drafted long-form persona text; you can edit it before the existing save.
-result: pending
+result: pass
 
 #### 12. AI-03 — Generate → draft → refine → promote
 expected: |
@@ -254,3 +254,22 @@ None identified yet. Run live-key UAT to surface any.
 **Scope:** small/medium phase. Could be a focused mini-phase or rolled into a future "Recipes UX consistency" pass.
 
 **Related to:** Phase 6 deferred enhancements (already captured), REC-04 / AI-04 (Phase 7), drafts → Originals promote flow (AI-03 / D-11).
+
+### BL-3 — "Non-Alcoholic Only Tonight" mode (Recommender + AI-03 generate)
+*Surfaced during Test 11, 2026-05-26.*
+
+**Requested feature (deferred):** A first-class "NA-only" mode the user can toggle on both:
+
+1. **`#recommender` page** — a button/toggle near the existing scope/mood/occasion filters. When active, the recommender either:
+   - Filters to recipes flagged as NA (the simple path), OR
+   - Surfaces NA-friendly substitutions for marginal recipes (e.g. "this Old Fashioned works with bitters + soda + a touch of demerara — alcohol-free analog"). The substitution path is the more interesting one; Claude can generate per-recipe NA reframings when a key is present.
+
+2. **Recipes tab → "Generate with AI"** — a "NA only" toggle alongside the prompt input. When active, the AI-03 prompt is augmented to request a non-alcoholic build (or a near-zero-ABV one: bitters + soda + acidic + bittersweet aromatic — the "phantom cocktail" pattern).
+
+**Schema change required:** add an `na` (boolean) field to the recipe JSON schema (`schema/recipes.schema.json` + classics-db entries + drafts). Possibly also `near_na` (boolean) for very-low-ABV builds (Angostura + soda, vermouth-only spritzes, etc.). Normalize handles legacy entries with `na: undefined` as `false`.
+
+**UI:** chips/cards rendered with `na: true` get a visible badge (e.g. "🚫 NA" or "AF") in the chip — uses the same render path as the existing buildable / favorite badges. Filter-to-NA driven by the toggle.
+
+**Scope:** modest. Schema bump + recommender filter + chip-badge render + AI-03 prompt augmentation + a one-pass tagging sweep over the 169 classics. Could be its own small phase or rolled into a "Recommender filters V2" phase alongside other deferred recommender items.
+
+**Related to:** REC-01..REC-09 (existing recommender filters), AI-03 (drafts), BL-2 (unified chip render — adding the NA badge would benefit from consistent chip rendering across surfaces).
