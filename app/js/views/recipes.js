@@ -1340,6 +1340,12 @@ const RecipesView = (() => {
     title.style.cssText = 'color:var(--amber);font-weight:normal;margin-bottom:20px;';
     wrap.appendChild(title);
 
+    // Hoisted before any conditional block that references it (the tweak panel
+    // immediately below + the legacy AI prompt block further down both check
+    // hasKey). Previously declared further down → temporal-dead-zone
+    // ReferenceError on every draft edit, abandoning the form render.
+    const hasKey = !!localStorage.getItem('bb_anthropic_key');
+
     // AI tweak panel — only when editing a draft (D-10 fork-on-tweak applied
     // from the edit form). Mirrors the `Generate with AI` block shape used
     // for new recipes. Produces a NEW draft (fork) so the original is
@@ -1360,7 +1366,6 @@ const RecipesView = (() => {
     }
 
     // AI prompt block — shown only for new recipes (D-12)
-    const hasKey = !!localStorage.getItem('bb_anthropic_key');
     if (!isEdit) {
       wrap.innerHTML += `
         <div class="rf-ai-prompt-wrap" id="rf-ai-wrap" style="margin-bottom:20px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);">
