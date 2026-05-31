@@ -273,3 +273,25 @@ None identified yet. Run live-key UAT to surface any.
 **Scope:** modest. Schema bump + recommender filter + chip-badge render + AI-03 prompt augmentation + a one-pass tagging sweep over the 169 classics. Could be its own small phase or rolled into a "Recommender filters V2" phase alongside other deferred recommender items.
 
 **Related to:** REC-01..REC-09 (existing recommender filters), AI-03 (drafts), BL-2 (unified chip render — adding the NA badge would benefit from consistent chip rendering across surfaces).
+
+### BL-4 — Unify the two "Generate with AI" entry points + clarify labels
+*Surfaced during Test 12, 2026-05-26.*
+
+**Current state:** Two entry points to AI recipe generation coexist:
+
+1. **Drafts tab → "Generate with AI"** (new, Phase 7 / 07-05 Task 2): `ClaudeAPI.requestJSON({schemaKey:'drafts'})` → WriteGate-validated draft → auto-saved to Drafts tab → refine card stays open for tweak ("make it less sweet") and "generate new" (D-09 / D-10).
+2. **"+ New Recipe" form → "Generate with AI"** (pre-Phase-7, from Phase 3 / 03-03): `ClaudeAPI.generateRecipe(prompt, ctx)` → fills the form inline → user clicks "Create Recipe" to save directly to Originals. No draft persistence, no refine card.
+
+User confusion (Test 12 feedback): "Create Recipe" label is unclear (does it save as draft?); the New-Recipe path produces a working recipe but lacks the refine feature the user wants; the Drafts-tab path was failing (now fixed in commits 97b6c6c + 352f78c) and is where the wanted features actually live.
+
+**Requested fix (deferred):**
+
+1. **Label clarity:** rename "Create Recipe" (after Generate-with-AI fills the form) to something more descriptive — e.g. "Save to Originals" or "Save as Final" — so the contrast with the Drafts path is obvious.
+
+2. **Add refine box to the New-Recipe entry point** *OR* redirect the New-Recipe "Generate with AI" button to the Drafts-tab flow (where refine already exists). The redirect is the simpler unification: one generation pipeline, two entry surfaces that converge on it.
+
+3. **Cross-link from Drafts:** add a "Promote to Originals" (already exists per D-11) and ensure the "Create Recipe from this draft" verb is consistent with the legacy form's verbiage.
+
+**Scope:** small. Could be done as a focused PR — recipes.js UX consolidation + label rename + one redirect. The hard work (AI-03 + WriteGate + drafts auto-save + refine card) is already shipped.
+
+**Related to:** AI-03 (drafts), D-09 / D-10 / D-11 (auto-save, refine, promote), AI-12 wizard "Help me write" pattern (also a "fill the form, then save" surface — same label-ambiguity question may apply there).
