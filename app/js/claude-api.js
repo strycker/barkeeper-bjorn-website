@@ -243,9 +243,13 @@ const ClaudeAPI = (() => {
           ? Normalize.byKey(schemaKey, obj) : obj;
         // Validate. Prefer the shared WriteGate if present (browser); fall back to
         // a minimal local shape check (node tests can stub Normalize/WriteGate).
+        // WriteGate.validate is async (it lazy-fetches schema/<key>.schema.json
+        // on first use) so this MUST be awaited — without the await `errors`
+        // is a Promise, length===0 is false, and the next iteration trips
+        // `errors.join('; ')` with "errors.join is not a function".
         let errors = [];
         if (typeof WriteGate !== 'undefined' && typeof WriteGate.validate === 'function') {
-          errors = WriteGate.validate(schemaKey, norm) || [];
+          errors = (await WriteGate.validate(schemaKey, norm)) || [];
         }
         if (errors.length === 0) return norm;
         if (attempt === 0) {
