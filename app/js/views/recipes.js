@@ -1182,6 +1182,74 @@ const RecipesView = (() => {
   // Reads #rf-ai-prompt, calls ClaudeAPI.generateRecipe with current
   // buildPromptContext(), populates form fields inline, manages spinner +
   // form-field disable state. Errors surface as red toasts.
+  // Tweak-from-edit-form: edit-form-side analog of the runAIDesign('fork')
+  // path. Produces a NEW draft (fresh draft_id) so the original draft is
+  // preserved as a comparison point. Then routes back to the Drafts tab.
+  async function handleDraftTweak(wrap, baseDraft, container) {
+    const promptEl = wrap.querySelector('#rf-tweak-prompt');
+    const tweakBtn = wrap.querySelector('#rf-tweak');
+    const statusEl = wrap.querySelector('#rf-tweak-status');
+    const userPrompt = promptEl ? promptEl.value.trim() : '';
+    if (!userPrompt) {
+      Utils.showToast('Enter a tweak before requesting.', 'error');
+      return;
+    }
+    if (typeof ClaudeAPI === 'undefined' || !ClaudeAPI.getKey || !ClaudeAPI.getKey()) {
+      Utils.showToast('Add your Anthropic API key in Settings to tweak with AI.', 'error');
+      return;
+    }
+    tweakBtn.disabled = true;
+    tweakBtn.textContent = 'Tweaking…';
+    if (statusEl) { statusEl.textContent = ''; statusEl.style.color = 'var(--text-muted)'; }
+    try {
+      const ctx = buildPromptContext();
+      const system = _aiDesignSystem(ctx.bkName, ctx.bkPreset, ctx.inventoryText, ctx.profileText);
+      const slim = {
+        name: baseDraft.name,
+        tagline: baseDraft.tagline,
+        base: baseDraft.base,
+        ingredients: baseDraft.ingredients,
+        method: baseDraft.method,
+        method_type: baseDraft.method_type,
+        glassware: baseDraft.glassware,
+        garnish: baseDraft.garnish,
+      };
+      const composed = `Refine this existing draft per the user's tweak. Current draft:\n${JSON.stringify(slim, null, 2)}\n\nUser tweak: ${userPrompt}`;
+      const norm = await ClaudeAPI.requestJSON({
+        system,
+        userPrompt: composed,
+        schemaKey: 'drafts',
+        model: ClaudeAPI.getModel(),
+        maxTokens: 1500,
+      });
+      const drafts = (norm && Array.isArray(norm.drafts)) ? norm.drafts : [];
+      const candidate = drafts[drafts.length - 1];
+      if (!candidate || !candidate.name) throw new Error('No draft returned.');
+      const now = new Date().toISOString();
+      const newDraft = {
+        ...candidate,
+        _source: 'ai-generated',
+        draft_id: 'draft' + Date.now(),
+        created_at: now,
+        updated_at: now,
+        source_prompt: `Tweak of "${baseDraft.name || 'draft'}": ${userPrompt}`,
+      };
+      const oldDrafts = State.get('drafts') || { drafts: [] };
+      const list = Array.isArray(oldDrafts.drafts) ? oldDrafts.drafts.slice() : [];
+      list.push(newDraft);
+      const newDraftsPayload = { ...oldDrafts, drafts: list, last_updated: now.slice(0, 10) };
+      State.set('drafts', newDraftsPayload);
+      await State.save('drafts');
+      Utils.showToast('New draft created from your tweak.');
+      render(container, { tab: 'drafts' });
+    } catch (err) {
+      Utils.showToast('Tweak failed: ' + err.message, 'error');
+    } finally {
+      tweakBtn.disabled = false;
+      tweakBtn.textContent = 'Generate Tweaked Draft';
+    }
+  }
+
   async function handleGenerate(wrap) {
     const prompt = wrap.querySelector('#rf-ai-prompt').value.trim();
     if (!prompt) {
@@ -1271,6 +1339,25 @@ const RecipesView = (() => {
     title.textContent = isDraft ? `Edit Draft: ${r.name}` : (isEdit ? `Edit: ${r.name}` : 'New Recipe');
     title.style.cssText = 'color:var(--amber);font-weight:normal;margin-bottom:20px;';
     wrap.appendChild(title);
+
+    // AI tweak panel — only when editing a draft (D-10 fork-on-tweak applied
+    // from the edit form). Mirrors the `Generate with AI` block shape used
+    // for new recipes. Produces a NEW draft (fork) so the original is
+    // preserved as a comparison point.
+    if (isDraft && hasKey) {
+      wrap.innerHTML += `
+        <div class="rf-ai-prompt-wrap" id="rf-tweak-wrap" style="margin-bottom:20px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);">
+          <div class="section-label" style="margin-bottom:8px;">Tweak with AI</div>
+          <div class="form-group" style="margin-bottom:10px;">
+            <label for="rf-tweak-prompt" style="font-size:0.82rem;">Ask Claude to refine this draft (creates a NEW draft, keeps the original)</label>
+            <textarea id="rf-tweak-prompt" rows="2"
+                      placeholder="e.g. make it less sweet, or substitute something for mezcal"
+                      style="font-family:monospace;font-size:0.82rem;padding:10px;resize:vertical;"></textarea>
+          </div>
+          <button class="btn btn-primary btn-sm" id="rf-tweak" type="button">Generate Tweaked Draft</button>
+          <span id="rf-tweak-status" style="font-size:0.82rem;color:var(--text-muted);margin-left:10px;"></span>
+        </div>`;
+    }
 
     // AI prompt block — shown only for new recipes (D-12)
     const hasKey = !!localStorage.getItem('bb_anthropic_key');
@@ -1374,8 +1461,9 @@ const RecipesView = (() => {
         <label for="rf-built" style="margin:0;">Confirmed Built</label>
       </div>
 
-      <div style="display:flex;gap:10px;margin-top:20px;">
+      <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
         <button class="btn btn-primary" id="rf-save">${isDraft ? 'Save Draft Changes' : (isEdit ? 'Save Changes' : 'Create Recipe')}</button>
+        ${isDraft ? '<button class="btn btn-primary" id="rf-save-promote" title="Save these edits then promote the draft into Originals">Save and Promote to Original</button>' : ''}
         <button class="btn btn-secondary" id="rf-cancel">Cancel</button>
       </div>`;
 
@@ -1396,10 +1484,31 @@ const RecipesView = (() => {
       }
     }
 
+    // Closure flag: set to true by the "Save and Promote to Original" button
+    // before it programmatically clicks rf-save. The drafts-success branch of
+    // the rf-save handler then calls promoteDraftToOriginal instead of
+    // returning to the Drafts tab.
+    let _promoteAfterSave = false;
+
     wrap.querySelector('#rf-cancel').addEventListener('click', () => {
-      if (isEdit) renderDetail(r, container);
+      if (isDraft) render(container, { tab: 'drafts' });
+      else if (isEdit) renderDetail(r, container);
       else render(container);
     });
+
+    if (isDraft) {
+      const promoteBtn = wrap.querySelector('#rf-save-promote');
+      if (promoteBtn) {
+        promoteBtn.addEventListener('click', () => {
+          _promoteAfterSave = true;
+          wrap.querySelector('#rf-save').click();
+        });
+      }
+      const tweakBtn = wrap.querySelector('#rf-tweak');
+      if (tweakBtn) {
+        tweakBtn.addEventListener('click', () => handleDraftTweak(wrap, r, container));
+      }
+    }
 
     wrap.querySelector('#rf-add-ing').addEventListener('click', () => {
       const ingList = wrap.querySelector('#rf-ingredients');
@@ -1492,9 +1601,14 @@ const RecipesView = (() => {
         const newDrafts = { ...draftsNow, drafts: list, last_updated: new Date().toISOString().slice(0, 10) };
         State.set('drafts', newDrafts);
         State.save('drafts').then(() => {
+          if (_promoteAfterSave) {
+            _promoteAfterSave = false;
+            return promoteDraftToOriginal(draftUpdated, container);
+          }
           Utils.showToast('Draft updated.');
           render(container, { tab: 'drafts' });
         }).catch(err => {
+          _promoteAfterSave = false;
           Utils.showToast('Save failed: ' + err.message, 'error');
           saveBtn.disabled = false;
           saveBtn.textContent = 'Save Draft Changes';
