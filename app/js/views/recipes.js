@@ -476,6 +476,7 @@ const RecipesView = (() => {
             </div>
           </div>
           <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
+            <button class="btn btn-ghost btn-sm" data-edit-draft="${Utils.escapeHtml(draft.draft_id || '')}">Edit</button>
             <button class="btn btn-primary btn-sm" data-promote="${Utils.escapeHtml(draft.draft_id || '')}">Promote to Original</button>
             <button class="btn-icon" data-discard title="Discard draft">✕</button>
           </div>
@@ -487,6 +488,13 @@ const RecipesView = (() => {
       card.querySelector('[data-promote]').addEventListener('click', e => {
         e.stopPropagation();
         promoteDraftToOriginal(draft, mainContainer);
+      });
+
+      card.querySelector('[data-edit-draft]').addEventListener('click', e => {
+        e.stopPropagation();
+        // Reuse the existing renderForm — it sniffs _source==='ai-generated'
+        // and routes the save back to drafts.drafts (find by draft_id).
+        renderForm(draft, mainContainer);
       });
 
       card.querySelector('[data-discard]').addEventListener('click', e => {
@@ -1240,13 +1248,18 @@ const RecipesView = (() => {
 
   function renderForm(r, container) {
     const isEdit = !!r;
+    // A draft is just a universal recipe stored in drafts.drafts; the form is
+    // the same, but its save handler must route back to drafts (not originals)
+    // and titles/back-nav should reflect that. Detect via _source provenance.
+    const isDraft = isEdit && r && r._source === 'ai-generated' && r.draft_id;
     container.innerHTML = '';
 
     const back = document.createElement('button');
     back.className = 'back-btn';
-    back.textContent = isEdit ? '← Back to Recipe' : '← Back to Recipes';
+    back.textContent = isDraft ? '← Back to Drafts' : (isEdit ? '← Back to Recipe' : '← Back to Recipes');
     back.addEventListener('click', () => {
-      if (isEdit) renderDetail(r, container);
+      if (isDraft) render(container, { tab: 'drafts' });
+      else if (isEdit) renderDetail(r, container);
       else render(container);
     });
     container.appendChild(back);
@@ -1255,7 +1268,7 @@ const RecipesView = (() => {
     wrap.style.cssText = 'max-width:680px;';
 
     const title = document.createElement('h2');
-    title.textContent = isEdit ? `Edit: ${r.name}` : 'New Recipe';
+    title.textContent = isDraft ? `Edit Draft: ${r.name}` : (isEdit ? `Edit: ${r.name}` : 'New Recipe');
     title.style.cssText = 'color:var(--amber);font-weight:normal;margin-bottom:20px;';
     wrap.appendChild(title);
 
@@ -1362,7 +1375,7 @@ const RecipesView = (() => {
       </div>
 
       <div style="display:flex;gap:10px;margin-top:20px;">
-        <button class="btn btn-primary" id="rf-save">${isEdit ? 'Save Changes' : 'Create Recipe'}</button>
+        <button class="btn btn-primary" id="rf-save">${isDraft ? 'Save Draft Changes' : (isEdit ? 'Save Changes' : 'Create Recipe')}</button>
         <button class="btn btn-secondary" id="rf-cancel">Cancel</button>
       </div>`;
 
@@ -1456,6 +1469,40 @@ const RecipesView = (() => {
         if (ratingNotesVal) updated.ratings.notes = ratingNotesVal;
       }
 
+      const saveBtn = wrap.querySelector('#rf-save');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving…';
+
+      // Draft path: preserve draft provenance, find-by-draft_id in drafts.drafts,
+      // save back to the drafts state file. Reuses the same form code.
+      if (isDraft) {
+        const draftUpdated = {
+          ...updated,
+          _source: 'ai-generated',
+          draft_id: r.draft_id,
+          created_at: r.created_at,
+          updated_at: new Date().toISOString(),
+          source_prompt: r.source_prompt,
+        };
+        const draftsNow = State.get('drafts') || { drafts: [] };
+        const list = Array.isArray(draftsNow.drafts) ? draftsNow.drafts.slice() : [];
+        const dIdx = list.findIndex(d => d.draft_id === r.draft_id);
+        if (dIdx >= 0) list[dIdx] = draftUpdated;
+        else list.push(draftUpdated);
+        const newDrafts = { ...draftsNow, drafts: list, last_updated: new Date().toISOString().slice(0, 10) };
+        State.set('drafts', newDrafts);
+        State.save('drafts').then(() => {
+          Utils.showToast('Draft updated.');
+          render(container, { tab: 'drafts' });
+        }).catch(err => {
+          Utils.showToast('Save failed: ' + err.message, 'error');
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save Draft Changes';
+        });
+        return;
+      }
+
+      // Originals / new-recipe path (unchanged).
       const recipes = State.get('recipes') || {};
       const originals = recipes.originals || [];
       if (isEdit) {
@@ -1468,10 +1515,6 @@ const RecipesView = (() => {
       recipes.originals = originals;
       recipes.last_updated = new Date().toISOString().slice(0, 10);
       State.set('recipes', recipes);
-
-      const saveBtn = wrap.querySelector('#rf-save');
-      saveBtn.disabled = true;
-      saveBtn.textContent = 'Saving…';
 
       State.save('recipes').then(() => {
         Utils.showToast(isEdit ? 'Recipe updated.' : 'Recipe created.');
