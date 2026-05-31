@@ -87,16 +87,40 @@ const WriteGate = (() => {
 
   // Fetch and parse schema/<key>.schema.json. Browser-only; in node tests the
   // caller passes a pre-parsed schema to `validateWith(schemaObj, payload)`.
+  //
+  // Path resolution: schemas live at <repo-root>/schema/, but the SPA is
+  // served from <repo-root>/app/ in local dev (relative `schema/…` resolves
+  // to `/app/schema/…` → 404). In GH Pages prod the publish root is `app/`
+  // itself, so `/schema/` doesn't exist on the origin at all. We probe in
+  // order:
+  //   1. `../schema/<key>.schema.json`   — local dev served from repo root
+  //   2. `schema/<key>.schema.json`      — if schemas were copied into app/
+  //   3. `GitHubAPI.readJSON('schema/<key>.schema.json')` — works anywhere a
+  //      GitHub token is configured (production + offline-mode local). This
+  //      is the same auth path data/*.json already use.
+  // First non-empty response wins; subsequent calls hit `_schemaCache`.
   async function _loadSchema(schemaKey) {
     if (_schemaCache[schemaKey]) return _schemaCache[schemaKey];
-    if (typeof fetch !== 'function') return null;
-    try {
-      const resp = await fetch(`schema/${schemaKey}.schema.json`);
-      if (!resp.ok) return null;
-      const json = await resp.json();
-      _schemaCache[schemaKey] = json;
-      return json;
-    } catch { return null; }
+    const relPaths = [`../schema/${schemaKey}.schema.json`, `schema/${schemaKey}.schema.json`];
+    if (typeof fetch === 'function') {
+      for (const path of relPaths) {
+        try {
+          const resp = await fetch(path);
+          if (resp.ok) {
+            const json = await resp.json();
+            _schemaCache[schemaKey] = json;
+            return json;
+          }
+        } catch { /* try next */ }
+      }
+    }
+    if (typeof GitHubAPI !== 'undefined' && typeof GitHubAPI.readJSON === 'function') {
+      try {
+        const { data } = await GitHubAPI.readJSON(`schema/${schemaKey}.schema.json`);
+        if (data) { _schemaCache[schemaKey] = data; return data; }
+      } catch { /* fall through */ }
+    }
+    return null;
   }
 
   // Pure validator: takes a parsed schema object and returns error strings.
