@@ -532,12 +532,103 @@ const Normalize = (() => {
     return data;
   }
 
+  // reclassifyExistingPool — one-time corrective pass that runs once per
+  // pool. Finds entries with status:'original' (no seed_id) whose `name`
+  // matches a classics-db seed and converts them to overlay-only seeded
+  // entries, preserving every overlay flag (is_favorite / is_wishlist /
+  // is_hidden / made_log / ratings / user_notes / images).
+  //
+  // Why this exists: the v1->v2 migration's lookupSeed runs at load time;
+  // if a v1 confirmed_favorites/wishlist/made_log entry was missing an `id`
+  // OR had a stripped-down shape, the seed lookup could fall through and
+  // the entry would land in the pool as a phantom `status:'original'` —
+  // visible to the user as a wrongly-tagged "Original" badge on a classic
+  // like Army & Navy or French 75. Reclassify is the cleanup pass.
+  //
+  // Also dedupes: when a reclassified entry's new seed_id collides with an
+  // existing pool entry, merges overlay flags (truthy wins) and drops the
+  // duplicate so the pool ends up with one entry per seeded classic.
+  //
+  // Idempotent via the `_reclassified_v2_1` flag on the pool object.
+  function reclassifyExistingPool(recipesV2, lookupSeed) {
+    if (!recipesV2 || !Array.isArray(recipesV2.pool)) return recipesV2;
+    if (recipesV2._reclassified_v2_1) return recipesV2;
+    const lookup = lookupSeed || _defaultLookupSeed;
+    const bySeedId = {};
+    const newPool = [];
+    let changed = false;
+    recipesV2.pool.forEach(entry => {
+      // Seeded entries pass through unchanged.
+      if (entry.seed_id) {
+        if (bySeedId[entry.seed_id]) {
+          // Already saw a seeded entry with this id — merge overlay flags.
+          const existing = bySeedId[entry.seed_id];
+          if (entry.is_favorite) existing.is_favorite = true;
+          if (entry.is_wishlist) existing.is_wishlist = true;
+          if (entry.is_hidden)   existing.is_hidden   = true;
+          if (Array.isArray(entry.made_log) && entry.made_log.length) {
+            existing.made_log = (Array.isArray(existing.made_log) ? existing.made_log : []).concat(entry.made_log);
+          }
+          changed = true;
+          return;
+        }
+        bySeedId[entry.seed_id] = entry;
+        newPool.push(entry);
+        return;
+      }
+      // Drafts pass through unchanged.
+      if (entry.status === 'draft') {
+        newPool.push(entry);
+        return;
+      }
+      // status:'original' with no seed_id — try to match a classics-db seed.
+      const seedId = lookup({ id: entry.id, name: entry.name });
+      if (!seedId) {
+        // Truly a user original.
+        newPool.push(entry);
+        return;
+      }
+      // Convert to overlay-only seeded entry, preserving every flag the
+      // phantom-original was carrying.
+      changed = true;
+      const reclassified = recipe({
+        id: seedId,
+        seed_id: seedId,
+        status: 'classic',
+        _source: 'seed',
+        is_favorite: !!entry.is_favorite,
+        is_wishlist: !!entry.is_wishlist,
+        is_hidden:   !!entry.is_hidden,
+        made_log:    Array.isArray(entry.made_log) ? entry.made_log : [],
+        ratings:     entry.ratings,
+        user_notes:  entry.user_notes,
+        images:      entry.images,
+      });
+      if (!reclassified) return;
+      if (bySeedId[seedId]) {
+        // Collision with an existing seeded entry — merge overlay flags.
+        const existing = bySeedId[seedId];
+        if (reclassified.is_favorite) existing.is_favorite = true;
+        if (reclassified.is_wishlist) existing.is_wishlist = true;
+        if (reclassified.is_hidden)   existing.is_hidden   = true;
+        if (reclassified.made_log && reclassified.made_log.length) {
+          existing.made_log = (Array.isArray(existing.made_log) ? existing.made_log : []).concat(reclassified.made_log);
+        }
+        if (!existing.user_notes && reclassified.user_notes) existing.user_notes = reclassified.user_notes;
+        return;
+      }
+      bySeedId[seedId] = reclassified;
+      newPool.push(reclassified);
+    });
+    return {
+      ...recipesV2,
+      pool: newPool,
+      _reclassified_v2_1: true,
+      last_updated: changed ? isoToday() : recipesV2.last_updated,
+    };
+  }
+
   // foldDraftsIntoPool — called by state.js after loadAll when a legacy
-  // data/drafts.json is present alongside a v1 or already-migrated recipes
-  // file. Takes the in-memory recipes object (v2 pool shape) and the legacy
-  // drafts payload, returns a new recipes object with each draft folded in
-  // as a pool entry. Idempotent — if a pool entry with the same draft_id
-  // already exists, it is replaced rather than duplicated.
   function foldDraftsIntoPool(recipesV2, draftsLegacy) {
     if (!recipesV2 || !Array.isArray(recipesV2.pool)) return recipesV2;
     const draftsList = ensureArray(draftsLegacy && draftsLegacy.drafts);
@@ -565,6 +656,6 @@ const Normalize = (() => {
   return {
     inventory, barkeeper, profile, recipes, drafts, library, byKey,
     // v2 chip unification helpers:
-    recipe, migrateRecipesV1, foldDraftsIntoPool,
+    recipe, migrateRecipesV1, foldDraftsIntoPool, reclassifyExistingPool,
   };
 })();

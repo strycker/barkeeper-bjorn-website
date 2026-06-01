@@ -105,6 +105,23 @@ const State = (() => {
             _data.drafts = { drafts: [], last_updated: new Date().toISOString().slice(0,10) };
           }
         }
+        // Reclassify any phantom-original pool entries (Phase 7 follow-up:
+        // confirmed_favorites/wishlist/made_log entries whose v1->v2 lookup
+        // missed CLASSICS_DB land as status:'original' without a seed_id;
+        // reclassifyExistingPool corrects them on a one-time pass, preserving
+        // overlay flags).
+        if (typeof Normalize !== 'undefined' && Normalize.reclassifyExistingPool) {
+          const before = (_data.recipes.pool || []).length;
+          const reclassified = Normalize.reclassifyExistingPool(_data.recipes);
+          if (reclassified && reclassified !== _data.recipes && !_data.recipes._reclassified_v2_1) {
+            _data.recipes = reclassified;
+            if ((reclassified.pool || []).length !== before) migratedRecipes = true;
+            // Flag a flush even if the entry count is unchanged — the
+            // _reclassified_v2_1 marker itself needs to land on GitHub so
+            // we don't re-run on every load.
+            migratedRecipes = migratedRecipes || true;
+          }
+        }
         // Flag for any caller that wants to trigger a one-time flush save.
         if (migratedRecipes) notify({ type: 'migrated', key: 'recipes' });
       }
