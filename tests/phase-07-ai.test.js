@@ -47,6 +47,80 @@ function freshStorage() { global.localStorage.clear(); }
 // SET-05 / AI-09: model selector + log hygiene
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Chip Unification — Commit 1: Normalize.recipes() v1 → v2 pool migration
+// (idempotent; classics overlay-only via seed_id; drafts fold-in)
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('chip-unify: Normalize.recipes coerces v1 shape to v2 pool', () => {
+  const lookup = (entry) => entry && entry.id === 'old-fashioned' ? 'old-fashioned' : null;
+  const v1 = {
+    originals: [{ id: 'cocktail123', name: 'My Drink', creator: 'me', method: 'stirred',
+                  ingredients: [{ name: 'gin', amount: '2 oz' }] }],
+    confirmed_favorites: [{ id: 'old-fashioned', name: 'Old Fashioned' }],
+    wishlist: [{ name: 'Some standalone wishlist drink' }],
+    made_log: [{ id: 'old-fashioned', name: 'Old Fashioned', times_made: 3, last_made: '2026-05-01' }],
+    last_updated: '2026-05-01',
+  };
+  const v2 = Normalize.migrateRecipesV1(v1, lookup);
+  assert.equal(v2._schema_version, 2);
+  assert.equal(v2.pool.length, 3, 'one original + one seeded classic (favorited+made) + one standalone wishlist');
+  const original = v2.pool.find(p => p.id === 'cocktail123');
+  assert.equal(original.status, 'original');
+  assert.equal(original._source, 'user');
+  const classic = v2.pool.find(p => p.seed_id === 'old-fashioned');
+  assert.equal(classic.status, 'classic');
+  assert.equal(classic._source, 'seed');
+  assert.equal(classic.is_favorite, true);
+  assert.equal(classic.made_log.length, 1, 'made_log not duplicated by the upsert merge');
+  assert.equal(classic.made_log[0].times_made, 3);
+  // Seeded entry should NOT carry core fields (overlay-only design).
+  assert.equal(classic.name, undefined, 'core fields dropped on seeded entries (live overlay)');
+  assert.equal(classic.ingredients, undefined);
+});
+
+test('chip-unify: Normalize.recipes is idempotent (v2 in -> v2 out)', () => {
+  const v1 = { originals: [{ id: 'cocktail999', name: 'X', creator: 'me', method: 'stirred',
+                              ingredients: [{ name: 'gin', amount: '2 oz' }] }] };
+  const v2a = Normalize.recipes(v1);
+  const v2b = Normalize.recipes(v2a);
+  assert.equal(v2b._schema_version, 2);
+  assert.equal(v2b.pool.length, v2a.pool.length);
+  assert.equal(v2b.pool[0].id, v2a.pool[0].id);
+});
+
+test('chip-unify: Normalize.recipe coerces a single entry and locks seeded core', () => {
+  const rec = Normalize.recipe({
+    id: 'old-fashioned', seed_id: 'old-fashioned',
+    name: 'spoofed name', ingredients: [{ name: 'gin', amount: '2 oz' }],
+    is_favorite: true,
+  });
+  assert.equal(rec.status, 'classic', 'seed_id forces status=classic');
+  assert.equal(rec._source, 'seed');
+  assert.equal(rec.name, undefined, 'core fields dropped when seed_id is set');
+  assert.equal(rec.ingredients, undefined);
+  assert.equal(rec.is_favorite, true);
+});
+
+test('chip-unify: Normalize.foldDraftsIntoPool merges legacy drafts.json into pool', () => {
+  const v2 = Normalize.migrateRecipesV1({ originals: [] }, () => null);
+  const legacyDrafts = {
+    drafts: [
+      { name: 'AI Draft 1', draft_id: 'draft-a', method: 'stirred',
+        ingredients: [{ name: 'rye', amount: '2 oz' }], _source: 'ai-generated' },
+      { name: 'AI Draft 2', draft_id: 'draft-b', method: 'shaken',
+        ingredients: [{ name: 'gin', amount: '2 oz' }], _source: 'ai-generated' },
+    ],
+  };
+  const folded = Normalize.foldDraftsIntoPool(v2, legacyDrafts);
+  assert.equal(folded.pool.length, 2);
+  assert.equal(folded.pool[0].status, 'draft');
+  assert.equal(folded.pool[0].draft_id, 'draft-a');
+  // Re-folding the same legacy drafts is idempotent (replace by draft_id).
+  const refolded = Normalize.foldDraftsIntoPool(folded, legacyDrafts);
+  assert.equal(refolded.pool.length, 2, 'duplicate drafts dedupe by draft_id');
+});
+
 test('SET-05: getModel() returns claude-sonnet-4-6 when no override', () => {
   freshStorage();
   assert.equal(ClaudeAPI.getModel(), 'claude-sonnet-4-6');
@@ -162,12 +236,13 @@ test('Normalize.drafts drops keys not in draftItem allowlist', () => {
 // (Wave-1 helper-level — full promote flow lands in 07-02; this is the id shape.)
 // ─────────────────────────────────────────────────────────────────────────────
 
-test('Promote helper: cocktail id pattern (Date.now-based) matches schema regex', () => {
+test('Promote helper: user-original id convention (cocktail<ts>) holds', () => {
+  // Pre-v2 schema enforced ^cocktail[0-9]+$ via a regex; v2's pool schema
+  // accepts any string id (seeded entries use the seed id, drafts use
+  // 'draft<ts>'), so the assertion here just guards the Date.now()-based
+  // convention used by the Promote-to-Original flow.
   const id = 'cocktail' + Date.now();
   assert.match(id, /^cocktail[0-9]+$/);
-  // And matches the recipes schema's documented pattern explicitly:
-  const pat = RECIPES_SCHEMA.definitions.original.properties.id.pattern;
-  assert.match(id, new RegExp(pat));
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

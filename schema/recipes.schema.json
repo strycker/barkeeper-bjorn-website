@@ -1,45 +1,18 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "recipes.schema.json",
-  "title": "Recipes",
-  "description": "Originals, confirmed favorites, and the wishlist.",
+  "title": "Recipes (canonical pool)",
+  "description": "Single canonical recipe pool. Status / overlay flags replace the per-array storage that v1 used (originals / confirmed_favorites / wishlist / made_log / drafts). Classics live read-only in classics-db*.js and are referenced from pool entries via seed_id (no core fields stored — see chip-unification-plan.md C-2 overlay-only design).",
   "type": "object",
+  "required": ["pool"],
   "properties": {
-    "last_updated": { "type": "string", "format": "date" },
-    "originals": {
-      "type": "array",
-      "items": { "$ref": "#/definitions/original" },
-      "description": "Cocktails created specifically for or by the bar owner."
-    },
+    "_schema_version": { "type": "integer", "const": 2, "description": "Pool schema. v1 had separate originals/confirmed_favorites/wishlist/made_log arrays." },
+    "last_updated":    { "type": "string", "format": "date" },
+    "pool":            { "type": "array", "items": { "$ref": "#/definitions/recipe" } },
     "profile_coverage_matrix": {
       "type": "array",
-      "description": "Quick-reference view of originals across base/method/profile dimensions.",
-      "items": {
-        "type": "object",
-        "properties": {
-          "id": { "type": "string", "pattern": "^cocktail[0-9]+$" },
-          "name": { "type": "string" },
-          "creator": { "type": "string" },
-          "base": { "type": "string" },
-          "method": { "type": "string", "enum": ["shaken", "stirred", "built", "blended", "thrown", "other"] },
-          "profile_occasion": { "type": "string" }
-        }
-      }
-    },
-    "confirmed_favorites": {
-      "type": "array",
-      "items": { "$ref": "#/definitions/confirmedFavorite" },
-      "description": "Classics and agent-suggestions the bar owner has actually built and approved."
-    },
-    "wishlist": {
-      "type": "array",
-      "items": { "$ref": "#/definitions/savedRecipe" },
-      "description": "Recipes bookmarked to try. Full recipe stored inline at save time."
-    },
-    "made_log": {
-      "type": "array",
-      "items": { "$ref": "#/definitions/madeEntry" },
-      "description": "Recipes the bar owner has made. Most-recent first. Full recipe stored inline at save time."
+      "description": "Optional quick-reference index across base/method/profile dimensions. Preserved from v1 for any tooling that consumed it.",
+      "items": { "type": "object" }
     }
   },
   "definitions": {
@@ -47,129 +20,88 @@
       "type": "object",
       "required": ["name", "amount"],
       "properties": {
-        "name": { "type": "string" },
-        "amount": { "type": "string", "description": "e.g., '2 oz', '¾ oz', 'dash', 'barspoon'" },
-        "notes": { "type": "string", "description": "e.g., 'fresh squeezed', 'chilled'" }
+        "name":     { "type": "string" },
+        "amount":   { "type": "string", "description": "e.g. '2 oz', '¾ oz', 'dash', 'barspoon'" },
+        "notes":    { "type": "string" },
+        "keywords": { "type": "array", "items": { "type": "string" } },
+        "searchIn": { "type": "array", "items": { "type": "string" } },
+        "optional": { "type": "boolean" }
       }
     },
-    "original": {
+    "recipe": {
       "type": "object",
-      "required": ["id", "name", "creator", "ingredients", "method"],
+      "required": ["id", "name", "status"],
+      "description": "Canonical recipe entry. Core fields are locked when seed_id is set (seeded from classics-db). Overlay fields (is_favorite / is_wishlist / made_log / ratings / user_notes / images) are editable on every entry, including seeded classics.",
       "properties": {
-        "id": { "type": "string", "pattern": "^cocktail[0-9]+$" },
-        "name": { "type": "string" },
-        "tagline": { "type": "string" },
-        "creator": { "type": "string", "description": "Full attribution string." },
-        "date_created": { "type": "string", "format": "date" },
-        "ingredients": {
-          "type": "array",
-          "items": { "$ref": "#/definitions/ingredient" }
+        "id":          { "type": "string", "description": "Stable id. Seeded entries use the seed id (e.g. 'old-fashioned'); originals use 'cocktail<ts>'; drafts use 'draft<ts>'." },
+        "status":      { "enum": ["classic", "original", "draft"] },
+        "_source":     { "enum": ["seed", "user", "ai-generated"], "description": "Provenance — seed = referenced from classics-db; user = hand-authored; ai-generated = drafts produced by Claude." },
+        "seed_id":     { "type": ["string", "null"], "description": "When set, references a classics-db entry id. Core fields are read live from classics-db at render time (overlay-only design)." },
+
+        "name":        { "type": "string" },
+        "tagline":     { "type": "string" },
+        "base":        { "type": "string" },
+        "method":      { "type": "string" },
+        "method_type": { "type": "string", "enum": ["shaken", "stirred", "built", "blended", "thrown", "other"] },
+        "glassware":   { "type": "string" },
+        "garnish":     { "type": "string" },
+        "difficulty":  { "type": "integer", "minimum": 1, "maximum": 5 },
+        "ingredients": { "type": "array", "items": { "$ref": "#/definitions/ingredient" } },
+        "profile":     {
+          "oneOf": [
+            { "type": "string", "description": "Free-form profile text (v1 originals)." },
+            { "type": "object", "description": "Numeric flavor axes (v1 classics)." }
+          ]
         },
-        "method": { "type": "string" },
-        "method_type": {
-          "type": "string",
-          "enum": ["shaken", "stirred", "built", "blended", "thrown", "other"]
-        },
-        "garnish": { "type": "string" },
-        "glassware": { "type": "string" },
-        "profile": { "type": "string", "description": "Brief flavor/occasion description." },
-        "why_it_works": { "type": "string" },
-        "variations": {
+        "tags":        { "type": "array", "items": { "type": "string" } },
+        "specialties": { "type": "array", "items": { "type": "string" } },
+        "occasion":    { "type": "string" },
+        "creator":     { "type": "string" },
+        "date_created":{ "type": "string", "format": "date" },
+        "why_it_works":{ "type": "string" },
+
+        "is_favorite": { "type": "boolean" },
+        "is_wishlist": { "type": "boolean" },
+        "is_hidden":   { "type": "boolean", "description": "Soft-delete for seeded classics the user wants to suppress without removing the seed reference." },
+        "made_log":    {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "name": { "type": "string" },
-              "description": { "type": "string" }
+              "date":  { "type": "string", "format": "date" },
+              "notes": { "type": "string" },
+              "times_made": { "type": "integer", "minimum": 1 }
             }
           }
         },
-        "images": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "filename": { "type": "string", "description": "e.g., 'cocktail7_smokey_the_pear_001.png'" },
-              "style": { "type": "string", "enum": ["photorealistic", "illustrated", "other"] },
-              "alt_text": { "type": "string" }
-            }
-          }
-        },
-        "image_gen_prompts": {
-          "type": "object",
-          "properties": {
-            "photorealistic": { "type": "string" },
-            "illustrated": { "type": "string" }
-          }
-        },
-        "ratings": {
+        "ratings":     {
           "type": "object",
           "properties": {
             "bar_owner": { "type": "integer", "minimum": 1, "maximum": 10 },
-            "guests": { "type": "string" },
-            "notes": { "type": "string" }
+            "guests":    { "type": "string" },
+            "notes":     { "type": "string" }
           }
         },
-        "confirmed_built": { "type": "boolean", "description": "Whether the bar owner has actually made this." },
-        "date_confirmed": { "type": ["string", "null"], "format": "date" }
-      }
-    },
-    "confirmedFavorite": {
-      "type": "object",
-      "required": ["name"],
-      "properties": {
-        "name": { "type": "string" },
-        "creator": { "type": "string" },
-        "date_confirmed": { "type": "string", "format": "date" },
-        "notes": { "type": "string" },
-        "adaptation": { "type": "string", "description": "Any modifications from the canonical recipe." },
-        "ingredients": {
+        "user_notes":  { "type": "string" },
+        "images":      {
           "type": "array",
-          "items": { "$ref": "#/definitions/ingredient" }
+          "items": {
+            "type": "object",
+            "properties": {
+              "filename": { "type": "string" },
+              "alt_text": { "type": "string" },
+              "style":    { "type": "string", "enum": ["photorealistic", "illustrated", "other"] }
+            }
+          }
         },
-        "method": { "type": "string" },
-        "garnish": { "type": "string" }
-      }
-    },
-    "savedRecipe": {
-      "type": "object",
-      "required": ["name"],
-      "description": "Full recipe stored inline at save time (Favorites, Wishlist).",
-      "properties": {
-        "_source": { "type": "string", "description": "Provenance: classics-db | originals | ai-generated" },
-        "name": { "type": "string" },
-        "base": { "type": "string" },
-        "method": { "type": "string" },
-        "glassware": { "type": "string" },
-        "garnish": { "type": "string" },
-        "occasion": { "type": "string" },
-        "ingredients": {
-          "type": "array",
-          "items": { "$ref": "#/definitions/ingredient" }
-        },
-        "notes": { "type": "string" }
-      }
-    },
-    "madeEntry": {
-      "type": "object",
-      "required": ["name"],
-      "description": "Full recipe + tracking metadata stored inline at save time.",
-      "properties": {
-        "_source": { "type": "string", "description": "Provenance: classics-db | originals | ai-generated" },
-        "name": { "type": "string" },
-        "base": { "type": "string" },
-        "method": { "type": "string" },
-        "glassware": { "type": "string" },
-        "garnish": { "type": "string" },
-        "occasion": { "type": "string" },
-        "ingredients": {
-          "type": "array",
-          "items": { "$ref": "#/definitions/ingredient" }
-        },
-        "times_made": { "type": "integer", "minimum": 1 },
-        "first_made": { "type": "string", "format": "date" },
-        "last_made": { "type": "string", "format": "date" },
-        "notes": { "type": "string" }
+        "confirmed_built": { "type": "boolean" },
+        "date_confirmed":  { "type": ["string", "null"], "format": "date" },
+
+        "draft_id":      { "type": ["string", "null"], "description": "Present iff status === 'draft'." },
+        "source_prompt": { "type": "string" },
+        "parent_id":     { "type": ["string", "null"], "description": "Tweak provenance — the chip id this draft was forked from." },
+        "created_at":    { "type": "string" },
+        "updated_at":    { "type": "string" }
       }
     }
   }
