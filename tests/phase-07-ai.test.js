@@ -37,6 +37,17 @@ vm.runInThisContext(fs.readFileSync(path.resolve(__dirname, '../app/js/normalize
 vm.runInThisContext(fs.readFileSync(path.resolve(__dirname, '../app/js/claude-api.js'),  'utf8'));
 vm.runInThisContext(fs.readFileSync(path.resolve(__dirname, '../app/js/write-gate.js'),  'utf8'));
 
+// Chip Unification Commit 2: RecipeChip uses globalThis.CLASSICS_DB for seed
+// resolution. Tests stub a minimal db BEFORE loading recipe-chip.js so the
+// renderer's seed lookup is deterministic.
+globalThis.CLASSICS_DB = [
+  { id: 'old-fashioned', name: 'Old Fashioned', base: 'Bourbon', method: 'stirred',
+    glassware: 'Rocks glass', difficulty: 1,
+    ingredients: [{ name: 'Bourbon', amount: '2 oz' }, { name: 'Bitters', amount: '2 dashes' }],
+    garnish: 'Orange twist' },
+];
+vm.runInThisContext(fs.readFileSync(path.resolve(__dirname, '../app/js/recipe-chip.js'), 'utf8'));
+
 const DRAFTS_SCHEMA   = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../schema/drafts.schema.json'),  'utf8'));
 const RECIPES_SCHEMA  = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../schema/recipes.schema.json'), 'utf8'));
 
@@ -100,6 +111,66 @@ test('chip-unify: Normalize.recipe coerces a single entry and locks seeded core'
   assert.equal(rec.name, undefined, 'core fields dropped when seed_id is set');
   assert.equal(rec.ingredients, undefined);
   assert.equal(rec.is_favorite, true);
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Chip Unification — Commit 2: RecipeChip renderer + filterPool helper
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('chip-unify C2: RecipeChip.render(undefined) returns empty string', () => {
+  assert.equal(RecipeChip.render(undefined), '');
+  assert.equal(RecipeChip.render(null), '');
+  assert.equal(RecipeChip.render('not an object'), '');
+});
+
+test('chip-unify C2: RecipeChip.render(draft) emits draft status badge', () => {
+  const draft = {
+    id: 'draft1', status: 'draft', _source: 'ai-generated',
+    name: 'Smoky Sour', base: 'Mezcal', method: 'shaken',
+    ingredients: [{ name: 'mezcal', amount: '2 oz' }],
+  };
+  const html = RecipeChip.render(draft);
+  assert.ok(html.includes('badge--status-draft'), 'draft status badge class present');
+  assert.ok(html.includes('Smoky Sour'), 'name rendered');
+  assert.ok(html.includes('data-status="draft"'), 'data-status attr set');
+  assert.ok(html.includes('data-action="edit"'),    'draft chip has edit action');
+  assert.ok(html.includes('data-action="promote"'), 'draft chip has promote action');
+  assert.ok(html.includes('data-action="discard"'), 'draft chip has discard action');
+});
+
+test('chip-unify C2: RecipeChip.render(seeded) resolves core name from CLASSICS_DB', () => {
+  // Pool entry stores only overlay (seed_id + is_favorite); core (name, etc.)
+  // is read live from CLASSICS_DB by RecipeChip.resolveCore.
+  const seededPoolEntry = {
+    id: 'old-fashioned', seed_id: 'old-fashioned', status: 'classic',
+    _source: 'seed', is_favorite: true,
+  };
+  const html = RecipeChip.render(seededPoolEntry);
+  assert.ok(html.includes('Old Fashioned'), 'core name resolved from seed');
+  assert.ok(html.includes('badge--status-classic'), 'classic status badge present');
+  assert.ok(html.includes('Bourbon'),  'core base resolved from seed');
+  assert.ok(!html.includes('data-action="edit"'),     'classic chip has no edit (core locked)');
+  assert.ok(!html.includes('data-action="promote"'),  'classic chip has no promote');
+  // is_favorite overlay flag should render the heart.
+  assert.ok(html.includes('Favorite'), 'favorite flag rendered');
+});
+
+test('chip-unify C2: RecipeChip.filterPool("favorites") filters by is_favorite', () => {
+  const pool = [
+    { id: 'a', status: 'original', is_favorite: true,  name: 'A' },
+    { id: 'b', status: 'original', is_favorite: false, name: 'B' },
+    { id: 'c', status: 'draft',    is_favorite: true,  name: 'C' },
+    { id: 'd', status: 'classic',  is_favorite: false, is_hidden: true, name: 'D' },
+  ];
+  const favs = RecipeChip.filterPool(pool, 'favorites');
+  assert.equal(favs.length, 2);
+  assert.deepEqual(favs.map(r => r.id).sort(), ['a', 'c']);
+  // Drafts filter:
+  assert.deepEqual(RecipeChip.filterPool(pool, 'drafts').map(r => r.id), ['c']);
+  // Originals filter:
+  assert.deepEqual(RecipeChip.filterPool(pool, 'originals').map(r => r.id).sort(), ['a', 'b']);
+  // is_hidden excluded from non-classics views, but visible in 'classics':
+  assert.deepEqual(RecipeChip.filterPool(pool, 'classics').map(r => r.id), ['d']);
 });
 
 test('chip-unify: Normalize.foldDraftsIntoPool merges legacy drafts.json into pool', () => {

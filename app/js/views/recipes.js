@@ -456,48 +456,47 @@ const RecipesView = (() => {
       return;
     }
 
-    filtered.forEach(draft => {
-      const card = document.createElement('div');
-      card.className = 'rec-card';
-      const ingChips = (draft.ingredients || []).slice(0, 5).map(i =>
-        `<span class="rec-ing-chip">${Utils.escapeHtml(i.amount || '')} ${Utils.escapeHtml(i.name || '')}</span>`
-      ).join('');
-      const overflow = (draft.ingredients || []).length > 5
-        ? `<span class="rec-ing-chip" style="color:var(--text-muted);">+${(draft.ingredients||[]).length - 5} more</span>` : '';
+    // Unified RecipeChip render (chip-unification Commit 2). Draft chips get
+    // edit + promote + discard + ask-bjorn. The source_prompt line is rendered
+    // as a small note appended after the chip (drafts-only flair).
+    container.innerHTML = filtered.map(draft => {
+      const chipHtml = RecipeChip.render(draft, {
+        context: 'recipes-tab-drafts',
+        actions: { edit: true, promote: true, discard: true, askBjorn: true },
+      });
+      const sourceLine = draft.source_prompt
+        ? `<div class="recipe-chip-source" style="font-size:0.78rem;color:var(--text-muted);margin:-6px 0 10px 4px;"><strong>From:</strong> ${Utils.escapeHtml(draft.source_prompt)}</div>`
+        : '';
+      return chipHtml + sourceLine;
+    }).join('');
 
-      card.innerHTML = `
-        <div class="rec-card-header">
-          <div style="flex:1;min-width:0;">
-            <div class="rec-card-name">${Utils.escapeHtml(draft.name)} <span class="badge badge-amber" style="font-size:0.7rem;margin-left:6px;">draft</span></div>
-            <div class="rec-card-meta">
-              ${draft.base ? `<span class="rec-base">${Utils.escapeHtml(draft.base)}</span>` : ''}
-              ${draft.method ? `<span class="rec-sep">·</span><span class="rec-method">${Utils.escapeHtml(draft.method)}</span>` : ''}
-              ${draft.glassware ? `<span class="rec-sep">·</span><span>${Utils.escapeHtml(draft.glassware)}</span>` : ''}
-            </div>
-          </div>
-          <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
-            <button class="btn btn-ghost btn-sm" data-edit-draft="${Utils.escapeHtml(draft.draft_id || '')}">Edit</button>
-            <button class="btn btn-primary btn-sm" data-promote="${Utils.escapeHtml(draft.draft_id || '')}">Promote to Original</button>
-            <button class="btn-icon" data-discard title="Discard draft">✕</button>
-          </div>
-        </div>
-        ${draft.tagline ? `<p class="rec-occasion" style="font-style:italic;">${Utils.escapeHtml(draft.tagline)}</p>` : ''}
-        <div class="rec-ingredients">${ingChips}${overflow}</div>
-        ${draft.source_prompt ? `<div style="font-size:0.78rem;color:var(--text-muted);margin-top:6px;"><strong>From:</strong> ${Utils.escapeHtml(draft.source_prompt)}</div>` : ''}`;
-
-      card.querySelector('[data-promote]').addEventListener('click', e => {
+    // Wire delegated handlers per chip.
+    container.querySelectorAll('.recipe-chip').forEach((chipEl, idx) => {
+      const draft = filtered[idx];
+      const promoteBtn = chipEl.querySelector('[data-action="promote"]');
+      if (promoteBtn) promoteBtn.addEventListener('click', e => {
         e.stopPropagation();
         promoteDraftToOriginal(draft, mainContainer);
       });
-
-      card.querySelector('[data-edit-draft]').addEventListener('click', e => {
+      const editBtn = chipEl.querySelector('[data-action="edit"]');
+      if (editBtn) editBtn.addEventListener('click', e => {
         e.stopPropagation();
         // Reuse the existing renderForm — it sniffs _source==='ai-generated'
         // and routes the save back to drafts.drafts (find by draft_id).
         renderForm(draft, mainContainer);
       });
-
-      card.querySelector('[data-discard]').addEventListener('click', e => {
+      const askBtn = chipEl.querySelector('[data-action="ask-bjorn"]');
+      if (askBtn) askBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        if (typeof ChatView === 'undefined' || !ChatView.openDrawer) {
+          Utils.showToast('Chat module not loaded.', 'error');
+          return;
+        }
+        const seed = `I drafted "${draft.name}". What would you tweak?`;
+        ChatView.openDrawer({ seed });
+      });
+      const discardBtn = chipEl.querySelector('[data-action="discard"]');
+      if (discardBtn) discardBtn.addEventListener('click', e => {
         e.stopPropagation();
         if (!confirm(`Discard draft "${draft.name}"?`)) return;
         const cur = State.get('drafts') || { drafts: [] };
@@ -513,8 +512,6 @@ const RecipesView = (() => {
           render(mainContainer, { tab: 'drafts' });
         }).catch(err => Utils.showToast('Save failed: ' + err.message, 'error'));
       });
-
-      container.appendChild(card);
     });
   }
 
@@ -651,42 +648,25 @@ const RecipesView = (() => {
       return;
     }
 
-    filtered.forEach(recipe => {
-      const card = document.createElement('div');
-      card.className = 'rec-card';
-      card.style.cursor = 'pointer';
+    // Unified RecipeChip render — chip markup is identical across tabs/views
+    // (chip-unification Commit 2). Action buttons here are askBjorn + discard.
+    const ctxName = 'recipes-tab-' + (listKey === 'confirmed_favorites' ? 'favorites' : 'wishlist');
+    container.innerHTML = filtered.map(r => RecipeChip.render(r, {
+      context: ctxName,
+      actions: { edit: false, promote: false, discard: true, askBjorn: true },
+    })).join('');
 
-      const ingChips = (recipe.ingredients || []).slice(0, 5).map(i =>
-        `<span class="rec-ing-chip">${Utils.escapeHtml(i.amount || '')} ${Utils.escapeHtml(i.name)}</span>`
-      ).join('');
-      const overflow = (recipe.ingredients || []).length > 5
-        ? `<span class="rec-ing-chip" style="color:var(--text-muted);">+${(recipe.ingredients||[]).length - 5} more</span>` : '';
-
-      card.innerHTML = `
-        <div class="rec-card-header">
-          <div style="flex:1;min-width:0;">
-            <div class="rec-card-name">${Utils.escapeHtml(recipe.name)}</div>
-            <div class="rec-card-meta">
-              ${recipe.base ? `<span class="rec-base">${Utils.escapeHtml(recipe.base)}</span>` : ''}
-              ${recipe.method ? `<span class="rec-sep">·</span><span class="rec-method">${Utils.escapeHtml(recipe.method)}</span>` : ''}
-              ${recipe.glassware ? `<span class="rec-sep">·</span><span>${Utils.escapeHtml(recipe.glassware)}</span>` : ''}
-            </div>
-          </div>
-          <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
-            <button class="rec-ask-btn ai-ask-btn" data-ask title="Ask Bjorn about this">Ask Bjorn</button>
-            <button class="btn-icon" data-remove title="Remove">✕</button>
-          </div>
-        </div>
-        ${recipe.occasion ? `<p class="rec-occasion">${Utils.escapeHtml(recipe.occasion)}</p>` : ''}
-        <div class="rec-ingredients">${ingChips}${overflow}</div>`;
-
-      card.addEventListener('click', e => {
-        if (e.target.closest('[data-remove]')) return;
-        if (e.target.closest('[data-ask]')) return;
+    // Wire delegated handlers per chip. Commit 3 will hoist this into a
+    // shared RecipeChip.bindActions helper; per-chip wiring is fine here.
+    container.querySelectorAll('.recipe-chip').forEach((chipEl, idx) => {
+      const recipe = filtered[idx];
+      chipEl.style.cursor = 'pointer';
+      chipEl.addEventListener('click', e => {
+        if (e.target.closest('[data-action]')) return;
         showRecipeDetail(recipe, listKey, mainContainer);
       });
-
-      card.querySelector('[data-ask]').addEventListener('click', e => {
+      const askBtn = chipEl.querySelector('[data-action="ask-bjorn"]');
+      if (askBtn) askBtn.addEventListener('click', e => {
         e.stopPropagation();
         if (typeof ChatView === 'undefined' || !ChatView.openDrawer) {
           Utils.showToast('Chat module not loaded.', 'error');
@@ -697,8 +677,8 @@ const RecipesView = (() => {
           `Would it suit my taste, and what variations would you suggest given my bar?`;
         ChatView.openDrawer({ seed });
       });
-
-      card.querySelector('[data-remove]').addEventListener('click', e => {
+      const discardBtn = chipEl.querySelector('[data-action="discard"]');
+      if (discardBtn) discardBtn.addEventListener('click', e => {
         e.stopPropagation();
         State.patch('recipes', r => { r[listKey] = (r[listKey] || []).filter(x => !Utils.sameRecipe(x, recipe)); });
         State.save('recipes').then(() => {
@@ -706,8 +686,6 @@ const RecipesView = (() => {
           render(mainContainer, { tab: listKey === 'confirmed_favorites' ? 'favorites' : 'wishlist' });
         });
       });
-
-      container.appendChild(card);
     });
   }
 
