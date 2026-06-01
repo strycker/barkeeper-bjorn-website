@@ -1569,6 +1569,13 @@ const RecipesView = (() => {
         <input type="checkbox" id="rf-built" ${r?.confirmed_built ? 'checked' : ''} style="width:auto;margin:0;">
         <label for="rf-built" style="margin:0;">Confirmed Built</label>
       </div>
+      <div class="form-group" style="display:flex;align-items:center;gap:10px;" title="${r?.seed_id ? 'Classics cannot be marked as your Original — they live in the seed library.' : 'Tag this entry as your own creation.'}">
+        <input type="checkbox" id="rf-original"
+               ${r?.is_original ? 'checked' : ''}
+               ${r?.seed_id ? 'disabled' : ''}
+               style="width:auto;margin:0;${r?.seed_id ? 'opacity:0.5;cursor:not-allowed;' : ''}">
+        <label for="rf-original" style="margin:0;${r?.seed_id ? 'opacity:0.6;' : ''}">Original (my creation)${r?.seed_id ? ' — locked (classic)' : ''}</label>
+      </div>
 
       <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
         <button class="btn btn-primary" id="rf-save">${isDraft ? 'Save Draft Changes' : isSeededClassic ? 'Save Overlay (ratings / notes)' : (isEdit ? 'Save Changes' : 'Create Recipe')}</button>
@@ -1684,6 +1691,13 @@ const RecipesView = (() => {
       const why = wrap.querySelector('#rf-why').value.trim();
       if (why) updated.why_it_works = why;
       updated.confirmed_built = wrap.querySelector('#rf-built').checked;
+      // is_original tag: editable for non-seeded entries; for seeded chips
+      // the checkbox is disabled so the read-as-checked stays false. The
+      // save-path branches below trust Normalize.recipe / the pool-write
+      // patch to force is_original=false when seed_id is set, but we still
+      // honor the checkbox value here for user originals + drafts.
+      const origCheckbox = wrap.querySelector('#rf-original');
+      if (origCheckbox) updated.is_original = origCheckbox.checked;
       if (hasRating) {
         updated.ratings = {};
         if (ratingVal) updated.ratings.bar_owner = ratingVal;

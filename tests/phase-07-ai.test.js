@@ -201,6 +201,63 @@ test('chip-unify post-fix: reclassifyExistingPool dedupes when seed already in p
   assert.equal(merged.made_log.length, 1, 'made_log carried from phantom original');
 });
 
+test('chip-unify post-fix: lookupSeed tolerates name variants', () => {
+  // Default lookup uses globalThis.CLASSICS_DB; the test harness sets that
+  // at top with Old Fashioned. Confirm tolerance: ampersands, hyphens,
+  // whitespace, case all normalize to the same alphanumerics.
+  globalThis.CLASSICS_DB = [
+    { id: 'army-and-navy', name: 'Army & Navy' },
+    { id: 'french-75',     name: 'French 75' },
+    { id: 'cynar-spritz',  name: 'Cynar Spritz' },
+  ];
+  const cleaned = Normalize.reclassifyExistingPool({
+    _schema_version: 2,
+    pool: [
+      { id: 'cocktail-a', status: 'original', _source: 'user', name: 'army and navy' },
+      { id: 'cocktail-b', status: 'original', _source: 'user', name: 'FRENCH 75 ' },
+      { id: 'cocktail-c', status: 'original', _source: 'user', name: 'cynar  spritz' },
+    ],
+    last_updated: '2026-05-27',
+  });
+  // Reset CLASSICS_DB for downstream tests.
+  globalThis.CLASSICS_DB = [
+    { id: 'old-fashioned', name: 'Old Fashioned', base: 'Bourbon', method: 'stirred',
+      glassware: 'Rocks glass', difficulty: 1,
+      ingredients: [{ name: 'Bourbon', amount: '2 oz' }, { name: 'Bitters', amount: '2 dashes' }],
+      garnish: 'Orange twist' },
+  ];
+  assert.ok(cleaned.pool.find(p => p.seed_id === 'army-and-navy'), '"army and navy" matched "Army & Navy"');
+  assert.ok(cleaned.pool.find(p => p.seed_id === 'french-75'),     '"FRENCH 75 " matched "French 75"');
+  assert.ok(cleaned.pool.find(p => p.seed_id === 'cynar-spritz'),  '"cynar  spritz" matched "Cynar Spritz"');
+});
+
+test('chip-unify post-fix: is_original defaults sensibly + locks for seeded', () => {
+  // User-authored original: is_original true by default.
+  const ru = Normalize.recipe({
+    id: 'cocktail-x', status: 'original', _source: 'user', name: 'Smokey the Pear',
+    ingredients: [{ name: 'pear', amount: '1 oz' }], method: 'shaken',
+  });
+  assert.equal(ru.is_original, true, 'user originals default to is_original=true');
+  // Draft: is_original off by default.
+  const rd = Normalize.recipe({
+    id: 'draft-y', status: 'draft', _source: 'ai-generated', draft_id: 'draft-y',
+    name: 'The Oaken Throne', ingredients: [{ name: 'rye', amount: '2 oz' }], method: 'stirred',
+  });
+  assert.equal(rd.is_original, false, 'drafts default to is_original=false');
+  // Seeded classic: is_original forced false, ignoring any spoofed input.
+  const rc = Normalize.recipe({
+    id: 'french-75', seed_id: 'french-75', status: 'classic', _source: 'seed',
+    is_original: true, // attempt to spoof — must be ignored
+  });
+  assert.equal(rc.is_original, false, 'seed_id forces is_original=false');
+  // Explicit override on a non-seeded entry: respected.
+  const ru2 = Normalize.recipe({
+    id: 'cocktail-z', status: 'original', _source: 'user', name: 'X', is_original: false,
+    ingredients: [{ name: 'x', amount: '1 oz' }], method: 'stirred',
+  });
+  assert.equal(ru2.is_original, false, 'explicit is_original=false is honored');
+});
+
 test('chip-unify post-fix: RecipeChip badge keys off seed_id (defense in depth)', () => {
   // Even if a phantom-original entry survives in the pool (seed_id missing
   // but status='original'), the badge should NEVER show 'original' if the

@@ -62,6 +62,7 @@
 
         "is_favorite": { "type": "boolean" },
         "is_wishlist": { "type": "boolean" },
+        "is_original": { "type": "boolean", "description": "User-toggleable badge tag — defaults to true for status:'original', false for seeded classics (uneditable) and drafts." },
         "is_hidden":   { "type": "boolean", "description": "Soft-delete for seeded classics the user wants to suppress without removing the seed reference." },
         "made_log":    {
           "type": "array",
