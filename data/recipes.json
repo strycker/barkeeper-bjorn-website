@@ -1,42 +1,45 @@
 {
-  "originals": [
+  "_schema_version": 2,
+  "pool": [
     {
       "id": "cocktail1778776984398",
+      "status": "original",
+      "_source": "user",
       "name": "Smokey the Pear",
       "creator": "Glenn Strycker",
       "ingredients": [
         {
-          "amount": "1 oz",
-          "name": "Mezcal"
+          "name": "Mezcal",
+          "amount": "1 oz"
         },
         {
-          "amount": "1 oz",
-          "name": "White Jamaican Rum"
+          "name": "White Jamaican Rum",
+          "amount": "1 oz"
         },
         {
-          "amount": "2.5 oz",
-          "name": "Pear Juice"
+          "name": "Pear Juice",
+          "amount": "2.5 oz"
         },
         {
-          "amount": "1.5 oz",
           "name": "Crème de Poire",
+          "amount": "1.5 oz",
           "notes": "Prickly pear preserves optional"
         },
         {
-          "amount": "0.5 oz",
-          "name": "Cocchi"
+          "name": "Cocchi",
+          "amount": "0.5 oz"
         },
         {
-          "amount": "4 dashes",
-          "name": "Rhubarb bitters"
+          "name": "Rhubarb bitters",
+          "amount": "4 dashes"
         },
         {
-          "amount": "2 dashes",
-          "name": "Angostura"
+          "name": "Angostura",
+          "amount": "2 dashes"
         },
         {
-          "amount": "2 dashes",
-          "name": "Black walnut bitters"
+          "name": "Black walnut bitters",
+          "amount": "2 dashes"
         }
       ],
       "method": "Shake hard with ice.  Strain into a chilled martini glass.",
@@ -50,727 +53,110 @@
       "confirmed_built": true,
       "ratings": {
         "bar_owner": 5,
-        "guests": "Too smokey!",
         "notes": "Dial back the mezcal and increase the pear flavor"
-      }
-    }
-  ],
-  "confirmed_favorites": [
+      },
+      "is_favorite": true,
+      "is_wishlist": false,
+      "is_hidden": false,
+      "is_original": true,
+      "made_log": [
+        {
+          "date": "2026-05-21",
+          "notes": "",
+          "times_made": 1
+        }
+      ]
+    },
     {
       "id": "army-and-navy",
-      "name": "Army & Navy",
-      "base": "Gin",
-      "method": "shaken",
-      "glassware": "Coupe",
-      "difficulty": 2,
-      "profile": {
-        "sweetness": 0.35,
-        "acid": 0.6,
-        "strength": 0.25,
-        "complexity": 0.5,
-        "season": 0.25,
-        "risk": 0.3
-      },
-      "occasion": "Prohibition-era gem. Orgeat rounds the gin's botanicals while lemon keeps it lively.",
-      "tags": [
-        "sour",
-        "classic",
-        "refreshing"
-      ],
-      "ingredients": [
+      "status": "classic",
+      "_source": "seed",
+      "seed_id": "army-and-navy",
+      "is_favorite": true,
+      "is_wishlist": false,
+      "is_hidden": false,
+      "is_original": false,
+      "made_log": [
         {
-          "name": "Gin",
-          "amount": "2 oz"
-        },
-        {
-          "name": "Fresh Lemon Juice",
-          "amount": "¾ oz"
-        },
-        {
-          "name": "Orgeat",
-          "amount": "½ oz"
+          "date": "2026-05-20",
+          "notes": "",
+          "times_made": 1
         }
-      ],
-      "garnish": "Lemon twist or cherry",
-      "from_classics_db": true,
-      "notes": "First time I actually liked Orgeat.  This was tasty and simple to make.  Only complaint is that it ends up being a cloudy yellow-brown color... not as appetizing as other more colorful concoctions.  Consider stirring rather than shaking and adding something red to make this a more pleasing color."
+      ]
     },
     {
       "id": "french-75",
-      "name": "French 75",
-      "base": "Gin",
-      "method": "shaken",
-      "glassware": "Champagne flute",
-      "difficulty": 2,
-      "profile": {
-        "sweetness": 0.3,
-        "acid": 0.5,
-        "strength": 0.4,
-        "complexity": 0.4,
-        "season": 0.3,
-        "risk": 0.2
-      },
-      "occasion": "Celebratory fizz. Gin lends botanicals that vodka can't.",
-      "tags": [
-        "brunch",
-        "party",
-        "refreshing"
-      ],
-      "ingredients": [
+      "status": "classic",
+      "_source": "seed",
+      "seed_id": "french-75",
+      "is_favorite": true,
+      "is_wishlist": false,
+      "is_hidden": false,
+      "is_original": false,
+      "made_log": [
         {
-          "name": "Gin",
-          "amount": "1½ oz",
-          "keywords": [
-            "gin"
-          ],
-          "searchIn": [
-            "white_spirits"
-          ]
-        },
-        {
-          "name": "Fresh Lemon Juice",
-          "amount": "½ oz",
-          "keywords": [
-            "lemon"
-          ],
-          "searchIn": [
-            "produce",
-            "perishables"
-          ]
-        },
-        {
-          "name": "Simple Syrup",
-          "amount": "½ oz",
-          "keywords": [
-            "simple",
-            "sugar"
-          ],
-          "searchIn": [
-            "syrups",
-            "pantry"
-          ]
-        },
-        {
-          "name": "Champagne or Prosecco",
-          "amount": "2 oz",
-          "keywords": [
-            "champagne",
-            "prosecco",
-            "sparkling",
-            "cava"
-          ],
-          "searchIn": [
-            "fortified",
-            "mixers"
-          ]
+          "date": "2026-05-21",
+          "notes": "",
+          "times_made": 2
         }
-      ],
-      "garnish": "Lemon twist",
-      "_source": "classics-db"
-    },
-    {
-      "id": "cocktail1778776984398",
-      "name": "Smokey the Pear",
-      "creator": "Glenn Strycker",
-      "ingredients": [
-        {
-          "amount": "1 oz",
-          "name": "Mezcal"
-        },
-        {
-          "amount": "1 oz",
-          "name": "White Jamaican Rum"
-        },
-        {
-          "amount": "2.5 oz",
-          "name": "Pear Juice"
-        },
-        {
-          "amount": "1.5 oz",
-          "name": "Crème de Poire",
-          "notes": "Prickly pear preserves optional"
-        },
-        {
-          "amount": "0.5 oz",
-          "name": "Cocchi"
-        },
-        {
-          "amount": "4 dashes",
-          "name": "Rhubarb bitters"
-        },
-        {
-          "amount": "2 dashes",
-          "name": "Angostura"
-        },
-        {
-          "amount": "2 dashes",
-          "name": "Black walnut bitters"
-        }
-      ],
-      "method": "Shake hard with ice.  Strain into a chilled martini glass.",
-      "tagline": "Smokey Mezcal cocktail with pear juice and rhubarb bitters",
-      "date_created": "2026-05-01",
-      "method_type": "shaken",
-      "glassware": "Martini",
-      "garnish": "Pear slice + cocktail cherry",
-      "profile": "Smoky-meets-pear shaken cocktail. Desert/Mexican thematic -- the prickly pear preserves are the structural pun (a \"pear\" that isn't a pear, growing in mezcal country). Recommended sub-spirit pairing: white Jamaican rum first choice (funky/vegetal echoes agave's roasted notes; Jamaican esters complement pear esters), gin second (London Dry > floral botanicals can complement pear, but heavy florals will fight it), vodka third (subtracts smoke without adding character).",
-      "why_it_works": "Mezcal offers smokey flavors that compliment the pear",
-      "confirmed_built": true,
-      "ratings": {
-        "bar_owner": 5,
-        "notes": "Dial back the mezcal and increase the pear flavor"
-      },
-      "_source": "originals",
-      "base": "Mezcal",
-      "tags": []
+      ]
     },
     {
       "id": "caipirinha",
-      "name": "Caipirinha",
-      "base": "Cachaça",
-      "method": "built",
-      "glassware": "Rocks glass",
-      "difficulty": 1,
-      "profile": {
-        "sweetness": 0.3,
-        "acid": 0.7,
-        "strength": 0.2,
-        "complexity": 0.3,
-        "season": 0.1,
-        "risk": 0.25
-      },
-      "occasion": "Brazil's national cocktail. Funky, tart, aggressively lime-forward.",
-      "tags": [
-        "refreshing",
-        "sour",
-        "classic"
-      ],
-      "ingredients": [
-        {
-          "name": "Cachaça",
-          "amount": "2 oz",
-          "keywords": [
-            "cachaça",
-            "cachaca",
-            "cacha"
-          ],
-          "searchIn": [
-            "rum"
-          ]
-        },
-        {
-          "name": "Fresh Lime",
-          "amount": "1 whole, cut",
-          "keywords": [
-            "lime"
-          ],
-          "searchIn": [
-            "produce",
-            "perishables"
-          ]
-        },
-        {
-          "name": "Sugar",
-          "amount": "2 tsp",
-          "keywords": [
-            "sugar",
-            "simple",
-            "demerara"
-          ],
-          "searchIn": [
-            "pantry",
-            "syrups"
-          ]
-        }
-      ],
-      "garnish": "Lime wheel",
-      "_source": "classics-db"
+      "status": "classic",
+      "_source": "seed",
+      "seed_id": "caipirinha",
+      "is_favorite": true,
+      "is_wishlist": false,
+      "is_hidden": false,
+      "is_original": false,
+      "made_log": []
     },
     {
       "id": "gimlet",
-      "name": "Gimlet",
-      "base": "Gin",
-      "method": "shaken",
-      "glassware": "Coupe",
-      "difficulty": 2,
-      "profile": {
-        "sweetness": 0.3,
-        "acid": 0.65,
-        "strength": 0.25,
-        "complexity": 0.25,
-        "season": 0.2,
-        "risk": 0.1
-      },
-      "occasion": "Simple, tart, gin-forward. Unbeatable with quality gin.",
-      "tags": [
-        "sour",
-        "refreshing",
-        "classic"
-      ],
-      "ingredients": [
-        {
-          "name": "Gin",
-          "amount": "2 oz",
-          "keywords": [
-            "gin"
-          ],
-          "searchIn": [
-            "white_spirits"
-          ]
-        },
-        {
-          "name": "Fresh Lime Juice",
-          "amount": "¾ oz",
-          "keywords": [
-            "lime"
-          ],
-          "searchIn": [
-            "produce",
-            "perishables"
-          ]
-        },
-        {
-          "name": "Simple Syrup",
-          "amount": "¾ oz",
-          "keywords": [
-            "simple",
-            "sugar"
-          ],
-          "searchIn": [
-            "syrups",
-            "pantry"
-          ]
-        }
-      ],
-      "garnish": "Lime wheel",
-      "_source": "classics-db"
-    }
-  ],
-  "wishlist": [
+      "status": "classic",
+      "_source": "seed",
+      "seed_id": "gimlet",
+      "is_favorite": true,
+      "is_wishlist": false,
+      "is_hidden": false,
+      "is_original": false,
+      "made_log": []
+    },
     {
       "id": "ramos-gin-fizz",
-      "name": "Ramos Gin Fizz",
-      "base": "Gin",
-      "method": "shaken",
-      "glassware": "Highball",
-      "difficulty": 3,
-      "profile": {
-        "sweetness": 0.45,
-        "acid": 0.4,
-        "strength": 0.45,
-        "complexity": 0.55,
-        "season": 0.25,
-        "risk": 0.4
-      },
-      "occasion": "The ultimate brunch cocktail. 12-minute shake, cloud-like foam, New Orleans heritage.",
-      "tags": [
-        "brunch",
-        "refreshing",
-        "classic"
-      ],
-      "ingredients": [
-        {
-          "name": "Gin",
-          "amount": "2 oz",
-          "keywords": [
-            "gin"
-          ],
-          "searchIn": [
-            "white_spirits"
-          ]
-        },
-        {
-          "name": "Heavy Cream",
-          "amount": "2 oz",
-          "keywords": [
-            "cream",
-            "heavy cream"
-          ],
-          "searchIn": [
-            "perishables"
-          ]
-        },
-        {
-          "name": "Fresh Lemon Juice",
-          "amount": "½ oz",
-          "keywords": [
-            "lemon"
-          ],
-          "searchIn": [
-            "produce",
-            "perishables"
-          ]
-        },
-        {
-          "name": "Fresh Lime Juice",
-          "amount": "½ oz",
-          "keywords": [
-            "lime"
-          ],
-          "searchIn": [
-            "produce",
-            "perishables"
-          ]
-        },
-        {
-          "name": "Simple Syrup",
-          "amount": "1 oz",
-          "keywords": [
-            "simple",
-            "sugar"
-          ],
-          "searchIn": [
-            "syrups",
-            "pantry"
-          ]
-        },
-        {
-          "name": "Egg White",
-          "amount": "1",
-          "keywords": [
-            "egg"
-          ],
-          "searchIn": [
-            "perishables"
-          ]
-        },
-        {
-          "name": "Soda Water",
-          "amount": "1–2 oz",
-          "keywords": [
-            "soda",
-            "sparkling"
-          ],
-          "searchIn": [
-            "mixers"
-          ]
-        }
-      ],
-      "garnish": "None"
+      "status": "classic",
+      "_source": "seed",
+      "seed_id": "ramos-gin-fizz",
+      "is_wishlist": true,
+      "is_favorite": false,
+      "is_hidden": false,
+      "is_original": false,
+      "made_log": []
     },
     {
       "id": "cynar-spritz",
-      "name": "Cynar Spritz",
-      "base": "Cynar",
-      "method": "built",
-      "glassware": "Wine glass",
-      "difficulty": 1,
-      "profile": {
-        "sweetness": 0.2,
-        "acid": 0.15,
-        "strength": 0.8,
-        "complexity": 0.55,
-        "season": 0.4,
-        "risk": 0.5
-      },
-      "occasion": "Bitter artichoke amaro meets sparkling wine. Bolder, weirder, better than Aperol.",
-      "tags": [
-        "aperitif",
-        "refreshing"
-      ],
-      "ingredients": [
-        {
-          "name": "Cynar",
-          "amount": "2 oz",
-          "keywords": [
-            "cynar"
-          ],
-          "searchIn": [
-            "liqueurs_herbal",
-            "liqueurs_specialty"
-          ]
-        },
-        {
-          "name": "Prosecco",
-          "amount": "3 oz",
-          "keywords": [
-            "prosecco",
-            "champagne",
-            "sparkling"
-          ],
-          "searchIn": [
-            "fortified",
-            "mixers"
-          ]
-        },
-        {
-          "name": "Soda Water",
-          "amount": "1 oz",
-          "keywords": [
-            "soda",
-            "sparkling"
-          ],
-          "searchIn": [
-            "mixers"
-          ]
-        }
-      ],
-      "garnish": "Orange slice",
-      "_source": "classics-db"
+      "status": "classic",
+      "_source": "seed",
+      "seed_id": "cynar-spritz",
+      "is_wishlist": true,
+      "is_favorite": false,
+      "is_hidden": false,
+      "is_original": false,
+      "made_log": []
     },
     {
       "id": "fitzgerald",
-      "name": "Fitzgerald",
-      "base": "Gin",
-      "method": "shaken",
-      "glassware": "Coupe",
-      "difficulty": 1,
-      "profile": {
-        "sweetness": 0.3,
-        "acid": 0.45,
-        "strength": 0.35,
-        "complexity": 0.3,
-        "season": 0.2,
-        "risk": 0.15
-      },
-      "occasion": "Gin sour with Angostura — cleaner and more elegant than you'd expect.",
-      "tags": [
-        "sour",
-        "classic",
-        "refreshing"
-      ],
-      "specialties": [
-        "classic",
-        "craft"
-      ],
-      "ingredients": [
-        {
-          "name": "Gin",
-          "amount": "2 oz",
-          "keywords": [
-            "gin",
-            "london dry"
-          ],
-          "searchIn": [
-            "white_spirits"
-          ]
-        },
-        {
-          "name": "Lemon Juice",
-          "amount": "¾ oz",
-          "keywords": [
-            "lemon",
-            "lemon juice"
-          ],
-          "searchIn": [
-            "produce",
-            "perishables"
-          ]
-        },
-        {
-          "name": "Simple Syrup",
-          "amount": "¾ oz",
-          "keywords": [
-            "simple",
-            "syrup",
-            "sugar"
-          ],
-          "searchIn": [
-            "syrups",
-            "pantry"
-          ]
-        },
-        {
-          "name": "Angostura Bitters",
-          "amount": "2 dashes",
-          "keywords": [
-            "angostura",
-            "bitters"
-          ],
-          "searchIn": [
-            "bitters_anchors",
-            "bitters_other"
-          ]
-        }
-      ],
-      "garnish": "Lemon slice",
-      "_source": "classics-db"
+      "status": "classic",
+      "_source": "seed",
+      "seed_id": "fitzgerald",
+      "is_wishlist": true,
+      "is_favorite": false,
+      "is_hidden": false,
+      "is_original": false,
+      "made_log": []
     }
   ],
   "last_updated": "2026-05-21",
-  "made_log": [
-    {
-      "id": "cocktail1778776984398",
-      "name": "Smokey the Pear",
-      "creator": "Glenn Strycker",
-      "ingredients": [
-        {
-          "amount": "1 oz",
-          "name": "Mezcal"
-        },
-        {
-          "amount": "1 oz",
-          "name": "White Jamaican Rum"
-        },
-        {
-          "amount": "2.5 oz",
-          "name": "Pear Juice"
-        },
-        {
-          "amount": "1.5 oz",
-          "name": "Crème de Poire"
-        },
-        {
-          "amount": "0.5 oz",
-          "name": "Cocchi"
-        },
-        {
-          "amount": "1/2 tsp",
-          "name": "Prickly pear preserves"
-        },
-        {
-          "amount": "4 dashes",
-          "name": "Rhubarb bitters"
-        },
-        {
-          "amount": "2 dashes",
-          "name": "Angostura"
-        },
-        {
-          "amount": "2 dashes",
-          "name": "Black walnut bitters"
-        }
-      ],
-      "method": "Shake hard with ice.  Strain into a chilled martini glass.",
-      "tagline": "Smokey Mezcal cocktail with pear juice and rhubarb bitters",
-      "date_created": "2026-05-01",
-      "method_type": "shaken",
-      "glassware": "Martini",
-      "garnish": "Pear slice + cocktail cherry",
-      "profile": "Smoky-meets-pear shaken cocktail. Desert/Mexican thematic -- the prickly pear preserves are the structural pun (a \"pear\" that isn't a pear, growing in mezcal country). Recommended sub-spirit pairing: white Jamaican rum first choice (funky/vegetal echoes agave's roasted notes; Jamaican esters complement pear esters), gin second (London Dry > floral botanicals can complement pear, but heavy florals will fight it), vodka third (subtracts smoke without adding character).",
-      "why_it_works": "Mezcal offers smokey flavors that compliment the pear",
-      "confirmed_built": true,
-      "ratings": {
-        "bar_owner": 5,
-        "notes": "Dial back the mezcal and increase the pear flavor"
-      },
-      "_source": "originals",
-      "base": "Mezcal",
-      "tags": [],
-      "times_made": 1,
-      "first_made": "2026-05-21",
-      "last_made": "2026-05-21",
-      "notes": ""
-    },
-    {
-      "id": "french-75",
-      "name": "French 75",
-      "base": "Gin",
-      "method": "shaken",
-      "glassware": "Champagne flute",
-      "difficulty": 2,
-      "profile": {
-        "sweetness": 0.3,
-        "acid": 0.5,
-        "strength": 0.4,
-        "complexity": 0.4,
-        "season": 0.3,
-        "risk": 0.2
-      },
-      "occasion": "Celebratory fizz. Gin lends botanicals that vodka can't.",
-      "tags": [
-        "brunch",
-        "party",
-        "refreshing"
-      ],
-      "ingredients": [
-        {
-          "name": "Gin",
-          "amount": "1½ oz",
-          "keywords": [
-            "gin"
-          ],
-          "searchIn": [
-            "white_spirits"
-          ]
-        },
-        {
-          "name": "Fresh Lemon Juice",
-          "amount": "½ oz",
-          "keywords": [
-            "lemon"
-          ],
-          "searchIn": [
-            "produce",
-            "perishables"
-          ]
-        },
-        {
-          "name": "Simple Syrup",
-          "amount": "½ oz",
-          "keywords": [
-            "simple",
-            "sugar"
-          ],
-          "searchIn": [
-            "syrups",
-            "pantry"
-          ]
-        },
-        {
-          "name": "Champagne or Prosecco",
-          "amount": "2 oz",
-          "keywords": [
-            "champagne",
-            "prosecco",
-            "sparkling",
-            "cava"
-          ],
-          "searchIn": [
-            "fortified",
-            "mixers"
-          ]
-        }
-      ],
-      "garnish": "Lemon twist",
-      "_source": "classics-db",
-      "times_made": 2,
-      "first_made": "2026-05-21",
-      "last_made": "2026-05-21",
-      "notes": ""
-    },
-    {
-      "id": "army-and-navy",
-      "name": "Army & Navy",
-      "base": "Gin",
-      "method": "shaken",
-      "glassware": "Coupe",
-      "difficulty": 2,
-      "profile": {
-        "sweetness": 0.35,
-        "acid": 0.6,
-        "strength": 0.25,
-        "complexity": 0.5,
-        "season": 0.25,
-        "risk": 0.3
-      },
-      "occasion": "Prohibition-era gem. Orgeat rounds the gin's botanicals while lemon keeps it lively.",
-      "tags": [
-        "sour",
-        "classic",
-        "refreshing"
-      ],
-      "ingredients": [
-        {
-          "name": "Gin",
-          "amount": "2 oz"
-        },
-        {
-          "name": "Fresh Lemon Juice",
-          "amount": "¾ oz"
-        },
-        {
-          "name": "Orgeat",
-          "amount": "½ oz"
-        }
-      ],
-      "garnish": "Lemon twist or cherry",
-      "from_classics_db": true,
-      "_source": "classics-db",
-      "times_made": 1,
-      "first_made": "2026-05-20",
-      "last_made": "2026-05-20",
-      "notes": ""
-    }
-  ]
+  "_reclassified_v2_2": true
 }
