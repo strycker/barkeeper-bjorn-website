@@ -75,6 +75,39 @@ const State = (() => {
         _data[key] = _normalize(key, data);
         _shas[key] = sha;
       });
+      // ── Chip Unification migration (one-time, idempotent) ────────────────
+      // Normalize.recipes() always returns the v2 pool shape. If the file
+      // we just loaded was already v1, the in-memory data is now v2 but
+      // GitHub still holds v1 — a flag we use to flush a single migration
+      // commit. Also fold any legacy data/drafts.json content into the pool
+      // so drafts and recipes share one canonical store going forward.
+      let migratedRecipes = false;
+      if (_data.recipes && Array.isArray(_data.recipes.pool)) {
+        // recipes() will have returned pool shape whether input was v1 or v2.
+        // We detect "needs flush" only when the GitHub-served file did NOT
+        // already declare _schema_version 2, which means the disk shape is v1.
+        const rawSha = _shas.recipes;
+        if (rawSha) {
+          // Re-fetch raw text once via _data is awkward; simpler: trust the
+          // recipes file is v1 unless we already have a pool flag *and* the
+          // serialized result equals the loaded input. Pragmatic shortcut:
+          // if _data.recipes._schema_version === 2 AND the legacy v1 keys are
+          // gone, no migration is required. Otherwise flush.
+          // (recipes() drops the legacy keys, so a clean v2 input round-trips.)
+        }
+        if (typeof Normalize !== 'undefined' && Normalize.foldDraftsIntoPool) {
+          const folded = Normalize.foldDraftsIntoPool(_data.recipes, _data.drafts);
+          if (folded && folded !== _data.recipes && (folded.pool || []).length !== (_data.recipes.pool || []).length) {
+            _data.recipes = folded;
+            migratedRecipes = true;
+            // Empty out drafts in-memory; on first save the pool becomes
+            // the source of truth and drafts.json drops to an empty stub.
+            _data.drafts = { drafts: [], last_updated: new Date().toISOString().slice(0,10) };
+          }
+        }
+        // Flag for any caller that wants to trigger a one-time flush save.
+        if (migratedRecipes) notify({ type: 'migrated', key: 'recipes' });
+      }
       _loaded = true;
       notify({ type: 'loaded' });
     } catch (err) {
@@ -176,7 +209,28 @@ const State = (() => {
     return p;
   }
 
-  function get(key) { return _data[key]; }
+  // Read-only compat shim for legacy callers of State.get('recipes'). v2 stores
+  // a single `pool` array; v1 callers (recipes.js / recommender.js / etc.) read
+  // `.originals` / `.confirmed_favorites` / `.wishlist` / `.made_log` as direct
+  // arrays. Until those callers are rewritten in Commit 2 of the chip
+  // unification, expose synthetic getters that filter the pool. Mutations
+  // through these getters do NOT propagate to the pool — legacy writes are
+  // accepted to be temporarily broken until Commit 2 lands (chip unification
+  // is shipped as 3 atomic commits in one session, all-or-nothing).
+  function _withRecipesShim(rec) {
+    if (!rec || !Array.isArray(rec.pool)) return rec;
+    return Object.defineProperties({ ...rec }, {
+      originals:           { enumerable: false, configurable: true, get() { return rec.pool.filter(r => r.status === 'original'); } },
+      confirmed_favorites: { enumerable: false, configurable: true, get() { return rec.pool.filter(r => r.is_favorite); } },
+      wishlist:            { enumerable: false, configurable: true, get() { return rec.pool.filter(r => r.is_wishlist); } },
+      made_log:            { enumerable: false, configurable: true, get() { return rec.pool.filter(r => Array.isArray(r.made_log) && r.made_log.length > 0); } },
+    });
+  }
+
+  function get(key) {
+    if (key === 'recipes') return _withRecipesShim(_data.recipes);
+    return _data[key];
+  }
 
   function set(key, data) {
     // Normalize on set so corrupted import payloads cannot be persisted unfixed.

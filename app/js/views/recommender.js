@@ -56,6 +56,12 @@ const RecommenderView = (() => {
     </div>`;
   }
 
+  // Chip-unification Commit 2 note: this card renderer (and _renderTwoAwayCard
+  // below) predates RecipeChip and renders classics + originals + their match-score
+  // rail in a single layout. Converting these to RecipeChip is deferred to
+  // Commit 3 because the score bar / missing-ingredient affordances need
+  // dedicated chip-renderer opts. For now, RecipeChip is used only by the
+  // Recipes view tabs; this surface stays on the legacy markup.
   function _renderCard(item, isOneAway) {
     const { recipe, flavorScore, missingIngredient, missingIngredients } = item;
     const diff = _difficultyLabel(recipe.difficulty);

@@ -1785,3 +1785,90 @@ a:hover { color: var(--amber); }
 .rec-card-actions .ai-ask-btn {
   margin-left: 4px;
 }
+
+/* ── Chip Unification (mini-phase Commit 2): canonical RecipeChip styles ── */
+/* Visual parity across all chip surfaces. Sibling of .rec-card — the article
+   element gets both classes so cards still pick up legacy .rec-card padding/
+   border/background. The .recipe-chip-* selectors only add or refine. */
+.recipe-chip {
+  position: relative;
+}
+.recipe-chip-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.recipe-chip-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.recipe-chip-name {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--amber-glow);
+}
+.recipe-chip-flag {
+  color: var(--amber);
+  font-size: 0.95rem;
+  line-height: 1;
+}
+.recipe-chip-meta {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  margin-top: 2px;
+  width: 100%;
+}
+.recipe-chip-body {
+  margin-top: 4px;
+}
+.recipe-chip-tagline {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin: 0 0 6px;
+}
+.recipe-chip-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+/* Status badges — small, sit next to the chip name. Colour conveys lifecycle:
+   classic = blue (stable), original = green (yours/published), draft = amber. */
+.badge-status {
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+.badge--status-classic {
+  background: rgba(91,155,213,0.15);
+  color: var(--blue);
+  border: 1px solid rgba(91,155,213,0.3);
+}
+.badge--status-original {
+  background: rgba(76,175,125,0.15);
+  color: var(--green);
+  border: 1px solid rgba(76,175,125,0.3);
+}
+.badge--status-draft {
+  background: rgba(212,148,58,0.15);
+  color: var(--amber);
+  border: 1px solid rgba(212,148,58,0.3);
+}
+
+@media (max-width: 600px) {
+  .recipe-chip-head { flex-direction: column; }
+  .recipe-chip-actions { width: 100%; }
+}

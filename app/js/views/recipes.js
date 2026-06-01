@@ -1,4 +1,10 @@
 // Recipe Browser view — card grid of originals + detail pane.
+//
+// Chip Unification Commit 3 (mini-phase): all reads/writes go through the
+// canonical recipes.pool (v2). Filter views (Originals / Favorites / Wishlist
+// / Made / Drafts) are derived live via RecipeChip.filterPool. Every chip is
+// rendered by RecipeChip.render and wired by RecipeChip.bindActions, so
+// click-to-open, AI-tweak, and the action buttons share one code path.
 
 const RecipesView = (() => {
 
@@ -15,15 +21,33 @@ const RecipesView = (() => {
     });
   }
 
+  // ── Pool helpers (Commit 3) ──────────────────────────────────────────────
+  // Single source of truth: data/recipes.json's `pool` array. The State key
+  // 'drafts' is now empty (folded into the pool on first load by state.js)
+  // but we keep reading it for safety in case a legacy file is reintroduced.
+  function _pool() {
+    const r = State.get('recipes');
+    return (r && Array.isArray(r.pool)) ? r.pool : [];
+  }
+
+  // Build a lookup function for RecipeChip.bindActions. The chip's data-id
+  // is matched against pool[i].id (or seed_id / draft_id as fallback so
+  // seeded chips still resolve under their seed key).
+  function _lookupFromPool() {
+    const pool = _pool();
+    return (id) => pool.find(r =>
+      r && (r.id === id || r.seed_id === id || r.draft_id === id)
+    );
+  }
+
   function render(container, params = {}) {
     _searchQuery = '';
-    const recipes = State.get('recipes') || {};
-    const draftsObj = State.get('drafts') || { drafts: [] };
-    const originals = recipes.originals || [];
-    const favorites = recipes.confirmed_favorites || [];
-    const wishlist  = recipes.wishlist || [];
-    const madeLog   = recipes.made_log || [];
-    const draftList = draftsObj.drafts || [];
+    const pool = _pool();
+    const originals = RecipeChip.filterPool(pool, 'originals');
+    const favorites = RecipeChip.filterPool(pool, 'favorites');
+    const wishlist  = RecipeChip.filterPool(pool, 'wishlist');
+    const madeLog   = RecipeChip.filterPool(pool, 'made');
+    const draftList = RecipeChip.filterPool(pool, 'drafts');
     const initialTab = params.tab || 'originals';
 
     container.innerHTML = `
@@ -52,7 +76,7 @@ const RecipesView = (() => {
     searchInput.addEventListener('input', () => {
       _searchQuery = searchInput.value;
       const activeTab = container.querySelector('.tab.active')?.dataset.tab || 'originals';
-      renderTab(activeTab, State.get('recipes') || {}, tabContent, container);
+      renderTab(activeTab, tabContent, container);
     });
 
     container.querySelectorAll('.tab').forEach(tab => {
@@ -61,7 +85,7 @@ const RecipesView = (() => {
         tab.classList.add('active');
         _searchQuery = '';
         searchInput.value = '';
-        renderTab(tab.dataset.tab, State.get('recipes') || {}, tabContent, container);
+        renderTab(tab.dataset.tab, tabContent, container);
       });
     });
 
@@ -74,7 +98,7 @@ const RecipesView = (() => {
       }
     }
 
-    renderTab(initialTab, recipes, tabContent, container);
+    renderTab(initialTab, tabContent, container);
 
     container.querySelector('#rb-generate-ai').addEventListener('click', () => {
       showAIPromptModal(container);
@@ -240,34 +264,50 @@ const RecipesView = (() => {
       }
 
       // Build draft entry (D-10): same draft_id on tweak, new id on new/fork.
+      // Commit 3: draft now lives in the recipes POOL as a status:'draft'
+      // entry (not in drafts.json). Schema validation runs against the
+      // recipes schema via WriteGate (the new pool entry includes draft-only
+      // fields the schema accepts).
       const now = new Date().toISOString();
       let draftEntry;
       if (mode === 'tweak' && baseDraft && baseDraft.draft_id) {
         draftEntry = {
           ...candidate,
+          id: baseDraft.id || baseDraft.draft_id,
+          status: 'draft',
           _source: 'ai-generated',
           draft_id: baseDraft.draft_id,
+          parent_id: baseDraft.parent_id || baseDraft.id || baseDraft.draft_id,
           created_at: baseDraft.created_at || now,
           updated_at: now,
           source_prompt: baseDraft.source_prompt || userPrompt,
         };
       } else {
+        const nid = 'draft' + Date.now();
         draftEntry = {
           ...candidate,
+          id: nid,
+          status: 'draft',
           _source: 'ai-generated',
-          draft_id: 'draft' + Date.now(),
+          draft_id: nid,
+          parent_id: (mode === 'fork' && baseDraft) ? (baseDraft.id || baseDraft.draft_id) : null,
           created_at: now,
           updated_at: now,
           source_prompt: userPrompt,
         };
       }
 
-      // Build the new drafts.json payload.
-      const oldDrafts = State.get('drafts') || { drafts: [] };
-      const list = Array.isArray(oldDrafts.drafts) ? oldDrafts.drafts.slice() : [];
-      const idx = list.findIndex(d => d.draft_id === draftEntry.draft_id);
-      if (idx >= 0) list[idx] = draftEntry; else list.push(draftEntry);
-      const newDrafts = { drafts: list, last_updated: new Date().toISOString().slice(0, 10) };
+      // Build the new recipes.json payload — mutate the POOL by id.
+      const oldRecipes = State.get('recipes') || { pool: [] };
+      const pool = Array.isArray(oldRecipes.pool) ? oldRecipes.pool.slice() : [];
+      const idx = pool.findIndex(p => p && p.id === draftEntry.id);
+      if (idx >= 0) pool[idx] = draftEntry; else pool.push(draftEntry);
+      const newRecipes = {
+        ...oldRecipes,
+        _schema_version: 2,
+        pool,
+        last_updated: new Date().toISOString().slice(0, 10),
+      };
 
       // FM #3: phantom-ingredient flag before gate.
       const inv = State.get('inventory') || {};
@@ -277,18 +317,20 @@ const RecipesView = (() => {
         ? WriteGate.inventoryFidelity(draftEntry, tokens, vetoArr)
         : { phantoms: [], vetoed: [] };
 
-      // Auto-save via WriteGate (D-09 - never silently corrupt).
+      // Auto-save via WriteGate (D-09 - never silently corrupt). Schema is
+      // 'recipes' (the new pool shape) — drafts.json is no longer the system
+      // of record.
       const gateMsg = mode === 'tweak'
         ? `Refine draft: ${draftEntry.name}`
         : `Save AI draft: ${draftEntry.name}`;
       const result = await WriteGate.gate({
-        schemaKey: 'drafts',
-        oldData: oldDrafts,
-        newPayload: newDrafts,
+        schemaKey: 'recipes',
+        oldData: oldRecipes,
+        newPayload: newRecipes,
         message: gateMsg,
         onConfirm: async () => {
-          State.set('drafts', newDrafts);
-          return State.save('drafts');
+          State.set('recipes', newRecipes);
+          return State.save('recipes');
         },
       });
 
@@ -427,23 +469,26 @@ const RecipesView = (() => {
     });
   }
 
-  function renderTab(tabName, recipes, container, mainContainer) {
+  function renderTab(tabName, container, mainContainer) {
     container.innerHTML = '';
+    const pool = _pool();
     if (tabName === 'originals') {
-      renderOriginalsGrid(recipes.originals || [], container);
+      renderOriginalsGrid(RecipeChip.filterPool(pool, 'originals'), container, mainContainer);
     } else if (tabName === 'favorites') {
-      renderRecipeChips(recipes.confirmed_favorites || [], container, 'confirmed_favorites', mainContainer);
+      renderRecipeChips(RecipeChip.filterPool(pool, 'favorites'), container, 'favorites', mainContainer);
     } else if (tabName === 'wishlist') {
-      renderRecipeChips(recipes.wishlist || [], container, 'wishlist', mainContainer);
+      renderRecipeChips(RecipeChip.filterPool(pool, 'wishlist'), container, 'wishlist', mainContainer);
     } else if (tabName === 'made') {
-      renderMadeList(recipes.made_log || [], container, mainContainer);
+      renderMadeList(RecipeChip.filterPool(pool, 'made'), container, mainContainer);
     } else if (tabName === 'drafts') {
-      const draftsObj = State.get('drafts') || { drafts: [] };
-      renderDraftChips(draftsObj.drafts || [], container, mainContainer);
+      renderDraftChips(RecipeChip.filterPool(pool, 'drafts'), container, mainContainer);
     }
   }
 
   // ── Drafts tab (D-11): list AI-generated drafts + Promote-to-Original ────
+  // Commit 3: all draft chips render through RecipeChip + bindActions and
+  // mutate the recipes pool by id. The previous data/drafts.json route is
+  // gone (drafts now live in the pool with status:'draft').
   function renderDraftChips(list, container, mainContainer) {
     const filtered = _filterRecipes(list, _searchQuery);
     if (filtered.length === 0) {
@@ -456,97 +501,141 @@ const RecipesView = (() => {
       return;
     }
 
-    filtered.forEach(draft => {
-      const card = document.createElement('div');
-      card.className = 'rec-card';
-      const ingChips = (draft.ingredients || []).slice(0, 5).map(i =>
-        `<span class="rec-ing-chip">${Utils.escapeHtml(i.amount || '')} ${Utils.escapeHtml(i.name || '')}</span>`
-      ).join('');
-      const overflow = (draft.ingredients || []).length > 5
-        ? `<span class="rec-ing-chip" style="color:var(--text-muted);">+${(draft.ingredients||[]).length - 5} more</span>` : '';
-
-      card.innerHTML = `
-        <div class="rec-card-header">
-          <div style="flex:1;min-width:0;">
-            <div class="rec-card-name">${Utils.escapeHtml(draft.name)} <span class="badge badge-amber" style="font-size:0.7rem;margin-left:6px;">draft</span></div>
-            <div class="rec-card-meta">
-              ${draft.base ? `<span class="rec-base">${Utils.escapeHtml(draft.base)}</span>` : ''}
-              ${draft.method ? `<span class="rec-sep">·</span><span class="rec-method">${Utils.escapeHtml(draft.method)}</span>` : ''}
-              ${draft.glassware ? `<span class="rec-sep">·</span><span>${Utils.escapeHtml(draft.glassware)}</span>` : ''}
-            </div>
-          </div>
-          <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
-            <button class="btn btn-ghost btn-sm" data-edit-draft="${Utils.escapeHtml(draft.draft_id || '')}">Edit</button>
-            <button class="btn btn-primary btn-sm" data-promote="${Utils.escapeHtml(draft.draft_id || '')}">Promote to Original</button>
-            <button class="btn-icon" data-discard title="Discard draft">✕</button>
-          </div>
-        </div>
-        ${draft.tagline ? `<p class="rec-occasion" style="font-style:italic;">${Utils.escapeHtml(draft.tagline)}</p>` : ''}
-        <div class="rec-ingredients">${ingChips}${overflow}</div>
-        ${draft.source_prompt ? `<div style="font-size:0.78rem;color:var(--text-muted);margin-top:6px;"><strong>From:</strong> ${Utils.escapeHtml(draft.source_prompt)}</div>` : ''}`;
-
-      card.querySelector('[data-promote]').addEventListener('click', e => {
-        e.stopPropagation();
-        promoteDraftToOriginal(draft, mainContainer);
+    container.innerHTML = filtered.map(draft => {
+      const chipHtml = RecipeChip.render(draft, {
+        context: 'recipes-tab-drafts',
+        actions: { edit: true, promote: true, discard: true, askBjorn: true },
       });
+      const sourceLine = draft.source_prompt
+        ? `<div class="recipe-chip-source" style="font-size:0.78rem;color:var(--text-muted);margin:-6px 0 10px 4px;"><strong>From:</strong> ${Utils.escapeHtml(draft.source_prompt)}</div>`
+        : '';
+      return chipHtml + sourceLine;
+    }).join('');
 
-      card.querySelector('[data-edit-draft]').addEventListener('click', e => {
-        e.stopPropagation();
-        // Reuse the existing renderForm — it sniffs _source==='ai-generated'
-        // and routes the save back to drafts.drafts (find by draft_id).
-        renderForm(draft, mainContainer);
-      });
-
-      card.querySelector('[data-discard]').addEventListener('click', e => {
-        e.stopPropagation();
+    RecipeChip.bindActions(container, {
+      body:    (draft) => renderForm(draft, mainContainer),
+      edit:    (draft) => renderForm(draft, mainContainer),
+      promote: (draft) => promoteDraftToOriginal(draft, mainContainer),
+      askBjorn: (draft) => {
+        if (typeof ChatView === 'undefined' || !ChatView.openDrawer) {
+          Utils.showToast('Chat module not loaded.', 'error');
+          return;
+        }
+        ChatView.openDrawer({ seed: `I drafted "${draft.name}". What would you tweak?` });
+      },
+      discard: (draft) => {
         if (!confirm(`Discard draft "${draft.name}"?`)) return;
-        const cur = State.get('drafts') || { drafts: [] };
-        const next = {
-          ...cur,
-          drafts: (cur.drafts || []).filter(d => d.draft_id !== draft.draft_id),
-          last_updated: new Date().toISOString().slice(0, 10),
-        };
-        // Discard isn't an AI-generated write — straight save is fine (no model output entering data).
-        State.set('drafts', next);
-        State.save('drafts').then(() => {
+        State.patch('recipes', r => {
+          r.pool = (r.pool || []).filter(p => p && p.id !== draft.id);
+          r.last_updated = new Date().toISOString().slice(0, 10);
+        });
+        State.save('recipes').then(() => {
           Utils.showToast('Draft discarded.');
           render(mainContainer, { tab: 'drafts' });
         }).catch(err => Utils.showToast('Save failed: ' + err.message, 'error'));
-      });
-
-      container.appendChild(card);
-    });
+      },
+      tweak: (draft, prompt) => handleChipTweak(draft, prompt, mainContainer),
+    }, { recipeById: _lookupFromPool() });
   }
 
-  // ── Promote draft -> originals (D-11) ────────────────────────────────────
-  // Re-tag _source to 'originals', assign 'cocktail'+Date.now() id (matches
-  // ^cocktail[0-9]+$), append to recipes.originals, then SEQUENTIALLY save
-  // recipes BEFORE drafts (Pitfall 4 - never parallel saves to avoid 409).
-  async function promoteDraftToOriginal(draft, mainContainer) {
-    const recipesNow = State.get('recipes') || {};
-    const originalsArr = Array.isArray(recipesNow.originals) ? recipesNow.originals.slice() : [];
+  // Tweak-from-chip (Commit 3): every chip's "Tweak with AI" panel routes
+  // here. Forks the source chip into a NEW draft with parent_id set, then
+  // navigates to the Drafts tab so the user can see the fork.
+  async function handleChipTweak(source, userPrompt, mainContainer) {
+    if (!userPrompt) {
+      Utils.showToast('Enter a tweak first.', 'error');
+      return;
+    }
+    if (typeof ClaudeAPI === 'undefined' || !ClaudeAPI.getKey || !ClaudeAPI.getKey()) {
+      Utils.showToast('Add your Anthropic API key in Settings to tweak with AI.', 'error');
+      return;
+    }
+    try {
+      const ctx = buildPromptContext();
+      const system = _aiDesignSystem(ctx.bkName, ctx.bkPreset, ctx.inventoryText, ctx.profileText);
+      // For seeded chips, resolveCore pulls live name/ingredients from CLASSICS_DB.
+      const core = (typeof RecipeChip !== 'undefined' && RecipeChip.resolveCore)
+        ? RecipeChip.resolveCore(source) : source;
+      const slim = {
+        name: core.name, tagline: core.tagline, base: core.base,
+        ingredients: core.ingredients, method: core.method,
+        method_type: core.method_type, glassware: core.glassware, garnish: core.garnish,
+      };
+      const composed = `Refine this existing recipe per the user's tweak. Current recipe:\n${JSON.stringify(slim, null, 2)}\n\nUser tweak: ${userPrompt}`;
+      const norm = await ClaudeAPI.requestJSON({
+        system, userPrompt: composed, schemaKey: 'drafts',
+        model: ClaudeAPI.getModel(), maxTokens: 1500,
+      });
+      const drafts = (norm && Array.isArray(norm.drafts)) ? norm.drafts : [];
+      const candidate = drafts[drafts.length - 1];
+      if (!candidate || !candidate.name) throw new Error('No draft returned.');
 
-    // Build promoted entry. Drop draft-only metadata.
+      const now = new Date().toISOString();
+      const nid = 'draft' + Date.now();
+      const newDraft = {
+        ...candidate,
+        id: nid,
+        status: 'draft',
+        _source: 'ai-generated',
+        draft_id: nid,
+        parent_id: source.id || source.seed_id || source.draft_id || null,
+        created_at: now,
+        updated_at: now,
+        source_prompt: `Tweak of "${core.name || 'recipe'}": ${userPrompt}`,
+      };
+      State.patch('recipes', r => {
+        if (!Array.isArray(r.pool)) r.pool = [];
+        r.pool.push(newDraft);
+        r.last_updated = now.slice(0, 10);
+        r._schema_version = 2;
+      });
+      await State.save('recipes');
+      Utils.showToast('New draft created from your tweak.');
+      render(mainContainer, { tab: 'drafts' });
+    } catch (err) {
+      Utils.showToast('Tweak failed: ' + (err.message || err), 'error');
+    }
+  }
+
+  // ── Promote draft -> original (Commit 3 — pool-aware) ────────────────────
+  // Mutate the existing pool entry by id: flip status 'draft' → 'original',
+  // assign a fresh 'cocktail<ts>' id (preserving the legacy id convention),
+  // clear draft-only metadata. Single State.save('recipes') — no parallel
+  // saves, no 409 risk because there is no second file to write.
+  async function promoteDraftToOriginal(draft, mainContainer) {
+    const recipesNow = State.get('recipes') || { pool: [] };
+    const pool = Array.isArray(recipesNow.pool) ? recipesNow.pool.slice() : [];
+    const idx = pool.findIndex(p => p && p.id === draft.id);
+    if (idx < 0) {
+      Utils.showToast('Draft not found in pool — refresh and try again.', 'error');
+      return;
+    }
+
+    const newId = 'cocktail' + Date.now();
     const promoted = {
-      ...draft,
-      _source: 'originals',
-      id: 'cocktail' + Date.now(),
-      creator: draft.creator || ((State.get('barkeeper') || {}).identity?.name) || 'Barkeeper Bjorn',
-      date_created: new Date().toISOString().slice(0, 10),
+      ...pool[idx],
+      id: newId,
+      status: 'original',
+      _source: 'user',
+      creator: pool[idx].creator || ((State.get('barkeeper') || {}).identity?.name) || 'Barkeeper Bjorn',
+      date_created: pool[idx].date_created || new Date().toISOString().slice(0, 10),
     };
     delete promoted.draft_id;
     delete promoted.source_prompt;
+    delete promoted.parent_id;
     delete promoted.created_at;
     delete promoted.updated_at;
 
-    // Duplicate flag (Utils.sameRecipe match against existing originals).
-    const dup = originalsArr.find(o => Utils.sameRecipe(o, promoted));
+    pool[idx] = promoted;
+
+    // Duplicate flag — match against OTHER originals already in the pool.
+    const dup = pool.find((o, i) => i !== idx && o.status === 'original' && Utils.sameRecipe(o, promoted));
     const dupNote = dup ? `\nPossible duplicate of existing original "${dup.name}".` : '';
 
-    originalsArr.push(promoted);
     const newRecipes = {
       ...recipesNow,
-      originals: originalsArr,
+      _schema_version: 2,
+      pool,
       last_updated: new Date().toISOString().slice(0, 10),
     };
 
@@ -556,27 +645,18 @@ const RecipesView = (() => {
       newPayload: newRecipes,
       message: `Promote to Original: ${promoted.name}${dupNote}`,
       onConfirm: async () => {
-        // Pitfall 4: save SEQUENTIALLY — recipes THEN drafts. Never parallel.
         State.set('recipes', newRecipes);
-        await State.save('recipes');
-        // Now remove the draft from drafts.json.
-        State.patch('drafts', d => {
-          d.drafts = (d.drafts || []).filter(x => x.draft_id !== draft.draft_id);
-          d.last_updated = new Date().toISOString().slice(0, 10);
-        });
-        await State.save('drafts');
+        return State.save('recipes');
       },
     });
 
     if (result && result.status === 'confirmed') {
       Utils.showToast(`Promoted "${promoted.name}" to Originals.`);
-      render(mainContainer, { tab: 'drafts' });
-    } else if (result && result.status === 'invalid') {
-      // WriteGate already toasted the schema error.
+      render(mainContainer, { tab: 'originals' });
     }
   }
 
-  function renderOriginalsGrid(originals, container) {
+  function renderOriginalsGrid(originals, container, mainContainer) {
     const addBtn = document.createElement('div');
     addBtn.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:12px;';
     addBtn.innerHTML = `<button class="btn btn-secondary btn-sm">+ New Recipe</button>`;
@@ -604,42 +684,51 @@ const RecipesView = (() => {
       return;
     }
 
-    const grid = document.createElement('div');
-    grid.className = 'card-grid';
+    // Unified RecipeChip render (chip-unification Commit 3) — originals now
+    // use the SAME chip markup as favorites / wishlist / drafts. Click body
+    // opens the detail view; Edit button opens the form; Discard hard-deletes
+    // from the pool. Tweak panel forks into a new draft.
+    const chipsWrap = document.createElement('div');
+    chipsWrap.className = 'recipe-chip-grid';
+    chipsWrap.innerHTML = filtered.map(r => RecipeChip.render(r, {
+      context: 'recipes-tab-originals',
+      actions: { edit: true, discard: true, askBjorn: true },
+    })).join('');
+    container.appendChild(chipsWrap);
 
-    filtered.forEach(r => {
-      const card = document.createElement('div');
-      card.className = 'recipe-card';
-      const builtBadge = r.confirmed_built
-        ? `<span class="badge badge-green" style="position:absolute;top:14px;right:14px;font-size:0.7rem;">Built ✓</span>`
-        : '';
-      const method = r.method_type || r.method || '';
-      const base = r.ingredients?.[0]?.name || '';
-      card.innerHTML = `
-        ${builtBadge}
-        <div class="card-id">${Utils.escapeHtml(r.id)}</div>
-        <div class="card-title">${Utils.escapeHtml(r.name)}</div>
-        ${r.tagline ? `<div style="font-size:0.83rem;color:var(--text-dim);font-style:italic;margin-bottom:8px;">${Utils.escapeHtml(r.tagline)}</div>` : ''}
-        <div class="card-meta">
-          ${method ? `<span>${Utils.escapeHtml(method)}</span>` : ''}
-          ${base ? `<span>${Utils.escapeHtml(base)}</span>` : ''}
-          ${r.glassware ? `<span>${Utils.escapeHtml(r.glassware)}</span>` : ''}
-        </div>
-        ${r.profile ? `<div class="card-profile">${Utils.escapeHtml(r.profile)}</div>` : ''}
-        ${r.ratings?.bar_owner ? `<div style="margin-top:10px;font-size:0.8rem;color:var(--amber);">Rating: ${r.ratings.bar_owner}/10</div>` : ''}`;
-
-      card.addEventListener('click', () => {
-        renderDetail(r, document.getElementById('main-content'));
-      });
-      grid.appendChild(card);
-    });
-
-    container.appendChild(grid);
+    RecipeChip.bindActions(chipsWrap, {
+      body: (r) => renderDetail(r, mainContainer || document.getElementById('main-content')),
+      edit: (r) => renderForm(r, mainContainer || document.getElementById('main-content')),
+      askBjorn: (r) => {
+        if (typeof ChatView === 'undefined' || !ChatView.openDrawer) {
+          Utils.showToast('Chat module not loaded.', 'error');
+          return;
+        }
+        const seed = `Tell me about my original "${r.name}". What would you tweak given my bar?`;
+        ChatView.openDrawer({ seed });
+      },
+      discard: (r) => {
+        if (!confirm(`Delete "${r.name}"? This cannot be undone.`)) return;
+        State.patch('recipes', rec => {
+          rec.pool = (rec.pool || []).filter(p => p && p.id !== r.id);
+          rec.last_updated = new Date().toISOString().slice(0, 10);
+        });
+        State.save('recipes').then(() => {
+          Utils.showToast('Recipe deleted.');
+          render(mainContainer || document.getElementById('main-content'), { tab: 'originals' });
+        }).catch(err => Utils.showToast('Save failed: ' + err.message, 'error'));
+      },
+      tweak: (r, prompt) => handleChipTweak(r, prompt, mainContainer || document.getElementById('main-content')),
+    }, { recipeById: _lookupFromPool() });
   }
 
+  // Commit 3: listKey is now the FILTER VIEW name ('favorites' | 'wishlist').
+  // "Removing" from the view clears the overlay flag on the pool entry — the
+  // recipe itself is never deleted by this control (a heart-toggle, not a
+  // hard delete).
   function renderRecipeChips(list, container, listKey, mainContainer) {
-    const emptyIcon = listKey === 'confirmed_favorites' ? '⭐' : '📋';
-    const emptyMsg  = listKey === 'confirmed_favorites' ? 'No favorites yet.' : 'Wishlist is empty.';
+    const emptyIcon = listKey === 'favorites' ? '⭐' : '📋';
+    const emptyMsg  = listKey === 'favorites' ? 'No favorites yet.' : 'Wishlist is empty.';
 
     const filtered = _filterRecipes(list, _searchQuery);
     if (filtered.length === 0) {
@@ -651,68 +740,48 @@ const RecipesView = (() => {
       return;
     }
 
-    filtered.forEach(recipe => {
-      const card = document.createElement('div');
-      card.className = 'rec-card';
-      card.style.cursor = 'pointer';
+    const ctxName = 'recipes-tab-' + listKey;
+    container.innerHTML = filtered.map(r => RecipeChip.render(r, {
+      context: ctxName,
+      actions: { edit: false, promote: false, discard: true, askBjorn: true },
+    })).join('');
 
-      const ingChips = (recipe.ingredients || []).slice(0, 5).map(i =>
-        `<span class="rec-ing-chip">${Utils.escapeHtml(i.amount || '')} ${Utils.escapeHtml(i.name)}</span>`
-      ).join('');
-      const overflow = (recipe.ingredients || []).length > 5
-        ? `<span class="rec-ing-chip" style="color:var(--text-muted);">+${(recipe.ingredients||[]).length - 5} more</span>` : '';
+    const overlayKey = (listKey === 'favorites') ? 'is_favorite' : 'is_wishlist';
+    const removedLabel = (listKey === 'favorites') ? 'Removed from Favorites' : 'Removed from Wishlist';
 
-      card.innerHTML = `
-        <div class="rec-card-header">
-          <div style="flex:1;min-width:0;">
-            <div class="rec-card-name">${Utils.escapeHtml(recipe.name)}</div>
-            <div class="rec-card-meta">
-              ${recipe.base ? `<span class="rec-base">${Utils.escapeHtml(recipe.base)}</span>` : ''}
-              ${recipe.method ? `<span class="rec-sep">·</span><span class="rec-method">${Utils.escapeHtml(recipe.method)}</span>` : ''}
-              ${recipe.glassware ? `<span class="rec-sep">·</span><span>${Utils.escapeHtml(recipe.glassware)}</span>` : ''}
-            </div>
-          </div>
-          <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
-            <button class="rec-ask-btn ai-ask-btn" data-ask title="Ask Bjorn about this">Ask Bjorn</button>
-            <button class="btn-icon" data-remove title="Remove">✕</button>
-          </div>
-        </div>
-        ${recipe.occasion ? `<p class="rec-occasion">${Utils.escapeHtml(recipe.occasion)}</p>` : ''}
-        <div class="rec-ingredients">${ingChips}${overflow}</div>`;
-
-      card.addEventListener('click', e => {
-        if (e.target.closest('[data-remove]')) return;
-        if (e.target.closest('[data-ask]')) return;
-        showRecipeDetail(recipe, listKey, mainContainer);
-      });
-
-      card.querySelector('[data-ask]').addEventListener('click', e => {
-        e.stopPropagation();
+    RecipeChip.bindActions(container, {
+      body: (r) => showRecipeDetail(r, listKey, mainContainer),
+      askBjorn: (r) => {
         if (typeof ChatView === 'undefined' || !ChatView.openDrawer) {
           Utils.showToast('Chat module not loaded.', 'error');
           return;
         }
         const seed =
-          `Tell me about the ${recipe.name}${recipe.base ? ` (${recipe.base})` : ''}. ` +
+          `Tell me about the ${r.name}${r.base ? ` (${r.base})` : ''}. ` +
           `Would it suit my taste, and what variations would you suggest given my bar?`;
         ChatView.openDrawer({ seed });
-      });
-
-      card.querySelector('[data-remove]').addEventListener('click', e => {
-        e.stopPropagation();
-        State.patch('recipes', r => { r[listKey] = (r[listKey] || []).filter(x => !Utils.sameRecipe(x, recipe)); });
-        State.save('recipes').then(() => {
-          Utils.showToast('Removed');
-          render(mainContainer, { tab: listKey === 'confirmed_favorites' ? 'favorites' : 'wishlist' });
+      },
+      discard: (r) => {
+        State.patch('recipes', rec => {
+          const entry = (rec.pool || []).find(p => p && p.id === r.id);
+          if (entry) entry[overlayKey] = false;
+          rec.last_updated = new Date().toISOString().slice(0, 10);
         });
-      });
-
-      container.appendChild(card);
-    });
+        State.save('recipes').then(() => {
+          Utils.showToast(removedLabel);
+          render(mainContainer, { tab: listKey });
+        });
+      },
+      tweak: (r, prompt) => handleChipTweak(r, prompt, mainContainer),
+    }, { recipeById: _lookupFromPool() });
   }
 
-  function renderMadeList(madeLog, container, mainContainer) {
-    const filtered = _filterRecipes(madeLog, _searchQuery);
+  // Commit 3: made_log is now a per-pool-entry array (not a top-level
+  // recipes.made_log). Renders the unified chip plus a times-made badge in
+  // the meta line. The discard control clears the made_log array on that
+  // pool entry (it does NOT delete the recipe itself).
+  function renderMadeList(madeList, container, mainContainer) {
+    const filtered = _filterRecipes(madeList, _searchQuery);
     if (filtered.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
@@ -723,63 +792,59 @@ const RecipesView = (() => {
       return;
     }
 
-    // Most-recent first (already unshifted on add, but sort by last_made for robustness)
-    const sorted = [...filtered].sort((a, b) => (b.last_made || '') > (a.last_made || '') ? 1 : -1);
+    // Sort by most recent log entry (last item appended is most recent;
+    // legacy entries may carry a `date` field).
+    const sorted = filtered.slice().sort((a, b) => {
+      const ad = (a.made_log && a.made_log.length) ? (a.made_log[a.made_log.length - 1].date || '') : '';
+      const bd = (b.made_log && b.made_log.length) ? (b.made_log[b.made_log.length - 1].date || '') : '';
+      return bd > ad ? 1 : -1;
+    });
 
-    sorted.forEach(recipe => {
-      const card = document.createElement('div');
-      card.className = 'rec-card';
-      card.style.cursor = 'pointer';
+    container.innerHTML = sorted.map(r => RecipeChip.render(r, {
+      context: 'recipes-tab-made',
+      actions: { discard: true, askBjorn: true },
+    })).join('');
 
-      const ingChips = (recipe.ingredients || []).slice(0, 5).map(i =>
-        `<span class="rec-ing-chip">${Utils.escapeHtml(i.amount || '')} ${Utils.escapeHtml(i.name)}</span>`
-      ).join('');
-      const overflow = (recipe.ingredients || []).length > 5
-        ? `<span class="rec-ing-chip" style="color:var(--text-muted);">+${(recipe.ingredients||[]).length - 5} more</span>` : '';
-
-      card.innerHTML = `
-        <div class="rec-card-header">
-          <div style="flex:1;min-width:0;">
-            <div class="rec-card-name">
-              ${Utils.escapeHtml(recipe.name)}
-              <span class="rec-times-made-badge">×${recipe.times_made || 1}</span>
-            </div>
-            <div class="rec-card-meta">
-              ${recipe.base ? `<span class="rec-base">${Utils.escapeHtml(recipe.base)}</span>` : ''}
-              ${recipe.method ? `<span class="rec-sep">·</span><span class="rec-method">${Utils.escapeHtml(recipe.method)}</span>` : ''}
-              ${recipe.last_made ? `<span class="rec-sep">·</span><span style="color:var(--text-muted);">Last: ${Utils.escapeHtml(recipe.last_made)}</span>` : ''}
-            </div>
-          </div>
-          <button class="btn-icon" data-remove title="Remove from Made" style="flex-shrink:0;">✕</button>
-        </div>
-        ${recipe.occasion ? `<p class="rec-occasion">${Utils.escapeHtml(recipe.occasion)}</p>` : ''}
-        <div class="rec-ingredients">${ingChips}${overflow}</div>`;
-
-      card.addEventListener('click', e => {
-        if (e.target.closest('[data-remove]')) return;
-        showRecipeDetail(recipe, 'made_log', mainContainer);
-      });
-
-      card.querySelector('[data-remove]').addEventListener('click', e => {
-        e.stopPropagation();
-        State.patch('recipes', r => { r.made_log = (r.made_log || []).filter(x => !Utils.sameRecipe(x, recipe)); });
+    RecipeChip.bindActions(container, {
+      body: (r) => showRecipeDetail(r, 'made', mainContainer),
+      askBjorn: (r) => {
+        if (typeof ChatView === 'undefined' || !ChatView.openDrawer) {
+          Utils.showToast('Chat module not loaded.', 'error');
+          return;
+        }
+        ChatView.openDrawer({ seed: `Tell me about ${r.name}. I've made it before — what variations should I try next?` });
+      },
+      discard: (r) => {
+        State.patch('recipes', rec => {
+          const entry = (rec.pool || []).find(p => p && p.id === r.id);
+          if (entry) entry.made_log = [];
+          rec.last_updated = new Date().toISOString().slice(0, 10);
+        });
         State.save('recipes').then(() => {
           Utils.showToast('Removed from Made');
           render(mainContainer, { tab: 'made' });
         });
-      });
-
-      container.appendChild(card);
-    });
+      },
+      tweak: (r, prompt) => handleChipTweak(r, prompt, mainContainer),
+    }, { recipeById: _lookupFromPool() });
   }
 
+  // Commit 3: detail modal reads the pool entry by id. `editable` is only
+  // true for user-owned originals (NOT seeded classics, NOT drafts). Seeded
+  // chips show overlay editing (notes, made tally) but not core editing —
+  // the form view handles core editing for originals/drafts (see renderForm).
   function showRecipeDetail(recipe, listKey, mainContainer) {
-    const editable = recipe._source === 'originals';
-    const madeLog = State.get('recipes')?.made_log || [];
-    const madeEntry = madeLog.find(m => Utils.sameRecipe(m, recipe));
-    const timesMade = madeEntry?.times_made || 0;
-    const currentNotes = (listKey === 'made_log' ? recipe.notes : null) ||
-      (State.get('recipes')?.[listKey]?.find(r => Utils.sameRecipe(r, recipe))?.notes) || '';
+    const editable = recipe.status === 'original' && !recipe.seed_id;
+    const pool = _pool();
+    const poolEntry = pool.find(p => p && p.id === recipe.id) || recipe;
+    // Use the resolved core (seed overlay) for seeded chips so the modal
+    // shows the live seed name/ingredients rather than blanks.
+    recipe = (typeof RecipeChip !== 'undefined' && RecipeChip.resolveCore)
+      ? RecipeChip.resolveCore(poolEntry) : poolEntry;
+    const madeLogArr = Array.isArray(poolEntry.made_log) ? poolEntry.made_log : [];
+    const timesMade = madeLogArr.reduce((sum, m) => sum + (m.times_made || 1), 0);
+    const lastMadeNotes = madeLogArr.length ? (madeLogArr[madeLogArr.length - 1].notes || '') : '';
+    const currentNotes = poolEntry.user_notes || lastMadeNotes || '';
 
     const overlay = document.createElement('div');
     overlay.className = 'recipe-detail-modal-overlay';
@@ -893,11 +958,16 @@ const RecipesView = (() => {
       });
     }
 
+    // Tab to re-render after a write — derived from listKey ('favorites' |
+    // 'wishlist' | 'made'). Used by every save path below.
+    const activeTab = (listKey === 'made') ? 'made' : (listKey === 'favorites' ? 'favorites' : (listKey === 'wishlist' ? 'wishlist' : 'originals'));
+
     overlay.querySelector('.rdm-save-notes').addEventListener('click', () => {
       const notes = overlay.querySelector('.rdm-notes').value.trim();
       State.patch('recipes', r => {
-        const entry = (r[listKey] || []).find(x => Utils.sameRecipe(x, recipe));
-        if (entry) entry.notes = notes;
+        const entry = (r.pool || []).find(p => p && p.id === recipe.id);
+        if (entry) entry.user_notes = notes;
+        r.last_updated = new Date().toISOString().slice(0, 10);
       });
       State.save('recipes').then(() => Utils.showToast('Notes saved.'))
         .catch(err => Utils.showToast('Save failed: ' + err.message, 'error'));
@@ -905,11 +975,7 @@ const RecipesView = (() => {
 
     if (editable) {
       overlay.querySelector('.rdm-save-recipe').addEventListener('click', () => {
-        // CRITICAL ORDER (Pitfall C): capture lookup keys BEFORE reading edited
-        // inputs so a rename still finds the canonical + inline-copy entries.
         const origId = recipe.id;
-        const origProbe = { name: recipe.name, base: recipe.base }; // pre-edit keys
-
         const edited = {
           name: overlay.querySelector('.rdm-edit-name').value.trim(),
           method: overlay.querySelector('.rdm-edit-method').value.trim(),
@@ -929,19 +995,14 @@ const RecipesView = (() => {
         if (!edited.ingredients.length) { Utils.showToast('At least one ingredient is required.', 'error'); return; }
 
         State.patch('recipes', r => {
-          const canon = (r.originals || []).find(o => o.id === origId)
-            || (r.originals || []).find(o => Utils.sameRecipe(o, origProbe));
-          if (canon) Object.assign(canon, edited);
-          if (listKey) {
-            const copy = (r[listKey] || []).find(x => Utils.sameRecipe(x, origProbe));
-            if (copy) Object.assign(copy, edited);
-          }
+          const entry = (r.pool || []).find(p => p && p.id === origId);
+          if (entry && !entry.seed_id) Object.assign(entry, edited);
+          r.last_updated = new Date().toISOString().slice(0, 10);
         });
         State.save('recipes').then(() => {
           Utils.showToast('Recipe updated.');
           close();
-          const tab = listKey === 'made_log' ? 'made' : (listKey === 'confirmed_favorites' ? 'favorites' : 'wishlist');
-          render(mainContainer, { tab });
+          render(mainContainer, { tab: activeTab });
         }).catch(err => Utils.showToast('Save failed: ' + err.message, 'error'));
       });
     }
@@ -949,18 +1010,16 @@ const RecipesView = (() => {
     overlay.querySelector('.rdm-made-btn').addEventListener('click', () => {
       const today = new Date().toISOString().slice(0, 10);
       State.patch('recipes', r => {
-        if (!r.made_log) r.made_log = [];
-        const existing = r.made_log.find(m => Utils.sameRecipe(m, recipe));
-        if (existing) {
-          existing.times_made = (existing.times_made || 1) + 1;
-          existing.last_made = today;
-        } else {
-          r.made_log.unshift({ ...recipe, _source: recipe._source || 'classics-db', times_made: 1, first_made: today, last_made: today, notes: '' });
-        }
+        const entry = (r.pool || []).find(p => p && p.id === recipe.id);
+        if (!entry) return;
+        if (!Array.isArray(entry.made_log)) entry.made_log = [];
+        entry.made_log.push({ date: today, times_made: 1, notes: '' });
+        r.last_updated = today;
       });
       State.save('recipes').then(() => {
         Utils.showToast('Marked as made ✓');
-        const newCount = State.get('recipes')?.made_log?.find(m => Utils.sameRecipe(m, recipe))?.times_made || 1;
+        const updatedEntry = (State.get('recipes')?.pool || []).find(p => p && p.id === recipe.id);
+        const newCount = updatedEntry ? (updatedEntry.made_log || []).reduce((s, m) => s + (m.times_made || 1), 0) : 1;
         const tallyCount = overlay.querySelector('.rdm-tally-count');
         if (tallyCount) tallyCount.textContent = newCount;
         const madeBtn = overlay.querySelector('.rdm-made-btn');
@@ -972,11 +1031,14 @@ const RecipesView = (() => {
           resetBtn.textContent = 'Reset';
           tally.appendChild(resetBtn);
           resetBtn.addEventListener('click', () => {
-            State.patch('recipes', r => { r.made_log = (r.made_log || []).filter(m => !Utils.sameRecipe(m, recipe)); });
+            State.patch('recipes', r => {
+              const entry = (r.pool || []).find(p => p && p.id === recipe.id);
+              if (entry) entry.made_log = [];
+              r.last_updated = new Date().toISOString().slice(0, 10);
+            });
             State.save('recipes').then(() => {
               Utils.showToast('Removed from Made');
               close();
-              const activeTab = listKey === 'made_log' ? 'made' : (listKey === 'confirmed_favorites' ? 'favorites' : 'wishlist');
               render(mainContainer, { tab: activeTab });
             }).catch(err => Utils.showToast('Save failed: ' + err.message, 'error'));
           });
@@ -987,11 +1049,14 @@ const RecipesView = (() => {
     const unMadeBtn = overlay.querySelector('.rdm-unmade-btn');
     if (unMadeBtn) {
       unMadeBtn.addEventListener('click', () => {
-        State.patch('recipes', r => { r.made_log = (r.made_log || []).filter(m => !Utils.sameRecipe(m, recipe)); });
+        State.patch('recipes', r => {
+          const entry = (r.pool || []).find(p => p && p.id === recipe.id);
+          if (entry) entry.made_log = [];
+          r.last_updated = new Date().toISOString().slice(0, 10);
+        });
         State.save('recipes').then(() => {
           Utils.showToast('Removed from Made');
           close();
-          const activeTab = listKey === 'made_log' ? 'made' : (listKey === 'confirmed_favorites' ? 'favorites' : 'wishlist');
           render(mainContainer, { tab: activeTab });
         }).catch(err => Utils.showToast('Save failed: ' + err.message, 'error'));
       });
@@ -1014,10 +1079,10 @@ const RecipesView = (() => {
     });
     topBar.querySelector('[data-action="delete"]').addEventListener('click', () => {
       if (!confirm(`Delete "${r.name}"? This cannot be undone.`)) return;
-      const recipes = State.get('recipes') || {};
-      recipes.originals = (recipes.originals || []).filter(x => x.id !== r.id);
-      recipes.last_updated = new Date().toISOString().slice(0, 10);
-      State.set('recipes', recipes);
+      State.patch('recipes', rec => {
+        rec.pool = (rec.pool || []).filter(p => p && p.id !== r.id);
+        rec.last_updated = new Date().toISOString().slice(0, 10);
+      });
       State.save('recipes').then(() => {
         Utils.showToast('Recipe deleted.');
         render(container);
@@ -1145,18 +1210,16 @@ const RecipesView = (() => {
         const sha = await GitHubAPI.getFileSHA(`images/${filename}`);
         await GitHubAPI.writeFile(`images/${filename}`, base64, sha, `Upload image for ${r.name}`);
 
-        // Patch recipe images array
-        const recipes = State.get('recipes') || {};
-        const originals = recipes.originals || [];
-        const idx = originals.findIndex(x => x.id === r.id);
-        if (idx >= 0) {
-          if (!originals[idx].images) originals[idx].images = [];
-          originals[idx].images.push({ filename, alt_text: r.name });
-          recipes.originals = originals;
-          recipes.last_updated = new Date().toISOString().slice(0, 10);
-          State.set('recipes', recipes);
-          await State.save('recipes');
-        }
+        // Patch recipe images array on the pool entry.
+        State.patch('recipes', rec => {
+          const entry = (rec.pool || []).find(p => p && p.id === r.id);
+          if (entry) {
+            if (!Array.isArray(entry.images)) entry.images = [];
+            entry.images.push({ filename, alt_text: r.name });
+          }
+          rec.last_updated = new Date().toISOString().slice(0, 10);
+        });
+        await State.save('recipes');
 
         statusEl.textContent = `Uploaded: images/${filename}`;
         statusEl.style.color = 'var(--green)';
@@ -1234,12 +1297,22 @@ const RecipesView = (() => {
         updated_at: now,
         source_prompt: `Tweak of "${baseDraft.name || 'draft'}": ${userPrompt}`,
       };
-      const oldDrafts = State.get('drafts') || { drafts: [] };
-      const list = Array.isArray(oldDrafts.drafts) ? oldDrafts.drafts.slice() : [];
-      list.push(newDraft);
-      const newDraftsPayload = { ...oldDrafts, drafts: list, last_updated: now.slice(0, 10) };
-      State.set('drafts', newDraftsPayload);
-      await State.save('drafts');
+      // Commit 3: drafts now live in the recipes pool with status:'draft'.
+      const nid = 'draft' + Date.now();
+      const poolEntry = {
+        ...newDraft,
+        id: nid,
+        status: 'draft',
+        draft_id: nid,
+        parent_id: baseDraft.id || baseDraft.draft_id || null,
+      };
+      State.patch('recipes', r => {
+        if (!Array.isArray(r.pool)) r.pool = [];
+        r.pool.push(poolEntry);
+        r.last_updated = now.slice(0, 10);
+        r._schema_version = 2;
+      });
+      await State.save('recipes');
       Utils.showToast('New draft created from your tweak.');
       render(container, { tab: 'drafts' });
     } catch (err) {
@@ -1316,17 +1389,29 @@ const RecipesView = (() => {
 
   function renderForm(r, container) {
     const isEdit = !!r;
-    // A draft is just a universal recipe stored in drafts.drafts; the form is
-    // the same, but its save handler must route back to drafts (not originals)
-    // and titles/back-nav should reflect that. Detect via _source provenance.
-    const isDraft = isEdit && r && r._source === 'ai-generated' && r.draft_id;
+    // Commit 3: status-based branching replaces _source sniffing.
+    // - isDraft        → editable core + Save and Promote button
+    // - isSeededClassic → readonly core (overlay-only edits); titled "View"
+    // - isOriginal     → editable core (no Promote)
+    const isDraft = isEdit && r && r.status === 'draft';
+    const isSeededClassic = isEdit && r && (r.status === 'classic' || r.seed_id);
+
+    // For seeded chips, resolve the live core (name / ingredients / method
+    // / etc.) from CLASSICS_DB so the readonly inputs display the seed
+    // values. The pool entry itself stores only the overlay.
+    const display = isSeededClassic && typeof RecipeChip !== 'undefined' && RecipeChip.resolveCore
+      ? RecipeChip.resolveCore(r) : r;
+
     container.innerHTML = '';
 
     const back = document.createElement('button');
     back.className = 'back-btn';
-    back.textContent = isDraft ? '← Back to Drafts' : (isEdit ? '← Back to Recipe' : '← Back to Recipes');
+    back.textContent = isDraft ? '← Back to Drafts'
+                     : isSeededClassic ? '← Back to Recipes'
+                     : isEdit ? '← Back to Recipe' : '← Back to Recipes';
     back.addEventListener('click', () => {
       if (isDraft) render(container, { tab: 'drafts' });
+      else if (isSeededClassic) render(container, { tab: 'originals' });
       else if (isEdit) renderDetail(r, container);
       else render(container);
     });
@@ -1336,9 +1421,29 @@ const RecipesView = (() => {
     wrap.style.cssText = 'max-width:680px;';
 
     const title = document.createElement('h2');
-    title.textContent = isDraft ? `Edit Draft: ${r.name}` : (isEdit ? `Edit: ${r.name}` : 'New Recipe');
+    const displayName = display?.name || r?.name || '';
+    title.textContent = isDraft ? `Edit Draft: ${displayName}`
+                      : isSeededClassic ? `View: ${displayName}`
+                      : isEdit ? `Edit: ${displayName}` : 'New Recipe';
     title.style.cssText = 'color:var(--amber);font-weight:normal;margin-bottom:20px;';
     wrap.appendChild(title);
+
+    // Per C-1: seeded chips' core fields are UNEDITABLE but not visually
+    // grayed out. We mark inputs readonly/disabled and provide a small
+    // hint at the top of the form explaining why. Overlay fields remain
+    // editable below.
+    if (isSeededClassic) {
+      const hint = document.createElement('div');
+      hint.style.cssText = 'margin-bottom:14px;padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.82rem;color:var(--text-dim);';
+      hint.textContent = 'This is a seeded classic — core recipe (name, ingredients, method) is read live from the classics database and not editable. Your overlay (ratings, notes, ♥/☆/✓) is editable below.';
+      wrap.appendChild(hint);
+    }
+
+    // Hoisted before any conditional block that references it (the tweak panel
+    // immediately below + the legacy AI prompt block further down both check
+    // hasKey). Previously declared further down → temporal-dead-zone
+    // ReferenceError on every draft edit, abandoning the form render.
+    const hasKey = !!localStorage.getItem('bb_anthropic_key');
 
     // AI tweak panel — only when editing a draft (D-10 fork-on-tweak applied
     // from the edit form). Mirrors the `Generate with AI` block shape used
@@ -1359,8 +1464,11 @@ const RecipesView = (() => {
         </div>`;
     }
 
+    // Per-input readonly/disabled flags (seeded-core lock — C-1).
+    const ro = isSeededClassic ? 'readonly' : '';
+    const dis = isSeededClassic ? 'disabled' : '';
+
     // AI prompt block — shown only for new recipes (D-12)
-    const hasKey = !!localStorage.getItem('bb_anthropic_key');
     if (!isEdit) {
       wrap.innerHTML += `
         <div class="rf-ai-prompt-wrap" id="rf-ai-wrap" style="margin-bottom:20px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);">
@@ -1381,64 +1489,65 @@ const RecipesView = (() => {
         </div>`;
     }
 
-    // Build ingredient rows HTML
-    const ingRows = (r?.ingredients?.length ? r.ingredients : [{ amount: '', name: '', notes: '' }])
-      .map((ing, i) => ingredientRowHtml(ing, i)).join('');
+    // Build ingredient rows HTML — pulled from `display` (resolved seed core
+    // for classics, pool entry otherwise). Rows are readonly for seeded.
+    const ingRows = (display?.ingredients?.length ? display.ingredients : [{ amount: '', name: '', notes: '' }])
+      .map((ing, i) => ingredientRowHtml(ing, i, isSeededClassic)).join('');
 
     wrap.innerHTML += `
       <div class="form-group">
         <label>Name *</label>
-        <input type="text" id="rf-name" value="${Utils.escapeHtml(r?.name || '')}" placeholder="Cocktail name">
+        <input type="text" id="rf-name" value="${Utils.escapeHtml(display?.name || '')}" placeholder="Cocktail name" ${ro}>
       </div>
       <div class="form-group">
         <label>Tagline</label>
-        <input type="text" id="rf-tagline" value="${Utils.escapeHtml(r?.tagline || '')}" placeholder="One-line description">
+        <input type="text" id="rf-tagline" value="${Utils.escapeHtml(display?.tagline || '')}" placeholder="One-line description" ${ro}>
       </div>
       <div class="form-row">
         <div class="form-group">
           <label>Creator *</label>
-          <input type="text" id="rf-creator" value="${Utils.escapeHtml(r?.creator || '')}" placeholder="Who made this?">
+          <input type="text" id="rf-creator" value="${Utils.escapeHtml(display?.creator || '')}" placeholder="Who made this?" ${ro}>
         </div>
         <div class="form-group">
           <label>Date Created</label>
-          <input type="date" id="rf-date" value="${Utils.escapeHtml(r?.date_created || '')}">
+          <input type="date" id="rf-date" value="${Utils.escapeHtml(display?.date_created || '')}" ${ro}>
         </div>
       </div>
 
       <div class="section-label" style="margin-top:8px;">Ingredients</div>
       <div id="rf-ingredients">${ingRows}</div>
-      <button type="button" class="btn btn-ghost btn-sm" id="rf-add-ing" style="margin-bottom:16px;">+ Add Ingredient</button>
+      ${isSeededClassic ? '' : '<button type="button" class="btn btn-ghost btn-sm" id="rf-add-ing" style="margin-bottom:16px;">+ Add Ingredient</button>'}
 
       <div class="form-row">
         <div class="form-group">
           <label>Method Type</label>
-          <select id="rf-method-type">
+          <select id="rf-method-type" ${dis}>
             <option value="">—</option>
             ${['shaken','stirred','built','blended','thrown','other'].map(m =>
-              `<option value="${m}" ${r?.method_type === m ? 'selected' : ''}>${m}</option>`
+              `<option value="${m}" ${display?.method_type === m ? 'selected' : ''}>${m}</option>`
             ).join('')}
           </select>
         </div>
         <div class="form-group">
           <label>Glassware</label>
-          <input type="text" id="rf-glassware" value="${Utils.escapeHtml(r?.glassware || '')}" placeholder="e.g. coupe">
+          <input type="text" id="rf-glassware" value="${Utils.escapeHtml(display?.glassware || '')}" placeholder="e.g. coupe" ${ro}>
         </div>
       </div>
       <div class="form-group">
         <label>Method / Instructions</label>
-        <textarea id="rf-method" rows="2" placeholder="Stir with ice for 30 seconds...">${Utils.escapeHtml(r?.method || '')}</textarea>
+        <textarea id="rf-method" rows="2" placeholder="Stir with ice for 30 seconds..." ${ro}>${Utils.escapeHtml(display?.method || '')}</textarea>
       </div>
       <div class="form-group">
         <label>Garnish</label>
-        <input type="text" id="rf-garnish" value="${Utils.escapeHtml(r?.garnish || '')}" placeholder="e.g. lemon twist">
+        <input type="text" id="rf-garnish" value="${Utils.escapeHtml(display?.garnish || '')}" placeholder="e.g. lemon twist" ${ro}>
       </div>
       <div class="form-group">
         <label>Profile</label>
-        <textarea id="rf-profile" rows="2" placeholder="Flavor/occasion description">${Utils.escapeHtml(r?.profile || '')}</textarea>
+        <textarea id="rf-profile" rows="2" placeholder="Flavor/occasion description" ${ro}>${Utils.escapeHtml(typeof display?.profile === 'string' ? display.profile : '')}</textarea>
       </div>
       <div class="form-group">
         <label>Why It Works</label>
-        <textarea id="rf-why" rows="2" placeholder="The science behind it">${Utils.escapeHtml(r?.why_it_works || '')}</textarea>
+        <textarea id="rf-why" rows="2" placeholder="The science behind it" ${ro}>${Utils.escapeHtml(display?.why_it_works || '')}</textarea>
       </div>
 
       <div class="section-label" style="margin-top:8px;">Ratings & Status</div>
@@ -1462,7 +1571,7 @@ const RecipesView = (() => {
       </div>
 
       <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
-        <button class="btn btn-primary" id="rf-save">${isDraft ? 'Save Draft Changes' : (isEdit ? 'Save Changes' : 'Create Recipe')}</button>
+        <button class="btn btn-primary" id="rf-save">${isDraft ? 'Save Draft Changes' : isSeededClassic ? 'Save Overlay (ratings / notes)' : (isEdit ? 'Save Changes' : 'Create Recipe')}</button>
         ${isDraft ? '<button class="btn btn-primary" id="rf-save-promote" title="Save these edits then promote the draft into Originals">Save and Promote to Original</button>' : ''}
         <button class="btn btn-secondary" id="rf-cancel">Cancel</button>
       </div>`;
@@ -1492,6 +1601,7 @@ const RecipesView = (() => {
 
     wrap.querySelector('#rf-cancel').addEventListener('click', () => {
       if (isDraft) render(container, { tab: 'drafts' });
+      else if (isSeededClassic) render(container, { tab: 'originals' });
       else if (isEdit) renderDetail(r, container);
       else render(container);
     });
@@ -1510,12 +1620,15 @@ const RecipesView = (() => {
       }
     }
 
-    wrap.querySelector('#rf-add-ing').addEventListener('click', () => {
-      const ingList = wrap.querySelector('#rf-ingredients');
-      const idx = ingList.querySelectorAll('.rf-ing-row').length;
-      ingList.insertAdjacentHTML('beforeend', ingredientRowHtml({ amount: '', name: '', notes: '' }, idx));
-      bindIngredientRemove(wrap);
-    });
+    const addIngBtn = wrap.querySelector('#rf-add-ing');
+    if (addIngBtn) {
+      addIngBtn.addEventListener('click', () => {
+        const ingList = wrap.querySelector('#rf-ingredients');
+        const idx = ingList.querySelectorAll('.rf-ing-row').length;
+        ingList.insertAdjacentHTML('beforeend', ingredientRowHtml({ amount: '', name: '', notes: '' }, idx, false));
+        bindIngredientRemove(wrap);
+      });
+    }
 
     bindIngredientRemove(wrap);
 
@@ -1616,17 +1729,17 @@ const RecipesView = (() => {
         return;
       }
 
-      // Originals / new-recipe path (unchanged).
-      const recipes = State.get('recipes') || {};
-      const originals = recipes.originals || [];
+      // Originals / new-recipe path — pool-aware (chip unification C3).
+      const recipes = State.get('recipes') || { pool: [] };
+      const pool = Array.isArray(recipes.pool) ? recipes.pool : [];
       if (isEdit) {
-        const idx = originals.findIndex(x => x.id === r.id);
-        if (idx >= 0) originals[idx] = updated;
-        else originals.push(updated);
+        const idx = pool.findIndex(p => p.id === r.id);
+        if (idx >= 0) pool[idx] = { ...pool[idx], ...updated, status: 'original', _source: 'user' };
+        else pool.push({ ...updated, status: 'original', _source: 'user' });
       } else {
-        originals.push(updated);
+        pool.push({ ...updated, status: 'original', _source: 'user' });
       }
-      recipes.originals = originals;
+      recipes.pool = pool;
       recipes.last_updated = new Date().toISOString().slice(0, 10);
       State.set('recipes', recipes);
 
@@ -1641,13 +1754,14 @@ const RecipesView = (() => {
     });
   }
 
-  function ingredientRowHtml(ing, i) {
+  function ingredientRowHtml(ing, i, readonly) {
+    const ro = readonly ? 'readonly' : '';
     return `
       <div class="rf-ing-row form-row" style="align-items:center;margin-bottom:6px;">
-        <input class="rf-ing-amount" type="text" value="${Utils.escapeHtml(ing.amount || '')}" placeholder="2 oz" style="flex:0 0 90px;">
-        <input class="rf-ing-name"   type="text" value="${Utils.escapeHtml(ing.name  || '')}" placeholder="Ingredient">
-        <input class="rf-ing-notes"  type="text" value="${Utils.escapeHtml(ing.notes || '')}" placeholder="Notes (opt)" style="flex:0 0 160px;">
-        <button type="button" class="btn-icon rf-ing-remove" title="Remove" style="flex:none;">✕</button>
+        <input class="rf-ing-amount" type="text" value="${Utils.escapeHtml(ing.amount || '')}" placeholder="2 oz" style="flex:0 0 90px;" ${ro}>
+        <input class="rf-ing-name"   type="text" value="${Utils.escapeHtml(ing.name  || '')}" placeholder="Ingredient" ${ro}>
+        <input class="rf-ing-notes"  type="text" value="${Utils.escapeHtml(ing.notes || '')}" placeholder="Notes (opt)" style="flex:0 0 160px;" ${ro}>
+        ${readonly ? '' : '<button type="button" class="btn-icon rf-ing-remove" title="Remove" style="flex:none;">✕</button>'}
       </div>`;
   }
 

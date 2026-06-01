@@ -230,21 +230,223 @@ const Normalize = (() => {
     return out;
   }
 
+  // ─── Recipes v2 (pool) ────────────────────────────────────────────────
+  // Single canonical pool. See .planning/chip-unification-plan.md.
+  //
+  // v1 stored recipes across several arrays inside data/recipes.json
+  // (originals / confirmed_favorites / wishlist / made_log) and a separate
+  // data/drafts.json. v2 collapses these into a single `pool` array where
+  // each entry has a `status` ("classic" | "original" | "draft") and
+  // boolean/list overlay flags (is_favorite / is_wishlist / made_log).
+  // Classics live read-only in classics-db*.js; pool entries with `seed_id`
+  // are OVERLAY-ONLY references (no core fields stored — core is read live
+  // from CLASSICS_DB at render time).
+  //
+  // Migration is idempotent: recipes({pool: [...]}) is a no-op; recipes({
+  // originals, confirmed_favorites, wishlist, made_log }) produces a fresh
+  // pool. Drafts are folded in by state.js after loadAll (it has both
+  // recipes and drafts files in hand). recipe() coerces a single entry.
+
+  const RECIPE_CORE_KEYS = new Set([
+    'name', 'tagline', 'base', 'method', 'method_type', 'glassware', 'garnish',
+    'difficulty', 'ingredients', 'profile', 'tags', 'specialties', 'occasion',
+    'creator', 'date_created', 'why_it_works',
+  ]);
+  const RECIPE_OVERLAY_KEYS = new Set([
+    'is_favorite', 'is_wishlist', 'is_hidden',
+    'made_log', 'ratings', 'user_notes', 'images',
+    'confirmed_built', 'date_confirmed',
+  ]);
+  const RECIPE_DRAFT_KEYS = new Set([
+    'draft_id', 'source_prompt', 'parent_id', 'created_at', 'updated_at',
+  ]);
+  const RECIPE_META_KEYS = new Set(['id', 'status', '_source', 'seed_id']);
+
+  function _coerceIngredient(i) {
+    if (!i || typeof i !== 'object') return null;
+    const out = { name: ensureString(i.name), amount: ensureString(i.amount) };
+    if (i.notes)    out.notes = ensureString(i.notes);
+    if (Array.isArray(i.keywords)) out.keywords = i.keywords.filter(k => typeof k === 'string');
+    if (Array.isArray(i.searchIn)) out.searchIn = i.searchIn.filter(k => typeof k === 'string');
+    if (i.optional === true) out.optional = true;
+    return out.name ? out : null;
+  }
+
+  function _emptyMadeLog() { return []; }
+
+  // Idempotent coercion of a single pool entry to canonical Recipe shape.
+  // Tolerates missing fields, drops unknown ones. Auto-fills sensible
+  // defaults (status, _source) when callable from migration paths.
+  function recipe(entry) {
+    if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return null;
+    const out = {};
+    // Meta
+    out.id      = ensureString(entry.id);
+    out.status  = ['classic', 'original', 'draft'].includes(entry.status) ? entry.status : 'original';
+    out._source = ['seed', 'user', 'ai-generated'].includes(entry._source) ? entry._source
+                : (out.status === 'classic' ? 'seed'
+                : out.status === 'draft'   ? 'ai-generated' : 'user');
+    if (entry.seed_id) out.seed_id = ensureString(entry.seed_id);
+    // Core
+    Object.keys(entry).forEach(k => {
+      if (RECIPE_CORE_KEYS.has(k) && entry[k] != null) out[k] = entry[k];
+    });
+    out.name = ensureString(out.name);
+    if (Array.isArray(out.ingredients)) {
+      out.ingredients = out.ingredients.map(_coerceIngredient).filter(Boolean);
+    }
+    // Overlay
+    Object.keys(entry).forEach(k => {
+      if (RECIPE_OVERLAY_KEYS.has(k) && entry[k] != null) out[k] = entry[k];
+    });
+    out.is_favorite = !!out.is_favorite;
+    out.is_wishlist = !!out.is_wishlist;
+    out.is_hidden   = !!out.is_hidden;
+    out.made_log    = Array.isArray(out.made_log) ? out.made_log.filter(m => m && typeof m === 'object') : _emptyMadeLog();
+    // Draft-only fields (only carried when status === 'draft')
+    if (out.status === 'draft') {
+      Object.keys(entry).forEach(k => {
+        if (RECIPE_DRAFT_KEYS.has(k) && entry[k] != null) out[k] = entry[k];
+      });
+      if (!out.draft_id) out.draft_id = out.id || ('draft' + Date.now());
+    }
+    // Ensure id exists (fall back to seed_id / draft_id / a generated one).
+    if (!out.id) out.id = out.seed_id || out.draft_id || ('cocktail' + Date.now());
+    // Seeded chips are overlay-only: drop core fields so they cannot drift
+    // from the classics-db source of truth. Only the overlay layer is stored.
+    if (out.seed_id) {
+      for (const k of RECIPE_CORE_KEYS) delete out[k];
+      out.status = 'classic';
+      out._source = 'seed';
+    }
+    return out.id ? out : null;
+  }
+
+  // Migration helper: build a pool from v1 shape arrays.
+  // `lookupSeed(recipe) -> seedId | null` resolves whether a v1 entry
+  // matches a classics-db seed (by id or name). Pure — caller passes the
+  // map so node tests stay deterministic.
+  function _migrateV1ToPool(src, lookupSeed) {
+    const pool = [];
+    const byId = {};
+
+    const upsert = (poolEntry) => {
+      if (!poolEntry || !poolEntry.id) return null;
+      if (byId[poolEntry.id]) {
+        // Merge into existing. made_log is concat-merged below; all other
+        // overlay scalars take the truthy value from poolEntry. Skip
+        // made_log in the forEach so the explicit concat is not overwritten.
+        const existing = byId[poolEntry.id];
+        Object.keys(poolEntry).forEach(k => {
+          if (k === 'made_log') return;
+          if (RECIPE_OVERLAY_KEYS.has(k) && poolEntry[k]) existing[k] = poolEntry[k];
+        });
+        if (poolEntry.is_favorite) existing.is_favorite = true;
+        if (poolEntry.is_wishlist) existing.is_wishlist = true;
+        if (Array.isArray(poolEntry.made_log) && poolEntry.made_log.length) {
+          existing.made_log = (Array.isArray(existing.made_log) ? existing.made_log : []).concat(poolEntry.made_log);
+        }
+        return existing;
+      }
+      byId[poolEntry.id] = poolEntry;
+      pool.push(poolEntry);
+      return poolEntry;
+    };
+
+    // Originals → status: 'original', _source: 'user'.
+    ensureArray(src.originals).forEach(r => {
+      if (!r || typeof r !== 'object') return;
+      upsert(recipe({ ...r, status: 'original', _source: 'user' }));
+    });
+
+    // Confirmed favorites → either set is_favorite on a matching entry,
+    // or add an overlay-only entry referencing a classics-db seed.
+    ensureArray(src.confirmed_favorites || src.favorites).forEach(r => {
+      if (!r || typeof r !== 'object') return;
+      const seedId = lookupSeed ? lookupSeed(r) : null;
+      if (seedId) {
+        upsert(recipe({ id: seedId, seed_id: seedId, status: 'classic', _source: 'seed', is_favorite: true }));
+        return;
+      }
+      // Standalone snapshot: preserve as an original with is_favorite.
+      const id = r.id || ('cocktail' + Date.now() + Math.floor(Math.random() * 1000));
+      upsert(recipe({ ...r, id, status: 'original', _source: 'user', is_favorite: true }));
+    });
+
+    // Wishlist → same pattern but is_wishlist.
+    ensureArray(src.wishlist).forEach(r => {
+      if (!r || typeof r !== 'object') return;
+      const seedId = lookupSeed ? lookupSeed(r) : null;
+      if (seedId) {
+        upsert(recipe({ id: seedId, seed_id: seedId, status: 'classic', _source: 'seed', is_wishlist: true }));
+        return;
+      }
+      const id = r.id || ('cocktail' + Date.now() + Math.floor(Math.random() * 1000));
+      upsert(recipe({ ...r, id, status: 'original', _source: 'user', is_wishlist: true }));
+    });
+
+    // Made log → push to made_log array. Preserve times_made/first_made/
+    // last_made/notes as a single condensed entry per v1 row.
+    ensureArray(src.made_log).forEach(r => {
+      if (!r || typeof r !== 'object') return;
+      const seedId = lookupSeed ? lookupSeed(r) : null;
+      const logEntry = {
+        date:       ensureString(r.last_made) || ensureString(r.first_made) || isoToday(),
+        notes:      ensureString(r.notes),
+        times_made: typeof r.times_made === 'number' && r.times_made > 0 ? r.times_made : 1,
+      };
+      if (seedId) {
+        upsert(recipe({ id: seedId, seed_id: seedId, status: 'classic', _source: 'seed', made_log: [logEntry] }));
+        return;
+      }
+      const id = r.id || ('cocktail' + Date.now() + Math.floor(Math.random() * 1000));
+      upsert(recipe({ ...r, id, status: 'original', _source: 'user', made_log: [logEntry] }));
+    });
+
+    return pool;
+  }
+
+  // Default classics-db lookup: tries id match first, then case-insensitive
+  // name match. Returns the seed's id (i.e. CLASSICS_DB[i].id) or null.
+  function _defaultLookupSeed(entry) {
+    if (typeof globalThis === 'undefined' || !Array.isArray(globalThis.CLASSICS_DB)) return null;
+    const id = entry && entry.id;
+    if (id && globalThis.CLASSICS_DB.some(c => c.id === id)) return id;
+    const name = entry && typeof entry.name === 'string' ? entry.name.toLowerCase().trim() : '';
+    if (!name) return null;
+    const hit = globalThis.CLASSICS_DB.find(c => typeof c.name === 'string' && c.name.toLowerCase().trim() === name);
+    return hit ? hit.id : null;
+  }
+
   function recipes(data) {
     const src = ensureObject(data);
-    // Migrate legacy `favorites` → canonical `confirmed_favorites` if present
-    const cf = Array.isArray(src.confirmed_favorites)
-      ? src.confirmed_favorites
-      : ensureArray(src.favorites);
-    const out = {
-      ...src,
-      originals:           ensureArray(src.originals).filter(r => r && typeof r === 'object'),
-      confirmed_favorites: ensureArray(cf).filter(r => r && typeof r === 'object'),
-      wishlist:            ensureArray(src.wishlist).filter(r => r && typeof r === 'object'),
-      last_updated:        ensureString(src.last_updated) || isoToday(),
+    // Already migrated — idempotent.
+    if (Array.isArray(src.pool)) {
+      return {
+        _schema_version: 2,
+        pool:            src.pool.map(recipe).filter(Boolean),
+        last_updated:    ensureString(src.last_updated) || isoToday(),
+        ...(src.profile_coverage_matrix ? { profile_coverage_matrix: src.profile_coverage_matrix } : {}),
+      };
+    }
+    // v1 → v2 migration. Pure: lookup function defaults to globalThis.CLASSICS_DB.
+    const pool = _migrateV1ToPool(src, _defaultLookupSeed);
+    return {
+      _schema_version: 2,
+      pool,
+      last_updated:    ensureString(src.last_updated) || isoToday(),
+      ...(src.profile_coverage_matrix ? { profile_coverage_matrix: src.profile_coverage_matrix } : {}),
     };
-    delete out.favorites;
-    return out;
+  }
+
+  // Test-friendly migration entry point: callers (state.js, tests) can pass
+  // a custom seed lookup to avoid reaching into globalThis.
+  function migrateRecipesV1(src, lookupSeed) {
+    return {
+      _schema_version: 2,
+      pool: _migrateV1ToPool(ensureObject(src), lookupSeed || _defaultLookupSeed),
+      last_updated: ensureString(src && src.last_updated) || isoToday(),
+    };
   }
 
   // Phase 7 D-11: 5th data file. Each entry carries _source:'ai-generated' (re-tagged
@@ -330,5 +532,39 @@ const Normalize = (() => {
     return data;
   }
 
-  return { inventory, barkeeper, profile, recipes, drafts, library, byKey };
+  // foldDraftsIntoPool — called by state.js after loadAll when a legacy
+  // data/drafts.json is present alongside a v1 or already-migrated recipes
+  // file. Takes the in-memory recipes object (v2 pool shape) and the legacy
+  // drafts payload, returns a new recipes object with each draft folded in
+  // as a pool entry. Idempotent — if a pool entry with the same draft_id
+  // already exists, it is replaced rather than duplicated.
+  function foldDraftsIntoPool(recipesV2, draftsLegacy) {
+    if (!recipesV2 || !Array.isArray(recipesV2.pool)) return recipesV2;
+    const draftsList = ensureArray(draftsLegacy && draftsLegacy.drafts);
+    if (!draftsList.length) return recipesV2;
+    const pool = recipesV2.pool.slice();
+    const byDraftId = {};
+    pool.forEach((p, i) => { if (p && p.draft_id) byDraftId[p.draft_id] = i; });
+    draftsList.forEach(d => {
+      if (!d || typeof d !== 'object') return;
+      const entry = recipe({
+        ...d,
+        status:   'draft',
+        _source:  'ai-generated',
+        draft_id: d.draft_id || ('draft' + Date.now() + Math.floor(Math.random() * 1000)),
+        id:       d.id || d.draft_id || ('draft' + Date.now() + Math.floor(Math.random() * 1000)),
+      });
+      if (!entry) return;
+      const existingIdx = byDraftId[entry.draft_id];
+      if (existingIdx != null) pool[existingIdx] = entry;
+      else pool.push(entry);
+    });
+    return { ...recipesV2, pool, last_updated: isoToday() };
+  }
+
+  return {
+    inventory, barkeeper, profile, recipes, drafts, library, byKey,
+    // v2 chip unification helpers:
+    recipe, migrateRecipesV1, foldDraftsIntoPool,
+  };
 })();
