@@ -785,5 +785,68 @@
       "garnish": "Lemon twist or cherry",
       "_source": "classics-db"
     }
+  ],
+  "wishlist": [
+    {
+      "id": "army-and-navy",
+      "name": "Army & Navy",
+      "base": "Gin",
+      "method": "shaken",
+      "glassware": "Coupe",
+      "difficulty": 2,
+      "profile": {
+        "sweetness": 0.35,
+        "acid": 0.6,
+        "strength": 0.25,
+        "complexity": 0.5,
+        "season": 0.25,
+        "risk": 0.3
+      },
+      "occasion": "Prohibition-era gem. Orgeat rounds the gin's botanicals while lemon keeps it lively.",
+      "tags": [
+        "sour",
+        "classic",
+        "refreshing"
+      ],
+      "ingredients": [
+        {
+          "name": "Gin",
+          "amount": "2 oz",
+          "keywords": [
+            "gin"
+          ],
+          "searchIn": [
+            "white_spirits"
+          ]
+        },
+        {
+          "name": "Fresh Lemon Juice",
+          "amount": "¾ oz",
+          "keywords": [
+            "lemon",
+            "citrus"
+          ],
+          "searchIn": [
+            "produce",
+            "perishables"
+          ]
+        },
+        {
+          "name": "Orgeat",
+          "amount": "½ oz",
+          "keywords": [
+            "orgeat",
+            "almond",
+            "almond syrup"
+          ],
+          "searchIn": [
+            "syrups",
+            "mixers_bottles"
+          ]
+        }
+      ],
+      "garnish": "Lemon twist or cherry",
+      "_source": "classics-db"
+    }
   ]
 }
