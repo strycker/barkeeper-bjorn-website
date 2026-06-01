@@ -113,11 +113,11 @@ const State = (() => {
         if (typeof Normalize !== 'undefined' && Normalize.reclassifyExistingPool) {
           const before = (_data.recipes.pool || []).length;
           const reclassified = Normalize.reclassifyExistingPool(_data.recipes);
-          if (reclassified && reclassified !== _data.recipes && !_data.recipes._reclassified_v2_1) {
+          if (reclassified && reclassified !== _data.recipes && !_data.recipes._reclassified_v2_2) {
             _data.recipes = reclassified;
             if ((reclassified.pool || []).length !== before) migratedRecipes = true;
             // Flag a flush even if the entry count is unchanged — the
-            // _reclassified_v2_1 marker itself needs to land on GitHub so
+            // _reclassified_v2_2 marker itself needs to land on GitHub so
             // we don't re-run on every load.
             migratedRecipes = migratedRecipes || true;
           }
@@ -132,10 +132,10 @@ const State = (() => {
       // reaches GitHub and the next reload re-runs the same correction
       // forever. Fire-and-forget save (no await) so loadAll resolves now;
       // errors surface via the existing 'error' notify (and the toast in
-      // any save callsite that listens). Guarded by _reclassified_v2_1 so
+      // any save callsite that listens). Guarded by _reclassified_v2_2 so
       // it never fires twice on a single boot.
-      if (migratedRecipes && _data.recipes && !_data.recipes._autosaved_v2_1) {
-        _data.recipes._autosaved_v2_1 = true;
+      if (migratedRecipes && _data.recipes && !_data.recipes._autosaved_v2_2) {
+        _data.recipes._autosaved_v2_2 = true;
         try {
           save('recipes', 'chip-unify: persist v2 pool migration + reclassify')
             .catch(err => notify({ type: 'error', error: err }));
