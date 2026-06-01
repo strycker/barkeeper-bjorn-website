@@ -92,14 +92,19 @@ const RecipeChip = (() => {
     return Object.assign({}, defaults, opts.actions || {});
   }
 
-  // Status badge HTML (color variant per status — see app.css additions).
-  function _statusBadge(status) {
-    const cls = status === 'classic'  ? 'badge--status-classic'
-              : status === 'original' ? 'badge--status-original'
-              : status === 'draft'    ? 'badge--status-draft'
+  // Status badge HTML. Defense in depth: a `seed_id` on the entry always
+  // means it's a classic regardless of the stored `status` field — covers
+  // the case where a stale migration left a `status:'original'` on what is
+  // really a seeded classic (cleaned up by Normalize.reclassifyExistingPool
+  // on next load, but the badge stays correct in the meantime).
+  function _statusBadge(status, recipe) {
+    const effective = (recipe && recipe.seed_id) ? 'classic' : status;
+    const cls = effective === 'classic'  ? 'badge--status-classic'
+              : effective === 'original' ? 'badge--status-original'
+              : effective === 'draft'    ? 'badge--status-draft'
               : '';
     if (!cls) return '';
-    return `<span class="badge badge-status ${cls}">${_esc(status)}</span>`;
+    return `<span class="badge badge-status ${cls}">${_esc(effective)}</span>`;
   }
 
   // Overlay flags (favorite / wishlist / made-count).
@@ -203,7 +208,7 @@ const RecipeChip = (() => {
       + `<header class="recipe-chip-head">`
       +   `<div class="recipe-chip-title">`
       +     `<span class="recipe-chip-name">${_esc(core.name)}</span>`
-      +     _statusBadge(status)
+      +     _statusBadge(status, recipe)
       +     _flagsHtml(core)
       +   `</div>`
       +   `<div class="recipe-chip-meta">${_metaHtml(core)}</div>`

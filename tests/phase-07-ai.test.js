@@ -138,6 +138,79 @@ test('chip-unify C2: RecipeChip.render(draft) emits draft status badge', () => {
   assert.ok(html.includes('data-action="discard"'), 'draft chip has discard action');
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Chip Unification — post-Commit-3 reclassify: phantom-original cleanup
+// (covers the user-reported bug where favorited classics like 'Army & Navy'
+// and 'French 75' migrated as status:'original' instead of seeded entries)
+// ─────────────────────────────────────────────────────────────────────────────
+
+test('chip-unify post-fix: reclassifyExistingPool converts phantom originals to seeded classics', () => {
+  const lookup = (entry) => {
+    if (!entry || typeof entry.name !== 'string') return null;
+    const n = entry.name.toLowerCase().trim();
+    if (n === 'french 75')   return 'french-75';
+    if (n === 'army & navy') return 'army-and-navy';
+    return null;
+  };
+  const v2 = {
+    _schema_version: 2,
+    pool: [
+      { id: 'cocktail-abc', status: 'original', _source: 'user', name: 'French 75',   is_favorite: true,
+        made_log: [{ date: '2026-05-01', times_made: 2 }] },
+      { id: 'cocktail-def', status: 'original', _source: 'user', name: 'Army & Navy', is_wishlist: true },
+      { id: 'cocktail-xyz', status: 'original', _source: 'user', name: 'Smokey the Pear',
+        ingredients: [{ name: 'pear', amount: '1 oz' }], method: 'shaken' },
+    ],
+    last_updated: '2026-05-27',
+  };
+  const cleaned = Normalize.reclassifyExistingPool(v2, lookup);
+  assert.equal(cleaned._reclassified_v2_1, true, 'idempotency flag set');
+  assert.equal(cleaned.pool.length, 3);
+  const f75 = cleaned.pool.find(p => p.seed_id === 'french-75');
+  assert.ok(f75, 'french-75 seeded entry created');
+  assert.equal(f75.status, 'classic');
+  assert.equal(f75.is_favorite, true, 'is_favorite preserved on reclassify');
+  assert.equal(f75.made_log.length, 1, 'made_log preserved on reclassify');
+  const an = cleaned.pool.find(p => p.seed_id === 'army-and-navy');
+  assert.equal(an.is_wishlist, true);
+  const original = cleaned.pool.find(p => p.id === 'cocktail-xyz');
+  assert.equal(original.status, 'original', 'true originals stay as originals');
+  assert.equal(original.name, 'Smokey the Pear');
+  // Idempotent: running again is a no-op.
+  const again = Normalize.reclassifyExistingPool(cleaned, lookup);
+  assert.equal(again.pool.length, cleaned.pool.length);
+});
+
+test('chip-unify post-fix: reclassifyExistingPool dedupes when seed already in pool', () => {
+  const lookup = (entry) => entry && entry.name === 'French 75' ? 'french-75' : null;
+  const v2 = {
+    _schema_version: 2,
+    pool: [
+      { id: 'french-75',    seed_id: 'french-75', status: 'classic', _source: 'seed', is_favorite: true },
+      { id: 'cocktail-old', status: 'original', _source: 'user', name: 'French 75', is_wishlist: true,
+        made_log: [{ date: '2026-04-15', times_made: 5 }] },
+    ],
+    last_updated: '2026-05-27',
+  };
+  const cleaned = Normalize.reclassifyExistingPool(v2, lookup);
+  assert.equal(cleaned.pool.length, 1, 'phantom original collapses into existing seeded entry');
+  const merged = cleaned.pool[0];
+  assert.equal(merged.seed_id, 'french-75');
+  assert.equal(merged.is_favorite, true, 'is_favorite carried from seeded entry');
+  assert.equal(merged.is_wishlist, true, 'is_wishlist carried from phantom original');
+  assert.equal(merged.made_log.length, 1, 'made_log carried from phantom original');
+});
+
+test('chip-unify post-fix: RecipeChip badge keys off seed_id (defense in depth)', () => {
+  // Even if a phantom-original entry survives in the pool (seed_id missing
+  // but status='original'), the badge should NEVER show 'original' if the
+  // ENTRY carries a seed_id. This guards against future migration bugs.
+  const phantom = { id: 'french-75', seed_id: 'french-75', status: 'original' };
+  const html = RecipeChip.render(phantom);
+  assert.ok(html.includes('badge--status-classic'), 'seed_id forces classic badge');
+  assert.ok(!html.includes('badge--status-original'), 'no original badge when seed_id set');
+});
+
 test('chip-unify C2: RecipeChip.render(seeded) resolves core name from CLASSICS_DB', () => {
   // Pool entry stores only overlay (seed_id + is_favorite); core (name, etc.)
   // is read live from CLASSICS_DB by RecipeChip.resolveCore.
