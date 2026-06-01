@@ -1,8 +1,8 @@
 # Chip Unification — Mini-Phase Plan
 
-> Non-GSD mini-phase surfaced during Phase 7 UAT Test 12. Three atomic commits, single session, all-or-nothing.
+> Non-GSD mini-phase surfaced during Phase 7 UAT Test 12. Three atomic commits, single session.
 
-**Status:** In progress (Commit 1 starting 2026-05-27).
+**Status:** SHIPPED 2026-05-27 — commits `946e3c9` (1/3) + `9527dce` (2/3) + the commit landing this update (3/3). All 57 deterministic tests green. The legacy `State.get('recipes')` compat shim is retained as a TRANSITIONAL bridge because non-recipes-view callers (recommender.js / export.js / claude-api.js / profile.js) still read `.originals` / `.confirmed_favorites` / `.wishlist` / `.made_log` directly; those callers are queued for a follow-up cleanup commit. The chip behavior layer — pool-aware writes inside recipes.js, RecipeChip.bindActions, click-to-render via the `body` handler, the embedded "Tweak with AI" panel on every chip, seeded-core lock enforcement in renderForm — is in place.
 **Trigger:** UAT 9 noted Originals chips render differently from other chips; UAT 12 surfaced architectural friction (two Generate-with-AI entry points, draft Edit affordance missing, save-storm bugs under rapid CRUD all stemming from per-array storage with stale indices and no unified renderer).
 **Outcome:** Single canonical recipe pool, single chip renderer, locked-core seeded classics, AI-tweak input on every chip.
 

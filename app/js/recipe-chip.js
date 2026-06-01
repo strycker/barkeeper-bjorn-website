@@ -1,14 +1,20 @@
 // RecipeChip — single canonical renderer for every recipe chip in the app.
 //
 // Part of the Chip Unification mini-phase (see .planning/chip-unification-plan.md).
-// Commit 2 of 3 — ships the renderer + view rewrites. Click-to-render,
-// AI-tweak input on every chip, and lock-seeded-core write enforcement are
-// deferred to Commit 3.
+// Commit 3 of 3 — adds the BEHAVIOR layer on top of the C2 renderer:
+//   • bindActions(container, handlers) — single delegated click listener per
+//     container (uses the _boundContainer pattern shared with library.js /
+//     classroom.js to avoid handler stacking on re-render).
+//   • Per-chip "Tweak with AI" panel rendered in the footer; tweak-submit
+//     fires handlers.tweak(recipe, prompt).
+//   • Click on the chip BODY (away from any [data-action]) dispatches to
+//     handlers.body(recipe) — the "open the chip" path.
+// Seeded-core lock enforcement is implemented in the callers' renderForm +
+// save handlers (and in Normalize.recipe which drops core fields when
+// seed_id is set — defense in depth).
 //
 // All chips share the same markup so visual / behavioral parity is enforced
-// by construction rather than copy-paste discipline. Callers wire delegated
-// click handlers off the rendered DOM via data-action attributes; this module
-// does NOT bind events (commit 3 will introduce a shared bindActions helper).
+// by construction rather than copy-paste discipline.
 //
 // IMPORTANT — security: every model/user-derived string is run through
 // Utils.escapeHtml() before being interpolated into innerHTML. The renderer
@@ -141,10 +147,35 @@ const RecipeChip = (() => {
     if (actions.askBjorn) {
       out.push('<button class="btn btn-ghost btn-sm ai-ask-btn" data-action="ask-bjorn">Ask Bjorn about this</button>');
     }
+    if (actions.favorite) {
+      out.push('<button class="btn-icon" data-action="favorite" title="Toggle Favorite">&#9825;</button>');
+    }
+    if (actions.wishlist) {
+      out.push('<button class="btn-icon" data-action="wishlist" title="Toggle Wishlist">&#9734;</button>');
+    }
+    if (actions.made) {
+      out.push('<button class="btn-icon" data-action="made" title="Mark Made">&#9675;</button>');
+    }
     if (actions.discard) {
       out.push('<button class="btn-icon" data-action="discard" title="Discard">&#10005;</button>');
     }
     return out.join('');
+  }
+
+  // Collapsible "Tweak with AI" panel — present on every chip per the
+  // chip-unification design contract (C-3: AI tweak input on every chip;
+  // submitting forks the chip into a new draft with parent_id = source.id).
+  // The renderer always emits the panel; the disabled state (no API key)
+  // is handled in the caller's handlers.tweak by toasting and not calling.
+  function _tweakPanelHtml(showActions, opts) {
+    if (!showActions) return '';
+    if (opts.tweak === false) return ''; // opt-out for special contexts
+    return `<details class="recipe-chip-tweak" data-tweak-panel>
+      <summary>Tweak with AI</summary>
+      <textarea class="recipe-chip-tweak-input" data-tweak-input rows="2"
+        placeholder="e.g. make it less sweet, sub mezcal..."></textarea>
+      <button class="btn btn-primary btn-sm" data-action="tweak-submit">Generate Tweaked Draft</button>
+    </details>`;
   }
 
   // Render a single chip. Returns an HTML string; intended use is inside
@@ -166,6 +197,8 @@ const RecipeChip = (() => {
       ? `<footer class="recipe-chip-actions">${_actionsHtml(actions)}</footer>`
       : '';
 
+    const tweakHtml = _tweakPanelHtml(showActions, opts);
+
     return `<article class="recipe-chip rec-card" data-id="${_esc(id)}" data-status="${_esc(status)}">`
       + `<header class="recipe-chip-head">`
       +   `<div class="recipe-chip-title">`
@@ -180,10 +213,94 @@ const RecipeChip = (() => {
       +   `<div class="rec-ingredients">${_ingredientsHtml(core)}</div>`
       + `</div>`
       + footerHtml
+      + tweakHtml
       + `</article>`;
   }
 
-  return { render, resolveCore, filterPool };
+  // ── Delegated action wiring (Commit 3) ──────────────────────────────────
+  // bindActions(container, handlers, options) — wires a SINGLE delegated
+  // click listener on `container` that dispatches to handlers[action] when
+  // the click originates inside a [data-action] element, or to handlers.body
+  // when the click is on the chip body away from any button.
+  //
+  // `handlers` is a partial map: { edit, promote, discard, askBjorn, tweak,
+  // favorite, wishlist, made, body }. Missing handlers are no-ops.
+  //
+  // Each handler is invoked as `handler(recipe, event)` where `recipe` is
+  // looked up by the chip's data-id via `options.recipeById(id)` — callers
+  // pass in their current pool / filtered list as a Map-like lookup so the
+  // dispatcher does not have to know storage layout.
+  //
+  // Listener-stacking guard (Pitfall mirrored from library.js / classroom.js):
+  // we track which container has been bound and skip re-binding so rapid
+  // re-renders don't pile up duplicate handlers (each call would otherwise
+  // fire N times after N renders).
+  const _BOUND = new WeakSet();
+
+  // Map data-action attribute -> handlers key. Keeps the rendered DOM
+  // (data-action="ask-bjorn") decoupled from the JS handler name (askBjorn).
+  const _ACTION_TO_HANDLER = {
+    'edit':          'edit',
+    'promote':       'promote',
+    'discard':       'discard',
+    'ask-bjorn':     'askBjorn',
+    'favorite':      'favorite',
+    'wishlist':      'wishlist',
+    'made':          'made',
+    'tweak-submit':  '__tweakSubmit',
+  };
+
+  function bindActions(container, handlers, options) {
+    if (!container || typeof container.addEventListener !== 'function') return;
+    if (_BOUND.has(container)) return;
+    _BOUND.add(container);
+    handlers = handlers || {};
+    options  = options  || {};
+
+    const lookup = typeof options.recipeById === 'function'
+      ? options.recipeById
+      : null;
+
+    container.addEventListener('click', (event) => {
+      const chipEl = event.target.closest && event.target.closest('.recipe-chip');
+      if (!chipEl || !container.contains(chipEl)) return;
+      const recipeId = chipEl.getAttribute('data-id') || '';
+      const recipe = lookup ? lookup(recipeId, chipEl) : { id: recipeId };
+      if (!recipe) return;
+
+      const actionEl = event.target.closest && event.target.closest('[data-action]');
+      if (actionEl && chipEl.contains(actionEl)) {
+        const action = actionEl.getAttribute('data-action');
+        const handlerName = _ACTION_TO_HANDLER[action];
+        if (handlerName === '__tweakSubmit') {
+          // Read sibling textarea; route to handlers.tweak(recipe, prompt).
+          const panel = actionEl.closest('[data-tweak-panel]');
+          const input = panel && panel.querySelector('[data-tweak-input]');
+          const prompt = input ? String(input.value || '').trim() : '';
+          if (typeof handlers.tweak === 'function') {
+            event.stopPropagation();
+            handlers.tweak(recipe, prompt, event);
+          }
+          return;
+        }
+        if (handlerName && typeof handlers[handlerName] === 'function') {
+          event.stopPropagation();
+          handlers[handlerName](recipe, event);
+        }
+        return;
+      }
+
+      // Click was inside the chip but not on a button — body / open path.
+      // Exclude clicks inside the open tweak panel (the textarea / summary
+      // expand should NOT trigger the open-chip action).
+      if (event.target.closest && event.target.closest('[data-tweak-panel]')) return;
+      if (typeof handlers.body === 'function') {
+        handlers.body(recipe, event);
+      }
+    });
+  }
+
+  return { render, resolveCore, filterPool, bindActions };
 })();
 
 // Expose on globalThis for node tests (vm.runInThisContext picks up `const`

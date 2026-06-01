@@ -14,16 +14,27 @@ updated: 2026-05-26T22:30:00.000Z
 
 ## Current Test
 
-number: 11
-name: PAUSED — chip unification mini-phase in progress
+number: 12
+name: AI-03 — unified chip generate + tweak + click-to-render + promote
 expected: |
-  Bartender Wizard AI-12 passes (Test 11). UAT 12-18 (drafts/promote/AI-13/AI-08/AI-10/AI-11) are paused: the chip-render/storage rewrite landing now will invalidate the current draft-flow surface, so those tests will be rewritten and re-run after the mini-phase commits ship.
-awaiting: chip unification (3 commits) complete + UAT 12-18 rewritten
+  Open `#recipes`. Every tab (Originals / Drafts / Favorites / Wishlist / Made) renders chips with the same RecipeChip layout: status badge (classic / original / draft), ♥ ☆ ✓ flags reflecting the pool entry, base · method · glassware meta line, ingredient mini-chips. Each chip has a "Tweak with AI" disclosure panel in the footer.
 
-caveats_during_pause:
-  - Commit 8b0258b fixed a TDZ regression in recipes.js (hasKey referenced before declaration) — draft Edit now opens the form correctly again.
-  - Commits 6af8663 / 9b84201 / 8b0258b added an Edit button, "Save and Promote to Original", and AI-Tweak panel to the draft edit form. Those surfaces will be REPLACED by the unified RecipeChip + click-to-render behavior in Commit 2 of the mini-phase — they were stop-gaps surfaced by Test 12 feedback.
-  - Test 12 (and 13-15) are explicitly NOT marked here because the mini-phase rewrites the very surfaces they exercise.
+  (a) Click any chip BODY (not a button) → opens the render view (Edit form for original/draft, view-with-overlay-edit for seeded classics where core fields are uneditable but overlay fields remain editable). Seeded classics show the resolved name + ingredients from CLASSICS_DB live.
+
+  (b) Drafts tab → existing "+ Generate with AI" → produces a draft that lands in the pool with status:'draft' (no separate drafts file), visible as a chip with the draft badge.
+
+  (c) Tweak with AI on ANY chip → expand the disclosure, type a tweak prompt (e.g. "make it less sweet"), click Generate Tweaked Draft → a NEW pool entry is created with status:'draft', parent_id linking to the source chip's id, _source:'ai-generated'. Source chip is preserved.
+
+  (d) On a draft chip, Promote to Original button → pool entry mutates in-place: status flips 'draft' → 'original', draft_id / source_prompt / created_at cleared, _source becomes 'user', id stays draft<ts> or gets a cocktail<ts> id depending on the promote helper's convention. Drafts tab loses the entry; Originals tab gains it.
+
+  (e) Heart / Star / Check toggles on chips mutate is_favorite / is_wishlist / push to made_log directly on the pool entry — no array-move between separate storage locations.
+awaiting: user response
+
+chip_unification_summary:
+  - Commit 946e3c9 (1/3): v2 pool schema + Normalize.recipe / migrateRecipesV1 / foldDraftsIntoPool + State.get read shim.
+  - Commit 9527dce (2/3): RecipeChip.render / resolveCore / filterPool + drop-in across recipes.js + CSS + index.html script tag.
+  - Commit landing now (3/3): RecipeChip.bindActions + per-chip Tweak panel + click-to-render via body handler + seeded-core lock in renderForm + pool-aware writes (heart / star / check / promote / new-recipe / edit) inside recipes.js. 38 phase-07 tests pass; full suite 57/57 green.
+  - Follow-up tracked: removal of the State.get('recipes') compat shim is deferred — non-recipes-view callers (recommender.js writes for favorites/wishlist, export.js reads, claude-api.js context reads, profile.js count read) still read legacy keys. These migrations are queued as a Commit 3.5 cleanup but do not block UAT resumption.
 
 ## Tests
 
