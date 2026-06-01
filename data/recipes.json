@@ -1,42 +1,45 @@
 {
-  "originals": [
+  "_schema_version": 2,
+  "pool": [
     {
       "id": "cocktail1778776984398",
+      "status": "original",
+      "_source": "user",
       "name": "Smokey the Pear",
       "creator": "Glenn Strycker",
       "ingredients": [
         {
-          "amount": "1 oz",
-          "name": "Mezcal"
+          "name": "Mezcal",
+          "amount": "1 oz"
         },
         {
-          "amount": "1 oz",
-          "name": "White Jamaican Rum"
+          "name": "White Jamaican Rum",
+          "amount": "1 oz"
         },
         {
-          "amount": "2.5 oz",
-          "name": "Pear Juice"
+          "name": "Pear Juice",
+          "amount": "2.5 oz"
         },
         {
-          "amount": "1.5 oz",
           "name": "Crème de Poire",
+          "amount": "1.5 oz",
           "notes": "Prickly pear preserves optional"
         },
         {
-          "amount": "0.5 oz",
-          "name": "Cocchi"
+          "name": "Cocchi",
+          "amount": "0.5 oz"
         },
         {
-          "amount": "4 dashes",
-          "name": "Rhubarb bitters"
+          "name": "Rhubarb bitters",
+          "amount": "4 dashes"
         },
         {
-          "amount": "2 dashes",
-          "name": "Angostura"
+          "name": "Angostura",
+          "amount": "2 dashes"
         },
         {
-          "amount": "2 dashes",
-          "name": "Black walnut bitters"
+          "name": "Black walnut bitters",
+          "amount": "2 dashes"
         }
       ],
       "method": "Shake hard with ice.  Strain into a chilled martini glass.",
@@ -50,7 +53,6 @@
       "confirmed_built": true,
       "ratings": {
         "bar_owner": 5,
-        "guests": "Too smokey!",
         "notes": "Dial back the mezcal and increase the pear flavor"
       },
       "images": [
@@ -58,12 +60,23 @@
           "filename": "cocktail1778776984398_1780103031139.png",
           "alt_text": "Smokey the Pear"
         }
+      ],
+      "is_favorite": true,
+      "is_wishlist": false,
+      "is_hidden": false,
+      "is_original": true,
+      "made_log": [
+        {
+          "date": "2026-05-21",
+          "notes": "",
+          "times_made": 1
+        }
       ]
-    }
-  ],
-  "confirmed_favorites": [
+    },
     {
       "id": "army-and-navy",
+      "status": "original",
+      "_source": "user",
       "name": "Army & Navy",
       "base": "Gin",
       "method": "shaken",
@@ -98,11 +111,22 @@
         }
       ],
       "garnish": "Lemon twist or cherry",
-      "from_classics_db": true,
-      "notes": "First time I actually liked Orgeat.  This was tasty and simple to make.  Only complaint is that it ends up being a cloudy yellow-brown color... not as appetizing as other more colorful concoctions.  Consider stirring rather than shaking and adding something red to make this a more pleasing color."
+      "is_favorite": true,
+      "is_wishlist": false,
+      "is_hidden": false,
+      "is_original": true,
+      "made_log": [
+        {
+          "date": "2026-05-20",
+          "notes": "",
+          "times_made": 1
+        }
+      ]
     },
     {
       "id": "french-75",
+      "status": "original",
+      "_source": "user",
       "name": "French 75",
       "base": "Gin",
       "method": "shaken",
@@ -172,66 +196,22 @@
         }
       ],
       "garnish": "Lemon twist",
-      "_source": "classics-db"
-    },
-    {
-      "id": "cocktail1778776984398",
-      "name": "Smokey the Pear",
-      "creator": "Glenn Strycker",
-      "ingredients": [
+      "is_favorite": true,
+      "is_wishlist": false,
+      "is_hidden": false,
+      "is_original": true,
+      "made_log": [
         {
-          "amount": "1 oz",
-          "name": "Mezcal"
-        },
-        {
-          "amount": "1 oz",
-          "name": "White Jamaican Rum"
-        },
-        {
-          "amount": "2.5 oz",
-          "name": "Pear Juice"
-        },
-        {
-          "amount": "1.5 oz",
-          "name": "Crème de Poire",
-          "notes": "Prickly pear preserves optional"
-        },
-        {
-          "amount": "0.5 oz",
-          "name": "Cocchi"
-        },
-        {
-          "amount": "4 dashes",
-          "name": "Rhubarb bitters"
-        },
-        {
-          "amount": "2 dashes",
-          "name": "Angostura"
-        },
-        {
-          "amount": "2 dashes",
-          "name": "Black walnut bitters"
+          "date": "2026-05-21",
+          "notes": "",
+          "times_made": 2
         }
-      ],
-      "method": "Shake hard with ice.  Strain into a chilled martini glass.",
-      "tagline": "Smokey Mezcal cocktail with pear juice and rhubarb bitters",
-      "date_created": "2026-05-01",
-      "method_type": "shaken",
-      "glassware": "Martini",
-      "garnish": "Pear slice + cocktail cherry",
-      "profile": "Smoky-meets-pear shaken cocktail. Desert/Mexican thematic -- the prickly pear preserves are the structural pun (a \"pear\" that isn't a pear, growing in mezcal country). Recommended sub-spirit pairing: white Jamaican rum first choice (funky/vegetal echoes agave's roasted notes; Jamaican esters complement pear esters), gin second (London Dry > floral botanicals can complement pear, but heavy florals will fight it), vodka third (subtracts smoke without adding character).",
-      "why_it_works": "Mezcal offers smokey flavors that compliment the pear",
-      "confirmed_built": true,
-      "ratings": {
-        "bar_owner": 5,
-        "notes": "Dial back the mezcal and increase the pear flavor"
-      },
-      "_source": "originals",
-      "base": "Mezcal",
-      "tags": []
+      ]
     },
     {
       "id": "caipirinha",
+      "status": "original",
+      "_source": "user",
       "name": "Caipirinha",
       "base": "Cachaça",
       "method": "built",
@@ -290,10 +270,16 @@
         }
       ],
       "garnish": "Lime wheel",
-      "_source": "classics-db"
+      "is_favorite": true,
+      "is_wishlist": false,
+      "is_hidden": false,
+      "is_original": true,
+      "made_log": []
     },
     {
       "id": "gimlet",
+      "status": "original",
+      "_source": "user",
       "name": "Gimlet",
       "base": "Gin",
       "method": "shaken",
@@ -349,10 +335,16 @@
         }
       ],
       "garnish": "Lime wheel",
-      "_source": "classics-db"
+      "is_favorite": true,
+      "is_wishlist": false,
+      "is_hidden": false,
+      "is_original": true,
+      "made_log": []
     },
     {
       "id": "east-india-75",
+      "status": "original",
+      "_source": "user",
       "name": "East India 75",
       "base": "Gin",
       "method": "shaken",
@@ -454,13 +446,22 @@
         }
       ],
       "garnish": "Expressed lemon peel + a tiny dusting of cardamom",
-      "_source": "classics-db",
-      "notes": "I didn’t have any lemon juice so I used pear juice and this was really delicious.  Also, I used Cardamom syrup, not Cardamom honey, but honestly it’s really the same thing minus the honey aftertaste.  If you can use that, great!  Could garnish with pistachios if you have a few, or rim the glass with pistachio dust."
-    }
-  ],
-  "wishlist": [
+      "is_favorite": true,
+      "is_wishlist": false,
+      "is_hidden": false,
+      "is_original": true,
+      "made_log": [
+        {
+          "date": "2026-05-22",
+          "notes": "",
+          "times_made": 1
+        }
+      ]
+    },
     {
       "id": "ramos-gin-fizz",
+      "status": "original",
+      "_source": "user",
       "name": "Ramos Gin Fizz",
       "base": "Gin",
       "method": "shaken",
@@ -558,10 +559,17 @@
           ]
         }
       ],
-      "garnish": "None"
+      "garnish": "None",
+      "is_wishlist": true,
+      "is_favorite": false,
+      "is_hidden": false,
+      "is_original": true,
+      "made_log": []
     },
     {
       "id": "cynar-spritz",
+      "status": "original",
+      "_source": "user",
       "name": "Cynar Spritz",
       "base": "Cynar",
       "method": "built",
@@ -618,10 +626,16 @@
         }
       ],
       "garnish": "Orange slice",
-      "_source": "classics-db"
+      "is_wishlist": true,
+      "is_favorite": false,
+      "is_hidden": false,
+      "is_original": true,
+      "made_log": []
     },
     {
       "id": "fitzgerald",
+      "status": "original",
+      "_source": "user",
       "name": "Fitzgerald",
       "base": "Gin",
       "method": "shaken",
@@ -696,302 +710,67 @@
         }
       ],
       "garnish": "Lemon slice",
-      "_source": "classics-db"
+      "is_wishlist": true,
+      "is_favorite": false,
+      "is_hidden": false,
+      "is_original": true,
+      "made_log": []
+    },
+    {
+      "id": "draft1780264353115",
+      "status": "draft",
+      "_source": "ai-generated",
+      "name": "The Oaken Throne",
+      "tagline": "A regal whiskey trinity, stirred to silken perfection.",
+      "base": "whiskey",
+      "ingredients": [
+        {
+          "name": "Rye whiskey",
+          "amount": "45 ml",
+          "notes": "Backbone — choose a 100-proof rye for spice and bite"
+        },
+        {
+          "name": "Bourbon",
+          "amount": "30 ml",
+          "notes": "Rounds out the rye with sweet corn and vanilla depth"
+        },
+        {
+          "name": "Sweet vermouth",
+          "amount": "15 ml",
+          "notes": "Carpano Antica preferred for bittersweet richness"
+        },
+        {
+          "name": "Demerara syrup",
+          "amount": "5 ml",
+          "notes": "2:1 demerara to water — adds molasses warmth"
+        },
+        {
+          "name": "Angostura bitters",
+          "amount": "2 dashes"
+        },
+        {
+          "name": "Orange bitters",
+          "amount": "1 dash",
+          "notes": "Lifts the aromatic profile"
+        }
+      ],
+      "method": "Add all ingredients to a mixing glass filled with cracked ice. Stir gently for 25–30 seconds until well-chilled and properly diluted. Strain into a chilled rocks glass over a single large ice cube. Express an orange peel over the surface, rub the rim, and drop it in.",
+      "method_type": "stirred",
+      "glassware": "Double rocks glass with a large format ice cube",
+      "garnish": "Expressed orange peel and a brandied cherry on a pick",
+      "why_it_works": "Blending rye and bourbon gives you both spice and sweetness without diluting the spirit-forward character. The minimal vermouth and demerara round the edges rather than mask them, while two bitters add aromatic complexity. It's an Old Fashioned and Manhattan's confident older sibling — bold, balanced, and unapologetically whiskey-driven.",
+      "is_favorite": false,
+      "is_wishlist": false,
+      "is_hidden": false,
+      "is_original": false,
+      "made_log": [],
+      "draft_id": "draft1780264353115",
+      "created_at": "2026-05-31T21:52:33.115Z",
+      "updated_at": "2026-05-31T21:52:33.115Z",
+      "source_prompt": "design me a spirit-forward whiskey drink"
     }
   ],
-  "last_updated": "2026-05-30",
-  "made_log": [
-    {
-      "id": "east-india-75",
-      "name": "East India 75",
-      "base": "Gin",
-      "method": "shaken",
-      "glassware": "Flute or coupe",
-      "difficulty": 3,
-      "profile": {
-        "sweetness": 0.3,
-        "acid": 0.45,
-        "strength": 0.35,
-        "complexity": 0.65,
-        "season": 0.5,
-        "risk": 0.45
-      },
-      "occasion": "A French 75 that drifted through a spice market. Sherry adds oxidative/nutty bass, cardamom broadens the midpalate where elderflower never quite does, and Angostura gives hidden structural bitterness — more \"adult\" than a standard French 75 while staying elegant.",
-      "tags": [
-        "party",
-        "brunch",
-        "spirit-forward"
-      ],
-      "specialties": [
-        "contemporary"
-      ],
-      "ingredients": [
-        {
-          "name": "London Dry Gin",
-          "amount": "1½ oz",
-          "keywords": [
-            "gin",
-            "london dry"
-          ],
-          "searchIn": [
-            "white_spirits"
-          ]
-        },
-        {
-          "name": "Amontillado Sherry",
-          "amount": "½ oz",
-          "keywords": [
-            "sherry",
-            "amontillado",
-            "oloroso",
-            "dry sherry"
-          ],
-          "searchIn": [
-            "fortified"
-          ]
-        },
-        {
-          "name": "Fresh Lemon Juice",
-          "amount": "½ oz",
-          "keywords": [
-            "lemon",
-            "citrus"
-          ],
-          "searchIn": [
-            "produce",
-            "perishables"
-          ]
-        },
-        {
-          "name": "Cardamom Honey Syrup (1:1)",
-          "amount": "0.35 oz",
-          "keywords": [
-            "honey",
-            "cardamom",
-            "honey syrup"
-          ],
-          "searchIn": [
-            "syrups",
-            "pantry",
-            "perishables"
-          ]
-        },
-        {
-          "name": "Angostura Bitters",
-          "amount": "1 dash",
-          "keywords": [
-            "angostura",
-            "bitters"
-          ],
-          "searchIn": [
-            "bitters_anchors",
-            "bitters_other"
-          ]
-        },
-        {
-          "name": "Champagne or Dry Cava",
-          "amount": "2–3 oz",
-          "keywords": [
-            "champagne",
-            "cava",
-            "sparkling",
-            "prosecco"
-          ],
-          "searchIn": [
-            "fortified",
-            "mixers"
-          ]
-        }
-      ],
-      "garnish": "Expressed lemon peel + a tiny dusting of cardamom",
-      "_source": "classics-db",
-      "times_made": 1,
-      "first_made": "2026-05-22",
-      "last_made": "2026-05-22",
-      "notes": ""
-    },
-    {
-      "id": "cocktail1778776984398",
-      "name": "Smokey the Pear",
-      "creator": "Glenn Strycker",
-      "ingredients": [
-        {
-          "amount": "1 oz",
-          "name": "Mezcal"
-        },
-        {
-          "amount": "1 oz",
-          "name": "White Jamaican Rum"
-        },
-        {
-          "amount": "2.5 oz",
-          "name": "Pear Juice"
-        },
-        {
-          "amount": "1.5 oz",
-          "name": "Crème de Poire"
-        },
-        {
-          "amount": "0.5 oz",
-          "name": "Cocchi"
-        },
-        {
-          "amount": "1/2 tsp",
-          "name": "Prickly pear preserves"
-        },
-        {
-          "amount": "4 dashes",
-          "name": "Rhubarb bitters"
-        },
-        {
-          "amount": "2 dashes",
-          "name": "Angostura"
-        },
-        {
-          "amount": "2 dashes",
-          "name": "Black walnut bitters"
-        }
-      ],
-      "method": "Shake hard with ice.  Strain into a chilled martini glass.",
-      "tagline": "Smokey Mezcal cocktail with pear juice and rhubarb bitters",
-      "date_created": "2026-05-01",
-      "method_type": "shaken",
-      "glassware": "Martini",
-      "garnish": "Pear slice + cocktail cherry",
-      "profile": "Smoky-meets-pear shaken cocktail. Desert/Mexican thematic -- the prickly pear preserves are the structural pun (a \"pear\" that isn't a pear, growing in mezcal country). Recommended sub-spirit pairing: white Jamaican rum first choice (funky/vegetal echoes agave's roasted notes; Jamaican esters complement pear esters), gin second (London Dry > floral botanicals can complement pear, but heavy florals will fight it), vodka third (subtracts smoke without adding character).",
-      "why_it_works": "Mezcal offers smokey flavors that compliment the pear",
-      "confirmed_built": true,
-      "ratings": {
-        "bar_owner": 5,
-        "notes": "Dial back the mezcal and increase the pear flavor"
-      },
-      "_source": "originals",
-      "base": "Mezcal",
-      "tags": [],
-      "times_made": 1,
-      "first_made": "2026-05-21",
-      "last_made": "2026-05-21",
-      "notes": ""
-    },
-    {
-      "id": "french-75",
-      "name": "French 75",
-      "base": "Gin",
-      "method": "shaken",
-      "glassware": "Champagne flute",
-      "difficulty": 2,
-      "profile": {
-        "sweetness": 0.3,
-        "acid": 0.5,
-        "strength": 0.4,
-        "complexity": 0.4,
-        "season": 0.3,
-        "risk": 0.2
-      },
-      "occasion": "Celebratory fizz. Gin lends botanicals that vodka can't.",
-      "tags": [
-        "brunch",
-        "party",
-        "refreshing"
-      ],
-      "ingredients": [
-        {
-          "name": "Gin",
-          "amount": "1½ oz",
-          "keywords": [
-            "gin"
-          ],
-          "searchIn": [
-            "white_spirits"
-          ]
-        },
-        {
-          "name": "Fresh Lemon Juice",
-          "amount": "½ oz",
-          "keywords": [
-            "lemon"
-          ],
-          "searchIn": [
-            "produce",
-            "perishables"
-          ]
-        },
-        {
-          "name": "Simple Syrup",
-          "amount": "½ oz",
-          "keywords": [
-            "simple",
-            "sugar"
-          ],
-          "searchIn": [
-            "syrups",
-            "pantry"
-          ]
-        },
-        {
-          "name": "Champagne or Prosecco",
-          "amount": "2 oz",
-          "keywords": [
-            "champagne",
-            "prosecco",
-            "sparkling",
-            "cava"
-          ],
-          "searchIn": [
-            "fortified",
-            "mixers"
-          ]
-        }
-      ],
-      "garnish": "Lemon twist",
-      "_source": "classics-db",
-      "times_made": 2,
-      "first_made": "2026-05-21",
-      "last_made": "2026-05-21",
-      "notes": ""
-    },
-    {
-      "id": "army-and-navy",
-      "name": "Army & Navy",
-      "base": "Gin",
-      "method": "shaken",
-      "glassware": "Coupe",
-      "difficulty": 2,
-      "profile": {
-        "sweetness": 0.35,
-        "acid": 0.6,
-        "strength": 0.25,
-        "complexity": 0.5,
-        "season": 0.25,
-        "risk": 0.3
-      },
-      "occasion": "Prohibition-era gem. Orgeat rounds the gin's botanicals while lemon keeps it lively.",
-      "tags": [
-        "sour",
-        "classic",
-        "refreshing"
-      ],
-      "ingredients": [
-        {
-          "name": "Gin",
-          "amount": "2 oz"
-        },
-        {
-          "name": "Fresh Lemon Juice",
-          "amount": "¾ oz"
-        },
-        {
-          "name": "Orgeat",
-          "amount": "½ oz"
-        }
-      ],
-      "garnish": "Lemon twist or cherry",
-      "from_classics_db": true,
-      "_source": "classics-db",
-      "times_made": 1,
-      "first_made": "2026-05-20",
-      "last_made": "2026-05-20",
-      "notes": ""
-    }
-  ]
+  "last_updated": "2026-06-01",
+  "_reclassified_v2_1": true,
+  "_autosaved_v2_1": true
 }
