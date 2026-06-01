@@ -14,11 +14,16 @@ updated: 2026-05-26T22:30:00.000Z
 
 ## Current Test
 
-number: 12
-name: AI-03 — Generate → draft → refine → promote
+number: 11
+name: PAUSED — chip unification mini-phase in progress
 expected: |
-  Recipes → "Generate with AI". Enter "design me a spirit-forward whiskey drink". A draft is generated, is schema-valid, AUTO-SAVED to the Drafts tab (D-09). If it used a bottle you don't own, a phantom-ingredient flag is surfaced in the draft preview. The refine card supports both "make it less sweet" (tweak SAME draft) and "generate new" (new draft, fork-before-refine on a 2nd refine).
-awaiting: user response
+  Bartender Wizard AI-12 passes (Test 11). UAT 12-18 (drafts/promote/AI-13/AI-08/AI-10/AI-11) are paused: the chip-render/storage rewrite landing now will invalidate the current draft-flow surface, so those tests will be rewritten and re-run after the mini-phase commits ship.
+awaiting: chip unification (3 commits) complete + UAT 12-18 rewritten
+
+caveats_during_pause:
+  - Commit 8b0258b fixed a TDZ regression in recipes.js (hasKey referenced before declaration) — draft Edit now opens the form correctly again.
+  - Commits 6af8663 / 9b84201 / 8b0258b added an Edit button, "Save and Promote to Original", and AI-Tweak panel to the draft edit form. Those surfaces will be REPLACED by the unified RecipeChip + click-to-render behavior in Commit 2 of the mini-phase — they were stop-gaps surfaced by Test 12 feedback.
+  - Test 12 (and 13-15) are explicitly NOT marked here because the mini-phase rewrites the very surfaces they exercise.
 
 ## Tests
 

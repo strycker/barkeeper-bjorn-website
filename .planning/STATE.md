@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: phase_executed_awaiting_uat
-last_updated: "2026-05-26T22:00:00.000Z"
+status: uat_paused_chip_unification_in_progress
+last_updated: "2026-05-27T00:00:00.000Z"
 progress:
   total_phases: 10
   completed_phases: 6
@@ -20,7 +20,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 
 **Core value:** The user's real-world bar inventory and flavor profile should power both AI-driven conversation and rule-based recommendations — seamlessly, whether in a chat session or the web app.
 
-**Current focus:** Phase 7 — AI Integration (executed; awaiting live-key UAT via /gsd-verify-work)
+**Current focus:** Phase 7 UAT PAUSED at Test 11 — chip unification mini-phase in progress (non-GSD; see .planning/chip-unification-plan.md). Will resume Tests 12-18 (rewritten to exercise unified chip behavior) once the mini-phase ships.
 
 ---
 
