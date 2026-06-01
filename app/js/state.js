@@ -127,6 +127,20 @@ const State = (() => {
       }
       _loaded = true;
       notify({ type: 'loaded' });
+      // Auto-persist the migration / reclassify result. The corrected pool
+      // sits in memory after loadAll; without an explicit save it never
+      // reaches GitHub and the next reload re-runs the same correction
+      // forever. Fire-and-forget save (no await) so loadAll resolves now;
+      // errors surface via the existing 'error' notify (and the toast in
+      // any save callsite that listens). Guarded by _reclassified_v2_1 so
+      // it never fires twice on a single boot.
+      if (migratedRecipes && _data.recipes && !_data.recipes._autosaved_v2_1) {
+        _data.recipes._autosaved_v2_1 = true;
+        try {
+          save('recipes', 'chip-unify: persist v2 pool migration + reclassify')
+            .catch(err => notify({ type: 'error', error: err }));
+        } catch (err) { notify({ type: 'error', error: err }); }
+      }
     } catch (err) {
       notify({ type: 'error', error: err });
       throw err;

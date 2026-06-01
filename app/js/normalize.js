@@ -253,7 +253,7 @@ const Normalize = (() => {
     'creator', 'date_created', 'why_it_works',
   ]);
   const RECIPE_OVERLAY_KEYS = new Set([
-    'is_favorite', 'is_wishlist', 'is_hidden',
+    'is_favorite', 'is_wishlist', 'is_hidden', 'is_original',
     'made_log', 'ratings', 'user_notes', 'images',
     'confirmed_built', 'date_confirmed',
   ]);
@@ -302,6 +302,16 @@ const Normalize = (() => {
     out.is_favorite = !!out.is_favorite;
     out.is_wishlist = !!out.is_wishlist;
     out.is_hidden   = !!out.is_hidden;
+    // is_original — editable overlay tag (default off for classics + drafts;
+    // default ON for user-authored entries with status:'original'). Always
+    // forced false when seed_id is set so a classic's tag stays correct.
+    if (out.seed_id) {
+      out.is_original = false;
+    } else if (typeof entry.is_original === 'boolean') {
+      out.is_original = entry.is_original;
+    } else {
+      out.is_original = out.status === 'original';
+    }
     out.made_log    = Array.isArray(out.made_log) ? out.made_log.filter(m => m && typeof m === 'object') : _emptyMadeLog();
     // Draft-only fields (only carried when status === 'draft')
     if (out.status === 'draft') {
@@ -314,10 +324,13 @@ const Normalize = (() => {
     if (!out.id) out.id = out.seed_id || out.draft_id || ('cocktail' + Date.now());
     // Seeded chips are overlay-only: drop core fields so they cannot drift
     // from the classics-db source of truth. Only the overlay layer is stored.
+    // is_original is also force-cleared here as a third defense layer (in
+    // addition to the assignment above + the schema default).
     if (out.seed_id) {
       for (const k of RECIPE_CORE_KEYS) delete out[k];
       out.status = 'classic';
       out._source = 'seed';
+      out.is_original = false;
     }
     return out.id ? out : null;
   }
@@ -406,15 +419,33 @@ const Normalize = (() => {
     return pool;
   }
 
-  // Default classics-db lookup: tries id match first, then case-insensitive
-  // name match. Returns the seed's id (i.e. CLASSICS_DB[i].id) or null.
+  // Default classics-db lookup: tries id match first, then a TOLERANT name
+  // match. Tolerance is intentional: v1 entries may have stripped-down
+  // shapes where the id is missing and the name is the only handle, and
+  // the canonical classics-db ids ('army-and-navy') vs display names
+  // ('Army & Navy') have different separators / punctuation. Both sides
+  // are normalized to lowercase alphanumerics-only before comparison so
+  // "Army & Navy" matches "Army and Navy" matches "army-and-navy" matches
+  // "armyandnavy". Returns the seed's id (i.e. CLASSICS_DB[i].id) or null.
+  function _normForMatch(s) {
+    if (typeof s !== 'string') return '';
+    return s.toLowerCase()
+            .replace(/&/g, ' and ')      // 'Army & Navy' / 'army and navy' / 'army-and-navy' all collapse
+            .replace(/[^a-z0-9]+/g, '');
+  }
   function _defaultLookupSeed(entry) {
     if (typeof globalThis === 'undefined' || !Array.isArray(globalThis.CLASSICS_DB)) return null;
     const id = entry && entry.id;
     if (id && globalThis.CLASSICS_DB.some(c => c.id === id)) return id;
-    const name = entry && typeof entry.name === 'string' ? entry.name.toLowerCase().trim() : '';
-    if (!name) return null;
-    const hit = globalThis.CLASSICS_DB.find(c => typeof c.name === 'string' && c.name.toLowerCase().trim() === name);
+    const wantId   = _normForMatch(id);
+    const wantName = _normForMatch(entry && entry.name);
+    if (!wantId && !wantName) return null;
+    const hit = globalThis.CLASSICS_DB.find(c => {
+      const cid   = _normForMatch(c.id);
+      const cname = _normForMatch(c.name);
+      return (wantId   && cid   && cid   === wantId)
+          || (wantName && cname && cname === wantName);
+    });
     return hit ? hit.id : null;
   }
 
