@@ -580,10 +580,10 @@ const Normalize = (() => {
   // existing pool entry, merges overlay flags (truthy wins) and drops the
   // duplicate so the pool ends up with one entry per seeded classic.
   //
-  // Idempotent via the `_reclassified_v2_1` flag on the pool object.
+  // Idempotent via the `_reclassified_v2_2` flag on the pool object.
   function reclassifyExistingPool(recipesV2, lookupSeed) {
     if (!recipesV2 || !Array.isArray(recipesV2.pool)) return recipesV2;
-    if (recipesV2._reclassified_v2_1) return recipesV2;
+    if (recipesV2._reclassified_v2_2) return recipesV2;
     const lookup = lookupSeed || _defaultLookupSeed;
     const bySeedId = {};
     const newPool = [];
@@ -654,7 +654,7 @@ const Normalize = (() => {
     return {
       ...recipesV2,
       pool: newPool,
-      _reclassified_v2_1: true,
+      _reclassified_v2_2: true,
       last_updated: changed ? isoToday() : recipesV2.last_updated,
     };
   }

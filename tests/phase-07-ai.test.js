@@ -164,7 +164,7 @@ test('chip-unify post-fix: reclassifyExistingPool converts phantom originals to 
     last_updated: '2026-05-27',
   };
   const cleaned = Normalize.reclassifyExistingPool(v2, lookup);
-  assert.equal(cleaned._reclassified_v2_1, true, 'idempotency flag set');
+  assert.equal(cleaned._reclassified_v2_2, true, 'idempotency flag set');
   assert.equal(cleaned.pool.length, 3);
   const f75 = cleaned.pool.find(p => p.seed_id === 'french-75');
   assert.ok(f75, 'french-75 seeded entry created');
