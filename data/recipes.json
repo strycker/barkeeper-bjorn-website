@@ -74,56 +74,6 @@
       ]
     },
     {
-      "id": "army-and-navy",
-      "status": "original",
-      "_source": "user",
-      "name": "Army & Navy",
-      "base": "Gin",
-      "method": "shaken",
-      "glassware": "Coupe",
-      "difficulty": 2,
-      "profile": {
-        "sweetness": 0.35,
-        "acid": 0.6,
-        "strength": 0.25,
-        "complexity": 0.5,
-        "season": 0.25,
-        "risk": 0.3
-      },
-      "occasion": "Prohibition-era gem. Orgeat rounds the gin's botanicals while lemon keeps it lively.",
-      "tags": [
-        "sour",
-        "classic",
-        "refreshing"
-      ],
-      "ingredients": [
-        {
-          "name": "Gin",
-          "amount": "2 oz"
-        },
-        {
-          "name": "Fresh Lemon Juice",
-          "amount": "¾ oz"
-        },
-        {
-          "name": "Orgeat",
-          "amount": "½ oz"
-        }
-      ],
-      "garnish": "Lemon twist or cherry",
-      "is_favorite": true,
-      "is_wishlist": false,
-      "is_hidden": false,
-      "is_original": true,
-      "made_log": [
-        {
-          "date": "2026-05-20",
-          "notes": "",
-          "times_made": 1
-        }
-      ]
-    },
-    {
       "id": "french-75",
       "status": "original",
       "_source": "user",
