@@ -157,59 +157,6 @@
       "made_log": []
     },
     {
-      "id": "draft1780264353115",
-      "status": "draft",
-      "_source": "ai-generated",
-      "name": "The Oaken Throne",
-      "tagline": "A regal whiskey trinity, stirred to silken perfection.",
-      "base": "whiskey",
-      "ingredients": [
-        {
-          "name": "Rye whiskey",
-          "amount": "45 ml",
-          "notes": "Backbone — choose a 100-proof rye for spice and bite"
-        },
-        {
-          "name": "Bourbon",
-          "amount": "30 ml",
-          "notes": "Rounds out the rye with sweet corn and vanilla depth"
-        },
-        {
-          "name": "Sweet vermouth",
-          "amount": "15 ml",
-          "notes": "Carpano Antica preferred for bittersweet richness"
-        },
-        {
-          "name": "Demerara syrup",
-          "amount": "5 ml",
-          "notes": "2:1 demerara to water — adds molasses warmth"
-        },
-        {
-          "name": "Angostura bitters",
-          "amount": "2 dashes"
-        },
-        {
-          "name": "Orange bitters",
-          "amount": "1 dash",
-          "notes": "Lifts the aromatic profile"
-        }
-      ],
-      "method": "Add all ingredients to a mixing glass filled with cracked ice. Stir gently for 25–30 seconds until well-chilled and properly diluted. Strain into a chilled rocks glass over a single large ice cube. Express an orange peel over the surface, rub the rim, and drop it in.",
-      "method_type": "stirred",
-      "glassware": "Double rocks glass with a large format ice cube",
-      "garnish": "Expressed orange peel and a brandied cherry on a pick",
-      "why_it_works": "Blending rye and bourbon gives you both spice and sweetness without diluting the spirit-forward character. The minimal vermouth and demerara round the edges rather than mask them, while two bitters add aromatic complexity. It's an Old Fashioned and Manhattan's confident older sibling — bold, balanced, and unapologetically whiskey-driven.",
-      "is_favorite": false,
-      "is_wishlist": false,
-      "is_hidden": false,
-      "is_original": false,
-      "made_log": [],
-      "draft_id": "draft1780264353115",
-      "created_at": "2026-05-31T21:52:33.115Z",
-      "updated_at": "2026-05-31T21:52:33.115Z",
-      "source_prompt": "design me a spirit-forward whiskey drink"
-    },
-    {
       "id": "camerons-kick",
       "status": "classic",
       "_source": "seed",
