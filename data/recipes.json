@@ -226,7 +226,7 @@
       "_source": "seed",
       "seed_id": "mezcal-negroni",
       "is_favorite": false,
-      "is_wishlist": true,
+      "is_wishlist": false,
       "is_hidden": false,
       "is_original": false,
       "made_log": []
