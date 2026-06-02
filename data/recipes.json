@@ -183,7 +183,7 @@
       "seed_id": "new-york-sour",
       "status": "classic",
       "_source": "seed",
-      "is_favorite": true,
+      "is_favorite": false,
       "is_wishlist": false,
       "is_hidden": false,
       "is_original": false,
