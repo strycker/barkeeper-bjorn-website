@@ -199,6 +199,47 @@
       "is_hidden": false,
       "is_original": false,
       "made_log": []
+    },
+    {
+      "name": "Amaretto Sour, Reimagined",
+      "tagline": "The Army & Navy's almond-loving cousin — richer, simpler, and always in the cabinet.",
+      "base": "Gin",
+      "ingredients": [
+        {
+          "name": "London Dry Gin",
+          "amount": "1.75 oz",
+          "notes": "A juniper-forward gin keeps the drink bracing against the sweet liqueur."
+        },
+        {
+          "name": "Amaretto",
+          "amount": "½ oz",
+          "notes": "Disaronno or Lazzaroni — provides the almond note that orgeat would, plus a touch of sweetness and depth."
+        },
+        {
+          "name": "Fresh Lemon Juice",
+          "amount": "¾ oz",
+          "notes": "Freshly squeezed and fine-strained."
+        },
+        {
+          "name": "Rich Simple Syrup (2:1)",
+          "amount": "1 barspoon",
+          "notes": "Optional — only if your amaretto is on the drier side or you want to round the edges."
+        }
+      ],
+      "method": "Add all ingredients to a shaker with ice. Shake hard for 10–12 seconds until well chilled and frothy. Double-strain into a chilled coupe.",
+      "method_type": "shaken",
+      "glassware": "Coupe",
+      "garnish": "Lemon twist expressed over the surface, draped on the rim; brandied cherry dropped in.",
+      "tasting_notes": "Bright lemon and juniper up front, with a warm marzipan-and-stone-fruit midpalate from the amaretto. Finishes clean and slightly bitter from the gin botanicals — drier than a classic Amaretto Sour, sharper than an Army & Navy.",
+      "why_it_works": "This is essentially a gin-based Amaretto Sour, and it shares DNA with the classic Army & Navy: spirit + lemon + nutty sweetener. Amaretto subs beautifully for orgeat at roughly the same volume because both deliver almond character, though amaretto brings alcohol and apricot-pit complexity that orgeat lacks. If you ever want to go further afield, Frangelico (hazelnut) or Nocino (green walnut) work on the same template. Pantry-friendly, no specialty syrup required.",
+      "_source": "ai-generated",
+      "id": "draft1780440797964",
+      "status": "draft",
+      "draft_id": "draft1780440797964",
+      "parent_id": "army-and-navy",
+      "created_at": "2026-06-02T22:53:17.964Z",
+      "updated_at": "2026-06-02T22:53:17.964Z",
+      "source_prompt": "Tweak of \"Army & Navy\": Find a good substitution for Orgeat, as some people don't like it and I don't always have it on hand.  Use something more interesting than simple syrup, though... are there any standard classic cocktails like Army & Navy except use a sweet nutty liqueur like Amaretto?"
     }
   ],
   "last_updated": "2026-06-02",
