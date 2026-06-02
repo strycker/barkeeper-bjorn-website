@@ -208,9 +208,20 @@
       "created_at": "2026-05-31T21:52:33.115Z",
       "updated_at": "2026-05-31T21:52:33.115Z",
       "source_prompt": "design me a spirit-forward whiskey drink"
+    },
+    {
+      "id": "camerons-kick",
+      "seed_id": "camerons-kick",
+      "status": "classic",
+      "_source": "seed",
+      "is_favorite": true,
+      "is_wishlist": false,
+      "is_hidden": false,
+      "is_original": false,
+      "made_log": []
     }
   ],
-  "last_updated": "2026-06-01",
+  "last_updated": "2026-06-02",
   "_reclassified_v2_2": true,
   "_autosaved_v2_2": true
 }
