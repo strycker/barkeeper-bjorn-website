@@ -14,10 +14,10 @@ updated: 2026-05-26T22:30:00.000Z
 
 ## Current Test
 
-number: 13
-name: AI-03 — fail-closed path on invalid generation
+number: 14
+name: Drafts → Promote to Original
 expected: |
-  Recipes → "Generate with AI" (Drafts tab). Enter a nonsense prompt that the model can't return schema-valid JSON for — e.g. "design me 17 different cocktails as one giant blob with no structure". After ClaudeAPI.requestJSON's one internal retry it should throw → an error toast surfaces and NOTHING is written to drafts (Drafts tab count stays the same, no new draft chip appears, no commit to data/recipes.json).
+  Drafts tab → pick a draft → click "Promote to Original" (button on the chip OR the "Save and Promote to Original" path from the draft edit form). Expected: a WriteGate diff/confirm dialog appears. On confirm, the pool entry mutates in place — status flips 'draft' → 'original', draft_id / source_prompt / created_at / parent_id are cleared, _source becomes 'user'. Drafts tab loses the entry; Originals tab gains it with no SHA conflicts.
 awaiting: user response
 
 chip_unification_summary:
@@ -189,6 +189,14 @@ expected: |
   Open the Bartender Wizard, enter a short preference (e.g. "playful surfer"), click "Help me write this with Claude". The personality textarea fills with drafted long-form persona text; you can edit it before the existing save.
 result: pass
 
+#### 13. AI-03 — fail-closed path on invalid / near-duplicate generation
+expected: |
+  Nonsense prompt → no draft written; near-duplicate of an existing recipe → no draft written.
+result: pass-with-fix
+reported: "Nonsense prompt didn't throw — model returned the source recipe back essentially unchanged, producing two identical draft chips."
+fix: |
+  Commit landing now adds `_isNearDuplicateOfPool` in recipes.js: candidate drafts are compared to every pool entry (seeded classics resolved through CLASSICS_DB) by normalized name + sorted ingredient-name key. If a match is found the runAIDesign + handleDraftTweak save paths throw before the pool.push / State.patch, so the duplicate never reaches the pool. Error toast tells the user where the duplicate lives ("a classic", "an existing draft", "one of your originals") and to try a more specific tweak.
+
 #### 12. AI-03 — Generate → draft → refine → promote
 expected: |
   Recipes → "Generate with AI". Enter "design me a spirit-forward whiskey drink". A draft is generated, is schema-valid, AUTO-SAVED to the Drafts tab (D-09). If it used a bottle you don't own, a phantom-ingredient flag is surfaced in the draft preview. The refine card supports both "make it less sweet" (tweak SAME draft) and "generate new" (new draft, fork-before-refine on a 2nd refine).
@@ -305,3 +313,21 @@ User confusion (Test 12 feedback): "Create Recipe" label is unclear (does it sav
 **Scope:** small. Could be done as a focused PR — recipes.js UX consolidation + label rename + one redirect. The hard work (AI-03 + WriteGate + drafts auto-save + refine card) is already shipped.
 
 **Related to:** AI-03 (drafts), D-09 / D-10 / D-11 (auto-save, refine, promote), AI-12 wizard "Help me write" pattern (also a "fill the form, then save" surface — same label-ambiguity question may apply there).
+
+### BL-5 — "Use the real recipe" option when AI-tweak matches an existing classic
+*Surfaced during Test 13, 2026-05-27.*
+
+**Background:** Test 13's fix-up landed `_isNearDuplicateOfPool` which blocks duplicate-draft writes via an error toast. Better UX: instead of just failing, offer the user a one-click action.
+
+**Requested feature (deferred to a future GSD phase):** When the AI-generated draft matches a real recipe — either an existing classic in `classics-db*.js` or one of the user's own originals — instead of an error, show a small interstitial dialog with two options:
+
+1. **"Use this real recipe"** — favorite / wishlist / mark-as-made the existing entry directly (the AI essentially confirmed the user already has what they want), and DO NOT create a draft. For classics not yet in the pool, this creates the overlay-only seeded entry with the chosen flag set.
+2. **"Save as draft anyway"** — proceed with the duplicate write (current bypass; lets the user keep both for comparison).
+
+**Extension:** if the AI-generated draft is close to a real recipe NOT yet in `classics-db*.js`, the dialog can also offer:
+
+3. **"Add to classics database"** — write the recipe shape into a user-side `data/extra-classics.json` (new tolerant file like drafts) or surface a PR-builder that opens GitHub with a pre-filled classics entry against `classics-db-extra-N.js`. This grows the seeded library through real-world usage.
+
+**Scope:** modest. New helper that scores match strength (already partially there in `_isNearDuplicateOfPool`); new interstitial dialog component; possible new tolerant data file. Could fit as one task in a future phase focused on AI UX polish or recipe library growth.
+
+**Related to:** AI-03 (drafts), BL-1 (Classroom V2 — lessons backed by structured data, same pattern), BL-3 (NA-only mode — similar "AI suggests a real recipe instead" surface), the `_isNearDuplicateOfPool` helper landed in this phase.
