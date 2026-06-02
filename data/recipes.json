@@ -128,7 +128,7 @@
       "status": "classic",
       "_source": "seed",
       "seed_id": "ramos-gin-fizz",
-      "is_wishlist": true,
+      "is_wishlist": false,
       "is_favorite": false,
       "is_hidden": false,
       "is_original": false,
