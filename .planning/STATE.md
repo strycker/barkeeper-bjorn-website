@@ -20,7 +20,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 
 **Core value:** The user's real-world bar inventory and flavor profile should power both AI-driven conversation and rule-based recommendations — seamlessly, whether in a chat session or the web app.
 
-**Current focus:** Phase 7 UAT ready to resume at Test 12 — chip unification mini-phase SHIPPED (3 commits, 57 tests green, see .planning/chip-unification-plan.md). Test 12 is rewritten in 07-UAT.md to exercise the unified chip flow.
+**Current focus:** Phase 7 UAT resuming at Test 13 — chip unification mini-phase SHIPPED + VERIFIED (see .planning/chip-unification-plan.md). Tests 1-12 pass; 13-18 (AI-03 fail-closed, promote, AI-13 derivation, AI-08 import, AI-10 repair, AI-11 paste-a-line) remaining.
 
 ---
 

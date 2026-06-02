@@ -14,27 +14,21 @@ updated: 2026-05-26T22:30:00.000Z
 
 ## Current Test
 
-number: 12
-name: AI-03 — unified chip generate + tweak + click-to-render + promote
+number: 13
+name: AI-03 — fail-closed path on invalid generation
 expected: |
-  Open `#recipes`. Every tab (Originals / Drafts / Favorites / Wishlist / Made) renders chips with the same RecipeChip layout: status badge (classic / original / draft), ♥ ☆ ✓ flags reflecting the pool entry, base · method · glassware meta line, ingredient mini-chips. Each chip has a "Tweak with AI" disclosure panel in the footer.
-
-  (a) Click any chip BODY (not a button) → opens the render view (Edit form for original/draft, view-with-overlay-edit for seeded classics where core fields are uneditable but overlay fields remain editable). Seeded classics show the resolved name + ingredients from CLASSICS_DB live.
-
-  (b) Drafts tab → existing "+ Generate with AI" → produces a draft that lands in the pool with status:'draft' (no separate drafts file), visible as a chip with the draft badge.
-
-  (c) Tweak with AI on ANY chip → expand the disclosure, type a tweak prompt (e.g. "make it less sweet"), click Generate Tweaked Draft → a NEW pool entry is created with status:'draft', parent_id linking to the source chip's id, _source:'ai-generated'. Source chip is preserved.
-
-  (d) On a draft chip, Promote to Original button → pool entry mutates in-place: status flips 'draft' → 'original', draft_id / source_prompt / created_at cleared, _source becomes 'user', id stays draft<ts> or gets a cocktail<ts> id depending on the promote helper's convention. Drafts tab loses the entry; Originals tab gains it.
-
-  (e) Heart / Star / Check toggles on chips mutate is_favorite / is_wishlist / push to made_log directly on the pool entry — no array-move between separate storage locations.
+  Recipes → "Generate with AI" (Drafts tab). Enter a nonsense prompt that the model can't return schema-valid JSON for — e.g. "design me 17 different cocktails as one giant blob with no structure". After ClaudeAPI.requestJSON's one internal retry it should throw → an error toast surfaces and NOTHING is written to drafts (Drafts tab count stays the same, no new draft chip appears, no commit to data/recipes.json).
 awaiting: user response
 
 chip_unification_summary:
   - Commit 946e3c9 (1/3): v2 pool schema + Normalize.recipe / migrateRecipesV1 / foldDraftsIntoPool + State.get read shim.
   - Commit 9527dce (2/3): RecipeChip.render / resolveCore / filterPool + drop-in across recipes.js + CSS + index.html script tag.
-  - Commit landing now (3/3): RecipeChip.bindActions + per-chip Tweak panel + click-to-render via body handler + seeded-core lock in renderForm + pool-aware writes (heart / star / check / promote / new-recipe / edit) inside recipes.js. 38 phase-07 tests pass; full suite 57/57 green.
-  - Follow-up tracked: removal of the State.get('recipes') compat shim is deferred — non-recipes-view callers (recommender.js writes for favorites/wishlist, export.js reads, claude-api.js context reads, profile.js count read) still read legacy keys. These migrations are queued as a Commit 3.5 cleanup but do not block UAT resumption.
+  - Commit cc5df53 (3/3): RecipeChip.bindActions + per-chip Tweak panel + click-to-render via body handler + seeded-core lock in renderForm + pool-aware writes in recipes.js.
+  - Post-ship fixes (3129e81 / 5646147 / 4044db5 / d2adef0 / 2754c2b / 506854d): reclassify v1->v2 follow-up, tolerant lookup (& / and / -), autosave persistence, version flag bump, manual pool migration on data/recipes.json, CLASSICS_DB lexical lookup (bare const + globalThis fallback), shim resolves seeded entries, recommender ♥/☆/✓ writes the pool (was silently no-op via getter assignments), WeakMap-based per-tab handler swap (was firing wrong tab's toast + navigating wrong), optimistic UI (instant toast + rerender, save in background), 3-retry save backoff (300/600/1000ms).
+  - User UAT confirmed working 2026-05-27: chips uniform across all tabs, classics render with seed-resolved metadata, Recommender toggles update instantly, per-tab remove fires the right toast and stays on the right tab, save reliability holds under rapid actions.
+
+verified_tests_during_chip_unification:
+  - "12: AI-03 unified chip flow + click-to-render + tweak + promote + heart/star/check toggles — PASS."
 
 ## Tests
 
