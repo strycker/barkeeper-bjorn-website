@@ -14,27 +14,21 @@ updated: 2026-05-26T22:30:00.000Z
 
 ## Current Test
 
-number: 12
-name: AI-03 — unified chip generate + tweak + click-to-render + promote
+number: 14
+name: Drafts → Promote to Original
 expected: |
-  Open `#recipes`. Every tab (Originals / Drafts / Favorites / Wishlist / Made) renders chips with the same RecipeChip layout: status badge (classic / original / draft), ♥ ☆ ✓ flags reflecting the pool entry, base · method · glassware meta line, ingredient mini-chips. Each chip has a "Tweak with AI" disclosure panel in the footer.
-
-  (a) Click any chip BODY (not a button) → opens the render view (Edit form for original/draft, view-with-overlay-edit for seeded classics where core fields are uneditable but overlay fields remain editable). Seeded classics show the resolved name + ingredients from CLASSICS_DB live.
-
-  (b) Drafts tab → existing "+ Generate with AI" → produces a draft that lands in the pool with status:'draft' (no separate drafts file), visible as a chip with the draft badge.
-
-  (c) Tweak with AI on ANY chip → expand the disclosure, type a tweak prompt (e.g. "make it less sweet"), click Generate Tweaked Draft → a NEW pool entry is created with status:'draft', parent_id linking to the source chip's id, _source:'ai-generated'. Source chip is preserved.
-
-  (d) On a draft chip, Promote to Original button → pool entry mutates in-place: status flips 'draft' → 'original', draft_id / source_prompt / created_at cleared, _source becomes 'user', id stays draft<ts> or gets a cocktail<ts> id depending on the promote helper's convention. Drafts tab loses the entry; Originals tab gains it.
-
-  (e) Heart / Star / Check toggles on chips mutate is_favorite / is_wishlist / push to made_log directly on the pool entry — no array-move between separate storage locations.
+  Drafts tab → pick a draft → click "Promote to Original" (button on the chip OR the "Save and Promote to Original" path from the draft edit form). Expected: a WriteGate diff/confirm dialog appears. On confirm, the pool entry mutates in place — status flips 'draft' → 'original', draft_id / source_prompt / created_at / parent_id are cleared, _source becomes 'user'. Drafts tab loses the entry; Originals tab gains it with no SHA conflicts.
 awaiting: user response
 
 chip_unification_summary:
   - Commit 946e3c9 (1/3): v2 pool schema + Normalize.recipe / migrateRecipesV1 / foldDraftsIntoPool + State.get read shim.
   - Commit 9527dce (2/3): RecipeChip.render / resolveCore / filterPool + drop-in across recipes.js + CSS + index.html script tag.
-  - Commit landing now (3/3): RecipeChip.bindActions + per-chip Tweak panel + click-to-render via body handler + seeded-core lock in renderForm + pool-aware writes (heart / star / check / promote / new-recipe / edit) inside recipes.js. 38 phase-07 tests pass; full suite 57/57 green.
-  - Follow-up tracked: removal of the State.get('recipes') compat shim is deferred — non-recipes-view callers (recommender.js writes for favorites/wishlist, export.js reads, claude-api.js context reads, profile.js count read) still read legacy keys. These migrations are queued as a Commit 3.5 cleanup but do not block UAT resumption.
+  - Commit cc5df53 (3/3): RecipeChip.bindActions + per-chip Tweak panel + click-to-render via body handler + seeded-core lock in renderForm + pool-aware writes in recipes.js.
+  - Post-ship fixes (3129e81 / 5646147 / 4044db5 / d2adef0 / 2754c2b / 506854d): reclassify v1->v2 follow-up, tolerant lookup (& / and / -), autosave persistence, version flag bump, manual pool migration on data/recipes.json, CLASSICS_DB lexical lookup (bare const + globalThis fallback), shim resolves seeded entries, recommender ♥/☆/✓ writes the pool (was silently no-op via getter assignments), WeakMap-based per-tab handler swap (was firing wrong tab's toast + navigating wrong), optimistic UI (instant toast + rerender, save in background), 3-retry save backoff (300/600/1000ms).
+  - User UAT confirmed working 2026-05-27: chips uniform across all tabs, classics render with seed-resolved metadata, Recommender toggles update instantly, per-tab remove fires the right toast and stays on the right tab, save reliability holds under rapid actions.
+
+verified_tests_during_chip_unification:
+  - "12: AI-03 unified chip flow + click-to-render + tweak + promote + heart/star/check toggles — PASS."
 
 ## Tests
 
@@ -195,6 +189,14 @@ expected: |
   Open the Bartender Wizard, enter a short preference (e.g. "playful surfer"), click "Help me write this with Claude". The personality textarea fills with drafted long-form persona text; you can edit it before the existing save.
 result: pass
 
+#### 13. AI-03 — fail-closed path on invalid / near-duplicate generation
+expected: |
+  Nonsense prompt → no draft written; near-duplicate of an existing recipe → no draft written.
+result: pass-with-fix
+reported: "Nonsense prompt didn't throw — model returned the source recipe back essentially unchanged, producing two identical draft chips."
+fix: |
+  Commit landing now adds `_isNearDuplicateOfPool` in recipes.js: candidate drafts are compared to every pool entry (seeded classics resolved through CLASSICS_DB) by normalized name + sorted ingredient-name key. If a match is found the runAIDesign + handleDraftTweak save paths throw before the pool.push / State.patch, so the duplicate never reaches the pool. Error toast tells the user where the duplicate lives ("a classic", "an existing draft", "one of your originals") and to try a more specific tweak.
+
 #### 12. AI-03 — Generate → draft → refine → promote
 expected: |
   Recipes → "Generate with AI". Enter "design me a spirit-forward whiskey drink". A draft is generated, is schema-valid, AUTO-SAVED to the Drafts tab (D-09). If it used a bottle you don't own, a phantom-ingredient flag is surfaced in the draft preview. The refine card supports both "make it less sweet" (tweak SAME draft) and "generate new" (new draft, fork-before-refine on a 2nd refine).
@@ -311,3 +313,21 @@ User confusion (Test 12 feedback): "Create Recipe" label is unclear (does it sav
 **Scope:** small. Could be done as a focused PR — recipes.js UX consolidation + label rename + one redirect. The hard work (AI-03 + WriteGate + drafts auto-save + refine card) is already shipped.
 
 **Related to:** AI-03 (drafts), D-09 / D-10 / D-11 (auto-save, refine, promote), AI-12 wizard "Help me write" pattern (also a "fill the form, then save" surface — same label-ambiguity question may apply there).
+
+### BL-5 — "Use the real recipe" option when AI-tweak matches an existing classic
+*Surfaced during Test 13, 2026-05-27.*
+
+**Background:** Test 13's fix-up landed `_isNearDuplicateOfPool` which blocks duplicate-draft writes via an error toast. Better UX: instead of just failing, offer the user a one-click action.
+
+**Requested feature (deferred to a future GSD phase):** When the AI-generated draft matches a real recipe — either an existing classic in `classics-db*.js` or one of the user's own originals — instead of an error, show a small interstitial dialog with two options:
+
+1. **"Use this real recipe"** — favorite / wishlist / mark-as-made the existing entry directly (the AI essentially confirmed the user already has what they want), and DO NOT create a draft. For classics not yet in the pool, this creates the overlay-only seeded entry with the chosen flag set.
+2. **"Save as draft anyway"** — proceed with the duplicate write (current bypass; lets the user keep both for comparison).
+
+**Extension:** if the AI-generated draft is close to a real recipe NOT yet in `classics-db*.js`, the dialog can also offer:
+
+3. **"Add to classics database"** — write the recipe shape into a user-side `data/extra-classics.json` (new tolerant file like drafts) or surface a PR-builder that opens GitHub with a pre-filled classics entry against `classics-db-extra-N.js`. This grows the seeded library through real-world usage.
+
+**Scope:** modest. New helper that scores match strength (already partially there in `_isNearDuplicateOfPool`); new interstitial dialog component; possible new tolerant data file. Could fit as one task in a future phase focused on AI UX polish or recipe library growth.
+
+**Related to:** AI-03 (drafts), BL-1 (Classroom V2 — lessons backed by structured data, same pattern), BL-3 (NA-only mode — similar "AI suggests a real recipe instead" surface), the `_isNearDuplicateOfPool` helper landed in this phase.

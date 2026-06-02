@@ -10,6 +10,43 @@ const RecipesView = (() => {
 
   let _searchQuery = '';
 
+  // ─── Near-duplicate detection (AI-03 fail-closed extension) ──────────
+  // Compare a candidate draft against the existing pool by normalized name
+  // + ingredient-name set. If the AI returns a near-clone of an existing
+  // recipe (real-world symptom: tweak prompts that don't move the needle
+  // and produce essentially the same recipe back), block the save with a
+  // clear error so the user doesn't accumulate duplicate draft chips.
+  // Skips the entry with `excludeId` (callers pass the source draft's id
+  // for the tweak/fork path).
+  function _normName(s) {
+    return typeof s === 'string'
+      ? s.toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '')
+      : '';
+  }
+  function _ingredientNameKey(recipe) {
+    const list = Array.isArray(recipe && recipe.ingredients) ? recipe.ingredients : [];
+    return list.map(i => _normName(i && i.name)).filter(Boolean).sort().join('|');
+  }
+  function _resolveSeedForCompare(entry) {
+    if (!entry || !entry.seed_id || typeof CLASSICS_DB === 'undefined') return entry;
+    const seed = CLASSICS_DB.find(c => c && c.id === entry.seed_id);
+    return seed ? { ...seed, ...entry } : entry;
+  }
+  function _isNearDuplicateOfPool(candidate, pool, excludeId) {
+    if (!candidate || !candidate.name || !Array.isArray(pool)) return null;
+    const candName = _normName(candidate.name);
+    const candIng  = _ingredientNameKey(candidate);
+    if (!candName || !candIng) return null;
+    for (const entry of pool) {
+      if (!entry || (excludeId && entry.id === excludeId)) continue;
+      const resolved = _resolveSeedForCompare(entry);
+      if (_normName(resolved.name) === candName && _ingredientNameKey(resolved) === candIng) {
+        return resolved;
+      }
+    }
+    return null;
+  }
+
   function _filterRecipes(list, q) {
     if (!q) return list;
     const lq = q.toLowerCase();
@@ -300,6 +337,20 @@ const RecipesView = (() => {
       // Build the new recipes.json payload — mutate the POOL by id.
       const oldRecipes = State.get('recipes') || { pool: [] };
       const pool = Array.isArray(oldRecipes.pool) ? oldRecipes.pool.slice() : [];
+
+      // AI-03 fail-closed: if the model returned essentially the same recipe
+      // as something already in the pool (the symptom: a "tweak" that didn't
+      // tweak; user accumulates identical draft chips), refuse the write and
+      // tell the user what to try next.
+      const excludeId = (mode === 'tweak' && baseDraft) ? (baseDraft.id || baseDraft.draft_id) : null;
+      const dup = _isNearDuplicateOfPool(draftEntry, pool, excludeId);
+      if (dup) {
+        const where = dup.status === 'classic' ? 'a classic'
+                    : dup.status === 'draft'   ? 'an existing draft'
+                    : 'one of your originals';
+        throw new Error(`The model returned ${where} ("${dup.name}") with the same ingredients — try a more specific tweak.`);
+      }
+
       const idx = pool.findIndex(p => p && p.id === draftEntry.id);
       if (idx >= 0) pool[idx] = draftEntry; else pool.push(draftEntry);
       const newRecipes = {
@@ -1306,6 +1357,20 @@ const RecipesView = (() => {
         draft_id: nid,
         parent_id: baseDraft.id || baseDraft.draft_id || null,
       };
+      // AI-03 fail-closed: if the model returned essentially the same recipe
+      // as the source baseDraft or as another pool entry, refuse the write
+      // and surface a clear error (caught by the catch block below).
+      const dupCheck = (function(){
+        const cur = State.get('recipes') || { pool: [] };
+        const curPool = Array.isArray(cur.pool) ? cur.pool : [];
+        return _isNearDuplicateOfPool(poolEntry, curPool, baseDraft.id || baseDraft.draft_id);
+      })();
+      if (dupCheck) {
+        const where = dupCheck.status === 'classic' ? 'a classic'
+                    : dupCheck.status === 'draft'   ? 'an existing draft'
+                    : 'one of your originals';
+        throw new Error(`The tweak produced ${where} ("${dupCheck.name}") with the same ingredients — try a more specific tweak (e.g. swap an ingredient or change a ratio).`);
+      }
       State.patch('recipes', r => {
         if (!Array.isArray(r.pool)) r.pool = [];
         r.pool.push(poolEntry);
