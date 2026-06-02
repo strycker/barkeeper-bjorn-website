@@ -211,9 +211,9 @@
     },
     {
       "id": "camerons-kick",
-      "seed_id": "camerons-kick",
       "status": "classic",
       "_source": "seed",
+      "seed_id": "camerons-kick",
       "is_favorite": true,
       "is_wishlist": false,
       "is_hidden": false,
@@ -222,9 +222,9 @@
     },
     {
       "id": "mezcal-negroni",
-      "seed_id": "mezcal-negroni",
       "status": "classic",
       "_source": "seed",
+      "seed_id": "mezcal-negroni",
       "is_favorite": false,
       "is_wishlist": true,
       "is_hidden": false,
