@@ -340,6 +340,56 @@ const RecommenderView = (() => {
       });
     });
 
+    // Pool-aware overlay toggle: find or create a pool entry for a
+    // recommender recipe (classic from CLASSICS_DB OR original from the
+    // pool) and flip the named overlay flag in place. Replaces the legacy
+    // `r.confirmed_favorites = [...]` assignment pattern, which silently
+    // no-op'd against the State.get('recipes') read-shim's getter-only
+    // properties.
+    //
+    //   flag === 'is_favorite' | 'is_wishlist' — boolean toggle
+    //   flag === 'made_log'                    — toggle (clear vs push one)
+    function _togglePoolFlag(item, flag) {
+      if (!item || !item.recipe) return Promise.resolve();
+      const probe = item.recipe;
+      const today = new Date().toISOString().slice(0, 10);
+      const classicsDb = (typeof CLASSICS_DB !== 'undefined' && Array.isArray(CLASSICS_DB)) ? CLASSICS_DB : [];
+      State.patch('recipes', r => {
+        if (!Array.isArray(r.pool)) r.pool = [];
+        let entry = r.pool.find(p => p.id === probe.id);
+        if (!entry) entry = r.pool.find(p => p.seed_id && p.seed_id === probe.id);
+        if (!entry) entry = r.pool.find(p => {
+          if (!p.seed_id) return false;
+          const seed = classicsDb.find(c => c.id === p.seed_id);
+          return seed && Utils.sameRecipe(seed, probe);
+        });
+        if (!entry) entry = r.pool.find(p => p.status === 'original' && Utils.sameRecipe(p, probe));
+        if (!entry) {
+          const isClassic = probe.id && classicsDb.some(c => c.id === probe.id);
+          entry = isClassic
+            ? { id: probe.id, seed_id: probe.id, status: 'classic', _source: 'seed',
+                is_favorite: false, is_wishlist: false, is_hidden: false, is_original: false, made_log: [] }
+            : { ...probe, id: probe.id || ('cocktail' + Date.now()),
+                status: probe.status || 'original',
+                _source: probe._source === 'classics-db' ? 'seed' : 'user',
+                is_favorite: false, is_wishlist: false, is_hidden: false,
+                is_original: true, made_log: [] };
+          r.pool.push(entry);
+        }
+        if (flag === 'made_log') {
+          if (Array.isArray(entry.made_log) && entry.made_log.length > 0) {
+            entry.made_log = [];
+          } else {
+            entry.made_log = [{ date: today, times_made: 1, notes: '' }];
+          }
+        } else {
+          entry[flag] = !entry[flag];
+        }
+        r.last_updated = today;
+      });
+      return State.save('recipes');
+    }
+
     // Wire ♥ Favorites toggle buttons — click toggles add/remove
     cardsEl.querySelectorAll('.rec-fav-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -352,18 +402,12 @@ const RecommenderView = (() => {
         const recipeBase = btn.dataset.base || '';
         const probe = { name: recipeName, base: recipeBase };
         const item = allItems.find(r => Utils.sameRecipe(r.recipe, probe));
+        if (!item) return;
         const isFav = (State.get('recipes')?.confirmed_favorites || []).some(r => Utils.sameRecipe(r, probe));
-        if (isFav) {
-          State.patch('recipes', r => { r.confirmed_favorites = (r.confirmed_favorites || []).filter(f => !Utils.sameRecipe(f, probe)); });
-          State.save('recipes').then(() => { Utils.showToast('Removed from Favorites'); _rerender(container); });
-        } else {
-          if (!item) return;
-          State.patch('recipes', r => {
-            r.confirmed_favorites = r.confirmed_favorites || [];
-            r.confirmed_favorites.push({ ...item.recipe, _source: item.recipe._source || 'classics-db' });
-          });
-          State.save('recipes').then(() => { Utils.showToast('Added to Favorites ♥'); _rerender(container); });
-        }
+        _togglePoolFlag(item, 'is_favorite').then(() => {
+          Utils.showToast(isFav ? 'Removed from Favorites' : 'Added to Favorites ♥');
+          _rerender(container);
+        });
       });
     });
 
@@ -379,18 +423,12 @@ const RecommenderView = (() => {
         const recipeBase = btn.dataset.base || '';
         const probe = { name: recipeName, base: recipeBase };
         const item = allItems.find(r => Utils.sameRecipe(r.recipe, probe));
+        if (!item) return;
         const isWish = (State.get('recipes')?.wishlist || []).some(r => Utils.sameRecipe(r, probe));
-        if (isWish) {
-          State.patch('recipes', r => { r.wishlist = (r.wishlist || []).filter(w => !Utils.sameRecipe(w, probe)); });
-          State.save('recipes').then(() => { Utils.showToast('Removed from Wishlist'); _rerender(container); });
-        } else {
-          if (!item) return;
-          State.patch('recipes', r => {
-            r.wishlist = r.wishlist || [];
-            r.wishlist.push({ ...item.recipe, _source: item.recipe._source || 'classics-db' });
-          });
-          State.save('recipes').then(() => { Utils.showToast('Added to Wishlist ★'); _rerender(container); });
-        }
+        _togglePoolFlag(item, 'is_wishlist').then(() => {
+          Utils.showToast(isWish ? 'Removed from Wishlist' : 'Added to Wishlist ★');
+          _rerender(container);
+        });
       });
     });
 
@@ -406,19 +444,12 @@ const RecommenderView = (() => {
         const recipeBase = btn.dataset.base || '';
         const probe = { name: recipeName, base: recipeBase };
         const item = allItems.find(r => Utils.sameRecipe(r.recipe, probe));
+        if (!item) return;
         const isMade = (State.get('recipes')?.made_log || []).some(r => Utils.sameRecipe(r, probe));
-        if (isMade) {
-          State.patch('recipes', r => { r.made_log = (r.made_log || []).filter(m => !Utils.sameRecipe(m, probe)); });
-          State.save('recipes').then(() => { Utils.showToast('Removed from Made'); _rerender(container); });
-        } else {
-          if (!item) return;
-          const today = new Date().toISOString().slice(0, 10);
-          State.patch('recipes', r => {
-            r.made_log = r.made_log || [];
-            r.made_log.unshift({ ...item.recipe, _source: item.recipe._source || 'classics-db', times_made: 1, first_made: today, last_made: today, notes: '' });
-          });
-          State.save('recipes').then(() => { Utils.showToast('Marked as made ✓'); _rerender(container); });
-        }
+        _togglePoolFlag(item, 'made_log').then(() => {
+          Utils.showToast(isMade ? 'Removed from Made' : 'Marked as made ✓');
+          _rerender(container);
+        });
       });
     });
   }

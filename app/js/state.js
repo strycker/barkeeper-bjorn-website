@@ -248,13 +248,31 @@ const State = (() => {
   // through these getters do NOT propagate to the pool — legacy writes are
   // accepted to be temporarily broken until Commit 2 lands (chip unification
   // is shipped as 3 atomic commits in one session, all-or-nothing).
+  // Seeded pool entries are overlay-only — they store seed_id + the user's
+  // flags but no core fields (name, ingredients, …). Legacy code paths
+  // (Utils.sameRecipe checks in recommender.js, export.js context builders,
+  // etc.) compare by name + base; without resolution they see undefined
+  // values and never match a seeded classic. Resolve at shim-read time by
+  // merging the live CLASSICS_DB row over the pool entry.
+  function _resolveSeededForShim(entry) {
+    if (!entry || !entry.seed_id) return entry;
+    const db = (typeof CLASSICS_DB !== 'undefined' && Array.isArray(CLASSICS_DB)) ? CLASSICS_DB
+             : (typeof globalThis !== 'undefined' && Array.isArray(globalThis.CLASSICS_DB)) ? globalThis.CLASSICS_DB
+             : null;
+    if (!db) return entry;
+    const seed = db.find(c => c && c.id === entry.seed_id);
+    if (!seed) return entry;
+    // Seed core first, pool entry's overlay/meta on top (so is_favorite etc. win).
+    return { ...seed, ...entry };
+  }
+
   function _withRecipesShim(rec) {
     if (!rec || !Array.isArray(rec.pool)) return rec;
     return Object.defineProperties({ ...rec }, {
-      originals:           { enumerable: false, configurable: true, get() { return rec.pool.filter(r => r.status === 'original'); } },
-      confirmed_favorites: { enumerable: false, configurable: true, get() { return rec.pool.filter(r => r.is_favorite); } },
-      wishlist:            { enumerable: false, configurable: true, get() { return rec.pool.filter(r => r.is_wishlist); } },
-      made_log:            { enumerable: false, configurable: true, get() { return rec.pool.filter(r => Array.isArray(r.made_log) && r.made_log.length > 0); } },
+      originals:           { enumerable: false, configurable: true, get() { return rec.pool.filter(r => r.status === 'original').map(_resolveSeededForShim); } },
+      confirmed_favorites: { enumerable: false, configurable: true, get() { return rec.pool.filter(r => r.is_favorite).map(_resolveSeededForShim); } },
+      wishlist:            { enumerable: false, configurable: true, get() { return rec.pool.filter(r => r.is_wishlist).map(_resolveSeededForShim); } },
+      made_log:            { enumerable: false, configurable: true, get() { return rec.pool.filter(r => Array.isArray(r.made_log) && r.made_log.length > 0).map(_resolveSeededForShim); } },
     });
   }
 

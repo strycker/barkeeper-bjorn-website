@@ -40,9 +40,15 @@ const RecipeChip = (() => {
   // Resolve a CLASSICS_DB seed by id. Combined db across all extra-N files
   // is concatenated into a single global CLASSICS_DB array at script load.
   function _seedById(seedId) {
-    if (!seedId || typeof globalThis === 'undefined') return null;
-    const db = globalThis.CLASSICS_DB;
-    if (!Array.isArray(db)) return null;
+    if (!seedId) return null;
+    // Browser top-level `const CLASSICS_DB` does NOT attach to globalThis;
+    // it lives in the global lexical scope. Reach it by bare name first,
+    // fall back to globalThis for node tests that explicitly stub via
+    // `globalThis.CLASSICS_DB = [...]`.
+    const db = (typeof CLASSICS_DB !== 'undefined' && Array.isArray(CLASSICS_DB)) ? CLASSICS_DB
+             : (typeof globalThis !== 'undefined' && Array.isArray(globalThis.CLASSICS_DB)) ? globalThis.CLASSICS_DB
+             : null;
+    if (!db) return null;
     return db.find(c => c && c.id === seedId) || null;
   }
 
