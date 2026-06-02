@@ -214,7 +214,7 @@
       "status": "classic",
       "_source": "seed",
       "seed_id": "camerons-kick",
-      "is_favorite": false,
+      "is_favorite": true,
       "is_wishlist": false,
       "is_hidden": false,
       "is_original": false,
@@ -226,7 +226,7 @@
       "_source": "seed",
       "seed_id": "mezcal-negroni",
       "is_favorite": false,
-      "is_wishlist": false,
+      "is_wishlist": true,
       "is_hidden": false,
       "is_original": false,
       "made_log": []
