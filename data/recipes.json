@@ -177,6 +177,17 @@
       "is_hidden": false,
       "is_original": false,
       "made_log": []
+    },
+    {
+      "id": "new-york-sour",
+      "seed_id": "new-york-sour",
+      "status": "classic",
+      "_source": "seed",
+      "is_favorite": true,
+      "is_wishlist": false,
+      "is_hidden": false,
+      "is_original": false,
+      "made_log": []
     }
   ],
   "last_updated": "2026-06-02",
