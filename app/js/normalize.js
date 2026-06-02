@@ -434,13 +434,18 @@ const Normalize = (() => {
             .replace(/[^a-z0-9]+/g, '');
   }
   function _defaultLookupSeed(entry) {
-    if (typeof globalThis === 'undefined' || !Array.isArray(globalThis.CLASSICS_DB)) return null;
+    // Same lexical/global trap as in recipe-chip.js — bare CLASSICS_DB first,
+    // globalThis fallback for node tests.
+    const db = (typeof CLASSICS_DB !== 'undefined' && Array.isArray(CLASSICS_DB)) ? CLASSICS_DB
+             : (typeof globalThis !== 'undefined' && Array.isArray(globalThis.CLASSICS_DB)) ? globalThis.CLASSICS_DB
+             : null;
+    if (!db) return null;
     const id = entry && entry.id;
-    if (id && globalThis.CLASSICS_DB.some(c => c.id === id)) return id;
+    if (id && db.some(c => c.id === id)) return id;
     const wantId   = _normForMatch(id);
     const wantName = _normForMatch(entry && entry.name);
     if (!wantId && !wantName) return null;
-    const hit = globalThis.CLASSICS_DB.find(c => {
+    const hit = db.find(c => {
       const cid   = _normForMatch(c.id);
       const cname = _normForMatch(c.name);
       return (wantId   && cid   && cid   === wantId)
