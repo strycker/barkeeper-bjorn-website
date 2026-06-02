@@ -214,7 +214,7 @@
       "status": "classic",
       "_source": "seed",
       "seed_id": "camerons-kick",
-      "is_favorite": true,
+      "is_favorite": false,
       "is_wishlist": false,
       "is_hidden": false,
       "is_original": false,
