@@ -188,6 +188,17 @@
       "is_hidden": false,
       "is_original": false,
       "made_log": []
+    },
+    {
+      "id": "oaxacan-old-fashioned",
+      "seed_id": "oaxacan-old-fashioned",
+      "status": "classic",
+      "_source": "seed",
+      "is_favorite": false,
+      "is_wishlist": true,
+      "is_hidden": false,
+      "is_original": false,
+      "made_log": []
     }
   ],
   "last_updated": "2026-06-02",
