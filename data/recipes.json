@@ -240,47 +240,6 @@
       "created_at": "2026-06-02T22:53:17.964Z",
       "updated_at": "2026-06-02T22:53:17.964Z",
       "source_prompt": "Tweak of \"Army & Navy\": Find a good substitution for Orgeat, as some people don't like it and I don't always have it on hand.  Use something more interesting than simple syrup, though... are there any standard classic cocktails like Army & Navy except use a sweet nutty liqueur like Amaretto?"
-    },
-    {
-      "name": "Amaretto Sour, Reimagined",
-      "tagline": "Bourbon and almond — a classic pairing dressed up as a proper sour.",
-      "base": "Bourbon",
-      "ingredients": [
-        {
-          "name": "Bourbon Whiskey",
-          "amount": "1.75 oz",
-          "notes": "A higher-proof bourbon (100° if you have it) keeps the drink from getting too sweet and stands up to the amaretto."
-        },
-        {
-          "name": "Amaretto",
-          "amount": "½ oz",
-          "notes": "Disaronno or Lazzaroni — the almond and bourbon are a time-tested match, echoing the classic Amaretto Sour but with the whiskey leading."
-        },
-        {
-          "name": "Fresh Lemon Juice",
-          "amount": "¾ oz",
-          "notes": "Freshly squeezed and fine-strained."
-        },
-        {
-          "name": "Rich Simple Syrup (2:1)",
-          "amount": "1 barspoon",
-          "notes": "Optional — only if your amaretto is on the drier side or you want to round the edges."
-        }
-      ],
-      "method": "Add all ingredients to a shaker with ice. Shake hard for 10–12 seconds until well chilled and frothy. Double-strain into a chilled coupe.",
-      "method_type": "shaken",
-      "glassware": "Coupe",
-      "garnish": "Lemon twist expressed over the surface, draped on the rim; brandied cherry dropped in.",
-      "tasting_notes": "Vanilla and oak from the bourbon meet marzipan sweetness and bright lemon. Round, nutty, and just tart enough to keep you sipping.",
-      "why_it_works": "Bourbon and amaretto is one of the great accidental discoveries of the cocktail world — the whiskey's caramel and vanilla notes amplify the amaretto's almond character rather than fighting it (as gin's juniper can). Lemon provides the structural acidity that makes any sour sing.",
-      "_source": "ai-generated",
-      "id": "draft1780441603444",
-      "status": "draft",
-      "draft_id": "draft1780441603444",
-      "parent_id": "draft1780440797964",
-      "created_at": "2026-06-02T23:06:43.444Z",
-      "updated_at": "2026-06-02T23:06:43.444Z",
-      "source_prompt": "Tweak of \"Amaretto Sour, Reimagined\": I'm not sure gin and amaretto go together well... can you swap something for the gin?"
     }
   ],
   "last_updated": "2026-06-02",
