@@ -193,12 +193,15 @@ const State = (() => {
       return;
     } catch (err) {
       if (!_isShaConflict(err)) throw err;
-      // Stale-SHA conflict: refetch and retry up to twice with brief backoff,
-      // covering GitHub's brief eventual-consistency window after a write from
-      // another tab / client. Falls back to readJSON if getFileSHA fails
-      // (e.g. transient network hiccup).
+      // Stale-SHA conflict: refetch and retry up to three times with growing
+      // backoff, covering GitHub's eventual-consistency window after a write
+      // from another tab / client. The previous 2-retry path was sometimes
+      // exhausted when a user toggled favorites rapidly across surfaces and
+      // GitHub was slow to settle. Total wait across retries: 300 + 600 +
+      // 1000ms ≈ 1.9s before surfacing the error to the user. Falls back to
+      // readJSON if getFileSHA fails (e.g. transient network hiccup).
       let lastErr = err;
-      for (let attempt = 0; attempt < 2; attempt++) {
+      for (let attempt = 0; attempt < 3; attempt++) {
         try {
           let freshSha = await GitHubAPI.getFileSHA(path);
           if (!freshSha) {
@@ -213,8 +216,7 @@ const State = (() => {
         } catch (retryErr) {
           lastErr = retryErr;
           if (!_isShaConflict(retryErr)) break;
-          // brief backoff before next attempt: 200ms, then 400ms
-          await new Promise(r => setTimeout(r, 200 * (attempt + 1)));
+          await new Promise(r => setTimeout(r, [300, 600, 1000][attempt]));
         }
       }
       throw new Error(`${lastErr.message} — reload the page to refresh file state, then try again.`);

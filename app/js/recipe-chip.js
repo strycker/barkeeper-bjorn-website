@@ -242,11 +242,14 @@ const RecipeChip = (() => {
   // pass in their current pool / filtered list as a Map-like lookup so the
   // dispatcher does not have to know storage layout.
   //
-  // Listener-stacking guard (Pitfall mirrored from library.js / classroom.js):
-  // we track which container has been bound and skip re-binding so rapid
-  // re-renders don't pile up duplicate handlers (each call would otherwise
-  // fire N times after N renders).
-  const _BOUND = new WeakSet();
+  // Listener lifecycle: bind ONE delegated click listener per container,
+  // store the latest handlers + lookup in a WeakMap. Each bindActions call
+  // overwrites the map slot — listeners never stack (the original library.js
+  // / classroom.js bug stays fixed) AND tab switches that reuse the same
+  // container correctly swap handlers (without this the FIRST tab's
+  // closure-captured handlers would keep firing for every later tab —
+  // "Removed from Favorites" on a Wishlist click, etc.).
+  const _BOUND = new WeakMap();   // container -> { handlers, options }
 
   // Map data-action attribute -> handlers key. Keeps the rendered DOM
   // (data-action="ask-bjorn") decoupled from the JS handler name (askBjorn).
@@ -263,16 +266,21 @@ const RecipeChip = (() => {
 
   function bindActions(container, handlers, options) {
     if (!container || typeof container.addEventListener !== 'function') return;
-    if (_BOUND.has(container)) return;
-    _BOUND.add(container);
     handlers = handlers || {};
     options  = options  || {};
-
-    const lookup = typeof options.recipeById === 'function'
-      ? options.recipeById
-      : null;
+    // Always overwrite the active handlers for this container (the delegated
+    // listener below reads from the WeakMap at click time, so this swap is
+    // immediately effective for the next click).
+    const wasBound = _BOUND.has(container);
+    _BOUND.set(container, { handlers, options });
+    if (wasBound) return;
 
     container.addEventListener('click', (event) => {
+      const slot = _BOUND.get(container);
+      if (!slot) return;
+      const h = slot.handlers;
+      const lookup = typeof slot.options.recipeById === 'function' ? slot.options.recipeById : null;
+
       const chipEl = event.target.closest && event.target.closest('.recipe-chip');
       if (!chipEl || !container.contains(chipEl)) return;
       const recipeId = chipEl.getAttribute('data-id') || '';
@@ -284,29 +292,25 @@ const RecipeChip = (() => {
         const action = actionEl.getAttribute('data-action');
         const handlerName = _ACTION_TO_HANDLER[action];
         if (handlerName === '__tweakSubmit') {
-          // Read sibling textarea; route to handlers.tweak(recipe, prompt).
           const panel = actionEl.closest('[data-tweak-panel]');
           const input = panel && panel.querySelector('[data-tweak-input]');
           const prompt = input ? String(input.value || '').trim() : '';
-          if (typeof handlers.tweak === 'function') {
+          if (typeof h.tweak === 'function') {
             event.stopPropagation();
-            handlers.tweak(recipe, prompt, event);
+            h.tweak(recipe, prompt, event);
           }
           return;
         }
-        if (handlerName && typeof handlers[handlerName] === 'function') {
+        if (handlerName && typeof h[handlerName] === 'function') {
           event.stopPropagation();
-          handlers[handlerName](recipe, event);
+          h[handlerName](recipe, event);
         }
         return;
       }
 
-      // Click was inside the chip but not on a button — body / open path.
-      // Exclude clicks inside the open tweak panel (the textarea / summary
-      // expand should NOT trigger the open-chip action).
       if (event.target.closest && event.target.closest('[data-tweak-panel]')) return;
-      if (typeof handlers.body === 'function') {
-        handlers.body(recipe, event);
+      if (typeof h.body === 'function') {
+        h.body(recipe, event);
       }
     });
   }

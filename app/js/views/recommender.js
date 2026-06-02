@@ -403,11 +403,15 @@ const RecommenderView = (() => {
         const probe = { name: recipeName, base: recipeBase };
         const item = allItems.find(r => Utils.sameRecipe(r.recipe, probe));
         if (!item) return;
+        // Optimistic UI: capture state BEFORE patch, fire toast + rerender
+        // immediately (State.patch is synchronous inside _togglePoolFlag),
+        // then await the GitHub save in the background. Error toast surfaces
+        // if the save eventually fails after all retries.
         const isFav = (State.get('recipes')?.confirmed_favorites || []).some(r => Utils.sameRecipe(r, probe));
-        _togglePoolFlag(item, 'is_favorite').then(() => {
-          Utils.showToast(isFav ? 'Removed from Favorites' : 'Added to Favorites ♥');
-          _rerender(container);
-        });
+        const savePromise = _togglePoolFlag(item, 'is_favorite');
+        Utils.showToast(isFav ? 'Removed from Favorites' : 'Added to Favorites ♥');
+        _rerender(container);
+        savePromise.catch(err => Utils.showToast('Save failed (UI may be ahead of GitHub): ' + err.message, 'error', 5000));
       });
     });
 
@@ -425,10 +429,10 @@ const RecommenderView = (() => {
         const item = allItems.find(r => Utils.sameRecipe(r.recipe, probe));
         if (!item) return;
         const isWish = (State.get('recipes')?.wishlist || []).some(r => Utils.sameRecipe(r, probe));
-        _togglePoolFlag(item, 'is_wishlist').then(() => {
-          Utils.showToast(isWish ? 'Removed from Wishlist' : 'Added to Wishlist ★');
-          _rerender(container);
-        });
+        const savePromise = _togglePoolFlag(item, 'is_wishlist');
+        Utils.showToast(isWish ? 'Removed from Wishlist' : 'Added to Wishlist ★');
+        _rerender(container);
+        savePromise.catch(err => Utils.showToast('Save failed (UI may be ahead of GitHub): ' + err.message, 'error', 5000));
       });
     });
 
@@ -446,10 +450,10 @@ const RecommenderView = (() => {
         const item = allItems.find(r => Utils.sameRecipe(r.recipe, probe));
         if (!item) return;
         const isMade = (State.get('recipes')?.made_log || []).some(r => Utils.sameRecipe(r, probe));
-        _togglePoolFlag(item, 'made_log').then(() => {
-          Utils.showToast(isMade ? 'Removed from Made' : 'Marked as made ✓');
-          _rerender(container);
-        });
+        const savePromise = _togglePoolFlag(item, 'made_log');
+        Utils.showToast(isMade ? 'Removed from Made' : 'Marked as made ✓');
+        _rerender(container);
+        savePromise.catch(err => Utils.showToast('Save failed (UI may be ahead of GitHub): ' + err.message, 'error', 5000));
       });
     });
   }
