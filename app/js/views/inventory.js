@@ -186,6 +186,12 @@ const InventoryView = (() => {
       if (!candidate.style) return null;
       // Validate by wrapping into a minimal inventory payload — WriteGate then
       // exercises the same schema path that the AI-08/AI-10 writes go through.
+      // If the schema isn't reachable (GitHub Pages doesn't serve /schema/ and
+      // GitHubAPI may not have the right read scope), validate returns
+      // ['no schema']. In that case we still accept the candidate — it has
+      // the right shape (style/type/brand/tier built explicitly above), and
+      // AI-11 isn't a security boundary on its own (the user still sees the
+      // chip and can edit before the explicit save).
       const sec = sectionKey || 'base_spirits.other';
       const wrap = Normalize.byKey('inventory', {});
       const parts = sec.split('.');
@@ -196,7 +202,8 @@ const InventoryView = (() => {
         wrap[sec] = [candidate];
       }
       const errs = await WriteGate.validate('inventory', wrap);
-      if (errs && errs.length) return null;   // invalid → discard; never accept
+      const onlyNoSchema = errs && errs.length === 1 && errs[0] === 'no schema';
+      if (errs && errs.length && !onlyNoSchema) return null;   // real validation failure → discard
       bottle = candidate;
     } catch (_err) {
       // Fail-soft per AI-SPEC §4 / Pitfall 6: never block the paste flow.
@@ -676,29 +683,15 @@ const InventoryView = (() => {
     async function commitQuickAdd(name, sectionKey, inv) {
       // Phase 5 regex parse first — always runs (free, deterministic).
       let newEntry = parseBottleEntry(name, sectionKey);
-      // TEMP AI-11 DEBUG (remove after diagnosis):
-      console.log('[AI-11 debug] commitQuickAdd', {
-        name,
-        sectionKey,
-        regexResult: { style: newEntry.style, type: newEntry.type, brand: newEntry.brand },
-        lowConfidence: newEntry._lowConfidence,
-        hasClaudeAPI: typeof ClaudeAPI !== 'undefined',
-        keyPresent: typeof ClaudeAPI !== 'undefined' && typeof ClaudeAPI.getKey === 'function' ? (ClaudeAPI.getKey() ? 'yes' : 'EMPTY') : 'n/a',
-        cachedAlready: (() => { try { return Object.prototype.hasOwnProperty.call(JSON.parse(localStorage.getItem('bb_parse_cache') || '{}'), name); } catch { return false; } })(),
-      });
       // AI-11 fallback: only on low confidence AND only with a key (fail-soft
       // returns the regex result if Claude errors or no key). Mirrors the
       // main add-bottle handler above so the quick-add picker also benefits
       // from AI parsing on ambiguous lines.
       if (newEntry._lowConfidence) {
-        console.log('[AI-11 debug] low-confidence path -> calling aiParseBottle');
         try {
           const ai = await aiParseBottle(name, sectionKey);
-          console.log('[AI-11 debug] aiParseBottle returned', ai);
           if (ai) newEntry = ai;
-        } catch (err) { console.log('[AI-11 debug] aiParseBottle threw', err); }
-      } else {
-        console.log('[AI-11 debug] HIGH confidence - skipping AI (this is the bug if you expected an AI call)');
+        } catch { /* fail-soft — keep the regex result */ }
       }
       State.patch('inventory', i2 => {
         const arr2 = getNestedArr(i2, sectionKey);

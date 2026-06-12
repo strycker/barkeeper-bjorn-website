@@ -368,3 +368,16 @@ User confusion (Test 12 feedback): "Create Recipe" label is unclear (does it sav
 **Scope:** modest. New helper that scores match strength (already partially there in `_isNearDuplicateOfPool`); new interstitial dialog component; possible new tolerant data file. Could fit as one task in a future phase focused on AI UX polish or recipe library growth.
 
 **Related to:** AI-03 (drafts), BL-1 (Classroom V2 — lessons backed by structured data, same pattern), BL-3 (NA-only mode — similar "AI suggests a real recipe instead" surface), the `_isNearDuplicateOfPool` helper landed in this phase.
+
+### BL-6 — AI-first category detection for Quick Add (Inventory)
+*Surfaced during Test 18, 2026-06-12.*
+
+**Current behavior:** Inventory's Quick Add field calls `parseBottleSection(name)` (keyword-based section detector) FIRST. If a section can be inferred from a keyword (whiskey/gin/rum/etc.), the bottle commits directly. Otherwise a category picker pops up and the user manually chooses. Only AFTER the section is decided does `commitQuickAdd` run `parseBottleEntry` + the AI-11 Claude fallback.
+
+**User feedback:** The category picker shouldn't be a manual hop. For ambiguous inputs like "Mariposa Plata 38% 750ml" or "Schladerer Black Forest" the AI should determine the right section AND parse the style/type/brand in one call, then commit the bottle without bothering the user with a picker.
+
+**Requested fix (deferred):** When Phase-5 `parseBottleSection` returns null (no keyword match), call Claude FIRST with a system prompt like "Given this bottle line, return JSON with {section, style, type, brand?, tier?} where section is one of …" enumerating the inventory section keys. If the AI returns a valid section, use it and skip the picker. If the AI fails or returns nothing recognizable, fall back to the existing picker as a graceful default.
+
+**Scope:** modest. Refactor `attemptAdd` in inventory.js to await an `aiClassifyAndParseBottle(name)` helper that combines section detection + bottle parsing in one Claude call (cheaper + better UX than the two-step current path). Cache by raw input to match Pitfall 6.
+
+**Related to:** AI-11 (paste-a-line Claude fallback — same code path, expanded), AI-08 (legacy MD import — the bundle-extract pattern from there is the inspiration).
