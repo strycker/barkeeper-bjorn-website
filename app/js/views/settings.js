@@ -17,9 +17,21 @@ const SettingsView = (() => {
     barware: {},
     unassigned: [],
   };
+  // v2 pool shape (post chip-unification). The _reclassified_v2_2 +
+  // _autosaved_v2_2 flags are pre-set so a fresh-reset file does not
+  // re-trigger Normalize.reclassifyExistingPool or the autosave on the
+  // next load (there's nothing to migrate from). Drafts no longer live
+  // in a separate file — they're status:'draft' entries inside the
+  // recipes pool, so resetting recipes also clears drafts.
   const DEFAULT_RECIPES = {
-    originals: [],
-    favorites: [],
+    _schema_version: 2,
+    pool: [],
+    last_updated: null,
+    _reclassified_v2_2: true,
+    _autosaved_v2_2: true,
+  };
+  const DEFAULT_LIBRARY = {
+    links: [],
     last_updated: null,
   };
   const DEFAULT_BARKEEPER = {
@@ -692,12 +704,27 @@ const SettingsView = (() => {
         State.set('barkeeper', Object.assign({}, DEFAULT_BARKEEPER, { last_updated: Utils.today() }));
         await State.save('barkeeper', 'Reset all data via Settings');
 
-        // Phase-7 AI-side localStorage sweep (T-07-10): clear chat-model + API call log.
-        // GitHub credentials (bb_token / bb_owner / bb_repo / bb_branch) and the
-        // bb_anthropic_key are intentionally preserved (consistent with the existing UX:
-        // "Your GitHub credentials are preserved.").
-        localStorage.removeItem('bb_chat_model');
+        // Reset library (6th State file added in Phase 7). Sequential save
+        // per Pitfall 4. Drafts no longer have their own file post chip-
+        // unification — they live as status:'draft' entries in recipes.pool,
+        // which we already reset above.
+        State.set('library', Object.assign({}, DEFAULT_LIBRARY, { last_updated: Utils.today() }));
+        await State.save('library', 'Reset all data via Settings');
+
+        // Phase-7 AI-side localStorage sweep — Test 1 UAT correction:
+        //   * bb_chat_model is a UI PREFERENCE (which model the user picked),
+        //     NOT data. Preserve it across Reset, same as dark-mode would be
+        //     preserved. (Previously cleared; user flagged this as wrong.)
+        //   * bb_chat_history IS user data (the persisted chat thread).
+        //     CLEAR it. (Previously NOT cleared; user flagged this as a
+        //     gap — chat thread survived a "reset all data".)
+        //   * bb_api_log is audit/debug data — clear (unchanged).
+        // GitHub credentials (bb_token / bb_owner / bb_repo / bb_branch) and
+        // bb_anthropic_key remain preserved.
+        localStorage.removeItem('bb_chat_history');
         localStorage.removeItem('bb_api_log');
+        localStorage.removeItem('bb_parse_cache');
+        localStorage.removeItem('bb_derivation_cache');
 
         resetStatus.textContent = 'All data has been reset.';
         resetStatus.style.color = 'var(--green)';

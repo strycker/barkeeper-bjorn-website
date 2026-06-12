@@ -130,7 +130,15 @@ findings: |
   2. bb_chat_history (the actual chat thread — real user data) is NOT cleared on Reset — should clear (alongside the other user data files).
   3. drafts (5th State file) and library (6th State file) are NOT reset to defaults on Reset — should reset (they hold user data: AI-generated drafts + saved external links).
   Audit/debug data (bb_api_log) clearing is correct. API key + GitHub credentials preservation is correct.
-disposition: deferred to single fix-up plan at end of UAT
+disposition: RESOLVED 2026-06-12 — fix-up landed in settings.js at end of UAT:
+  - DEFAULT_RECIPES updated to v2 pool shape (post chip-unification) with `_reclassified_v2_2` + `_autosaved_v2_2` pre-set so a fresh reset doesn't re-trigger migration on next load. Drafts fold-in via the pool — no separate drafts reset needed.
+  - DEFAULT_LIBRARY added + Library reset to defaults sequentially after the 4 original files (Pitfall 4 honored).
+  - Reset sweep updated per the three findings:
+    1. bb_chat_model is now PRESERVED (UI preference, not data).
+    2. bb_chat_history is now CLEARED (chat thread is user data).
+    3. drafts + library reset to defaults.
+  - Also clears bb_parse_cache + bb_derivation_cache (audit/derived caches that should not survive a "reset all data" sweep).
+  - bb_anthropic_key + GitHub credentials remain preserved.
 
 
 #### 2. Chat — no-key gate
@@ -288,7 +296,7 @@ UAT result breakdown:
 - 3 PASS-with-fix (Tests 13, 18 with multiple sub-fixes, plus the chip-unification mini-phase that ran between Tests 11 and 12) — issue surfaced during UAT, fix shipped in-line, re-verified.
 - 1 PASS-cheap-path (Test 15 AI-13) — static map covered the user's case, AI-13 didn't engage; functionally verified via the deterministic test suite.
 - 1 PASS-by-attribution (Test 17) — implicitly exercised by Test 16's flow.
-- 1 issue-deferred (Test 1) — Reset-sweep behavior flagged 3 sub-issues; user chose "single fix-up plan at end of UAT".
+- 1 issue-resolved-at-close (Test 1) — Reset-sweep behavior flagged 3 sub-issues; single fix-up plan applied at end of UAT (see Test 1 result block).
 
 Backlog items captured during UAT (BL-1 .. BL-6):
 - BL-1: Classroom V2 — structured lesson schema + adaptive progression
