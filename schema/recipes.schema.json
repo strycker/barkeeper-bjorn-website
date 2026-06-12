@@ -30,8 +30,8 @@
     },
     "recipe": {
       "type": "object",
-      "required": ["id", "name", "status"],
-      "description": "Canonical recipe entry. Core fields are locked when seed_id is set (seeded from classics-db). Overlay fields (is_favorite / is_wishlist / made_log / ratings / user_notes / images) are editable on every entry, including seeded classics.",
+      "required": ["id", "status"],
+      "description": "Canonical recipe entry. `name` is NOT required at the pool layer because seeded classics (seed_id set) are overlay-only — their `name` and other core fields live in classics-db*.js and are read live by RecipeChip.resolveCore at render time. User originals and drafts will always have a name in practice; Normalize.recipe enforces that on entries that lack seed_id. Validating `name: required` here would reject every seeded pool entry on every WriteGate save.",
       "properties": {
         "id":          { "type": "string", "description": "Stable id. Seeded entries use the seed id (e.g. 'old-fashioned'); originals use 'cocktail<ts>'; drafts use 'draft<ts>'." },
         "status":      { "enum": ["classic", "original", "draft"] },
