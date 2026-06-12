@@ -673,8 +673,19 @@ const InventoryView = (() => {
       if (existing) existing.remove();
     }
 
-    function commitQuickAdd(name, sectionKey, inv) {
-      const newEntry = parseBottleEntry(name, sectionKey);
+    async function commitQuickAdd(name, sectionKey, inv) {
+      // Phase 5 regex parse first — always runs (free, deterministic).
+      let newEntry = parseBottleEntry(name, sectionKey);
+      // AI-11 fallback: only on low confidence AND only with a key (fail-soft
+      // returns the regex result if Claude errors or no key). Mirrors the
+      // main add-bottle handler above so the quick-add picker also benefits
+      // from AI parsing on ambiguous lines.
+      if (newEntry._lowConfidence) {
+        try {
+          const ai = await aiParseBottle(name, sectionKey);
+          if (ai) newEntry = ai;
+        } catch { /* fail-soft — keep the regex result */ }
+      }
       State.patch('inventory', i2 => {
         const arr2 = getNestedArr(i2, sectionKey);
         arr2.push(newEntry);
