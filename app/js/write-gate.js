@@ -99,9 +99,21 @@ const WriteGate = (() => {
   //      GitHub token is configured (production + offline-mode local). This
   //      is the same auth path data/*.json already use.
   // First non-empty response wins; subsequent calls hit `_schemaCache`.
+  // Map State / requestJSON schemaKey -> on-disk schema filename. Most
+  // schemaKeys match directly ('inventory' -> 'inventory.schema.json'); the
+  // 'profile' key is the historical exception — State.FILES.profile points
+  // to 'data/bar-owner-profile.json' and the schema file is named to match.
+  // Without this map _loadSchema('profile') 404s on 'schema/profile.schema.json'
+  // and AI-08 import / AI-10 repair fail-close with "Structured output failed
+  // validation: no schema".
+  const _SCHEMA_FILENAME = {
+    profile: 'bar-owner-profile',
+  };
+
   async function _loadSchema(schemaKey) {
     if (_schemaCache[schemaKey]) return _schemaCache[schemaKey];
-    const relPaths = [`../schema/${schemaKey}.schema.json`, `schema/${schemaKey}.schema.json`];
+    const filename = _SCHEMA_FILENAME[schemaKey] || schemaKey;
+    const relPaths = [`../schema/${filename}.schema.json`, `schema/${filename}.schema.json`];
     if (typeof fetch === 'function') {
       for (const path of relPaths) {
         try {
@@ -116,7 +128,7 @@ const WriteGate = (() => {
     }
     if (typeof GitHubAPI !== 'undefined' && typeof GitHubAPI.readJSON === 'function') {
       try {
-        const { data } = await GitHubAPI.readJSON(`schema/${schemaKey}.schema.json`);
+        const { data } = await GitHubAPI.readJSON(`schema/${filename}.schema.json`);
         if (data) { _schemaCache[schemaKey] = data; return data; }
       } catch { /* fall through */ }
     }
