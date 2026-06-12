@@ -14,10 +14,10 @@ updated: 2026-05-26T22:30:00.000Z
 
 ## Current Test
 
-number: 14
-name: Drafts → Promote to Original
+number: 15
+name: AI-13 — ingredient derivation fallback in Recommender
 expected: |
-  Drafts tab → pick a draft → click "Promote to Original" (button on the chip OR the "Save and Promote to Original" path from the draft edit form). Expected: a WriteGate diff/confirm dialog appears. On confirm, the pool entry mutates in place — status flips 'draft' → 'original', draft_id / source_prompt / created_at / parent_id are cleared, _source becomes 'user'. Drafts tab loses the entry; Originals tab gains it with no SHA conflicts.
+  With your key set, set up an inventory state where the recommender's static DERIVATIONS map would miss but Claude can reason it out — e.g. have an ingredient X but not Y where Y is reasonably derivable from X (a citrus-derivative situation, a sub-spirit, etc.). A recipe that requires Y becomes buildable thanks to the AI-13 fallback. Re-rank or refresh → no second API call for the same pair (cache hit in `bb_derivation_cache`). Remove the key → the engine reverts to the Phase-5 static DERIVATIONS only (no new AI calls).
 awaiting: user response
 
 chip_unification_summary:
@@ -196,6 +196,13 @@ result: pass-with-fix
 reported: "Nonsense prompt didn't throw — model returned the source recipe back essentially unchanged, producing two identical draft chips."
 fix: |
   Commit landing now adds `_isNearDuplicateOfPool` in recipes.js: candidate drafts are compared to every pool entry (seeded classics resolved through CLASSICS_DB) by normalized name + sorted ingredient-name key. If a match is found the runAIDesign + handleDraftTweak save paths throw before the pool.push / State.patch, so the duplicate never reaches the pool. Error toast tells the user where the duplicate lives ("a classic", "an existing draft", "one of your originals") and to try a more specific tweak.
+
+#### 14. Drafts → Promote to Original
+expected: |
+  Promote via chip button or "Save and Promote to Original" from the edit form → WriteGate diff/confirm → pool entry mutates in place (status flips 'draft' → 'original', draft fields cleared). Drafts tab loses entry; Originals tab gains it.
+result: pass
+fix: |
+  Schema commit 372ad05 dropped 'name' from the recipe required list — seeded classics are overlay-only by design and were tripping validation on every WriteGate-gated write. Promote was the first path to actually exercise WriteGate.gate so it surfaced there.
 
 #### 12. AI-03 — Generate → draft → refine → promote
 expected: |
