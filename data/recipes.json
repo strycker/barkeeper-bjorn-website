@@ -201,48 +201,6 @@
       "made_log": []
     },
     {
-      "id": "cocktail1781289079221",
-      "status": "original",
-      "_source": "user",
-      "name": "Amaretto Sour, Reimagined",
-      "tagline": "The Army & Navy's almond-loving cousin — richer, simpler, and always in the cabinet.",
-      "base": "Gin",
-      "ingredients": [
-        {
-          "name": "London Dry Gin",
-          "amount": "1.75 oz",
-          "notes": "A juniper-forward gin keeps the drink bracing against the sweet liqueur."
-        },
-        {
-          "name": "Amaretto",
-          "amount": "½ oz",
-          "notes": "Disaronno or Lazzaroni — provides the almond note that orgeat would, plus a touch of sweetness and depth."
-        },
-        {
-          "name": "Fresh Lemon Juice",
-          "amount": "¾ oz",
-          "notes": "Freshly squeezed and fine-strained."
-        },
-        {
-          "name": "Rich Simple Syrup (2:1)",
-          "amount": "1 barspoon",
-          "notes": "Optional — only if your amaretto is on the drier side or you want to round the edges."
-        }
-      ],
-      "method": "Add all ingredients to a shaker with ice. Shake hard for 10–12 seconds until well chilled and frothy. Double-strain into a chilled coupe.",
-      "method_type": "shaken",
-      "glassware": "Coupe",
-      "garnish": "Lemon twist expressed over the surface, draped on the rim; brandied cherry dropped in.",
-      "why_it_works": "Amaretto stands in for orgeat, giving the classic gin sour an almond backbone without needing a specialty syrup.",
-      "creator": "Barkeeper Bjorn",
-      "date_created": "2026-06-12",
-      "is_favorite": false,
-      "is_wishlist": false,
-      "is_hidden": false,
-      "is_original": false,
-      "made_log": []
-    },
-    {
       "id": "draft1780264353115",
       "status": "draft",
       "_source": "ai-generated",
