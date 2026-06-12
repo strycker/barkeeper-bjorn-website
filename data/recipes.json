@@ -201,9 +201,9 @@
       "made_log": []
     },
     {
-      "id": "draft1780440797964",
-      "status": "draft",
-      "_source": "ai-generated",
+      "id": "cocktail1781289015704",
+      "status": "original",
+      "_source": "user",
       "name": "Amaretto Sour, Reimagined",
       "tagline": "The Army & Navy's almond-loving cousin — richer, simpler, and always in the cabinet.",
       "base": "Gin",
@@ -234,16 +234,13 @@
       "glassware": "Coupe",
       "garnish": "Lemon twist expressed over the surface, draped on the rim; brandied cherry dropped in.",
       "why_it_works": "This is essentially a gin-based Amaretto Sour, and it shares DNA with the classic Army & Navy: spirit + lemon + nutty sweetener. Amaretto subs beautifully for orgeat at roughly the same volume because both deliver almond character, though amaretto brings alcohol and apricot-pit complexity that orgeat lacks. If you ever want to go further afield, Frangelico (hazelnut) or Nocino (green walnut) work on the same template. Pantry-friendly, no specialty syrup required.",
+      "creator": "Barkeeper Bjorn",
+      "date_created": "2026-06-12",
       "is_favorite": false,
       "is_wishlist": false,
       "is_hidden": false,
       "is_original": false,
-      "made_log": [],
-      "draft_id": "draft1780440797964",
-      "parent_id": "army-and-navy",
-      "created_at": "2026-06-02T22:53:17.964Z",
-      "updated_at": "2026-06-02T22:53:17.964Z",
-      "source_prompt": "Tweak of \"Army & Navy\": Find a good substitution for Orgeat, as some people don't like it and I don't always have it on hand.  Use something more interesting than simple syrup, though... are there any standard classic cocktails like Army & Navy except use a sweet nutty liqueur like Amaretto?"
+      "made_log": []
     },
     {
       "id": "draft1780441667410",
@@ -344,7 +341,5 @@
       "source_prompt": "design me a spirit-forward whiskey drink"
     }
   ],
-  "last_updated": "2026-06-02",
-  "_reclassified_v2_2": true,
-  "_autosaved_v2_2": true
+  "last_updated": "2026-06-12"
 }
