@@ -676,15 +676,29 @@ const InventoryView = (() => {
     async function commitQuickAdd(name, sectionKey, inv) {
       // Phase 5 regex parse first — always runs (free, deterministic).
       let newEntry = parseBottleEntry(name, sectionKey);
+      // TEMP AI-11 DEBUG (remove after diagnosis):
+      console.log('[AI-11 debug] commitQuickAdd', {
+        name,
+        sectionKey,
+        regexResult: { style: newEntry.style, type: newEntry.type, brand: newEntry.brand },
+        lowConfidence: newEntry._lowConfidence,
+        hasClaudeAPI: typeof ClaudeAPI !== 'undefined',
+        keyPresent: typeof ClaudeAPI !== 'undefined' && typeof ClaudeAPI.getKey === 'function' ? (ClaudeAPI.getKey() ? 'yes' : 'EMPTY') : 'n/a',
+        cachedAlready: (() => { try { return Object.prototype.hasOwnProperty.call(JSON.parse(localStorage.getItem('bb_parse_cache') || '{}'), name); } catch { return false; } })(),
+      });
       // AI-11 fallback: only on low confidence AND only with a key (fail-soft
       // returns the regex result if Claude errors or no key). Mirrors the
       // main add-bottle handler above so the quick-add picker also benefits
       // from AI parsing on ambiguous lines.
       if (newEntry._lowConfidence) {
+        console.log('[AI-11 debug] low-confidence path -> calling aiParseBottle');
         try {
           const ai = await aiParseBottle(name, sectionKey);
+          console.log('[AI-11 debug] aiParseBottle returned', ai);
           if (ai) newEntry = ai;
-        } catch { /* fail-soft — keep the regex result */ }
+        } catch (err) { console.log('[AI-11 debug] aiParseBottle threw', err); }
+      } else {
+        console.log('[AI-11 debug] HIGH confidence - skipping AI (this is the bug if you expected an AI call)');
       }
       State.patch('inventory', i2 => {
         const arr2 = getNestedArr(i2, sectionKey);
