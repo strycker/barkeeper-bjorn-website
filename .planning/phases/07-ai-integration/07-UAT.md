@@ -14,10 +14,10 @@ updated: 2026-05-26T22:30:00.000Z
 
 ## Current Test
 
-number: 16
-name: AI-08 — legacy markdown import
+number: 18
+name: AI-11 — paste-a-line Claude fallback (cached, key-gated, fail-soft)
 expected: |
-  Settings → AI Import. Paste a few lines of legacy markdown notes (a list of bottles + a taste note + a recipe). Click "Import with Claude" → a DIFF preview appears, nothing is written until you confirm. Confirm → the parsed data lands in inventory/profile/recipes (whichever sections the model extracted). Now paste gibberish that has no parseable sections → fails closed with an error toast, no write to GitHub.
+  In Inventory's paste-a-line entry, enter an ambiguous bottle line the regex parser cannot classify cleanly — try the canned `tests/fixtures/paste-line-ambiguous.txt` content, or something like "Mariposa Plata 38% 750ml" (made-up brand, real-looking spec). Expected: Claude parses it into a reviewable chip (style/type filled in). Re-enter the EXACT same line → NO second `/v1/messages` request fires (cache hit on `bb_parse_cache`). Then clear your Anthropic key in Settings and re-enter the same line — the regex falls back to its REVIEW-bucket behavior (Phase-5 byte-identical, zero network calls).
 awaiting: user response
 
 chip_unification_summary:
@@ -211,6 +211,28 @@ result: pass-cheap-path
 reported: "A Paloma was automatically shown as buildable — no AI call needed from the Recommender page."
 note: |
   User's inventory + the static DERIVATIONS map covered grapefruit→grapefruit juice without engaging AI-13. The AI-13 fallback exists and is unit-tested deterministically in phase-07-ai.test.js; it just stayed dormant for this inventory state (correct cheap path — no spurious API calls). Test counted as pass on behavior grounds (the recipe surfaced as buildable as expected); the AI-13 path wasn't user-exercised but is functionally verified.
+
+#### 16. AI-08 — legacy markdown import
+expected: |
+  Paste legacy markdown notes → "Import with Claude" → diff preview → confirm → data lands; gibberish → fail-closed.
+result: pass
+fix: |
+  Commit bcb7d2c added a _SCHEMA_FILENAME map inside write-gate.js so the
+  'profile' schemaKey resolves to schema/bar-owner-profile.schema.json instead
+  of the non-existent schema/profile.schema.json. Before that, AI-08 import
+  + AI-10 repair both failed for the profile section with "Structured output
+  failed validation: no schema" because _loadSchema returned null on all
+  three probe paths.
+
+#### 17. AI-10 — JSON repair
+expected: |
+  Trigger a validation failure → "Ask Claude to repair this" → repaired JSON shown as diff → only written after confirm. Still-invalid repair fails closed.
+result: pass-by-attribution
+note: |
+  Implicitly exercised during Test 16's profile-section flow. After the
+  bcb7d2c schema-filename fix, the "Ask Claude to Repair This" button
+  worked as designed — user confirmed Test 16 passes, which includes the
+  repair path.
 
 #### 12. AI-03 — Generate → draft → refine → promote
 expected: |
