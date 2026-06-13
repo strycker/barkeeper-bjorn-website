@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: phase_shipped
-last_updated: "2026-06-12T20:45:00.000Z"
+last_updated: "2026-06-13T16:55:00.000Z"
 progress:
   total_phases: 10
   completed_phases: 7
@@ -20,7 +20,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 
 **Core value:** The user's real-world bar inventory and flavor profile should power both AI-driven conversation and rule-based recommendations — seamlessly, whether in a chat session or the web app.
 
-**Current focus:** Phase 7 — AI Integration SHIPPED ✅ + LEARNINGS extracted (14 decisions / 10 lessons / 11 patterns / 9 surprises in `.planning/phases/07-ai-integration/07-LEARNINGS.md`). Backlog items BL-1 .. BL-6 + chip-unification compat-shim removal deferred to future phases. Ready to start Phase 8 (Portability) when desired.
+**Current focus:** Phase 7 — AI Integration SHIPPED ✅ + SECURED ✅ + LEARNINGS extracted + UI Review 18/24. SECURITY.md verified 33/33 threats closed (0 open, 3 accepted) at ASVS L1. Backlog items BL-1 .. BL-6 + chip-unification compat-shim removal deferred to future phases. Ready to start Phase 8 (Portability) when desired.
 
 ---
 
