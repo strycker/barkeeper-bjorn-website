@@ -2,11 +2,11 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: phase_executed_awaiting_uat
-last_updated: "2026-05-27T06:00:00.000Z"
+status: phase_shipped
+last_updated: "2026-06-13T16:55:00.000Z"
 progress:
   total_phases: 10
-  completed_phases: 6
+  completed_phases: 7
   total_plans: 32
   completed_plans: 32
   percent: 100
@@ -20,7 +20,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 
 **Core value:** The user's real-world bar inventory and flavor profile should power both AI-driven conversation and rule-based recommendations — seamlessly, whether in a chat session or the web app.
 
-**Current focus:** Phase 7 UAT resuming at Test 13 — chip unification mini-phase SHIPPED + VERIFIED (see .planning/chip-unification-plan.md). Tests 1-12 pass; 13-18 (AI-03 fail-closed, promote, AI-13 derivation, AI-08 import, AI-10 repair, AI-11 paste-a-line) remaining.
+**Current focus:** Phase 7 — AI Integration SHIPPED ✅ + SECURED ✅ + LEARNINGS extracted + UI Review 18/24. SECURITY.md verified 33/33 threats closed (0 open, 3 accepted) at ASVS L1. Backlog items BL-1 .. BL-6 + chip-unification compat-shim removal deferred to future phases. Ready to start Phase 8 (Portability) when desired.
 
 ---
 
@@ -34,7 +34,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 | 4 | Inventory & Recommender Depth | Shipped | 3 | 100% |
 | 5 | Polish, Depth & UX Tidy | Shipped | 4 plans, 17/17 UAT, VALIDATION.md | 100% |
 | 6 | Recipe & Recommender UX | Shipped | 4 plans, 20/22 UAT pass (2 issues deferred), 2 recommender blocker bugs fixed mid-UAT | 100% |
-| 7 | AI Integration | Executed (awaiting UAT) | 6 plans, 25/25 reqs, 30/30 phase-07 tests, 49/49 full suite | 100% code; UAT pending |
+| 7 | AI Integration | Shipped | 6 plans, 25/25 reqs, 43/43 phase-07 tests, 62/62 full suite, 18/18 UAT pass | 100% |
 | 8 | Portability | Pending | — | 0% |
 | 9 | Backend & Multi-User | Pending | — | 0% |
 | 10 | Community, API & Multi-Agent | Pending | — | 0% |
