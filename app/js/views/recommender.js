@@ -65,10 +65,10 @@ const RecommenderView = (() => {
   function _renderCard(item, isOneAway) {
     const { recipe, flavorScore, missingIngredient, missingIngredients } = item;
     const diff = _difficultyLabel(recipe.difficulty);
-    const savedRecipes = State.get('recipes') || {};
-    const isFav  = (savedRecipes.confirmed_favorites || []).some(r => Utils.sameRecipe(r, recipe));
-    const isWish = (savedRecipes.wishlist || []).some(r => Utils.sameRecipe(r, recipe));
-    const isMade = (savedRecipes.made_log || []).some(r => Utils.sameRecipe(r, recipe));
+    const _e = _poolEntryFor(recipe);
+    const isFav  = !!(_e && _e.is_favorite);
+    const isWish = !!(_e && _e.is_wishlist);
+    const isMade = !!(_e && Array.isArray(_e.made_log) && _e.made_log.length > 0);
     return `
       <div class="rec-card ${isOneAway ? 'rec-card--oneaway' : ''}">
         <div class="rec-card-header">
@@ -125,10 +125,10 @@ const RecommenderView = (() => {
     const diff = _difficultyLabel(recipe.difficulty);
     const missing0 = missingIngredients[0];
     const missing1 = missingIngredients[1];
-    const savedRecipes = State.get('recipes') || {};
-    const isFav  = (savedRecipes.confirmed_favorites || []).some(r => Utils.sameRecipe(r, recipe));
-    const isWish = (savedRecipes.wishlist || []).some(r => Utils.sameRecipe(r, recipe));
-    const isMade = (savedRecipes.made_log || []).some(r => Utils.sameRecipe(r, recipe));
+    const _e = _poolEntryFor(recipe);
+    const isFav  = !!(_e && _e.is_favorite);
+    const isWish = !!(_e && _e.is_wishlist);
+    const isMade = !!(_e && Array.isArray(_e.made_log) && _e.made_log.length > 0);
     return `
       <div class="rec-card rec-card--twoaway">
         <div class="rec-card-header">
@@ -340,6 +340,23 @@ const RecommenderView = (() => {
       });
     });
 
+    // Look up a pool entry for a given recipe probe (classic or original).
+    // Uses the same lookup ladder as _togglePoolFlag so filled-state checks
+    // (isFav/isWish/isMade) are consistent with what a toggle would find.
+    function _poolEntryFor(probe) {
+      const pool = (State.get('recipes')?.pool) || [];
+      const classicsDb = (typeof CLASSICS_DB !== 'undefined' && Array.isArray(CLASSICS_DB)) ? CLASSICS_DB : [];
+      let e = pool.find(p => p.id === probe.id);
+      if (!e) e = pool.find(p => p.seed_id && p.seed_id === probe.id);
+      if (!e) e = pool.find(p => p.status === 'original' && Utils.sameRecipe(p, probe));
+      if (!e) e = pool.find(p => {
+        if (!p.seed_id) return false;
+        const seed = classicsDb.find(c => c.id === p.seed_id);
+        return seed && Utils.sameRecipe(seed, probe);
+      });
+      return e || null;
+    }
+
     // Pool-aware overlay toggle: find or create a pool entry for a
     // recommender recipe (classic from CLASSICS_DB OR original from the
     // pool) and flip the named overlay flag in place. Replaces the legacy
@@ -407,7 +424,7 @@ const RecommenderView = (() => {
         // immediately (State.patch is synchronous inside _togglePoolFlag),
         // then await the GitHub save in the background. Error toast surfaces
         // if the save eventually fails after all retries.
-        const isFav = (State.get('recipes')?.confirmed_favorites || []).some(r => Utils.sameRecipe(r, probe));
+        const _e = _poolEntryFor(probe); const isFav = !!(_e && _e.is_favorite);
         const savePromise = _togglePoolFlag(item, 'is_favorite');
         Utils.showToast(isFav ? 'Removed from Favorites' : 'Added to Favorites ♥');
         _rerender(container);
@@ -428,7 +445,7 @@ const RecommenderView = (() => {
         const probe = { name: recipeName, base: recipeBase };
         const item = allItems.find(r => Utils.sameRecipe(r.recipe, probe));
         if (!item) return;
-        const isWish = (State.get('recipes')?.wishlist || []).some(r => Utils.sameRecipe(r, probe));
+        const _e = _poolEntryFor(probe); const isWish = !!(_e && _e.is_wishlist);
         const savePromise = _togglePoolFlag(item, 'is_wishlist');
         Utils.showToast(isWish ? 'Removed from Wishlist' : 'Added to Wishlist ★');
         _rerender(container);
@@ -449,7 +466,7 @@ const RecommenderView = (() => {
         const probe = { name: recipeName, base: recipeBase };
         const item = allItems.find(r => Utils.sameRecipe(r.recipe, probe));
         if (!item) return;
-        const isMade = (State.get('recipes')?.made_log || []).some(r => Utils.sameRecipe(r, probe));
+        const _e = _poolEntryFor(probe); const isMade = !!(_e && (_e.made_log || []).length > 0);
         const savePromise = _togglePoolFlag(item, 'made_log');
         Utils.showToast(isMade ? 'Removed from Made' : 'Marked as made ✓');
         _rerender(container);
@@ -475,7 +492,7 @@ const RecommenderView = (() => {
         _scopeLevel = Number(btn.dataset.scope);
         const inv = State.get('inventory') || {};
         const overrideProfile = _buildOverrideProfile(profile);
-        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '', originals: State.get('recipes')?.originals || [] });
+        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '', originals: (State.get('recipes')?.pool || []).filter(r => r.status === 'original') });
         _rerender(container);
       });
     });
@@ -487,7 +504,7 @@ const RecommenderView = (() => {
         if (_vetoOverrides.has(v)) _vetoOverrides.delete(v); else _vetoOverrides.add(v);
         const inv = State.get('inventory') || {};
         const overrideProfile = _buildOverrideProfile(profile);
-        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '', originals: State.get('recipes')?.originals || [] });
+        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '', originals: (State.get('recipes')?.pool || []).filter(r => r.status === 'original') });
         _rerender(container);
         // Update chip visual state
         btn.classList.toggle('bypassed', _vetoOverrides.has(v));
@@ -517,7 +534,7 @@ const RecommenderView = (() => {
         _sliderValues[input.dataset.axis] = parseFloat(input.value);
         const inv = State.get('inventory') || {};
         const overrideProfile = _buildOverrideProfile(profile);
-        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '', originals: State.get('recipes')?.originals || [] });
+        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '', originals: (State.get('recipes')?.pool || []).filter(r => r.status === 'original') });
         _rerender(container);
       });
     });
@@ -555,7 +572,7 @@ const RecommenderView = (() => {
         });
         const inv = State.get('inventory') || {};
         const overrideProfile = _buildOverrideProfile(profile);
-        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '', originals: State.get('recipes')?.originals || [] });
+        _results = RecommenderEngine.recommend(inv, overrideProfile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '', originals: (State.get('recipes')?.pool || []).filter(r => r.status === 'original') });
         _rerender(container);
       });
     }
@@ -607,7 +624,7 @@ const RecommenderView = (() => {
     // these are user-interaction state that persist within the session.
 
     // Run engine with saved profile
-    _results = RecommenderEngine.recommend(inventory, profile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '', originals: State.get('recipes')?.originals || [] });
+    _results = RecommenderEngine.recommend(inventory, profile, { scope: _scopeLevel, ignoreVetoes: _vetoOverrides, specialty: State.get('barkeeper')?.personality?.specialty || '', originals: (State.get('recipes')?.pool || []).filter(r => r.status === 'original') });
 
     const occasionTags = _getOccasionTags();
 
