@@ -342,7 +342,7 @@ const ClaudeAPI = (() => {
     }
 
     // Originals
-    const originals = (recipes.originals || []).filter(r => r && r.name);
+    const originals = (recipes.pool || []).filter(r => r && r.status === 'original' && r.name);
     if (originals.length) {
       lines.push('## Original Cocktails');
       originals.forEach(r => {
@@ -377,12 +377,19 @@ const ClaudeAPI = (() => {
     }
 
     // Made-log with times_made
-    const madeLog = (recipes.made_log || []).filter(r => r && r.name);
+    const _ctxClassics = (typeof CLASSICS_DB !== 'undefined' && Array.isArray(CLASSICS_DB)) ? CLASSICS_DB : [];
+    const _resolveCtx = (e) => (e && e.seed_id) ? ({ ...(_ctxClassics.find(c => c.id === e.seed_id) || {}), ...e }) : e;
+    const madeLog = (recipes.pool || [])
+      .filter(r => Array.isArray(r.made_log) && r.made_log.length > 0)
+      .map(_resolveCtx)
+      .filter(r => r && r.name);
     if (madeLog.length) {
       lines.push('## Made Log (with frequency)');
       madeLog.forEach(m => {
-        const n = m.times_made || 1;
-        lines.push(`- ${m.name} — ${n}× ${m.last_made ? `(last: ${m.last_made})` : ''}`.trim());
+        const lastEntry = m.made_log[m.made_log.length - 1] || {};
+        const n = lastEntry.times_made || m.made_log.length;
+        const lastDate = lastEntry.date;
+        lines.push(`- ${m.name} — ${n}× ${lastDate ? `(last: ${lastDate})` : ''}`.trim());
       });
       lines.push('');
     }
