@@ -19,6 +19,13 @@
   --blue:      #5b9bd5;
   --radius:    8px;
   --radius-sm: 5px;
+  /* Type scale (UI-TOKEN-01) — six steps; --fs-xs is the accessibility floor. */
+  --fs-xs:   0.75rem;
+  --fs-sm:   0.85rem;
+  --fs-base: 0.95rem;
+  --fs-lg:   1.05rem;
+  --fs-xl:   1.2rem;
+  --fs-2xl:  1.5rem;
   --shadow:    0 4px 20px rgba(0,0,0,0.5);
   --transition: 150ms ease;
 }
