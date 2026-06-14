@@ -266,8 +266,12 @@
 
 **Out of scope (stays in backlog):** BL-1, BL-3, BL-5, BL-6; chat streaming "thinking…"/Stop affordances; live-key UAT.
 
-**Plans:**
-- [ ] TBD (run /gsd-plan-phase 07.1 to break down)
+**Plans:** 5 plans
+- [ ] 07.1-01-PLAN.md — CHIP-03: remove the State.get('recipes') compat shim (in state.js, not normalize.js) after migrating recommender/dashboard/profile/export/claude-api readers to the pool
+- [ ] 07.1-02-PLAN.md — CHIP-04: Originals chip parity — add ♥/☆/✓ overlay actions to the unified RecipeChip render + verify rename-sync
+- [ ] 07.1-03-PLAN.md — RECIPE-GEN-01: converge both Generate-with-AI entry points on the WriteGate drafts pipeline; rename "Create Recipe" → "Save to Originals"
+- [ ] 07.1-04-PLAN.md — UI-TOKEN-01: add --fs-xs..--fs-2xl type scale; migrate chip/badge/chat/classroom/library selectors (CSS-only)
+- [ ] 07.1-05-PLAN.md — UI-TOKEN-02: add --space-* tokens + .form-section-card/.form-actions-row/.muted-help/.input-disabled; extract inline styles in recipes.js + settings.js; phase-wide final verification
 
 **Success criteria:**
 1. No source file calls the legacy `State.get('recipes')` getters shim; the shim is deleted from `normalize.js`; `node tests/*.test.js` is fully green
