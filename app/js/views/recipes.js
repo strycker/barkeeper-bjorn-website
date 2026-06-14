@@ -1562,7 +1562,7 @@ const RecipesView = (() => {
     // preserved as a comparison point.
     if (isDraft && hasKey) {
       wrap.innerHTML += `
-        <div class="rf-ai-prompt-wrap" id="rf-tweak-wrap" style="margin-bottom:20px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);">
+        <div class="rf-gen-wrap" id="rf-tweak-wrap" style="margin-bottom:20px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);">
           <div class="section-label" style="margin-bottom:8px;">Tweak with AI</div>
           <div class="form-group" style="margin-bottom:10px;">
             <label for="rf-tweak-prompt" style="font-size:0.82rem;">Ask Claude to refine this draft (creates a NEW draft, keeps the original)</label>
@@ -1580,23 +1580,15 @@ const RecipesView = (() => {
     const dis = isSeededClassic ? 'disabled' : '';
 
     // AI prompt block — shown only for new recipes (D-12)
+    // Redirects to the unified WriteGate-backed drafts pipeline (RECIPE-GEN-01).
     if (!isEdit) {
       wrap.innerHTML += `
-        <div class="rf-ai-prompt-wrap" id="rf-ai-wrap" style="margin-bottom:20px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);">
+        <div class="rf-gen-wrap" id="rf-ai-wrap" style="margin-bottom:20px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);">
           <div class="section-label" style="margin-bottom:8px;">Generate with AI</div>
-          <div class="form-group" style="margin-bottom:10px;">
-            <label for="rf-ai-prompt" style="font-size:0.82rem;">Describe the cocktail you want</label>
-            <textarea id="rf-ai-prompt" rows="2"
-                      placeholder="e.g. a smoky mezcal sour with honey and citrus"
-                      style="font-family:monospace;font-size:0.82rem;padding:10px;resize:vertical;"></textarea>
-          </div>
-          <button class="btn btn-primary btn-sm" id="rf-generate" type="button"
-                  ${hasKey ? '' : 'disabled'}
-                  title="${hasKey ? '' : 'Add your Anthropic API key in Settings to use AI generation'}"
-                  style="${hasKey ? '' : 'opacity:0.4;cursor:not-allowed;'}">
-            Generate
-          </button>
-          <span id="rf-generate-status" style="font-size:0.82rem;color:var(--text-muted);margin-left:10px;"></span>
+          <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:10px;">
+            Let your bartender design a draft you can refine, then promote to an Original.
+          </p>
+          <button class="btn btn-primary btn-sm" id="rf-open-ai" type="button">✨ Generate with AI</button>
         </div>`;
     }
 
@@ -1696,17 +1688,12 @@ const RecipesView = (() => {
 
     container.appendChild(wrap);
 
-    // Generate button stub: live wiring lands in plan 03-03 (Wave 2 / ClaudeAPI).
-    // If no API key, button is disabled at render time (handled above) — skip listener.
-    if (!isEdit && hasKey) {
-      const genBtn = wrap.querySelector('#rf-generate');
-      if (genBtn) {
-        genBtn.addEventListener('click', () => {
-          if (typeof ClaudeAPI === 'undefined' || typeof handleGenerate === 'undefined') {
-            Utils.showToast('AI generation module not yet loaded.', 'error');
-            return;
-          }
-          handleGenerate(wrap);
+    // AI generate button — redirects to the unified drafts pipeline (RECIPE-GEN-01).
+    if (!isEdit) {
+      const openAiBtn = wrap.querySelector('#rf-open-ai');
+      if (openAiBtn) {
+        openAiBtn.addEventListener('click', () => {
+          showAIPromptModal(document.getElementById('main-content'));
         });
       }
     }
