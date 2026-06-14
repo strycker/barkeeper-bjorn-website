@@ -707,6 +707,49 @@ const RecipesView = (() => {
     }
   }
 
+  // Toggle a boolean overlay flag (is_favorite / is_wishlist) on an Original's
+  // pool entry by id, save to GitHub, then re-render the Originals tab.
+  function _toggleOriginalOverlay(r, flag, mainContainer) {
+    State.patch('recipes', rec => {
+      const entry = (rec.pool || []).find(p => p && p.id === r.id);
+      if (entry) entry[flag] = !entry[flag];
+      rec.last_updated = new Date().toISOString().slice(0, 10);
+    });
+    State.save('recipes').then(() => {
+      const on = (State.get('recipes')?.pool || []).find(p => p && p.id === r.id);
+      const isOn = !!(on && on[flag]);
+      const label = flag === 'is_favorite'
+        ? (isOn ? 'Added to Favorites ♥' : 'Removed from Favorites')
+        : (isOn ? 'Added to Wishlist ★' : 'Removed from Wishlist');
+      Utils.showToast(label);
+      render(mainContainer || document.getElementById('main-content'), { tab: 'originals' });
+    }).catch(err => Utils.showToast('Save failed: ' + err.message, 'error'));
+  }
+
+  // Toggle made_log on an Original's pool entry (clear vs push one entry),
+  // save to GitHub, then re-render the Originals tab.
+  function _toggleOriginalMade(r, mainContainer) {
+    const today = new Date().toISOString().slice(0, 10);
+    let nowMade = false;
+    State.patch('recipes', rec => {
+      const entry = (rec.pool || []).find(p => p && p.id === r.id);
+      if (entry) {
+        if (Array.isArray(entry.made_log) && entry.made_log.length > 0) {
+          entry.made_log = [];
+          nowMade = false;
+        } else {
+          entry.made_log = [{ date: today, times_made: 1, notes: '' }];
+          nowMade = true;
+        }
+      }
+      rec.last_updated = today;
+    });
+    State.save('recipes').then(() => {
+      Utils.showToast(nowMade ? 'Marked as made ✓' : 'Removed from Made');
+      render(mainContainer || document.getElementById('main-content'), { tab: 'originals' });
+    }).catch(err => Utils.showToast('Save failed: ' + err.message, 'error'));
+  }
+
   function renderOriginalsGrid(originals, container, mainContainer) {
     const addBtn = document.createElement('div');
     addBtn.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:12px;';
@@ -758,6 +801,9 @@ const RecipesView = (() => {
         const seed = `Tell me about my original "${r.name}". What would you tweak given my bar?`;
         ChatView.openDrawer({ seed });
       },
+      favorite: (r) => _toggleOriginalOverlay(r, 'is_favorite', mainContainer),
+      wishlist: (r) => _toggleOriginalOverlay(r, 'is_wishlist', mainContainer),
+      made: (r) => _toggleOriginalMade(r, mainContainer),
       discard: (r) => {
         if (!confirm(`Delete "${r.name}"? This cannot be undone.`)) return;
         State.patch('recipes', rec => {
