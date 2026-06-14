@@ -14,8 +14,8 @@
 | 3 | Content Management | Recipe add/edit, image upload, export/import | RECIPE-01–05, EXPORT-01–04 | Complete |
 | 4 | Inventory & Recommender Depth | Structured bottle objects, in-place editing, mood sliders, scope toggle, name standardization | INV-03–07, REC-01–03 | Complete |
 | 5 | Polish, Depth & UX Tidy | Recommender UX fixes, vetoes filter panel, ingredient derivation, inventory field depth, data model tidy, Bartender Customization Wizard | REC-05–09, INV-08–10, DATA-01–03, CUST-01–02 | Complete |
-| 6 | Recipe & Recommender UX | "I Made This" tracking, chip-style Favorites/Wishlist/Made tabs, text search on Recipes + Recommender, card layout polish | REC-10–11, RECIPE-MADE-01–02, RECIPE-VIEW-01–02, RECIPE-SEARCH-01, REC-SEARCH-01 | Code complete · awaiting UAT |
-| 7 | AI Integration | Claude API chat, classroom, AI design, AI recommendations, AI import, Library | AI-01–13, LIB-01, REC-04, SET-05, CHAT-01–09 | Pending |
+| 6 | Recipe & Recommender UX | "I Made This" tracking, chip-style Favorites/Wishlist/Made tabs, text search on Recipes + Recommender, card layout polish | REC-10–11, RECIPE-MADE-01–02, RECIPE-VIEW-01–02, RECIPE-SEARCH-01, REC-SEARCH-01 | Complete |
+| 7 | AI Integration | Claude API chat, classroom, AI design, AI recommendations, AI import, Library | AI-01–13, LIB-01, REC-04, SET-05, CHAT-01–09 | Complete (live-key UAT deferred) |
 | 8 | Portability | Markdown round-trip, per-page export/import, append/overwrite import mode | PORT-01–05 | Pending |
 | 9 | Backend & Multi-User | Supabase, auth, per-user isolation, account settings | BACKEND-01–08 | Pending |
 | 10 | Community, API & Multi-Agent | Community feed, forum, REST API, Bjorn sub-agents | COMMUNITY-01–08, API-01–06, AGENT-SYS-01–04 | Pending |
@@ -363,11 +363,35 @@ Phase 10 — depends on Phase 9 (community requires multi-user accounts)
 
 Items still unscheduled — triage at next milestone boundary.
 
+### Derivation / Recommender (pre-Phase-7 backlog)
+
 - **AI-assisted onboarding** — With an API key present, onboarding steps could offer AI-generated suggestions based on partial answers ("based on your love of smoky spirits, here are common pairings to consider for your veto list"). Low-priority polish for Phase 6+.
 - **Recommender user-overridable substitution rules** — Allow users to define their own derivation/substitution rules (e.g. "I always have fresh citrus so treat limes as lime juice"). Extends Phase 5 static map + Phase 6 AI inference. Design TBD.
 - **Transitive derivations** — Multi-hop inference: lemons → lemon juice → sour mix; sugar + water → simple syrup. Extend Phase 5/6 derivation map. Design: static DAG vs. AI-inferred graph.
 - **Recommender card detail expansion** — Click a card in the recommender to expand full recipe inline (ingredients, method, glassware) without navigating away. Phase 5 or 6 quality-of-life.
 - **Ingredient hierarchy UX** — Show the user which ingredients were matched via derivation (e.g. "✓ lime juice (from fresh limes)") so they understand why a recipe is included.
+
+### Captured during Phase 7 UAT (BL-1 .. BL-6)
+
+Full detail in `.planning/phases/07-ai-integration/07-UAT.md` (Deferred / Backlog section).
+
+- **BL-1: Classroom V2** — structured lesson schema (`schema/classroom.schema.json`) + adaptive 101→201→advanced progression + lesson card actions (mark complete, save to Library, add AI-suggested lesson). Scope: new phase (likely Phase 11+), "personalized learning loop" theme.
+- **BL-2: Unified recipe-chip schema** — normalize recipe storage (store once, reference by id) + single `renderRecipeChip()` so Originals reach visual parity with other chip surfaces; also fixes Phase 6 Test 12 (rename sync). Partially addressed by the chip-unification mini-phase; Originals-parity remainder still open. Scope: small/medium.
+- **BL-3: "Non-Alcoholic Only Tonight" mode** — `na` (and optional `near_na`) boolean on the recipe schema + Recommender toggle + AI-03 prompt augmentation + NA chip badge + one-pass tagging sweep over the 169 classics. Scope: modest.
+- **BL-4: Unify the two "Generate with AI" entry points** — converge the legacy New-Recipe-form generator and the Drafts-tab generator on one pipeline; rename ambiguous "Create Recipe" CTA. Scope: small.
+- **BL-5: "Use the real recipe" interstitial** — when an AI-tweak draft near-matches an existing classic/original, offer "use the real recipe" / "save as draft anyway" / "add to classics DB" instead of a bare error toast (builds on `_isNearDuplicateOfPool`). Scope: modest.
+- **BL-6: AI-first category detection for Quick Add (Inventory)** — when `parseBottleSection` returns null, call Claude FIRST to return `{section, style, type, brand?, tier?}` and skip the manual category picker; fall back to picker on failure. Scope: modest.
+
+### Tech debt / cleanup
+
+- **Chip-unification compat-shim removal** — drop the legacy `State.get('recipes')` getters shim once the remaining non-recipes-view callers (`export.js`, `claude-api.js` context, `profile.js` count) are migrated to read the pool directly. Shipped mini-phase plan: `.planning/chip-unification-plan.md` (Commit 3 final step). Queued cleanup; non-blocking.
+- **UI type-scale tokens** — add `--fs-xs`..`--fs-2xl` to `:root` and migrate the 30+ ad-hoc `font-size` values (chip system, lesson tiles, badges, chat bubbles) onto the scale. From Phase 7 UI Review (Typography 2/4).
+- **UI spacing tokens + inline-style extraction** — add `--space-*` tokens; promote the 87 inline `style=` blocks in `recipes.js` and 38 in `settings.js` into named utility/section classes (`.form-section-card`, `.form-actions-row`, `.muted-help`, `.input-disabled`). From Phase 7 UI Review (Spacing 2/4).
+- **Chat streaming affordances** — add a "thinking…" placeholder before the first token and a visible Stop button (wire to the existing `AbortController`) in both the `#chat` page and the quick-ask drawer. From Phase 7 UI Review (Visuals 3/4).
+
+### Deferred verification
+
+- **Phase 7 live-key UAT** — recipe-balance quality, persona voice, import quality, JSON-repair quality, drawer/abort/rate-limit UX, and lesson Q&A all require a real BYOK Anthropic key and could not be exercised in the build container. Run via `/gsd-verify-work` once a key is available.
 
 ---
 
