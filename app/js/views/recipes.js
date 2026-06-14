@@ -1338,13 +1338,9 @@ const RecipesView = (() => {
     container.appendChild(wrap);
   }
 
-  // ── handleGenerate — live AI recipe generation (D-13) ─────────────────
-  // Reads #rf-ai-prompt, calls ClaudeAPI.generateRecipe with current
-  // buildPromptContext(), populates form fields inline, manages spinner +
-  // form-field disable state. Errors surface as red toasts.
-  // Tweak-from-edit-form: edit-form-side analog of the runAIDesign('fork')
-  // path. Produces a NEW draft (fresh draft_id) so the original draft is
-  // preserved as a comparison point. Then routes back to the Drafts tab.
+  // ── handleDraftTweak — AI tweak from the draft edit form (D-10) ────────
+  // Produces a NEW draft (fork) so the original draft is preserved as a
+  // comparison point. Routes back to the Drafts tab on success.
   async function handleDraftTweak(wrap, baseDraft, container) {
     const promptEl = wrap.querySelector('#rf-tweak-prompt');
     const tweakBtn = wrap.querySelector('#rf-tweak');
@@ -1431,70 +1427,6 @@ const RecipesView = (() => {
     } finally {
       tweakBtn.disabled = false;
       tweakBtn.textContent = 'Generate Tweaked Draft';
-    }
-  }
-
-  async function handleGenerate(wrap) {
-    const prompt = wrap.querySelector('#rf-ai-prompt').value.trim();
-    if (!prompt) {
-      Utils.showToast('Enter a description before generating.', 'error');
-      return;
-    }
-
-    const genBtn   = wrap.querySelector('#rf-generate');
-    const statusEl = wrap.querySelector('#rf-generate-status');
-
-    // Disable Generate button and all form fields while in-flight (D-13)
-    genBtn.disabled = true;
-    genBtn.textContent = 'Generating…';
-    statusEl.textContent = '';
-    const formFields = wrap.querySelectorAll('input, textarea, button:not(#rf-generate)');
-    formFields.forEach(el => { el.disabled = true; });
-
-    try {
-      const ctx = buildPromptContext();  // { bkName, bkPreset, inventoryText, profileText }
-      const recipe = await ClaudeAPI.generateRecipe(prompt, ctx);
-
-      // Populate form fields inline (D-13). Assigning to input.value does not
-      // parse HTML — no XSS vector. escapeHtml is only needed for innerHTML sinks.
-      if (recipe.name)          wrap.querySelector('#rf-name').value      = recipe.name;
-      if (recipe.tagline)       wrap.querySelector('#rf-tagline').value   = recipe.tagline;
-      // Auto-fill creator with AI-returned value or fall back to bartender name (D-02 required)
-      wrap.querySelector('#rf-creator').value = recipe.creator || ctx.bkName || 'Barkeeper Bjorn';
-      if (recipe.method)        wrap.querySelector('#rf-method').value    = recipe.method;
-      if (recipe.glassware)     wrap.querySelector('#rf-glassware').value = recipe.glassware;
-      if (recipe.garnish)       wrap.querySelector('#rf-garnish').value   = recipe.garnish;
-      if (recipe.tasting_notes) wrap.querySelector('#rf-profile').value   = recipe.tasting_notes;
-      if (recipe.why_it_works)  wrap.querySelector('#rf-why').value       = recipe.why_it_works;
-      if (recipe.method_type) {
-        const mtSelect = wrap.querySelector('#rf-method-type');
-        const validTypes = ['shaken','stirred','built','blended','thrown','other'];
-        if (validTypes.includes(recipe.method_type)) mtSelect.value = recipe.method_type;
-      }
-
-      // Rebuild ingredient rows from AI response (ingredientRowHtml escapes)
-      if (Array.isArray(recipe.ingredients) && recipe.ingredients.length) {
-        const ingContainer = wrap.querySelector('#rf-ingredients');
-        ingContainer.innerHTML = recipe.ingredients
-          .map((ing, i) => ingredientRowHtml(ing, i))
-          .join('');
-        bindIngredientRemove(wrap);
-      }
-
-      Utils.showToast('AI draft loaded — review and save.');
-
-    } catch (err) {
-      Utils.showToast('Generation failed: ' + err.message, 'error');
-    } finally {
-      // Always re-enable form fields and reset Generate button regardless of outcome
-      const allFields = wrap.querySelectorAll('input, textarea, button');
-      allFields.forEach(el => { el.disabled = false; });
-      genBtn.textContent = 'Generate';
-      // Edge case: user removed key during generation — re-disable Generate
-      if (!localStorage.getItem('bb_anthropic_key')) {
-        genBtn.disabled = true;
-        genBtn.style.opacity = '0.4';
-      }
     }
   }
 
@@ -1681,7 +1613,7 @@ const RecipesView = (() => {
       </div>
 
       <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
-        <button class="btn btn-primary" id="rf-save">${isDraft ? 'Save Draft Changes' : isSeededClassic ? 'Save Overlay (ratings / notes)' : (isEdit ? 'Save Changes' : 'Create Recipe')}</button>
+        <button class="btn btn-primary" id="rf-save">${isDraft ? 'Save Draft Changes' : isSeededClassic ? 'Save Overlay (ratings / notes)' : (isEdit ? 'Save Changes' : 'Save to Originals')}</button>
         ${isDraft ? '<button class="btn btn-primary" id="rf-save-promote" title="Save these edits then promote the draft into Originals">Save and Promote to Original</button>' : ''}
         <button class="btn btn-secondary" id="rf-cancel">Cancel</button>
       </div>`;
@@ -1861,7 +1793,7 @@ const RecipesView = (() => {
       }).catch(err => {
         Utils.showToast('Save failed: ' + err.message, 'error');
         saveBtn.disabled = false;
-        saveBtn.textContent = isEdit ? 'Save Changes' : 'Create Recipe';
+        saveBtn.textContent = isEdit ? 'Save Changes' : 'Save to Originals';
       });
     });
   }
