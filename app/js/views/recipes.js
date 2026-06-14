@@ -743,7 +743,7 @@ const RecipesView = (() => {
     chipsWrap.className = 'recipe-chip-grid';
     chipsWrap.innerHTML = filtered.map(r => RecipeChip.render(r, {
       context: 'recipes-tab-originals',
-      actions: { edit: true, discard: true, askBjorn: true },
+      actions: { edit: true, discard: true, askBjorn: true, favorite: true, wishlist: true, made: true },
     })).join('');
     container.appendChild(chipsWrap);
 
