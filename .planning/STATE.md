@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: phase_shipped
-last_updated: "2026-06-14T02:15:00.000Z"
+last_updated: "2026-06-14T04:20:00.000Z"
 progress:
-  total_phases: 10
+  total_phases: 11
   completed_phases: 7
   total_plans: 32
   completed_plans: 32
@@ -20,7 +20,10 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 
 **Core value:** The user's real-world bar inventory and flavor profile should power both AI-driven conversation and rule-based recommendations — seamlessly, whether in a chat session or the web app.
 
-**Current focus:** Phases 1–7 SHIPPED ✅ (32/32 plans). Phase 7 SECURED ✅ + LEARNINGS extracted + UI Review 18/24. SECURITY.md verified 33/33 threats closed (0 open, 3 accepted) at ASVS L1. **Pre-Phase-8 triage complete (2026-06-14):** all deferred work — BL-1 .. BL-6, chip-unification compat-shim removal, three UI tech-debt items (type-scale tokens, spacing tokens / inline-style extraction, chat streaming affordances), and the deferred Phase 7 live-key UAT — is now captured in ROADMAP.md "Backlog / Future Enhancements" (previously lived only in 07-UAT.md / 07-UI-REVIEW.md). ROADMAP summary table reconciled (Phases 6 & 7 → Complete). Ready to start Phase 8 (Portability) GSD planning.
+**Current focus:** Phases 1–7 SHIPPED ✅ (32/32 plans). Phase 7 SECURED ✅ + LEARNINGS extracted + UI Review 18/24. SECURITY.md verified 33/33 threats closed (0 open, 3 accepted) at ASVS L1. **Pre-Phase-8 triage complete (2026-06-14):** all deferred work — BL-1 .. BL-6, chip-unification compat-shim removal, three UI tech-debt items (type-scale tokens, spacing tokens / inline-style extraction, chat streaming affordances), and the deferred Phase 7 live-key UAT — is now captured in ROADMAP.md "Backlog / Future Enhancements" (previously lived only in 07-UAT.md / 07-UI-REVIEW.md). ROADMAP summary table reconciled (Phases 6 & 7 → Complete). **Decision (2026-06-14): a cleanup mini-phase goes before Phase 8.** Inserted **Phase 7.1 — Recipes & UI Consistency Cleanup** (decimal insertion, no renumber): CHIP-03 compat-shim removal, CHIP-04 (BL-2) Originals chip parity, RECIPE-GEN-01 (BL-4) unify the two AI-generate entry points, UI-TOKEN-01/02 type + spacing tokens. Remaining backlog (BL-1/3/5/6, chat streaming affordances, live-key UAT) stays deferred. **Next step: `/gsd-plan-phase 07.1`.**
+
+### Roadmap Evolution
+- Phase 7.1 inserted after Phase 7 (2026-06-14) — Recipes & UI Consistency Cleanup; consolidation pass before Phase 8 Portability. Decimal insertion preserves Phase 8/9/10 numbering.
 
 **Health (2026-06-14):** DEGRADED — 4 warnings, all expected: W006×3 = Phases 8/9/10 in ROADMAP have no phase directory yet (created at plan time); W019 = `.planning/chip-unification-plan.md` is a non-canonical artifact (kept as the shipped mini-phase record, now cross-referenced from ROADMAP backlog). I001×5 (Phase 01 "no SUMMARY.md") are false positives — summaries exist as `01-0X-SUMMARY.md` (plan/summary name mismatch).
 
@@ -37,6 +40,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 | 5 | Polish, Depth & UX Tidy | Shipped | 4 plans, 17/17 UAT, VALIDATION.md | 100% |
 | 6 | Recipe & Recommender UX | Shipped | 4 plans, 20/22 UAT pass (2 issues deferred), 2 recommender blocker bugs fixed mid-UAT | 100% |
 | 7 | AI Integration | Shipped | 6 plans, 25/25 reqs, 43/43 phase-07 tests, 62/62 full suite, 18/18 UAT pass | 100% |
+| 7.1 | Recipes & UI Consistency Cleanup *(inserted)* | Not planned | — | 0% |
 | 8 | Portability | Pending | — | 0% |
 | 9 | Backend & Multi-User | Pending | — | 0% |
 | 10 | Community, API & Multi-Agent | Pending | — | 0% |
