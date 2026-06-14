@@ -256,13 +256,13 @@
 **Depends on:** Phase 7 (chip-unification mini-phase, AI generation, UI surfaces all shipped)
 
 **Requirements:**
-- CHIP-03: **Compat-shim removal** — migrate the remaining legacy `State.get('recipes')` callers (`export.js`, `claude-api.js` context builder, `profile.js` count) to read the canonical pool directly, then delete the derived `originals`/`confirmed_favorites`/`wishlist`/`made_log` getters shim from `normalize.js` (chip-unification Commit 3 final step)
+- CHIP-03: **Compat-shim removal** — migrate the remaining legacy `State.get('recipes')` callers (`recommender.js` — heaviest, `dashboard.js`, `profile.js`, `export.js`, `claude-api.js` context builder) to read the canonical pool directly, then delete the derived `originals`/`confirmed_favorites`/`wishlist`/`made_log` getters shim from `state.js` (`_withRecipesShim`/`_resolveSeededForShim` + the `get('recipes')` branch — verified location; chip-unification Commit 3 final step)
 - CHIP-04 (BL-2): **Originals visual + behavioral parity** — route Originals chips through the single `RecipeChip.render()` path used by Favorites/Wishlist/Made/Classics so they share layout, status badges, ♥/☆/✓ actions, and the AI-04 "Ask Bjorn about this" entry; verify renaming a recipe syncs across every derived view (closes Phase 6 Test 12 symptom at the render layer)
 - RECIPE-GEN-01 (BL-4): **Unify the two "Generate with AI" entry points** — converge the legacy New-Recipe-form generator (`ClaudeAPI.generateRecipe` → fills form → "Create Recipe") and the Drafts-tab generator (`requestJSON` → WriteGate draft → refine card) on one pipeline (redirect the legacy entry to the drafts flow, or share the generation core); rename the ambiguous "Create Recipe" CTA to reflect the actual outcome (e.g. "Save to Originals")
 - UI-TOKEN-01: **Type-scale tokens** — add `--fs-xs` … `--fs-2xl` (six steps) to `:root`; migrate the 30+ ad-hoc `font-size` values (chip system, lesson tiles, status badges, chat bubbles) onto the scale so vertical rhythm is auditable and the accessibility floor lifts off `0.68rem`
 - UI-TOKEN-02: **Spacing tokens + inline-style extraction** — add `--space-*` tokens; promote the bulk of the 87 inline `style=` blocks in `recipes.js` and 38 in `settings.js` into named utility/section classes (`.form-section-card`, `.form-actions-row`, `.muted-help`, `.input-disabled`)
 
-**Files touched:** `app/js/recipe-chip.js`, `app/js/views/recipes.js`, `app/js/views/recommender.js`, `app/js/recommender-engine.js`, `app/js/normalize.js`, `app/js/export.js`, `app/js/claude-api.js`, `app/js/views/profile.js`, `app/js/views/settings.js`, `app/js/views/dashboard.js`, `app/css/app.css`, `app/index.html`, `tests/*.test.js`
+**Files touched:** `app/js/recipe-chip.js`, `app/js/views/recipes.js`, `app/js/views/recommender.js`, `app/js/recommender-engine.js`, `app/js/state.js`, `app/js/export.js`, `app/js/claude-api.js`, `app/js/views/profile.js`, `app/js/views/settings.js`, `app/js/views/dashboard.js`, `app/css/app.css`, `app/index.html`, `tests/*.test.js`
 
 **Out of scope (stays in backlog):** BL-1, BL-3, BL-5, BL-6; chat streaming "thinking…"/Stop affordances; live-key UAT.
 
@@ -274,7 +274,7 @@
 - [ ] 07.1-05-PLAN.md — UI-TOKEN-02: add --space-* tokens + .form-section-card/.form-actions-row/.muted-help/.input-disabled; extract inline styles in recipes.js + settings.js; phase-wide final verification
 
 **Success criteria:**
-1. No source file calls the legacy `State.get('recipes')` getters shim; the shim is deleted from `normalize.js`; `node tests/*.test.js` is fully green
+1. No source file calls the legacy `State.get('recipes')` getters shim; the shim is deleted from `state.js`; `node tests/*.test.js` is fully green
 2. Originals chips render through the same `RecipeChip.render()` call site as the other tabs (badges, ♥/☆/✓, Ask-Bjorn identical); renaming an Original updates Favorites/Wishlist/Made/Recommender wherever it appears
 3. A single AI recipe-generation pipeline backs both entry surfaces; no CTA reads the ambiguous "Create Recipe"
 4. `:root` defines a six-step type scale and a spacing scale; chip/lesson/badge/chat selectors reference the scale variables instead of raw `rem`/`px`
