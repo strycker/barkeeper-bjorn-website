@@ -10,32 +10,32 @@
       "sweetness": {
         "position": 0.09,
         "confidence": "Tentative",
-        "last_evaluated": "2026-06-20"
+        "last_evaluated": "2026-06-27"
       },
       "acid": {
         "position": 0.75,
         "confidence": "Tentative",
-        "last_evaluated": "2026-06-20"
+        "last_evaluated": "2026-06-27"
       },
       "strength": {
         "position": 0.85,
         "confidence": "Tentative",
-        "last_evaluated": "2026-06-20"
+        "last_evaluated": "2026-06-27"
       },
       "complexity": {
         "position": 0.82,
         "confidence": "Tentative",
-        "last_evaluated": "2026-06-20"
+        "last_evaluated": "2026-06-27"
       },
       "season": {
         "position": 0.75,
         "confidence": "Tentative",
-        "last_evaluated": "2026-06-20"
+        "last_evaluated": "2026-06-27"
       },
       "risk": {
         "position": 0.94,
         "confidence": "Tentative",
-        "last_evaluated": "2026-06-20"
+        "last_evaluated": "2026-06-27"
       }
     },
     "supplemental": {
@@ -53,7 +53,7 @@
     }
   },
   "onboarding_complete": true,
-  "last_updated": "2026-06-20",
+  "last_updated": "2026-06-27",
   "background": {
     "drinking_frequency": "weekly",
     "profession": "Vice President of Decision Sciences. Leads an 8-9 person team of PhDs specializing in predictive modeling (supervised and unsupervised learning). Physics PhD. Strong applied background in financial modeling for investment predictions.",
