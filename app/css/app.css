@@ -19,6 +19,20 @@
   --blue:      #5b9bd5;
   --radius:    8px;
   --radius-sm: 5px;
+  /* Type scale (UI-TOKEN-01) — six steps; --fs-xs is the accessibility floor. */
+  --fs-xs:   0.75rem;
+  --fs-sm:   0.85rem;
+  --fs-base: 0.95rem;
+  --fs-lg:   1.05rem;
+  --fs-xl:   1.2rem;
+  --fs-2xl:  1.5rem;
+  /* Spacing scale (UI-TOKEN-02) — 4px base step. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
   --shadow:    0 4px 20px rgba(0,0,0,0.5);
   --transition: 150ms ease;
 }
@@ -250,6 +264,58 @@ label {
 .form-group { margin-bottom: 16px; }
 .form-row { display: flex; gap: 12px; }
 .form-row > * { flex: 1; }
+
+/* Named form utility/section classes (UI-TOKEN-02) — replace repeated inline styles. */
+.form-section-card {
+  margin-bottom: var(--space-5);
+  padding: var(--space-3);
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.form-actions-row {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  flex-wrap: wrap;
+}
+.form-check-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.muted-help {
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+}
+.empty-hint {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+}
+.form-status {
+  font-size: var(--fs-sm);
+  min-height: 1.2em;
+  margin-top: var(--space-2);
+  color: var(--text-muted);
+}
+.input-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+/* Spacing utilities (UI-TOKEN-02) — token-based margin helpers. */
+.mt-1 { margin-top: var(--space-1); }
+.mt-2 { margin-top: var(--space-2); }
+.mt-3 { margin-top: var(--space-3); }
+.mt-4 { margin-top: var(--space-4); }
+.mt-5 { margin-top: var(--space-5); }
+.mt-6 { margin-top: var(--space-6); }
+.mb-2 { margin-bottom: var(--space-2); }
+.mb-3 { margin-bottom: var(--space-3); }
+.section-desc {
+  color: var(--text-dim);
+  font-size: var(--fs-base);
+  margin-bottom: var(--space-4);
+}
 
 /* ─── Buttons ────────────────────────────────────────────────────── */
 button, .btn {
@@ -1511,7 +1577,7 @@ a:hover { color: var(--amber); }
   gap: 12px; padding-bottom: 12px;
   border-bottom: 1px solid var(--border);
 }
-.chat-page .chat-header h1 { font-size: 1.4rem; color: var(--amber); }
+.chat-page .chat-header h1 { font-size: var(--fs-2xl); color: var(--amber); }
 .chat-page .chat-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
 .chat-transcript {
@@ -1526,11 +1592,12 @@ a:hover { color: var(--amber); }
 }
 
 .chat-bubble {
+  font-size: var(--fs-base);
   padding: 10px 14px;
   border-radius: var(--radius);
   max-width: 85%;
   white-space: pre-wrap; word-wrap: break-word;
-  line-height: 1.45; font-size: 0.95rem;
+  line-height: 1.45;
 }
 .chat-bubble--user {
   align-self: flex-end;
@@ -1548,7 +1615,7 @@ a:hover { color: var(--amber); }
   background: rgba(224,85,85,0.10);
   border: 1px solid var(--red);
   color: var(--red);
-  font-family: 'Menlo', 'Consolas', monospace; font-size: 0.85rem;
+  font-family: 'Menlo', 'Consolas', monospace; font-size: var(--fs-sm);
 }
 
 .chat-composer {
@@ -1559,7 +1626,7 @@ a:hover { color: var(--amber); }
   flex: 1; resize: vertical;
   background: var(--bg2); color: var(--text);
   border: 1px solid var(--border2); border-radius: var(--radius-sm);
-  padding: 10px; font-family: inherit; font-size: 0.95rem;
+  padding: 10px; font-family: inherit; font-size: var(--fs-base);
   min-height: 44px;
 }
 .chat-composer textarea:focus {
@@ -1588,11 +1655,11 @@ a:hover { color: var(--amber); }
 .classroom-page { max-width: 980px; margin: 0 auto; }
 .classroom-header { margin-bottom: 22px; }
 .classroom-header h1 { color: var(--amber); margin-bottom: 6px; }
-.classroom-sub { color: var(--text-dim); font-size: 0.92rem; max-width: 720px; }
+.classroom-sub { color: var(--text-dim); font-size: var(--fs-base); max-width: 720px; }
 .classroom-topic { margin-bottom: 28px; }
 .classroom-topic h2 {
   color: var(--text);
-  font-size: 1.15rem;
+  font-size: var(--fs-xl);
   border-bottom: 1px solid var(--border);
   padding-bottom: 6px;
   margin-bottom: 14px;
@@ -1618,12 +1685,12 @@ a:hover { color: var(--amber); }
 .lesson-tile:hover { border-color: var(--amber-dim); }
 .lesson-tile-title {
   color: var(--amber);
-  font-size: 1rem;
+  font-size: var(--fs-lg);
   margin: 0;
 }
 .lesson-tile-body {
   color: var(--text);
-  font-size: 0.9rem;
+  font-size: var(--fs-base);
   line-height: 1.55;
   margin: 0;
 }
@@ -1641,7 +1708,7 @@ a:hover { color: var(--amber); }
 .library-page { max-width: 880px; margin: 0 auto; }
 .library-header { margin-bottom: 18px; }
 .library-header h1 { color: var(--amber); margin-bottom: 6px; }
-.library-sub { color: var(--text-dim); font-size: 0.92rem; max-width: 680px; }
+.library-sub { color: var(--text-dim); font-size: var(--fs-base); max-width: 680px; }
 
 .library-form {
   background: var(--bg2);
@@ -1655,14 +1722,14 @@ a:hover { color: var(--amber); }
 }
 .library-form h2 {
   color: var(--text);
-  font-size: 1.05rem;
+  font-size: var(--fs-lg);
   margin: 0 0 4px;
 }
 .library-form label {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  font-size: 0.86rem;
+  font-size: var(--fs-sm);
   color: var(--text-dim);
 }
 .library-form input,
@@ -1672,7 +1739,7 @@ a:hover { color: var(--amber); }
   border-radius: var(--radius-sm);
   color: var(--text);
   font-family: inherit;
-  font-size: 0.92rem;
+  font-size: var(--fs-base);
   padding: 7px 9px;
 }
 .library-form input:focus,
@@ -1706,7 +1773,7 @@ a:hover { color: var(--amber); }
   gap: 12px;
   flex-wrap: wrap;
 }
-.library-card-title { font-size: 1rem; margin: 0; }
+.library-card-title { font-size: var(--fs-lg); margin: 0; }
 .library-link {
   color: var(--amber);
   text-decoration: none;
@@ -1719,14 +1786,14 @@ a:hover { color: var(--amber); }
 }
 .library-card-url {
   color: var(--text-muted);
-  font-size: 0.78rem;
+  font-size: var(--fs-xs);
   margin-top: 4px;
   word-break: break-all;
 }
 .library-card-desc {
   margin-top: 8px;
   color: var(--text);
-  font-size: 0.9rem;
+  font-size: var(--fs-base);
   line-height: 1.5;
 }
 .library-card-actions {
@@ -1745,7 +1812,7 @@ a:hover { color: var(--amber); }
   border: 1px solid var(--border2);
   border-radius: 999px;
   color: var(--text-dim);
-  font-size: 0.74rem;
+  font-size: var(--fs-xs);
   padding: 2px 9px;
 }
 .library-empty {
@@ -1767,7 +1834,7 @@ a:hover { color: var(--amber); }
   border: 1px solid var(--amber-dim);
   border-radius: var(--radius-sm);
   padding: 4px 8px;
-  font-size: 0.78rem;
+  font-size: var(--fs-xs);
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
@@ -1810,17 +1877,17 @@ a:hover { color: var(--amber); }
   min-width: 0;
 }
 .recipe-chip-name {
-  font-size: 1.05rem;
+  font-size: var(--fs-lg);
   font-weight: 600;
   color: var(--amber-glow);
 }
 .recipe-chip-flag {
   color: var(--amber);
-  font-size: 0.95rem;
+  font-size: var(--fs-base);
   line-height: 1;
 }
 .recipe-chip-meta {
-  font-size: 0.8rem;
+  font-size: var(--fs-sm);
   color: var(--text-dim);
   margin-top: 2px;
   width: 100%;
@@ -1829,7 +1896,7 @@ a:hover { color: var(--amber); }
   margin-top: 4px;
 }
 .recipe-chip-tagline {
-  font-size: 0.85rem;
+  font-size: var(--fs-sm);
   color: var(--text-dim);
   margin: 0 0 6px;
 }
@@ -1846,7 +1913,7 @@ a:hover { color: var(--amber); }
 /* Status badges — small, sit next to the chip name. Colour conveys lifecycle:
    classic = blue (stable), original = green (yours/published), draft = amber. */
 .badge-status {
-  font-size: 0.68rem;
+  font-size: var(--fs-xs);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   padding: 1px 6px;

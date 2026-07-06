@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: phase_shipped
-last_updated: "2026-06-13T16:55:00.000Z"
+last_updated: "2026-06-14T15:30:00.000Z"
 progress:
-  total_phases: 10
-  completed_phases: 7
-  total_plans: 32
-  completed_plans: 32
+  total_phases: 11
+  completed_phases: 8
+  total_plans: 37
+  completed_plans: 37
   percent: 100
 ---
 
@@ -20,7 +20,16 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 
 **Core value:** The user's real-world bar inventory and flavor profile should power both AI-driven conversation and rule-based recommendations — seamlessly, whether in a chat session or the web app.
 
-**Current focus:** Phase 7 — AI Integration SHIPPED ✅ + SECURED ✅ + LEARNINGS extracted + UI Review 18/24. SECURITY.md verified 33/33 threats closed (0 open, 3 accepted) at ASVS L1. Backlog items BL-1 .. BL-6 + chip-unification compat-shim removal deferred to future phases. Ready to start Phase 8 (Portability) when desired.
+**Current focus:** Phases 1–7 SHIPPED ✅ (32/32 plans). Phase 7 SECURED ✅ + LEARNINGS extracted + UI Review 18/24. SECURITY.md verified 33/33 threats closed (0 open, 3 accepted) at ASVS L1. **Pre-Phase-8 triage complete (2026-06-14):** all deferred work — BL-1 .. BL-6, chip-unification compat-shim removal, three UI tech-debt items (type-scale tokens, spacing tokens / inline-style extraction, chat streaming affordances), and the deferred Phase 7 live-key UAT — is now captured in ROADMAP.md "Backlog / Future Enhancements" (previously lived only in 07-UAT.md / 07-UI-REVIEW.md). ROADMAP summary table reconciled (Phases 6 & 7 → Complete). **Decision (2026-06-14): a cleanup mini-phase goes before Phase 8.** Inserted **Phase 7.1 — Recipes & UI Consistency Cleanup** (decimal insertion, no renumber): CHIP-03 compat-shim removal, CHIP-04 (BL-2) Originals chip parity, RECIPE-GEN-01 (BL-4) unify the two AI-generate entry points, UI-TOKEN-01/02 type + spacing tokens. Remaining backlog (BL-1/3/5/6, chat streaming affordances, live-key UAT) stays deferred. **Phase 7.1 PLANNED + PLAN-CHECKED (2026-06-14): 5 plans across 4 waves; plan-check verdict PASS after revision.** gsd-plan-checker found 2 HIGH + 3 MEDIUM + 2 LOW — all HIGH/MEDIUM/LOW addressed: (H-1) Plan 01 Task 2 now migrates all three dashboard.js shim reads (lines 13/89/185), (H-2) claude-api.js acceptance grep now includes `made_log`, (M-1) const _e closure note, (M-2) Plan 03 stale-bartender-name phrasing made generic, (M-3) Plan 04 concrete spot-greps, (L-1) Plan 05 diagnosis guide. ROADMAP CHIP-03 corrected: shim lives in **state.js** (not normalize.js — verified). Waves: 1 = [01 CHIP-03, 04 UI-TOKEN-01] parallel-safe; 2 = [02 CHIP-04]; 3 = [03 RECIPE-GEN-01]; 4 = [05 UI-TOKEN-02].
+
+**Phase 7.1 EXECUTED (2026-06-14): all 5 plans shipped, 37/37 plans this milestone.** Ran sequentially on the main branch (executor subagents, sonnet); the 07.1-05 executor hit a session limit after adding the --space tokens, so the orchestrator finished that plan inline. Final phase-wide sweep GREEN: 8 phase-touched JS files `node --check` clean; all 4 deterministic test files `# fail 0` (62 tests); CHIP-03 shim reads = 0 and `_withRecipesShim` gone from state.js; `"Create Recipe"` = 0 (every AI write now routes through WriteGate — the un-gated `handleGenerate` path was removed); `--fs-*` = 6 and `--space-*` = 6 in :root; inline `style=` recipes.js 83→55 and settings.js 38→24. Originals chips now carry ♥/☆/✓ overlay actions via the single RecipeChip.render path. **Deferred (cannot run in headless container): visual UAT** of the 4 human-verify checkpoints (type scale, Originals chips, Generate-with-AI flow, spacing) — auto-approved in yolo mode, to be confirmed in a browser via `/gsd-verify-work`. **Security gate PASSED (2026-06-14):** `/gsd-secure-phase 07.1` complete — 07.1-SECURITY.md verified **11/11 threats closed (0 open, 10 accepted + 1 mitigation code-verified)** at ASVS L1. The one "mitigate" (T-073-01) confirmed in code: WriteGate.gate at recipes.js:377/:693, `handleGenerate` = 0 — net surface reduction.
+
+**Phase 7.1 CLOSED OUT (2026-06-14): verify-work + validate-phase + extract-learnings all done.** UAT (07.1-UAT.md): automated headless-Chromium visual pass — 5 passed, 0 issues, 2 blocked (live GitHub PAT + live Anthropic key, prerequisite gates not code defects). Originals chip ♥/☆/✓ parity, type/spacing tokens, unified Generate-with-AI all visually confirmed via injected-fixture render + computed-style asserts. VALIDATION (07.1-VALIDATION.md): nyquist **partial** — added `tests/phase-07_1-cleanup.test.js` (CHIP-03 pool-contract, 5 assertions; suite now 5 files green); the 4 UI/CSS reqs verified via browser UAT + grep. LEARNINGS (07.1-LEARNINGS.md): 5 decisions / 5 lessons / 5 patterns / 4 surprises. **Phase 7.1 fully closed.** Optional-not-done: 07.1 UI-REVIEW (the Phase 7 UI Review already covers the token/chip areas). Remaining Phase 7 (parent) item: deferred **live-key UAT** (BYOK Anthropic key). Next: Phase 8 (Portability) — `/gsd-discuss-phase 8` or `/gsd-plan-phase 8`.
+
+### Roadmap Evolution
+- Phase 7.1 inserted after Phase 7 (2026-06-14) — Recipes & UI Consistency Cleanup; consolidation pass before Phase 8 Portability. Decimal insertion preserves Phase 8/9/10 numbering.
+
+**Health (2026-06-14):** DEGRADED — 4 warnings, all expected: W006×3 = Phases 8/9/10 in ROADMAP have no phase directory yet (created at plan time); W019 = `.planning/chip-unification-plan.md` is a non-canonical artifact (kept as the shipped mini-phase record, now cross-referenced from ROADMAP backlog). I001×5 (Phase 01 "no SUMMARY.md") are false positives — summaries exist as `01-0X-SUMMARY.md` (plan/summary name mismatch).
 
 ---
 
@@ -35,6 +44,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 | 5 | Polish, Depth & UX Tidy | Shipped | 4 plans, 17/17 UAT, VALIDATION.md | 100% |
 | 6 | Recipe & Recommender UX | Shipped | 4 plans, 20/22 UAT pass (2 issues deferred), 2 recommender blocker bugs fixed mid-UAT | 100% |
 | 7 | AI Integration | Shipped | 6 plans, 25/25 reqs, 43/43 phase-07 tests, 62/62 full suite, 18/18 UAT pass | 100% |
+| 7.1 | Recipes & UI Consistency Cleanup *(inserted)* | Executed + Secured (visual UAT pending) | 5 | 100% |
 | 8 | Portability | Pending | — | 0% |
 | 9 | Backend & Multi-User | Pending | — | 0% |
 | 10 | Community, API & Multi-Agent | Pending | — | 0% |
@@ -111,6 +121,22 @@ Wave 2 plans (05-03, 05-04) can also run in parallel with each other; 05-03 shou
 | 07-06 | 5 | 01, 02, 05 | AI data ops: legacy-MD import, JSON repair, paste-a-line fallback + Wave-0 fixtures | AI-08, AI-10, AI-11 |
 
 Plan-check post-revision verdict: PASS. M-2 (07-05 Task 1 5-file scope) deferred to executor with documented rationale; 6 LOW polish items deferred to execution-time.
+
+---
+
+## Phase 7.1 Plan Index
+
+| Plan | Wave | Depends | Objective | Requirements |
+|------|------|---------|-----------|--------------|
+| 07.1-01 | 1 | — | Remove State.get('recipes') compat shim (lives in state.js, NOT normalize.js) after migrating recommender/dashboard/profile/export/claude-api readers to the pool | CHIP-03 |
+| 07.1-02 | 2 | 01 | Originals chip parity — add ♥/☆/✓ overlay actions to unified RecipeChip render + verify rename-sync | CHIP-04 |
+| 07.1-03 | 3 | 02 | Converge both Generate-with-AI entry points on WriteGate drafts pipeline; rename "Create Recipe" → "Save to Originals" | RECIPE-GEN-01 |
+| 07.1-04 | 1 | — | Add --fs-xs..--fs-2xl type scale; migrate chip/badge/chat/classroom/library selectors (CSS-only) | UI-TOKEN-01 |
+| 07.1-05 | 4 | 01,02,03,04 | Add --space-* tokens + 4 named form classes; extract inline styles in recipes.js + settings.js; phase-wide final verification | UI-TOKEN-02 |
+
+Wave structure: {01, 04} parallel (Wave 1 — no recipes.js/app.css collision); 02 (Wave 2, recipes.js) → 03 (Wave 3, recipes.js) sequential to avoid recipes.js edit collision; 05 (Wave 4) extracts inline styles last after structural recipes.js work settles. recipes.js touched only by 02/03/05 across distinct waves; app.css touched by 04/05 across distinct waves — zero same-wave file overlap.
+
+Planner reality corrections vs brief: (1) the compat shim lives in app/js/state.js (_withRecipesShim/_resolveSeededForShim + get('recipes') branch), NOT normalize.js as the brief stated — normalize.js has no derived-getters block. (2) CHIP-03 scope is wider than listed: recommender.js is the heaviest shim consumer (9 getter reads) and dashboard.js also reads .originals — all migrated in 07.1-01 before shim deletion. (3) Originals already route through RecipeChip.render but omit ♥/☆/✓ — CHIP-04 is additive wiring. (4) RECIPE-GEN-01 legacy path = the in-form #rf-ai-prompt/#rf-generate block → handleGenerate (un-gated); converged onto showAIPromptModal/runAIDesign (WriteGate). Baseline verified green: node --check clean on all 11 source files, all 4 test files # fail 0, inline style= counts recipes.js=87 / settings.js=38, app.css font-size raw=135. Security: low-risk internal refactor/CSS; existing WriteGate + Library href sanitization cover AI-write/link surfaces; the GEN unification REMOVES the only non-gated AI write path (net security improvement); no NEW threat introduced (stated per plan threat models).
 
 ---
 

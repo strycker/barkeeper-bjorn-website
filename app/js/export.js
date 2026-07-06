@@ -124,8 +124,13 @@ const DataExport = (() => {
     }
     lines.push('');
 
+    // Resolve seed core for seeded pool entries (overlay-only entries lack name/ingredients).
+    const _exportClassics = (typeof CLASSICS_DB !== 'undefined' && Array.isArray(CLASSICS_DB)) ? CLASSICS_DB : [];
+    const _resolveExport = (e) => (e && e.seed_id) ? ({ ...(_exportClassics.find(c => c.id === e.seed_id) || {}), ...e }) : e;
+
     // Original cocktails
-    const originals = recipes.originals || [];
+    const pool = recipes.pool || [];
+    const originals = pool.filter(r => r.status === 'original').map(_resolveExport);
     if (originals.length) {
       lines.push('## Original Cocktails');
       originals.forEach(r => {
@@ -152,7 +157,7 @@ const DataExport = (() => {
     }
 
     // Confirmed favorites
-    const favorites = recipes.confirmed_favorites || [];
+    const favorites = pool.filter(r => r.is_favorite).map(_resolveExport);
     if (favorites.length) {
       lines.push('## Confirmed Favorites');
       favorites.forEach(f => {
@@ -162,7 +167,7 @@ const DataExport = (() => {
     }
 
     // Wishlist
-    const wishlist = recipes.wishlist || [];
+    const wishlist = pool.filter(r => r.is_wishlist).map(_resolveExport);
     if (wishlist.length) {
       lines.push('## Wishlist');
       wishlist.forEach(w => {

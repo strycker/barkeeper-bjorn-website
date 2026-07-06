@@ -14,8 +14,9 @@
 | 3 | Content Management | Recipe add/edit, image upload, export/import | RECIPE-01–05, EXPORT-01–04 | Complete |
 | 4 | Inventory & Recommender Depth | Structured bottle objects, in-place editing, mood sliders, scope toggle, name standardization | INV-03–07, REC-01–03 | Complete |
 | 5 | Polish, Depth & UX Tidy | Recommender UX fixes, vetoes filter panel, ingredient derivation, inventory field depth, data model tidy, Bartender Customization Wizard | REC-05–09, INV-08–10, DATA-01–03, CUST-01–02 | Complete |
-| 6 | Recipe & Recommender UX | "I Made This" tracking, chip-style Favorites/Wishlist/Made tabs, text search on Recipes + Recommender, card layout polish | REC-10–11, RECIPE-MADE-01–02, RECIPE-VIEW-01–02, RECIPE-SEARCH-01, REC-SEARCH-01 | Code complete · awaiting UAT |
-| 7 | AI Integration | Claude API chat, classroom, AI design, AI recommendations, AI import, Library | AI-01–13, LIB-01, REC-04, SET-05, CHAT-01–09 | Pending |
+| 6 | Recipe & Recommender UX | "I Made This" tracking, chip-style Favorites/Wishlist/Made tabs, text search on Recipes + Recommender, card layout polish | REC-10–11, RECIPE-MADE-01–02, RECIPE-VIEW-01–02, RECIPE-SEARCH-01, REC-SEARCH-01 | Complete |
+| 7 | AI Integration | Claude API chat, classroom, AI design, AI recommendations, AI import, Library | AI-01–13, LIB-01, REC-04, SET-05, CHAT-01–09 | Complete (live-key UAT deferred) |
+| 7.1 | Recipes & UI Consistency Cleanup *(inserted)* | Chip-shim removal, Originals chip parity, unify AI-generate entry points, type/spacing tokens | CHIP-03–04, RECIPE-GEN-01, UI-TOKEN-01–02 | Executed (visual UAT + secure-phase pending) |
 | 8 | Portability | Markdown round-trip, per-page export/import, append/overwrite import mode | PORT-01–05 | Pending |
 | 9 | Backend & Multi-User | Supabase, auth, per-user isolation, account settings | BACKEND-01–08 | Pending |
 | 10 | Community, API & Multi-Agent | Community feed, forum, REST API, Bjorn sub-agents | COMMUNITY-01–08, API-01–06, AGENT-SYS-01–04 | Pending |
@@ -248,6 +249,37 @@
 
 ---
 
+### Phase 07.1: Recipes & UI Consistency Cleanup (INSERTED)
+
+**Goal:** Pay down the highest-friction debt accumulated through Phase 7 before building Portability on top of it — finish the chip-unification migration, bring Originals chips to full visual/behavioral parity, collapse the two AI recipe-generation entry points into one, and replace the worst ad-hoc CSS with a real type + spacing token scale. No new user-facing features; this is a consolidation pass so Phase 8 (Portability) reads a clean recipe pool and a consistent UI.
+
+**Depends on:** Phase 7 (chip-unification mini-phase, AI generation, UI surfaces all shipped)
+
+**Requirements:**
+- CHIP-03: **Compat-shim removal** — migrate the remaining legacy `State.get('recipes')` callers (`recommender.js` — heaviest, `dashboard.js`, `profile.js`, `export.js`, `claude-api.js` context builder) to read the canonical pool directly, then delete the derived `originals`/`confirmed_favorites`/`wishlist`/`made_log` getters shim from `state.js` (`_withRecipesShim`/`_resolveSeededForShim` + the `get('recipes')` branch — verified location; chip-unification Commit 3 final step)
+- CHIP-04 (BL-2): **Originals visual + behavioral parity** — route Originals chips through the single `RecipeChip.render()` path used by Favorites/Wishlist/Made/Classics so they share layout, status badges, ♥/☆/✓ actions, and the AI-04 "Ask Bjorn about this" entry; verify renaming a recipe syncs across every derived view (closes Phase 6 Test 12 symptom at the render layer)
+- RECIPE-GEN-01 (BL-4): **Unify the two "Generate with AI" entry points** — converge the legacy New-Recipe-form generator (`ClaudeAPI.generateRecipe` → fills form → "Create Recipe") and the Drafts-tab generator (`requestJSON` → WriteGate draft → refine card) on one pipeline (redirect the legacy entry to the drafts flow, or share the generation core); rename the ambiguous "Create Recipe" CTA to reflect the actual outcome (e.g. "Save to Originals")
+- UI-TOKEN-01: **Type-scale tokens** — add `--fs-xs` … `--fs-2xl` (six steps) to `:root`; migrate the 30+ ad-hoc `font-size` values (chip system, lesson tiles, status badges, chat bubbles) onto the scale so vertical rhythm is auditable and the accessibility floor lifts off `0.68rem`
+- UI-TOKEN-02: **Spacing tokens + inline-style extraction** — add `--space-*` tokens; promote the bulk of the 87 inline `style=` blocks in `recipes.js` and 38 in `settings.js` into named utility/section classes (`.form-section-card`, `.form-actions-row`, `.muted-help`, `.input-disabled`)
+
+**Files touched:** `app/js/recipe-chip.js`, `app/js/views/recipes.js`, `app/js/views/recommender.js`, `app/js/recommender-engine.js`, `app/js/state.js`, `app/js/export.js`, `app/js/claude-api.js`, `app/js/views/profile.js`, `app/js/views/settings.js`, `app/js/views/dashboard.js`, `app/css/app.css`, `app/index.html`, `tests/*.test.js`
+
+**Out of scope (stays in backlog):** BL-1, BL-3, BL-5, BL-6; chat streaming "thinking…"/Stop affordances; live-key UAT.
+
+**Plans:** 5/5 plans complete
+- [x] 07.1-01-PLAN.md — CHIP-03: remove the State.get('recipes') compat shim (in state.js, not normalize.js) after migrating recommender/dashboard/profile/export/claude-api readers to the pool
+- [x] 07.1-02-PLAN.md — CHIP-04: Originals chip parity — add ♥/☆/✓ overlay actions to the unified RecipeChip render + verify rename-sync
+- [x] 07.1-03-PLAN.md — RECIPE-GEN-01: converge both Generate-with-AI entry points on the WriteGate drafts pipeline; rename "Create Recipe" → "Save to Originals"
+- [x] 07.1-04-PLAN.md — UI-TOKEN-01: add --fs-xs..--fs-2xl type scale; migrate chip/badge/chat/classroom/library selectors (CSS-only)
+- [x] 07.1-05-PLAN.md — UI-TOKEN-02: add --space-* tokens + .form-section-card/.form-actions-row/.muted-help/.input-disabled; extract inline styles in recipes.js + settings.js; phase-wide final verification
+
+**Success criteria:**
+1. No source file calls the legacy `State.get('recipes')` getters shim; the shim is deleted from `state.js`; `node tests/*.test.js` is fully green
+2. Originals chips render through the same `RecipeChip.render()` call site as the other tabs (badges, ♥/☆/✓, Ask-Bjorn identical); renaming an Original updates Favorites/Wishlist/Made/Recommender wherever it appears
+3. A single AI recipe-generation pipeline backs both entry surfaces; no CTA reads the ambiguous "Create Recipe"
+4. `:root` defines a six-step type scale and a spacing scale; chip/lesson/badge/chat selectors reference the scale variables instead of raw `rem`/`px`
+5. Inline `style=` attribute counts in `recipes.js` and `settings.js` drop substantially, with form sections and action rows rendered via shared utility classes
+
 ## Phase 8: Portability
 
 **Goal:** Full round-trip data portability — strict Markdown export (canonical, human-readable), AI-assisted flexible import (accepts JSON bundles, older versions, or `.md` files), per-page single-file operations, and append-vs-overwrite import control per section. Uses Phase 6's Claude API as the import backstop for unrecognized formats.
@@ -352,7 +384,8 @@ Phase 4  — recommends Phase 2 (inventory view refactor; recommender view exist
 Phase 5  — depends on Phases 1–4 being stable (data model tidy requires settled schema)
 Phase 6  — depends on Phase 5 (recipe card structure + favorites/wishlist schema must be settled)
 Phase 7  — recommends Phase 6 (clean data model + rec-card chips improve AI context quality; Settings page needed for API key)
-Phase 8  — recommends Phase 7 (AI import fallback requires claude-api.js; MD export format should be stable before building importer)
+Phase 7.1 — depends on Phase 7 (consolidates the chip-unification pool, AI generation, and UI surfaces shipped in Phase 7)
+Phase 8  — recommends Phase 7; benefits from Phase 7.1 (a clean recipe pool with the compat shim removed simplifies MD export/import mapping)
 Phase 9  — depends on Phases 3–5 being stable (data model must be settled before Supabase migration)
 Phase 10 — depends on Phase 9 (community requires multi-user accounts)
 ```
@@ -363,11 +396,35 @@ Phase 10 — depends on Phase 9 (community requires multi-user accounts)
 
 Items still unscheduled — triage at next milestone boundary.
 
+### Derivation / Recommender (pre-Phase-7 backlog)
+
 - **AI-assisted onboarding** — With an API key present, onboarding steps could offer AI-generated suggestions based on partial answers ("based on your love of smoky spirits, here are common pairings to consider for your veto list"). Low-priority polish for Phase 6+.
 - **Recommender user-overridable substitution rules** — Allow users to define their own derivation/substitution rules (e.g. "I always have fresh citrus so treat limes as lime juice"). Extends Phase 5 static map + Phase 6 AI inference. Design TBD.
 - **Transitive derivations** — Multi-hop inference: lemons → lemon juice → sour mix; sugar + water → simple syrup. Extend Phase 5/6 derivation map. Design: static DAG vs. AI-inferred graph.
 - **Recommender card detail expansion** — Click a card in the recommender to expand full recipe inline (ingredients, method, glassware) without navigating away. Phase 5 or 6 quality-of-life.
 - **Ingredient hierarchy UX** — Show the user which ingredients were matched via derivation (e.g. "✓ lime juice (from fresh limes)") so they understand why a recipe is included.
+
+### Captured during Phase 7 UAT (BL-1 .. BL-6)
+
+Full detail in `.planning/phases/07-ai-integration/07-UAT.md` (Deferred / Backlog section).
+
+- **BL-1: Classroom V2** — structured lesson schema (`schema/classroom.schema.json`) + adaptive 101→201→advanced progression + lesson card actions (mark complete, save to Library, add AI-suggested lesson). Scope: new phase (likely Phase 11+), "personalized learning loop" theme.
+- **BL-2: Unified recipe-chip schema** — normalize recipe storage (store once, reference by id) + single `renderRecipeChip()` so Originals reach visual parity with other chip surfaces; also fixes Phase 6 Test 12 (rename sync). Partially addressed by the chip-unification mini-phase; Originals-parity remainder still open. Scope: small/medium.
+- **BL-3: "Non-Alcoholic Only Tonight" mode** — `na` (and optional `near_na`) boolean on the recipe schema + Recommender toggle + AI-03 prompt augmentation + NA chip badge + one-pass tagging sweep over the 169 classics. Scope: modest.
+- **BL-4: Unify the two "Generate with AI" entry points** — converge the legacy New-Recipe-form generator and the Drafts-tab generator on one pipeline; rename ambiguous "Create Recipe" CTA. Scope: small.
+- **BL-5: "Use the real recipe" interstitial** — when an AI-tweak draft near-matches an existing classic/original, offer "use the real recipe" / "save as draft anyway" / "add to classics DB" instead of a bare error toast (builds on `_isNearDuplicateOfPool`). Scope: modest.
+- **BL-6: AI-first category detection for Quick Add (Inventory)** — when `parseBottleSection` returns null, call Claude FIRST to return `{section, style, type, brand?, tier?}` and skip the manual category picker; fall back to picker on failure. Scope: modest.
+
+### Tech debt / cleanup
+
+- **Chip-unification compat-shim removal** — drop the legacy `State.get('recipes')` getters shim once the remaining non-recipes-view callers (`export.js`, `claude-api.js` context, `profile.js` count) are migrated to read the pool directly. Shipped mini-phase plan: `.planning/chip-unification-plan.md` (Commit 3 final step). Queued cleanup; non-blocking.
+- **UI type-scale tokens** — add `--fs-xs`..`--fs-2xl` to `:root` and migrate the 30+ ad-hoc `font-size` values (chip system, lesson tiles, badges, chat bubbles) onto the scale. From Phase 7 UI Review (Typography 2/4).
+- **UI spacing tokens + inline-style extraction** — add `--space-*` tokens; promote the 87 inline `style=` blocks in `recipes.js` and 38 in `settings.js` into named utility/section classes (`.form-section-card`, `.form-actions-row`, `.muted-help`, `.input-disabled`). From Phase 7 UI Review (Spacing 2/4).
+- **Chat streaming affordances** — add a "thinking…" placeholder before the first token and a visible Stop button (wire to the existing `AbortController`) in both the `#chat` page and the quick-ask drawer. From Phase 7 UI Review (Visuals 3/4).
+
+### Deferred verification
+
+- **Phase 7 live-key UAT** — recipe-balance quality, persona voice, import quality, JSON-repair quality, drawer/abort/rate-limit UX, and lesson Q&A all require a real BYOK Anthropic key and could not be exercised in the build container. Run via `/gsd-verify-work` once a key is available.
 
 ---
 

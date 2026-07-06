@@ -183,16 +183,16 @@ const RecipesView = (() => {
     overlay.className = 'confirm-dialog-overlay';
     overlay.innerHTML = `
       <div class="confirm-dialog ai-design-dialog" style="max-width:640px;width:92vw;">
-        <h3 style="margin-bottom:8px;">Generate with AI</h3>
+        <h3 class="mb-2">Generate with AI</h3>
         ${hasApiKey
           ? `<p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:12px;">Describe a cocktail and ${Utils.escapeHtml(bkName)} will design it. The draft auto-saves so you can refine it without losing work.</p>`
           : `<p style="color:var(--text-dim);font-size:0.85rem;margin-bottom:12px;">Add your Anthropic API key in Settings to generate drafts here. (Without a key, copy the prompt below into Claude/ChatGPT.)</p>`}
         <textarea id="ai-design-prompt" rows="3"
           placeholder="e.g. a smoky mezcal sour with honey and lemon, summery"
           style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px;font-size:0.88rem;font-family:inherit;resize:vertical;"></textarea>
-        <p id="ai-design-status" style="font-size:0.82rem;min-height:1.2em;margin-top:6px;color:var(--text-muted);"></p>
+        <p id="ai-design-status" class="form-status"></p>
         <div id="ai-design-preview"></div>
-        <div class="dialog-btns" style="margin-top:12px;">
+        <div class="dialog-btns mt-3">
           <button class="btn btn-ghost btn-sm" id="ai-design-close">Close</button>
           <button class="btn btn-primary btn-sm" id="ai-design-generate" ${hasApiKey ? '' : 'disabled'}>${hasApiKey ? 'Generate' : 'No API key'}</button>
         </div>
@@ -458,17 +458,17 @@ const RecipesView = (() => {
         <div style="font-size:0.95rem;font-weight:600;color:var(--amber);">${Utils.escapeHtml(draft.name)}</div>
         ${draft.tagline ? `<div style="font-size:0.82rem;color:var(--text-dim);font-style:italic;margin-top:2px;">${Utils.escapeHtml(draft.tagline)}</div>` : ''}
         ${ingList ? `<ul style="margin:8px 0 6px;padding-left:18px;font-size:0.84rem;color:var(--text-dim);">${ingList}</ul>` : ''}
-        ${draft.method ? `<div style="font-size:0.82rem;color:var(--text-dim);"><strong>Method:</strong> ${Utils.escapeHtml(draft.method)}</div>` : ''}
-        ${draft.glassware ? `<div style="font-size:0.82rem;color:var(--text-dim);"><strong>Glass:</strong> ${Utils.escapeHtml(draft.glassware)}</div>` : ''}
-        ${draft.garnish ? `<div style="font-size:0.82rem;color:var(--text-dim);"><strong>Garnish:</strong> ${Utils.escapeHtml(draft.garnish)}</div>` : ''}
+        ${draft.method ? `<div class="muted-help"><strong>Method:</strong> ${Utils.escapeHtml(draft.method)}</div>` : ''}
+        ${draft.glassware ? `<div class="muted-help"><strong>Glass:</strong> ${Utils.escapeHtml(draft.glassware)}</div>` : ''}
+        ${draft.garnish ? `<div class="muted-help"><strong>Garnish:</strong> ${Utils.escapeHtml(draft.garnish)}</div>` : ''}
         ${draft.why_it_works ? `<div style="font-size:0.82rem;color:var(--text-dim);margin-top:6px;"><strong>Why it works:</strong> ${Utils.escapeHtml(draft.why_it_works)}</div>` : ''}
 
         <div style="margin-top:10px;">
-          <label style="font-size:0.82rem;color:var(--text-dim);">Refine this draft</label>
+          <label class="muted-help">Refine this draft</label>
           <input type="text" class="ai-refine-input" placeholder="e.g. make it less sweet"
             style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:6px 8px;font-size:0.85rem;margin-top:4px;">
         </div>
-        <p class="ai-refine-status" style="font-size:0.82rem;min-height:1.2em;margin-top:6px;color:var(--text-muted);"></p>
+        <p class="ai-refine-status form-status"></p>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">
           <button class="btn btn-primary btn-sm ai-refine-tweak" title="Update the SAME draft with this tweak">Apply tweak (same draft)</button>
           <button class="btn btn-secondary btn-sm ai-refine-new" title="Generate a brand-new draft from this idea">Generate new</button>
@@ -547,7 +547,7 @@ const RecipesView = (() => {
         <div class="empty-state">
           <div class="empty-icon">✨</div>
           <p>${_searchQuery ? 'No matches found.' : 'No AI drafts yet.'}</p>
-          <p style="font-size:0.85rem;color:var(--text-muted);">Click "✨ Generate with AI" above to design one.</p>
+          <p class="empty-hint">Click "✨ Generate with AI" above to design one.</p>
         </div>`;
       return;
     }
@@ -707,6 +707,49 @@ const RecipesView = (() => {
     }
   }
 
+  // Toggle a boolean overlay flag (is_favorite / is_wishlist) on an Original's
+  // pool entry by id, save to GitHub, then re-render the Originals tab.
+  function _toggleOriginalOverlay(r, flag, mainContainer) {
+    State.patch('recipes', rec => {
+      const entry = (rec.pool || []).find(p => p && p.id === r.id);
+      if (entry) entry[flag] = !entry[flag];
+      rec.last_updated = new Date().toISOString().slice(0, 10);
+    });
+    State.save('recipes').then(() => {
+      const on = (State.get('recipes')?.pool || []).find(p => p && p.id === r.id);
+      const isOn = !!(on && on[flag]);
+      const label = flag === 'is_favorite'
+        ? (isOn ? 'Added to Favorites ♥' : 'Removed from Favorites')
+        : (isOn ? 'Added to Wishlist ★' : 'Removed from Wishlist');
+      Utils.showToast(label);
+      render(mainContainer || document.getElementById('main-content'), { tab: 'originals' });
+    }).catch(err => Utils.showToast('Save failed: ' + err.message, 'error'));
+  }
+
+  // Toggle made_log on an Original's pool entry (clear vs push one entry),
+  // save to GitHub, then re-render the Originals tab.
+  function _toggleOriginalMade(r, mainContainer) {
+    const today = new Date().toISOString().slice(0, 10);
+    let nowMade = false;
+    State.patch('recipes', rec => {
+      const entry = (rec.pool || []).find(p => p && p.id === r.id);
+      if (entry) {
+        if (Array.isArray(entry.made_log) && entry.made_log.length > 0) {
+          entry.made_log = [];
+          nowMade = false;
+        } else {
+          entry.made_log = [{ date: today, times_made: 1, notes: '' }];
+          nowMade = true;
+        }
+      }
+      rec.last_updated = today;
+    });
+    State.save('recipes').then(() => {
+      Utils.showToast(nowMade ? 'Marked as made ✓' : 'Removed from Made');
+      render(mainContainer || document.getElementById('main-content'), { tab: 'originals' });
+    }).catch(err => Utils.showToast('Save failed: ' + err.message, 'error'));
+  }
+
   function renderOriginalsGrid(originals, container, mainContainer) {
     const addBtn = document.createElement('div');
     addBtn.style.cssText = 'display:flex;justify-content:flex-end;margin-bottom:12px;';
@@ -725,7 +768,7 @@ const RecipesView = (() => {
         empty.innerHTML = `
           <div class="empty-icon">🍹</div>
           <p>No original cocktails yet.</p>
-          <p style="font-size:0.85rem;color:var(--text-muted);">Click "+ New Recipe" or "✨ Generate with AI" to create your first one.</p>`;
+          <p class="empty-hint">Click "+ New Recipe" or "✨ Generate with AI" to create your first one.</p>`;
       } else {
         empty.innerHTML = `
           <div class="empty-icon">🔍</div>
@@ -743,7 +786,7 @@ const RecipesView = (() => {
     chipsWrap.className = 'recipe-chip-grid';
     chipsWrap.innerHTML = filtered.map(r => RecipeChip.render(r, {
       context: 'recipes-tab-originals',
-      actions: { edit: true, discard: true, askBjorn: true },
+      actions: { edit: true, discard: true, askBjorn: true, favorite: true, wishlist: true, made: true },
     })).join('');
     container.appendChild(chipsWrap);
 
@@ -758,6 +801,9 @@ const RecipesView = (() => {
         const seed = `Tell me about my original "${r.name}". What would you tweak given my bar?`;
         ChatView.openDrawer({ seed });
       },
+      favorite: (r) => _toggleOriginalOverlay(r, 'is_favorite', mainContainer),
+      wishlist: (r) => _toggleOriginalOverlay(r, 'is_wishlist', mainContainer),
+      made: (r) => _toggleOriginalMade(r, mainContainer),
       discard: (r) => {
         if (!confirm(`Delete "${r.name}"? This cannot be undone.`)) return;
         State.patch('recipes', rec => {
@@ -838,7 +884,7 @@ const RecipesView = (() => {
         <div class="empty-state">
           <div class="empty-icon">✓</div>
           <p>${_searchQuery ? 'No matches found.' : 'Nothing marked as made yet.'}</p>
-          <p style="font-size:0.85rem;color:var(--text-muted);">Use the ○ button on Recommender cards to track what you've made.</p>
+          <p class="empty-hint">Use the ○ button on Recommender cards to track what you've made.</p>
         </div>`;
       return;
     }
@@ -906,14 +952,14 @@ const RecipesView = (() => {
 
     // Shared tally + notes + footer-close blocks (rendered in BOTH branches).
     const tallyBlock = `
-        <div class="section-label" style="margin-top:16px;">Times Made</div>
+        <div class="section-label mt-4">Times Made</div>
         <div class="rdm-tally">
           <span class="rdm-tally-count">${timesMade}</span>
           <button class="btn btn-secondary btn-sm rdm-made-btn">${timesMade > 0 ? '+ Made It Again' : 'Mark as Made'}</button>
           ${timesMade > 0 ? `<button class="btn btn-ghost btn-sm rdm-unmade-btn">Reset</button>` : ''}
         </div>
 
-        <div class="section-label" style="margin-top:16px;">Notes</div>
+        <div class="section-label mt-4">Notes</div>
         <textarea class="rdm-notes" rows="3" placeholder="Personal notes about this recipe…">${Utils.escapeHtml(currentNotes)}</textarea>`;
 
     if (editable) {
@@ -929,11 +975,11 @@ const RecipesView = (() => {
           <button class="btn-icon rdm-close" aria-label="Close">✕</button>
         </div>
 
-        <div class="section-label" style="margin-top:12px;">Ingredients</div>
+        <div class="section-label mt-3">Ingredients</div>
         <div id="rdm-ingredients">${editIngRows}</div>
         <button type="button" class="btn btn-ghost btn-sm rdm-add-ing">+ Add Ingredient</button>
 
-        <div class="rdm-edit-meta" style="margin-top:12px;">
+        <div class="rdm-edit-meta mt-3">
           <div class="form-group">
             <label>Method</label>
             <input class="rdm-edit-method" type="text" value="${Utils.escapeHtml(recipe.method || '')}" placeholder="e.g. stirred">
@@ -974,7 +1020,7 @@ const RecipesView = (() => {
         ${recipe.occasion ? `<p class="rec-occasion" style="margin:8px 0;">${Utils.escapeHtml(recipe.occasion)}</p>` : ''}
 
         ${ingRows ? `
-          <div class="section-label" style="margin-top:12px;">Ingredients</div>
+          <div class="section-label mt-3">Ingredients</div>
           <table class="ingredients-table">
             <thead><tr><th>Amount</th><th>Ingredient</th></tr></thead>
             <tbody>${ingRows}</tbody>
@@ -1151,7 +1197,7 @@ const RecipesView = (() => {
         <div class="recipe-id">${Utils.escapeHtml(r.id)}</div>
         <h2>${Utils.escapeHtml(r.name)}</h2>
         ${r.tagline ? `<div class="tagline">${Utils.escapeHtml(r.tagline)}</div>` : ''}
-        <div class="creator" style="margin-top:8px;">
+        <div class="creator mt-2">
           ${Utils.escapeHtml(r.creator || '—')}
           ${r.date_created ? `<span style="margin-left:10px;color:var(--text-muted);">${Utils.formatDate(r.date_created)}</span>` : ''}
         </div>
@@ -1171,7 +1217,7 @@ const RecipesView = (() => {
       </table>
 
       <!-- Meta grid -->
-      <div class="recipe-meta-grid" style="margin-top:16px;">
+      <div class="recipe-meta-grid mt-4">
         ${r.method ? `<div class="recipe-meta-item"><div class="meta-label">Method</div><div class="meta-value">${Utils.escapeHtml(r.method)}</div></div>` : ''}
         ${r.glassware ? `<div class="recipe-meta-item"><div class="meta-label">Glassware</div><div class="meta-value">${Utils.escapeHtml(r.glassware)}</div></div>` : ''}
         ${r.garnish ? `<div class="recipe-meta-item"><div class="meta-label">Garnish</div><div class="meta-value">${Utils.escapeHtml(r.garnish)}</div></div>` : ''}
@@ -1223,7 +1269,7 @@ const RecipesView = (() => {
         <span id="rd-img-name" style="font-size:0.85rem;color:var(--text-dim);">No file chosen</span>
       </div>
       <button class="btn btn-ghost btn-sm" id="rd-img-upload" style="display:none;margin-top:10px;">Upload to GitHub</button>
-      <p id="rd-img-status" style="font-size:0.82rem;min-height:1.2em;margin-top:6px;color:var(--text-muted);"></p>`;
+      <p id="rd-img-status" class="form-status"></p>`;
 
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
@@ -1292,13 +1338,9 @@ const RecipesView = (() => {
     container.appendChild(wrap);
   }
 
-  // ── handleGenerate — live AI recipe generation (D-13) ─────────────────
-  // Reads #rf-ai-prompt, calls ClaudeAPI.generateRecipe with current
-  // buildPromptContext(), populates form fields inline, manages spinner +
-  // form-field disable state. Errors surface as red toasts.
-  // Tweak-from-edit-form: edit-form-side analog of the runAIDesign('fork')
-  // path. Produces a NEW draft (fresh draft_id) so the original draft is
-  // preserved as a comparison point. Then routes back to the Drafts tab.
+  // ── handleDraftTweak — AI tweak from the draft edit form (D-10) ────────
+  // Produces a NEW draft (fork) so the original draft is preserved as a
+  // comparison point. Routes back to the Drafts tab on success.
   async function handleDraftTweak(wrap, baseDraft, container) {
     const promptEl = wrap.querySelector('#rf-tweak-prompt');
     const tweakBtn = wrap.querySelector('#rf-tweak');
@@ -1388,70 +1430,6 @@ const RecipesView = (() => {
     }
   }
 
-  async function handleGenerate(wrap) {
-    const prompt = wrap.querySelector('#rf-ai-prompt').value.trim();
-    if (!prompt) {
-      Utils.showToast('Enter a description before generating.', 'error');
-      return;
-    }
-
-    const genBtn   = wrap.querySelector('#rf-generate');
-    const statusEl = wrap.querySelector('#rf-generate-status');
-
-    // Disable Generate button and all form fields while in-flight (D-13)
-    genBtn.disabled = true;
-    genBtn.textContent = 'Generating…';
-    statusEl.textContent = '';
-    const formFields = wrap.querySelectorAll('input, textarea, button:not(#rf-generate)');
-    formFields.forEach(el => { el.disabled = true; });
-
-    try {
-      const ctx = buildPromptContext();  // { bkName, bkPreset, inventoryText, profileText }
-      const recipe = await ClaudeAPI.generateRecipe(prompt, ctx);
-
-      // Populate form fields inline (D-13). Assigning to input.value does not
-      // parse HTML — no XSS vector. escapeHtml is only needed for innerHTML sinks.
-      if (recipe.name)          wrap.querySelector('#rf-name').value      = recipe.name;
-      if (recipe.tagline)       wrap.querySelector('#rf-tagline').value   = recipe.tagline;
-      // Auto-fill creator with AI-returned value or fall back to bartender name (D-02 required)
-      wrap.querySelector('#rf-creator').value = recipe.creator || ctx.bkName || 'Barkeeper Bjorn';
-      if (recipe.method)        wrap.querySelector('#rf-method').value    = recipe.method;
-      if (recipe.glassware)     wrap.querySelector('#rf-glassware').value = recipe.glassware;
-      if (recipe.garnish)       wrap.querySelector('#rf-garnish').value   = recipe.garnish;
-      if (recipe.tasting_notes) wrap.querySelector('#rf-profile').value   = recipe.tasting_notes;
-      if (recipe.why_it_works)  wrap.querySelector('#rf-why').value       = recipe.why_it_works;
-      if (recipe.method_type) {
-        const mtSelect = wrap.querySelector('#rf-method-type');
-        const validTypes = ['shaken','stirred','built','blended','thrown','other'];
-        if (validTypes.includes(recipe.method_type)) mtSelect.value = recipe.method_type;
-      }
-
-      // Rebuild ingredient rows from AI response (ingredientRowHtml escapes)
-      if (Array.isArray(recipe.ingredients) && recipe.ingredients.length) {
-        const ingContainer = wrap.querySelector('#rf-ingredients');
-        ingContainer.innerHTML = recipe.ingredients
-          .map((ing, i) => ingredientRowHtml(ing, i))
-          .join('');
-        bindIngredientRemove(wrap);
-      }
-
-      Utils.showToast('AI draft loaded — review and save.');
-
-    } catch (err) {
-      Utils.showToast('Generation failed: ' + err.message, 'error');
-    } finally {
-      // Always re-enable form fields and reset Generate button regardless of outcome
-      const allFields = wrap.querySelectorAll('input, textarea, button');
-      allFields.forEach(el => { el.disabled = false; });
-      genBtn.textContent = 'Generate';
-      // Edge case: user removed key during generation — re-disable Generate
-      if (!localStorage.getItem('bb_anthropic_key')) {
-        genBtn.disabled = true;
-        genBtn.style.opacity = '0.4';
-      }
-    }
-  }
-
   function renderForm(r, container) {
     const isEdit = !!r;
     // Commit 3: status-based branching replaces _source sniffing.
@@ -1516,8 +1494,8 @@ const RecipesView = (() => {
     // preserved as a comparison point.
     if (isDraft && hasKey) {
       wrap.innerHTML += `
-        <div class="rf-ai-prompt-wrap" id="rf-tweak-wrap" style="margin-bottom:20px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);">
-          <div class="section-label" style="margin-bottom:8px;">Tweak with AI</div>
+        <div class="rf-gen-wrap form-section-card" id="rf-tweak-wrap">
+          <div class="section-label mb-2">Tweak with AI</div>
           <div class="form-group" style="margin-bottom:10px;">
             <label for="rf-tweak-prompt" style="font-size:0.82rem;">Ask Claude to refine this draft (creates a NEW draft, keeps the original)</label>
             <textarea id="rf-tweak-prompt" rows="2"
@@ -1534,23 +1512,15 @@ const RecipesView = (() => {
     const dis = isSeededClassic ? 'disabled' : '';
 
     // AI prompt block — shown only for new recipes (D-12)
+    // Redirects to the unified WriteGate-backed drafts pipeline (RECIPE-GEN-01).
     if (!isEdit) {
       wrap.innerHTML += `
-        <div class="rf-ai-prompt-wrap" id="rf-ai-wrap" style="margin-bottom:20px;padding:12px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);">
-          <div class="section-label" style="margin-bottom:8px;">Generate with AI</div>
-          <div class="form-group" style="margin-bottom:10px;">
-            <label for="rf-ai-prompt" style="font-size:0.82rem;">Describe the cocktail you want</label>
-            <textarea id="rf-ai-prompt" rows="2"
-                      placeholder="e.g. a smoky mezcal sour with honey and citrus"
-                      style="font-family:monospace;font-size:0.82rem;padding:10px;resize:vertical;"></textarea>
-          </div>
-          <button class="btn btn-primary btn-sm" id="rf-generate" type="button"
-                  ${hasKey ? '' : 'disabled'}
-                  title="${hasKey ? '' : 'Add your Anthropic API key in Settings to use AI generation'}"
-                  style="${hasKey ? '' : 'opacity:0.4;cursor:not-allowed;'}">
-            Generate
-          </button>
-          <span id="rf-generate-status" style="font-size:0.82rem;color:var(--text-muted);margin-left:10px;"></span>
+        <div class="rf-gen-wrap form-section-card" id="rf-ai-wrap">
+          <div class="section-label mb-2">Generate with AI</div>
+          <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:10px;">
+            Let your bartender design a draft you can refine, then promote to an Original.
+          </p>
+          <button class="btn btn-primary btn-sm" id="rf-open-ai" type="button">✨ Generate with AI</button>
         </div>`;
     }
 
@@ -1579,7 +1549,7 @@ const RecipesView = (() => {
         </div>
       </div>
 
-      <div class="section-label" style="margin-top:8px;">Ingredients</div>
+      <div class="section-label mt-2">Ingredients</div>
       <div id="rf-ingredients">${ingRows}</div>
       ${isSeededClassic ? '' : '<button type="button" class="btn btn-ghost btn-sm" id="rf-add-ing" style="margin-bottom:16px;">+ Add Ingredient</button>'}
 
@@ -1615,7 +1585,7 @@ const RecipesView = (() => {
         <textarea id="rf-why" rows="2" placeholder="The science behind it" ${ro}>${Utils.escapeHtml(display?.why_it_works || '')}</textarea>
       </div>
 
-      <div class="section-label" style="margin-top:8px;">Ratings & Status</div>
+      <div class="section-label mt-2">Ratings & Status</div>
       <div class="form-row">
         <div class="form-group">
           <label>Owner Rating (1–10)</label>
@@ -1630,37 +1600,33 @@ const RecipesView = (() => {
         <label>Rating Notes</label>
         <input type="text" id="rf-rating-notes" value="${Utils.escapeHtml(r?.ratings?.notes || '')}" placeholder="Any notes on the rating">
       </div>
-      <div class="form-group" style="display:flex;align-items:center;gap:10px;">
+      <div class="form-group form-check-row">
         <input type="checkbox" id="rf-built" ${r?.confirmed_built ? 'checked' : ''} style="width:auto;margin:0;">
         <label for="rf-built" style="margin:0;">Confirmed Built</label>
       </div>
-      <div class="form-group" style="display:flex;align-items:center;gap:10px;" title="${r?.seed_id ? 'Classics cannot be marked as your Original — they live in the seed library.' : 'Tag this entry as your own creation.'}">
+      <div class="form-group form-check-row" title="${r?.seed_id ? 'Classics cannot be marked as your Original — they live in the seed library.' : 'Tag this entry as your own creation.'}">
         <input type="checkbox" id="rf-original"
                ${r?.is_original ? 'checked' : ''}
                ${r?.seed_id ? 'disabled' : ''}
-               style="width:auto;margin:0;${r?.seed_id ? 'opacity:0.5;cursor:not-allowed;' : ''}">
+               class="${r?.seed_id ? 'input-disabled' : ''}"
+               style="width:auto;margin:0;">
         <label for="rf-original" style="margin:0;${r?.seed_id ? 'opacity:0.6;' : ''}">Original (my creation)${r?.seed_id ? ' — locked (classic)' : ''}</label>
       </div>
 
-      <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
-        <button class="btn btn-primary" id="rf-save">${isDraft ? 'Save Draft Changes' : isSeededClassic ? 'Save Overlay (ratings / notes)' : (isEdit ? 'Save Changes' : 'Create Recipe')}</button>
+      <div class="form-actions-row">
+        <button class="btn btn-primary" id="rf-save">${isDraft ? 'Save Draft Changes' : isSeededClassic ? 'Save Overlay (ratings / notes)' : (isEdit ? 'Save Changes' : 'Save to Originals')}</button>
         ${isDraft ? '<button class="btn btn-primary" id="rf-save-promote" title="Save these edits then promote the draft into Originals">Save and Promote to Original</button>' : ''}
         <button class="btn btn-secondary" id="rf-cancel">Cancel</button>
       </div>`;
 
     container.appendChild(wrap);
 
-    // Generate button stub: live wiring lands in plan 03-03 (Wave 2 / ClaudeAPI).
-    // If no API key, button is disabled at render time (handled above) — skip listener.
-    if (!isEdit && hasKey) {
-      const genBtn = wrap.querySelector('#rf-generate');
-      if (genBtn) {
-        genBtn.addEventListener('click', () => {
-          if (typeof ClaudeAPI === 'undefined' || typeof handleGenerate === 'undefined') {
-            Utils.showToast('AI generation module not yet loaded.', 'error');
-            return;
-          }
-          handleGenerate(wrap);
+    // AI generate button — redirects to the unified drafts pipeline (RECIPE-GEN-01).
+    if (!isEdit) {
+      const openAiBtn = wrap.querySelector('#rf-open-ai');
+      if (openAiBtn) {
+        openAiBtn.addEventListener('click', () => {
+          showAIPromptModal(document.getElementById('main-content'));
         });
       }
     }
@@ -1828,7 +1794,7 @@ const RecipesView = (() => {
       }).catch(err => {
         Utils.showToast('Save failed: ' + err.message, 'error');
         saveBtn.disabled = false;
-        saveBtn.textContent = isEdit ? 'Save Changes' : 'Create Recipe';
+        saveBtn.textContent = isEdit ? 'Save Changes' : 'Save to Originals';
       });
     });
   }

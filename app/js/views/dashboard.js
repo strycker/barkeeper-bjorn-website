@@ -10,7 +10,7 @@ const DashboardView = (() => {
 
     const name       = profile.identity?.preferred_name || profile.identity?.full_name || 'there';
     const bjornName  = barkeeper.identity?.name || 'Barkeeper Bjorn';
-    const originals  = (recipes.originals || []).length;
+    const originals  = ((recipes.pool || []).filter(r => r.status === 'original')).length;
     const bottleCount = Utils.countInventoryItems(inventory);
     const shopping   = (inventory.shopping_list || []).length;
     const isNew      = State.isNewUser();
@@ -86,7 +86,7 @@ const DashboardView = (() => {
         <span class="stat-label">Originals</span>
       </div>
       <div class="stat-item">
-        <span class="stat-value">${(recipes.confirmed_favorites || []).length}</span>
+        <span class="stat-value">${(recipes.pool || []).filter(r => r.is_favorite).length}</span>
         <span class="stat-label">Favorites</span>
       </div>
       <div class="stat-item">
@@ -182,7 +182,7 @@ const DashboardView = (() => {
       recentsEl.innerHTML = `<h2 style="margin-bottom:14px;">Recent Originals</h2>`;
       const grid = document.createElement('div');
       grid.className = 'card-grid';
-      const toShow = (recipes.originals || []).slice(-4).reverse();
+      const toShow = (recipes.pool || []).filter(r => r.status === 'original').slice(-4).reverse();
       toShow.forEach(r => {
         const card = document.createElement('a');
         card.href = `#recipes/${r.id}`;

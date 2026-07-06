@@ -336,7 +336,7 @@ const ProfileView = (() => {
     if (!sumEl) return;
 
     const name = identity.preferred_name || identity.full_name || '—';
-    const total = (State.get('recipes')?.originals || []).length;
+    const total = ((State.get('recipes')?.pool || []).filter(r => r.status === 'original')).length;
     const since = profile.review_counter?.last_review_date;
     const sinceCount = profile.review_counter?.cocktails_since_last_review ?? 0;
 
