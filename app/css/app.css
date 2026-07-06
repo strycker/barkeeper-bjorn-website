@@ -26,6 +26,13 @@
   --fs-lg:   1.05rem;
   --fs-xl:   1.2rem;
   --fs-2xl:  1.5rem;
+  /* Spacing scale (UI-TOKEN-02) — 4px base step. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
   --shadow:    0 4px 20px rgba(0,0,0,0.5);
   --transition: 150ms ease;
 }
@@ -257,6 +264,34 @@ label {
 .form-group { margin-bottom: 16px; }
 .form-row { display: flex; gap: 12px; }
 .form-row > * { flex: 1; }
+
+/* Named form utility/section classes (UI-TOKEN-02) — replace repeated inline styles. */
+.form-section-card {
+  margin-bottom: var(--space-5);
+  padding: var(--space-3);
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.form-actions-row {
+  display: flex;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  flex-wrap: wrap;
+}
+.form-check-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.muted-help {
+  font-size: var(--fs-sm);
+  color: var(--text-dim);
+}
+.input-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 /* ─── Buttons ────────────────────────────────────────────────────── */
 button, .btn {
