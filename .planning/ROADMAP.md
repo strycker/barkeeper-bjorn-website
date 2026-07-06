@@ -16,7 +16,7 @@
 | 5 | Polish, Depth & UX Tidy | Recommender UX fixes, vetoes filter panel, ingredient derivation, inventory field depth, data model tidy, Bartender Customization Wizard | REC-05–09, INV-08–10, DATA-01–03, CUST-01–02 | Complete |
 | 6 | Recipe & Recommender UX | "I Made This" tracking, chip-style Favorites/Wishlist/Made tabs, text search on Recipes + Recommender, card layout polish | REC-10–11, RECIPE-MADE-01–02, RECIPE-VIEW-01–02, RECIPE-SEARCH-01, REC-SEARCH-01 | Complete |
 | 7 | AI Integration | Claude API chat, classroom, AI design, AI recommendations, AI import, Library | AI-01–13, LIB-01, REC-04, SET-05, CHAT-01–09 | Complete (live-key UAT deferred) |
-| 7.1 | Recipes & UI Consistency Cleanup *(inserted)* | Chip-shim removal, Originals chip parity, unify AI-generate entry points, type/spacing tokens | CHIP-03–04, RECIPE-GEN-01, UI-TOKEN-01–02 | Pending |
+| 7.1 | Recipes & UI Consistency Cleanup *(inserted)* | Chip-shim removal, Originals chip parity, unify AI-generate entry points, type/spacing tokens | CHIP-03–04, RECIPE-GEN-01, UI-TOKEN-01–02 | Executed (visual UAT + secure-phase pending) |
 | 8 | Portability | Markdown round-trip, per-page export/import, append/overwrite import mode | PORT-01–05 | Pending |
 | 9 | Backend & Multi-User | Supabase, auth, per-user isolation, account settings | BACKEND-01–08 | Pending |
 | 10 | Community, API & Multi-Agent | Community feed, forum, REST API, Bjorn sub-agents | COMMUNITY-01–08, API-01–06, AGENT-SYS-01–04 | Pending |
