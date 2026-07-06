@@ -130,7 +130,7 @@ const SettingsView = (() => {
           <button class="btn btn-primary btn-sm" id="st-save-identity">Update bartender settings</button>
           <a href="#bartender-wizard" class="btn btn-secondary btn-sm" style="margin-left:8px;">Full Customization →</a>
           <a href="#onboarding" class="btn btn-ghost btn-sm" style="margin-left:8px;">Review Setup →</a>
-          <p id="st-identity-status" style="min-height:1.2em;margin-top:8px;font-size:0.82rem;"></p>
+          <p id="st-identity-status" class="form-status"></p>
         </div>
 
         <!-- ── Section 2: GitHub Connection (SETTINGS-02) ───────────────── -->
@@ -163,13 +163,13 @@ const SettingsView = (() => {
                    placeholder="main">
           </div>
           <button class="btn btn-primary btn-sm" id="st-save-github">Update GitHub connection</button>
-          <p id="st-github-status" style="min-height:1.2em;margin-top:8px;font-size:0.82rem;"></p>
+          <p id="st-github-status" class="form-status"></p>
         </div>
 
         <!-- ── Section 3: Account / Logout (SETTINGS-03) ────────────────── -->
         <div class="settings-section" id="sect-account">
           <div class="settings-section__heading">Account</div>
-          <p style="color:var(--text-dim);font-size:0.9rem;margin-bottom:16px;">
+          <p class="section-desc">
             Logging out clears your GitHub credentials from this browser. Your data in GitHub remains intact.
           </p>
           <button class="btn btn-ghost btn-sm" id="st-logout">Log out</button>
@@ -187,14 +187,14 @@ const SettingsView = (() => {
               <button class="btn-icon" id="st-ai-key-toggle" type="button" title="Show/hide key">Show</button>
             </div>
           </div>
-          <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:12px;">
+          <p class="muted-help mb-3">
             Your Anthropic API key enables the Generate with AI feature on new recipes. Stored only in this browser.
           </p>
           <button class="btn btn-primary btn-sm" id="st-save-ai-key" type="button">Save API key</button>
-          <p id="st-ai-key-status" style="min-height:1.2em;margin-top:8px;font-size:0.82rem;"></p>
+          <p id="st-ai-key-status" class="form-status"></p>
 
           <!-- ── SET-05: Model selector (D-12) ───────────────────────────── -->
-          <div class="form-group" style="margin-top:20px;">
+          <div class="form-group mt-5">
             <label for="st-chat-model">Model</label>
             <select id="st-chat-model">
               ${CHAT_MODELS.map(([value, label]) =>
@@ -202,14 +202,14 @@ const SettingsView = (() => {
               ).join('')}
             </select>
           </div>
-          <p style="font-size:0.82rem;color:var(--text-dim);">
+          <p class="muted-help">
             Sonnet is the recommended balance of speed, quality, and cost on your key. (per D-12)
           </p>
-          <p id="st-chat-model-status" style="min-height:1.2em;margin-top:8px;font-size:0.82rem;"></p>
+          <p id="st-chat-model-status" class="form-status"></p>
 
           <!-- ── AI-09: Call Log panel ──────────────────────────────────── -->
-          <div class="settings-section__heading" style="margin-top:24px;">AI Call Log</div>
-          <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:8px;">
+          <div class="settings-section__heading mt-6">AI Call Log</div>
+          <p class="muted-help mb-2">
             Most-recent API calls (timestamp, type, model, token usage). Your API key is never logged.
           </p>
           <div id="st-ai-log" style="font-size:0.85rem;margin-bottom:12px;"></div>
@@ -222,7 +222,7 @@ const SettingsView = (() => {
         <!-- ── Section 5: Export & Import (EXPORT-01–04) ───────────────── -->
         <div class="settings-section" id="sect-export">
           <div class="settings-section__heading">Export & Import</div>
-          <p style="color:var(--text-dim);font-size:0.9rem;margin-bottom:16px;">
+          <p class="section-desc">
             Download your bar data as a portable ZIP bundle or as an AI-context text file,
             or restore from a previous export.
           </p>
@@ -235,7 +235,7 @@ const SettingsView = (() => {
           <!-- ── AI-08 / AI-10: AI Import / Repair sub-panel (D-14) ──────── -->
           <div id="sect-ai-import" style="margin-top:24px;padding-top:16px;border-top:1px solid var(--amber-dim);">
             <div class="settings-section__heading">AI Import / Repair</div>
-            <p style="font-size:0.82rem;color:var(--text-dim);margin-bottom:12px;">
+            <p class="muted-help mb-3">
               Paste legacy bartender notes (markdown) or upload an <code>.md</code> file.
               Claude extracts inventory / profile / recipes / barkeeper sections; each is
               schema-validated and previewed as a diff before any write. Invalid sections
@@ -257,7 +257,7 @@ const SettingsView = (() => {
         <div class="settings-section settings-section--danger" id="sect-danger"
              role="region" aria-label="Danger Zone">
           <div class="settings-section__heading">Danger Zone</div>
-          <p style="color:var(--text-dim);font-size:0.9rem;margin-bottom:16px;">
+          <p class="section-desc">
             Destructive actions. These cannot be undone.
           </p>
           <div id="st-reset-state-1">
@@ -273,7 +273,7 @@ const SettingsView = (() => {
               <button class="btn btn-ghost btn-sm" id="st-reset-cancel">Never mind, keep my data</button>
             </div>
           </div>
-          <p id="st-reset-status" style="min-height:1.2em;margin-top:8px;font-size:0.82rem;"></p>
+          <p id="st-reset-status" class="form-status"></p>
         </div>
 
       </div>`;
