@@ -1,18 +1,15 @@
 ---
-status: testing
+status: complete
 phase: 04-inventory-recommender-depth
 source: [04-01-SUMMARY.md, 04-02-SUMMARY.md, 04-03-SUMMARY.md]
 started: 2026-05-15T00:00:00Z
-updated: 2026-05-15T00:00:00Z
+updated: 2026-06-14T16:30:00Z
+reconciled: "2026-06-14 — all 12 scenarios were walked in the original session (per-test results below: 11 pass, 1 minor issue) but the Summary counters + status were never finalized. Counters corrected, status set to complete. No results fabricated — every result below is the one recorded in-session."
 ---
 
 ## Current Test
 
-number: 1
-name: Structured Bottle Chips Display
-expected: |
-  Open the Inventory page. Bottle entries show as clickable chips with the spirit name as primary text. If a brand is set, it appears below the name in smaller muted text. A small colored dot on the chip indicates tier (well=gray, standard=green, premium=blue, craft=amber, boutique=purple, rare/exceptional=bright amber-gold). Unset tier shows a hollow/transparent dot. Old string-only entries still display without errors.
-awaiting: user response
+[testing complete]
 
 ## Tests
 
@@ -92,12 +89,18 @@ issue: |
 ## Summary
 
 total: 12
-passed: 0
-issues: 0
-pending: 12
+passed: 11
+issues: 1
+pending: 0
 skipped: 0
 blocked: 0
 
 ## Gaps
 
-[none yet]
+- truth: "Canonical-name suggestion banner offers 'Use it' for near-miss inventory names"
+  status: partial
+  reason: "Test 4 — typing 'Angostura' shows no suggestion; curated list has 'Angostura Bitters' but Levenshtein distance (8) exceeds the threshold in canonical-names.js. Minor UX gap; does not block. Candidate backlog fix: add common bitters/brand aliases to the curated map or raise the threshold for longer strings."
+  severity: minor
+  test: 4
+
+Note (2026-06-14): the extensive product-vision feedback captured in Tests 5, 6, 8, 11 (equipment expansion beyond strainers, section-scoped type datalists, filter-chip inventory UX, AI/web recipe discovery when filters yield no matches, numeric-axis removal on Profile) was already routed into later phases — Phase 5 (data-model tidy, Profile numeric-axis removal), Phase 7 (AI recommendations / generation), and the ROADMAP backlog. No new action required from this reconciliation beyond the minor Test-4 gap above.
