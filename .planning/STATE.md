@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: phase_shipped
-last_updated: "2026-06-14T15:30:00.000Z"
+last_updated: "2026-06-14T16:10:00.000Z"
 progress:
   total_phases: 11
   completed_phases: 8
@@ -29,6 +29,16 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 ### Roadmap Evolution
 - Phase 7.1 inserted after Phase 7 (2026-06-14) — Recipes & UI Consistency Cleanup; consolidation pass before Phase 8 Portability. Decimal insertion preserves Phase 8/9/10 numbering.
 
+### Milestone-Close Checklist (v1.0)
+Open items surfaced by `audit-open` before milestone completion. Reconciled 2026-06-14: Phase 06 verification advanced to `verified` (its human_verification items were exercised by the completed 06-UAT.md, 20/22). Remaining open items are USER-run GSD steps (they require a live agent session, a browser walk-through, a BYOK key, or a visual audit — none fabricated here):
+
+- [ ] **Phase 01** — `01-VERIFICATION.md` [human_needed]: two live-agent behavioral checks — (1) INIT_PROMPT auto-onboarding fires (no options menu on first message); (2) one-question-at-a-time rule holds at runtime. Needs a live ChatGPT/Claude Custom-GPT session. → run the live checks, then advance status (or `/gsd-verify-work 01`).
+- [ ] **Phase 04** — `04-UAT.md` [testing, 12 scenarios never walked]: phase is verifier-verified (`04-VERIFICATION.md`) and its surface (bottle chips, tier dots, mood sliders, scope toggle, occasion filters) has since been re-exercised by Phase 6 UAT (22 scenarios) and Phase 7.1 UAT. → either walk `/gsd-verify-work 04` or formally mark it superseded.
+- [ ] **Phase 07** — live-key UAT (deferred): streaming chat, AI design/recommendations, AI import quality — needs a BYOK Anthropic key. → `/gsd-verify-work 07` with a key.
+- [ ] **Phase 07.1** — `/gsd-ui-review 07.1` (requested): retroactive 6-pillar visual audit; should score higher than Phase 7's 18/24 now that the `--fs-*`/`--space-*` token scales landed (Typography/Spacing were the 2/4 pillars).
+
+After these clear, milestone v1.0 is ready for `/gsd-audit-milestone` → `/gsd-complete-milestone`.
+
 **Health (2026-06-14):** DEGRADED — 4 warnings, all expected: W006×3 = Phases 8/9/10 in ROADMAP have no phase directory yet (created at plan time); W019 = `.planning/chip-unification-plan.md` is a non-canonical artifact (kept as the shipped mini-phase record, now cross-referenced from ROADMAP backlog). I001×5 (Phase 01 "no SUMMARY.md") are false positives — summaries exist as `01-0X-SUMMARY.md` (plan/summary name mismatch).
 
 ---
@@ -42,9 +52,9 @@ See: `.planning/PROJECT.md` (updated 2026-05-04)
 | 3 | Content Management | Shipped | 4 | 100% |
 | 4 | Inventory & Recommender Depth | Shipped | 3 | 100% |
 | 5 | Polish, Depth & UX Tidy | Shipped | 4 plans, 17/17 UAT, VALIDATION.md | 100% |
-| 6 | Recipe & Recommender UX | Shipped | 4 plans, 20/22 UAT pass (2 issues deferred), 2 recommender blocker bugs fixed mid-UAT | 100% |
-| 7 | AI Integration | Shipped | 6 plans, 25/25 reqs, 43/43 phase-07 tests, 62/62 full suite, 18/18 UAT pass | 100% |
-| 7.1 | Recipes & UI Consistency Cleanup *(inserted)* | Executed + Secured (visual UAT pending) | 5 | 100% |
+| 6 | Recipe & Recommender UX | Shipped · verification reconciled (human items via 06-UAT 20/22) | 4 plans, 20/22 UAT pass (2 issues deferred), 2 recommender blocker bugs fixed mid-UAT | 100% |
+| 7 | AI Integration | Shipped (live-key UAT deferred) | 6 plans, 25/25 reqs, 43/43 phase-07 tests, 62/62 full suite, 18/18 UAT pass | 100% |
+| 7.1 | Recipes & UI Consistency Cleanup *(inserted)* | Verified + Secured (UI-review pending) | 5 plans, UAT 5/5+2 blocked, VALIDATION partial, LEARNINGS | 100% |
 | 8 | Portability | Pending | — | 0% |
 | 9 | Backend & Multi-User | Pending | — | 0% |
 | 10 | Community, API & Multi-Agent | Pending | — | 0% |

@@ -1,13 +1,18 @@
 ---
 phase: 06-recipe-recommender-ux
 verified: 2026-05-20T00:00:00Z
-status: human_needed
+status: verified
 score: 13/13 must-haves verified
 overrides_applied: 0
+human_verification_resolved:
+  by: 06-UAT.md
+  date: 2026-05-21
+  result: "22/22 UAT scenarios resolved (20 pass, 2 issues deferred to future phases). The four human_verification items below (D-06 editability, D-07 Recommender badge, D-07<->D-06 coupling, D-08 duplicate-guard/toggle) were exercised end-to-end in that browser UAT session — see 06-UAT.md (status: complete)."
+  reconciled: 2026-06-14
 re_verification:
   previous_status: human_needed
   previous_score: 13/13
-  gaps_closed: []
+  gaps_closed: ["human_verification items satisfied via completed 06-UAT.md (20/22)"]
   gaps_remaining: []
   regressions: []
 human_verification:
@@ -29,7 +34,7 @@ human_verification:
 
 **Phase Goal:** Elevate the Recipes and Recommender views from read-only display to a fully interactive experience — chip-style cards everywhere, "I Made This" tracking, text search on both pages, action-button polish, editable Originals from any context, and Originals discoverable in Recommendations.
 **Verified:** 2026-05-20
-**Status:** human_needed
+**Status:** verified (human_verification items confirmed via completed 06-UAT.md — 20/22 pass, 2 deferred; reconciled 2026-06-14)
 **Re-verification:** Yes — independent re-verification against current code (prior report had no gaps; all claims re-checked directly against source, not trusted)
 
 ## Goal Achievement

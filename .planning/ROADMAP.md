@@ -16,7 +16,7 @@
 | 5 | Polish, Depth & UX Tidy | Recommender UX fixes, vetoes filter panel, ingredient derivation, inventory field depth, data model tidy, Bartender Customization Wizard | REC-05–09, INV-08–10, DATA-01–03, CUST-01–02 | Complete |
 | 6 | Recipe & Recommender UX | "I Made This" tracking, chip-style Favorites/Wishlist/Made tabs, text search on Recipes + Recommender, card layout polish | REC-10–11, RECIPE-MADE-01–02, RECIPE-VIEW-01–02, RECIPE-SEARCH-01, REC-SEARCH-01 | Complete |
 | 7 | AI Integration | Claude API chat, classroom, AI design, AI recommendations, AI import, Library | AI-01–13, LIB-01, REC-04, SET-05, CHAT-01–09 | Complete (live-key UAT deferred) |
-| 7.1 | Recipes & UI Consistency Cleanup *(inserted)* | Chip-shim removal, Originals chip parity, unify AI-generate entry points, type/spacing tokens | CHIP-03–04, RECIPE-GEN-01, UI-TOKEN-01–02 | Executed (visual UAT + secure-phase pending) |
+| 7.1 | Recipes & UI Consistency Cleanup *(inserted)* | Chip-shim removal, Originals chip parity, unify AI-generate entry points, type/spacing tokens | CHIP-03–04, RECIPE-GEN-01, UI-TOKEN-01–02 | Verified + Secured (UI-review pending) |
 | 8 | Portability | Markdown round-trip, per-page export/import, append/overwrite import mode | PORT-01–05 | Pending |
 | 9 | Backend & Multi-User | Supabase, auth, per-user isolation, account settings | BACKEND-01–08 | Pending |
 | 10 | Community, API & Multi-Agent | Community feed, forum, REST API, Bjorn sub-agents | COMMUNITY-01–08, API-01–06, AGENT-SYS-01–04 | Pending |
@@ -422,9 +422,16 @@ Full detail in `.planning/phases/07-ai-integration/07-UAT.md` (Deferred / Backlo
 - **UI spacing tokens + inline-style extraction** — add `--space-*` tokens; promote the 87 inline `style=` blocks in `recipes.js` and 38 in `settings.js` into named utility/section classes (`.form-section-card`, `.form-actions-row`, `.muted-help`, `.input-disabled`). From Phase 7 UI Review (Spacing 2/4).
 - **Chat streaming affordances** — add a "thinking…" placeholder before the first token and a visible Stop button (wire to the existing `AbortController`) in both the `#chat` page and the quick-ask drawer. From Phase 7 UI Review (Visuals 3/4).
 
-### Deferred verification
+### Deferred verification / Milestone-close checklist (v1.0)
 
-- **Phase 7 live-key UAT** — recipe-balance quality, persona voice, import quality, JSON-repair quality, drawer/abort/rate-limit UX, and lesson Q&A all require a real BYOK Anthropic key and could not be exercised in the build container. Run via `/gsd-verify-work` once a key is available.
+Reconciled 2026-06-14 (`audit-open`): Phase 06 verification advanced to `verified` (human items exercised by the completed 06-UAT.md, 20/22). Remaining items are user-run GSD steps — not code work:
+
+- **Phase 7 live-key UAT** — recipe-balance quality, persona voice, import quality, JSON-repair quality, drawer/abort/rate-limit UX, and lesson Q&A all require a real BYOK Anthropic key and could not be exercised in the build container. Run via `/gsd-verify-work 07` once a key is available.
+- **Phase 7.1 UI review** — retroactive 6-pillar visual audit (`/gsd-ui-review 07.1`); expected to score higher than Phase 7's 18/24 now that the `--fs-*`/`--space-*` token scales landed (Typography + Spacing were the 2/4 pillars).
+- **Phase 01 live-agent UAT** — `01-VERIFICATION.md` [human_needed]: INIT_PROMPT auto-onboarding flow + one-question-at-a-time rule; needs a live ChatGPT/Claude session.
+- **Phase 04 UAT** — `04-UAT.md` never walked (12 scenarios); phase is verifier-verified and its surface re-exercised by Phase 6/7.1 UATs. Walk `/gsd-verify-work 04` or formally mark superseded.
+
+When these clear → `/gsd-audit-milestone` → `/gsd-complete-milestone`.
 
 ---
 
