@@ -421,6 +421,8 @@ Full detail in `.planning/phases/07-ai-integration/07-UAT.md` (Deferred / Backlo
 - **UI type-scale tokens** — add `--fs-xs`..`--fs-2xl` to `:root` and migrate the 30+ ad-hoc `font-size` values (chip system, lesson tiles, badges, chat bubbles) onto the scale. From Phase 7 UI Review (Typography 2/4).
 - **UI spacing tokens + inline-style extraction** — add `--space-*` tokens; promote the 87 inline `style=` blocks in `recipes.js` and 38 in `settings.js` into named utility/section classes (`.form-section-card`, `.form-actions-row`, `.muted-help`, `.input-disabled`). From Phase 7 UI Review (Spacing 2/4).
 - **Chat streaming affordances** — add a "thinking…" placeholder before the first token and a visible Stop button (wire to the existing `AbortController`) in both the `#chat` page and the quick-ask drawer. From Phase 7 UI Review (Visuals 3/4).
+- **Canonical-name coverage for long names** (Phase 04 UAT Test 4) — `canonical-names.js` misses "Angostura" → "Angostura Bitters" because the Levenshtein distance (8) exceeds the threshold for longer strings. Add common bitters/brand aliases to the curated map, or scale the threshold with string length. Minor UX.
+- **Chip action-button aria-labels** (Phase 7.1 UI Review) — the four icon-only chip buttons (♥/☆/○/×, `recipe-chip.js:162-171`) lack `aria-label`; add them (accessibility). Plus finish the font-size tokenization outside the originally-scoped selectors (~113 raw vs 26 tokenized) and close inline-style gaps inside migrated `.form-section-card` blocks.
 
 ### Deferred verification / Milestone-close checklist (v1.0)
 
@@ -429,7 +431,7 @@ Reconciled 2026-06-14 (`audit-open`): Phase 06 verification advanced to `verifie
 - **Phase 7 live-key UAT** — recipe-balance quality, persona voice, import quality, JSON-repair quality, drawer/abort/rate-limit UX, and lesson Q&A all require a real BYOK Anthropic key and could not be exercised in the build container. Run via `/gsd-verify-work 07` once a key is available.
 - **Phase 7.1 UI review** — DONE (2026-06-14): `07.1-UI-REVIEW.md` **20/24** (Typography 2→3, Spacing 2→3 vs Phase 7). Remaining fixes are deferred polish (finish font-size tokenization, aria-labels on icon-only chip buttons), not blockers.
 - **Phase 01 live-agent UAT** — `01-VERIFICATION.md` [human_needed]: INIT_PROMPT auto-onboarding flow + one-question-at-a-time rule; needs a live ChatGPT/Claude session.
-- **Phase 04 UAT** — `04-UAT.md` never walked (12 scenarios); phase is verifier-verified and its surface re-exercised by Phase 6/7.1 UATs. Walk `/gsd-verify-work 04` or formally mark superseded.
+- **Phase 04 UAT** — DONE/reconciled (2026-06-14): `04-UAT.md` was walked in-session (results present) but never finalized; corrected to complete — **11/12 pass, 1 minor issue** (canonical-name banner misses "Angostura", captured as a backlog fix below).
 
 When these clear → `/gsd-audit-milestone` → `/gsd-complete-milestone`.
 
