@@ -35,7 +35,7 @@ Open items surfaced by `audit-open` before milestone completion. Reconciled 2026
 - [ ] **Phase 01** — `01-VERIFICATION.md` [human_needed]: two live-agent behavioral checks — (1) INIT_PROMPT auto-onboarding fires (no options menu on first message); (2) one-question-at-a-time rule holds at runtime. Needs a live ChatGPT/Claude Custom-GPT session. → run the live checks, then advance status (or `/gsd-verify-work 01`).
 - [ ] **Phase 04** — `04-UAT.md` [testing, 12 scenarios never walked]: phase is verifier-verified (`04-VERIFICATION.md`) and its surface (bottle chips, tier dots, mood sliders, scope toggle, occasion filters) has since been re-exercised by Phase 6 UAT (22 scenarios) and Phase 7.1 UAT. → either walk `/gsd-verify-work 04` or formally mark it superseded.
 - [ ] **Phase 07** — live-key UAT (deferred): streaming chat, AI design/recommendations, AI import quality — needs a BYOK Anthropic key. → `/gsd-verify-work 07` with a key.
-- [ ] **Phase 07.1** — `/gsd-ui-review 07.1` (requested): retroactive 6-pillar visual audit; should score higher than Phase 7's 18/24 now that the `--fs-*`/`--space-*` token scales landed (Typography/Spacing were the 2/4 pillars).
+- [x] **Phase 07.1** — `/gsd-ui-review 07.1` DONE (2026-06-14): **20/24**, up from Phase 7's 18/24. Typography 2→3 and Spacing 2→3 (the token work moved both target pillars); Color 4/4, Experience Design 4/4. Top remaining fixes (deferred polish, not blockers): finish font-size tokenization outside the scoped selectors (~113 raw vs 26 tokenized), close inline-style gaps inside migrated `.form-section-card` blocks, add `aria-label` to the 4 icon-only chip buttons. See 07.1-UI-REVIEW.md.
 
 After these clear, milestone v1.0 is ready for `/gsd-audit-milestone` → `/gsd-complete-milestone`.
 
@@ -54,7 +54,7 @@ After these clear, milestone v1.0 is ready for `/gsd-audit-milestone` → `/gsd-
 | 5 | Polish, Depth & UX Tidy | Shipped | 4 plans, 17/17 UAT, VALIDATION.md | 100% |
 | 6 | Recipe & Recommender UX | Shipped · verification reconciled (human items via 06-UAT 20/22) | 4 plans, 20/22 UAT pass (2 issues deferred), 2 recommender blocker bugs fixed mid-UAT | 100% |
 | 7 | AI Integration | Shipped (live-key UAT deferred) | 6 plans, 25/25 reqs, 43/43 phase-07 tests, 62/62 full suite, 18/18 UAT pass | 100% |
-| 7.1 | Recipes & UI Consistency Cleanup *(inserted)* | Verified + Secured (UI-review pending) | 5 plans, UAT 5/5+2 blocked, VALIDATION partial, LEARNINGS | 100% |
+| 7.1 | Recipes & UI Consistency Cleanup *(inserted)* | Complete (UAT + secured + validated + learnings + UI-review 20/24) | 5 plans, UAT 5/5+2 blocked, VALIDATION partial, LEARNINGS, UI 20/24 | 100% |
 | 8 | Portability | Pending | — | 0% |
 | 9 | Backend & Multi-User | Pending | — | 0% |
 | 10 | Community, API & Multi-Agent | Pending | — | 0% |
