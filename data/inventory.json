@@ -1,5 +1,5 @@
 {
-  "last_updated": "2026-06-12",
+  "last_updated": "2026-07-18",
   "base_spirits": {
     "whiskey": [
       {
@@ -342,6 +342,16 @@
         "nationality": "Taiwan",
         "region": "",
         "subtype": ""
+      },
+      {
+        "style": "Liqueurs & Cordials",
+        "type": "Fruit Liqueur",
+        "brand": "",
+        "tier": "",
+        "best_for": "",
+        "notes": "",
+        "created_at": "2026-07-18T04:47:39.252Z",
+        "updated_at": "2026-07-18T04:47:39.252Z"
       }
     ],
     "nut_coffee": [
@@ -439,6 +449,16 @@
         "nationality": "Montreal, Canada",
         "region": "",
         "subtype": ""
+      },
+      {
+        "style": "Liqueurs & Cordials",
+        "type": "Specialty Liqueur",
+        "brand": "",
+        "tier": "",
+        "best_for": "",
+        "notes": "",
+        "created_at": "2026-07-18T04:47:21.623Z",
+        "updated_at": "2026-07-18T04:47:21.623Z"
       }
     ]
   },
